@@ -5,6 +5,11 @@
 # default card
 cardfile=cards/delphes_EICmatrixv2_3T.tcl
 
+# delphes executable 
+exeDelphes=DelphesHepMC2
+
+#####################################################
+
 
 # check environment
 if [ -z "$DELPHES_HOME" ]; then
@@ -34,8 +39,8 @@ fi
 # run delphes
 if [[ $infile == *"hepmc.gz"* ]]; then
   echo "hepmc file is gunzipped"
-  cat $infile | gunzip | DelphesHepMC3 $cardfile $outfile
+  cat $infile | gunzip | $exeDelphes $cardfile $outfile
 else
   echo "hepmc file is not gunzipped"
-  DelphesHepMC3 $cardfile $outfile $infile
+  $exeDelphes $cardfile $outfile $infile
 fi

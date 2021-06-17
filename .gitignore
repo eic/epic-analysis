@@ -2,4 +2,8 @@
 sandbox
 *.hepmc*
 *.root
+*.pcm
+*.so
+*.exe
+*Dict.cxx
 external
