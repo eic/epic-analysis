@@ -5,5 +5,6 @@
 #pragma link off all functions;
 
 #pragma link C++ class Histos+;
+#pragma link C++ class Kinematics+;
 
 #endif
