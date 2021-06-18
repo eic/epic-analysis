@@ -54,9 +54,10 @@ int main(int argc, char **argv) {
   Kinematics *kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
 
   // tree loop
-  ENT = 1000; // limiter
+  //ENT = 10000; // limiter
   Int_t s;
   for(Long64_t e=0; e<ENT; e++) {
+    if(e>0&&e%1000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
     tr->ReadEntry(e);
 
       // electron loop
@@ -78,24 +79,50 @@ int main(int argc, char **argv) {
       if(maxEleP<0.001) continue; // no scattered electron found
 
       // calculate DIS kinematics
-      kin->DISbyElectron();
+      kin->CalculateDISbyElectron();
 
 
 
       // track loop
       itTrack.Reset();
       while(Track *trk = (Track*) itTrack()) {
-        cout << e << " " << trk->PID << endl;
+        //cout << e << " " << trk->PID << endl;
         switch(trk->PID) {
           case 211: s=pipTrack; break;
           default: s=-1;
         };
 
         if(s>=0) {
-          histSet[s]->Hist("p")->Fill(trk->P);
-          histSet[s]->Hist("pT")->Fill(trk->PT);
-          histSet[s]->Hist("eta")->Fill(trk->Eta);
-          histSet[s]->Hist("phi")->Fill(trk->Phi);
+
+          // calculate hadron kinematics
+          kin->vecHadron.SetPtEtaPhiM(
+              trk->PT,
+              trk->Eta,
+              trk->Phi,
+              trk->Mass /* TODO: do we use track mass here ?? */
+              );
+          kin->CalculateHadronKinematics();
+
+          // apply cuts and fill histograms
+          if(kin->CutFull()) {
+            // DIS kinematics
+            histSet[s]->Hist("Q2vsX")->Fill(kin->x,kin->Q2);
+            histSet[s]->Hist("W")->Fill(kin->W);
+            histSet[s]->Hist("y")->Fill(kin->y);
+            // hadron 4-momentum
+            histSet[s]->Hist("p")->Fill(trk->P);
+            histSet[s]->Hist("pTlab")->Fill(trk->PT);
+            histSet[s]->Hist("eta")->Fill(trk->Eta);
+            histSet[s]->Hist("phi")->Fill(trk->Phi);
+            // hadron kinematics
+            histSet[s]->Hist("z")->Fill(kin->z);
+            histSet[s]->Hist("pT")->Fill(kin->pT);
+            histSet[s]->Hist("qT")->Fill(kin->qT);
+            histSet[s]->Hist("qTq")->Fill(kin->qT/TMath::Sqrt(kin->Q2));
+            histSet[s]->Hist("mX")->Fill(kin->mX);
+            histSet[s]->Hist("phiH")->Fill(kin->phiH);
+            histSet[s]->Hist("phiS")->Fill(kin->phiS);
+          };
         };
       };
   };

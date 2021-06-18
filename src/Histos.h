@@ -14,6 +14,7 @@
 #include "TFile.h"
 #include "TString.h"
 #include "TH1.h"
+#include "TH2.h"
 #include "TMath.h"
 
 using std::map;
@@ -29,12 +30,22 @@ class Histos : public TObject
 
     const Int_t NBINS = 100;
 
-    // builders
-    void DefineHist(
+    // histogram builders
+    void DefineHist1D(
         TString varname,
         TString vartitle,
         TString units,
-        Int_t nb, Double_t lb, Double_t ub
+        Int_t numBins, Double_t lowerBound, Double_t upperBound,
+        Bool_t logx = false
+        );
+    void DefineHist2D(
+        TString varname,
+        TString vartitlex, TString vartitley,
+        TString unitsx, TString unitsy,
+        Int_t numBinsx, Double_t lowerBoundx, Double_t upperBoundx,
+        Int_t numBinsy, Double_t lowerBoundy, Double_t upperBoundy,
+        Bool_t logx = false,
+        Bool_t logy = false
         );
 
     // accessors
@@ -44,6 +55,9 @@ class Histos : public TObject
     void WriteHists() {
       histList->Write(setname+"_hists",TObject::kSingleKey);
     };
+
+    // tools
+    static void BinLog(TAxis *axis);
 
 
   private:
