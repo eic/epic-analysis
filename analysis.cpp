@@ -40,7 +40,17 @@ int main(int argc, char **argv) {
   // branch iterators
   TObjArrayIter itTrack(tr->UseBranch("Track"));
   TObjArrayIter itElectron(tr->UseBranch("Electron"));
+  TObjArrayIter itParticle(tr->UseBranch("Particle"));
+  TObjArrayIter itEFlowTrack(tr->UseBranch("EFlowTrack"));
+  TObjArrayIter itEFlowPhoton(tr->UseBranch("EFlowPhoton"));
+  TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
+  TObjArrayIter itmRICHTrack(tr->UseBranch("mRICHTrack"));
+  TObjArrayIter itbarrelDIRCTrack(tr->UseBranch("barrelDIRCTrack"));
+  TObjArrayIter itdualRICHagTrack(tr->UseBranch("dualRICHagTrack"));
+  TObjArrayIter itdualRICHcfTrack(tr->UseBranch("dualRICHcfTrack"));
 
+  // branch arrays
+  
   // vars
   Double_t eleP,maxEleP;
 
@@ -93,6 +103,12 @@ int main(int argc, char **argv) {
         };
 
         if(s>=0) {
+	  // get parent particle, to check if pion is from vector meson
+	  GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
+	  TObjArray *brParticle = (TObjArray*)itParticle.GetCollection();
+	  GenParticle *parentParticle = (GenParticle*)brParticle->At(trkParticle->M1);
+	  int parentPID = (parentParticle->PID);
+	  
 
           // calculate hadron kinematics
           kin->vecHadron.SetPtEtaPhiM(
@@ -102,7 +118,9 @@ int main(int argc, char **argv) {
               trk->Mass /* TODO: do we use track mass here ?? */
               );
           kin->CalculateHadronKinematics();
-
+	  
+	  
+	  
           // apply cuts and fill histograms
           if(kin->CutFull()) {
             // DIS kinematics

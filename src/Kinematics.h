@@ -16,6 +16,10 @@
 #include "TMath.h"
 #include "TLorentzVector.h"
 
+#include "classes/DelphesClasses.h"
+#include "external/ExRootAnalysis/ExRootTreeReader.h"
+
+
 using std::map;
 using std::cout;
 using std::cerr;
@@ -29,12 +33,22 @@ class Kinematics : public TObject
 
     // calculators
     void CalculateDISbyElectron();
+    void CalculateDISbyJB();
+    void CalculateDISbyDA();
+    void CalculateDISbyMixed();
+  
+    void getqWQuadratic();
     void CalculateHadronKinematics();
-
+    void CalculateHadronicFinalState(TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter mRICHTrack, TObjArrayIter barrelDIRCTrack, TObjArrayIter dualRICHagTrack, TObjArrayIter dualRICHcfTrack, TObjArrayIter itParticle);
+    
+  
     // kinematics
-    Double_t W,Q2,Nu,x,y; // DIS
+    Double_t W,Q2,Nu,x,y,s; // DIS
     Double_t z,pT,qT,mX,xF,phiH,phiS;
-
+    
+    // hadronic final state variables
+    Double_t sigmah, Pxh, Pyh;
+  
     // 4-vectors
     // - lab frame
     TLorentzVector vecEleBeam, vecIonBeam;
@@ -59,6 +73,8 @@ class Kinematics : public TObject
     // particle masses
     static Double_t ElectronMass() { return 0.000511; };
     static Double_t ProtonMass()   { return 0.938272; };
+    static Double_t KaonMass()   { return 0.493677; };
+    static Double_t PionMass()   { return 0.139570; };
     Double_t IonMass;
 
 
@@ -119,7 +135,22 @@ class Kinematics : public TObject
       };
       return sgn * TMath::ACos(numer/denom);
     };
-
+  
+    // misc. functions for hadronic final state
+    float correctMass(int pid){
+      float massOut = 0;                                                                                                                                                                                                             
+      switch(std::abs(pid)){
+      case 11:
+	massOut = ElectronMass();
+      case 2212:
+	massOut = ProtonMass();
+      case 321:
+	massOut = KaonMass();
+      case 211:
+	massOut = PionMass();
+      }
+      return massOut;
+    }
 
 
     // CUTS =====================================================
@@ -149,3 +180,4 @@ class Kinematics : public TObject
 };
 
 #endif
+

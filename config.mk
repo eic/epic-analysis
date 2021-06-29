@@ -1,6 +1,6 @@
 # compiler and flags
 CXX = g++
-FLAGS = -g -Wno-deprecated -fPIC -fno-inline -Wno-write-strings
+FLAGS = -g -Wno-deprecated -fPIC -fno-inline -Wno-write-strings -std=c++11
 
 # extra flags for valgrind
 #FLAGS += -O0
