@@ -44,12 +44,8 @@ int main(int argc, char **argv) {
   TObjArrayIter itEFlowTrack(tr->UseBranch("EFlowTrack"));
   TObjArrayIter itEFlowPhoton(tr->UseBranch("EFlowPhoton"));
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
-  TObjArrayIter itmRICHTrack(tr->UseBranch("mRICHTrack"));
-  TObjArrayIter itbarrelDIRCTrack(tr->UseBranch("barrelDIRCTrack"));
-  TObjArrayIter itdualRICHagTrack(tr->UseBranch("dualRICHagTrack"));
-  TObjArrayIter itdualRICHcfTrack(tr->UseBranch("dualRICHcfTrack"));
-
-  // branch arrays
+  TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
+  
   
   // vars
   Double_t eleP,maxEleP;
@@ -88,6 +84,9 @@ int main(int argc, char **argv) {
       };
       if(maxEleP<0.001) continue; // no scattered electron found
 
+      // get hadronic final state variables
+      kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itPIDSystemsTrack, itParticle);
+      
       // calculate DIS kinematics
       kin->CalculateDISbyElectron();
 
