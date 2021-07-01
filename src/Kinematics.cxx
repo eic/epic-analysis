@@ -36,15 +36,16 @@ Kinematics::Kinematics(
 
 // calculates q,W, boost vecs from quadratic formula
 void Kinematics::getqWQuadratic(){
-  float a = 1-(vecIonBeam.E()/vecIonBeam.Pz())*(vecIonBeam.E()/vecIonBeam.Pz());
+  float a = 1 - (vecIonBeam.E()/vecIonBeam.Pz())*(vecIonBeam.E()/vecIonBeam.Pz());
   float b = 2*y*vecIonBeam.E()*(vecIonBeam*vecEleBeam)/(vecIonBeam.Pz()*vecIonBeam.Pz());
-  float c = -1*Q2 - Pxh*Pxh - Pyh*Pyh-(y*(vecIonBeam*vecEleBeam)/(vecIonBeam.Pz()*vecIonBeam.Pz()))*(y*(vecIonBeam*vecEleBeam)/(vecIonBeam.Pz()*vecIonBeam.Pz()));
+  float c = Q2 - Pxh*Pxh - Pyh*Pyh - pow(y*(vecIonBeam*vecEleBeam)/(vecIonBeam.Pz()),2.0);
+  
   float qE1, qE2, qE, qz;
   if(b*b>4*a*c && a != 0){
     qE1 = (-1*b+sqrt(b*b-4*a*c))/(2*a);
     qE2 = (-1*b-sqrt(b*b-4*a*c))/(2*a);
     
-    if(std::abs(qE1) < std::abs(qE2)) qE = qE1;
+    if( (qE1) < (qE2) ) qE = qE1;
     else qE = qE2;
     
     qz = (-1*y*(vecEleBeam*vecIonBeam)+vecIonBeam.E()*qE)/(vecIonBeam.Pz());
