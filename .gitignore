@@ -5,6 +5,7 @@ sandbox
 *.pcm
 *.so
 *.exe
+*.png
 *Dict.cxx
 external
 datagen/escalate

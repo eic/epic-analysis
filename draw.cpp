@@ -1,3 +1,5 @@
+#include <map>
+
 // root
 #include "TFile.h"
 #include "TCanvas.h"
@@ -14,6 +16,10 @@
 TString infileN, outfileN, pngDir;
 TFile *infile, *outfile;
 Bool_t plotRatioOnly;
+std::map<TString,TCanvas*> summaryCanvMap;
+TCanvas *summaryCanv;
+int nsum;
+
 
 // subroutines
 void DrawRatios(TString outName, TString numerSet, TString denomSet);
@@ -39,6 +45,7 @@ int main(int argc, char **argv) {
 
   gStyle->SetOptStat(0);
   gROOT->ProcessLine(".! mkdir -p "+pngDir);
+  nsum=0;
 
   // ratios y>y_min / y>0
   for(int y=1; y<4; y++) {
@@ -49,9 +56,21 @@ int main(int argc, char **argv) {
         );
   };
 
+  // write summary canvases
+  outfile->cd("/");
+  outfile->mkdir("summary");
+  outfile->cd("summary");
+  for(auto const& kv : summaryCanvMap) {
+    kv.second->Write();
+    kv.second->Print(pngDir+"/summary_"+kv.first+".png");
+  };
+
+
+  // cleanup
   infile->Close();
   outfile->Close();
   cout << outfileN << " written." << endl;
+  cout << pngDir << "/ images written." << endl;
 
 };
 
@@ -105,7 +124,9 @@ void DrawRatios(TString outName, TString numerSet, TString denomSet) {
       ratio = (TH1D*) hist[num]->Clone();
       ratio->Divide(hist[den]);
       TString ratioT = ratio->GetTitle();
+      TString ratioSummaryT = ratioT;
       ratioT(TRegexp("distribution")) = ratioStr;
+      ratioSummaryT(TRegexp("distribution")) = "ratios";
       ratio->SetTitle(ratioT);
 
       // calculate ratio errors, assuming ratio represents an efficiency
@@ -120,8 +141,11 @@ void DrawRatios(TString outName, TString numerSet, TString denomSet) {
 
       // canvas
       TString canvN = "canv_"+outName+"_"+varName;
-      canv = new TCanvas(canvN,canvN, plotRatioOnly ? 800 : 1600, 700);
+      Int_t dimx=800;
+      Int_t dimy=700;
+      canv = new TCanvas(canvN,canvN, dimx*(plotRatioOnly?1:2), dimy);
 
+      // draw plots
       if(!plotRatioOnly) {
         canv->Divide(2,1);
         canv->cd(1);
@@ -174,7 +198,35 @@ void DrawRatios(TString outName, TString numerSet, TString denomSet) {
       ratio->Draw("ERR X0 P");
       canv->Print(pngDir+"/"+canvN+".png");
       canv->Write();
+
+      // add to summary canvas
+      TH1D *ratioSummary = (TH1D*) ratio->Clone();
+      ratioSummary->SetTitle(ratioSummaryT);
+      ratioSummary->SetYTitle("ratio");
+      Color_t summaryColor[3] = {kRed,kGreen+1,kBlue};
+      Style_t summaryStyle[3] = {kFullCircle,kFullTriangleUp,kFullTriangleDown};
+      ratioSummary->SetLineColor  (nsum<3?summaryColor[nsum]:kBlack);
+      ratioSummary->SetMarkerColor(nsum<3?summaryColor[nsum]:kBlack);
+      ratioSummary->SetMarkerStyle(nsum<3?summaryStyle[nsum]:kFullCircle);
+      auto kv = summaryCanvMap.find(varName);
+      if(kv==summaryCanvMap.end()) {
+        summaryCanv = new TCanvas(
+            "summaryCanv_"+varName,
+            "summaryCanv_"+varName,
+            dimx,dimy
+            );
+        summaryCanv->SetBottomMargin(0.15);
+        summaryCanv->SetLeftMargin(0.15);
+        summaryCanv->SetGrid(1,1);
+        summaryCanvMap.insert(std::pair<TString,TCanvas*>(varName,summaryCanv));
+        ratioSummary->Draw();
+      } else {
+        kv->second->cd();
+        ratioSummary->Draw("SAME");
+      };
+
     };
   };
   outfile->cd("/");
+  nsum++;
 };

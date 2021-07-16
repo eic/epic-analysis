@@ -20,14 +20,14 @@ Histos::Histos(TString setname_, TString settitle_) {
   DefineHist1D("y","y","",NBINS,1e-5,1,true);
   // hadron 4-momentum
   DefineHist1D("p","p","GeV",NBINS,0,10);
-  DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-4,10,true);
+  DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
   DefineHist1D("eta","#eta","",NBINS,-5,5);
   DefineHist1D("phi","#phi","",NBINS,-TMath::Pi(),TMath::Pi());
   // hadron kinematics
   DefineHist1D("z","z","",NBINS,0,1);
-  DefineHist1D("pT","p_{T}","GeV",NBINS,1e-4,3);
-  DefineHist1D("qT","q_{T}","GeV",NBINS,1e-4,3);
-  DefineHist1D("qTq","q_{T}/Q","",NBINS,1e-4,3);
+  DefineHist1D("pT","p_{T}","GeV",NBINS,1e-2,3,true);
+  DefineHist1D("qT","q_{T}","GeV",NBINS,1e-2,5,true);
+  DefineHist1D("qTq","q_{T}/Q","",NBINS,1e-2,3,true);
   DefineHist1D("mX","m_{X}","GeV",NBINS,0,20);
   DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
   DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());

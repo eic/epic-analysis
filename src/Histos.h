@@ -32,7 +32,7 @@ class Histos : public TNamed
     ~Histos();
 
     // number of bins
-    const Int_t NBINS = 100;
+    const Int_t NBINS = 50;
 
     // accessors
     TH1 *Hist(TString histName); // access histogram by name

@@ -69,9 +69,9 @@ int main(int argc, char **argv) {
   const int NY=4;
   Float_t ycut[NY] = {
     0.00,
-    0.01,
     0.03,
-    0.05
+    0.05,
+    0.10
   };
   std::vector<int> v_y;
   // - particle species
