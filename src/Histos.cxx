@@ -6,6 +6,7 @@ ClassImp(Histos)
 Histos::Histos(TString setname_, TString settitle_) {
   setname=setname_;
   settitle=settitle_;
+  this->SetName("histos_"+setname);
   histList = new TObjArray();
 
   // HISTOGRAMS ================================================
@@ -45,12 +46,13 @@ void Histos::DefineHist1D(
   if(units!="") units=" ["+units+"]";
   TH1D *hist = new TH1D(
       setname+"_hist_"+varname,
-      settitle+" "+vartitle+" distribution;"+vartitle+units,
+      vartitle+" distribution, "+settitle+";"+vartitle+units,
       numBins,lowerBound,upperBound
       );
   if(logx) BinLog(hist->GetXaxis());
   histList->AddLast(hist);
   histMap.insert(std::pair<TString,TH1D*>(varname,hist));
+  VarNameList.push_back(varname);
 };
 
 
@@ -68,9 +70,8 @@ void Histos::DefineHist2D(
   if(unitsy!="") unitsy=" ["+unitsy+"]";
   TH2D *hist = new TH2D(
       setname+"_hist_"+varname,
-      settitle+
-          " "+vartitley+" vs. "+vartitlex+" distribution"+
-          ";"+vartitlex+unitsx+";"+vartitley+unitsy,
+      " "+vartitley+" vs. "+vartitlex+" distribution, "+settitle+
+      ";"+vartitlex+unitsx+";"+vartitley+unitsy,
       numBinsx,lowerBoundx,upperBoundx,
       numBinsy,lowerBoundy,upperBoundy
       );
@@ -78,6 +79,7 @@ void Histos::DefineHist2D(
   if(logy) BinLog(hist->GetYaxis());
   histList->AddLast(hist);
   histMap.insert(std::pair<TString,TH2D*>(varname,hist));
+  VarNameList.push_back(varname);
 };
 
 
@@ -115,5 +117,6 @@ void Histos::BinLog(TAxis *axis) {
 
 
 Histos::~Histos() {
+  if(histList) delete histList;
 };
 

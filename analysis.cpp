@@ -12,6 +12,8 @@
 #include "Histos.h"
 #include "Kinematics.h"
 
+// subroutines
+void DrawRatios(Histos *numerSet, Histos *denomSet);
 
 //=========================================================================
 
@@ -35,7 +37,7 @@ int main(int argc, char **argv) {
   Long64_t ENT = tr->GetEntries();
 
   // define output file
-  TFile *outfile = new TFile("histos.root","RECREATE");
+  TFile *outfile = new TFile("out/histos.root","RECREATE");
 
   // branch iterators
   TObjArrayIter itTrack(tr->UseBranch("Track"));
@@ -45,17 +47,48 @@ int main(int argc, char **argv) {
   Double_t eleP,maxEleP;
 
 
-  // define particle sets for histograms
-  enum setEnum { pipTrack, nSets };
-  Histos *histSet[nSets];
-  histSet[pipTrack] = new Histos("pipTrack","#pi^{+} track");
+  // define histogram sets
+  // - y-minimum cuts
+  const int NY=4;
+  Float_t ycut[NY] = {
+    0.00,
+    0.01,
+    0.03,
+    0.05
+  };
+  std::vector<int> v_y;
+  // - particle species
+  enum partEnum{
+    pPip,
+    pPim,
+    NPart
+  };
+  std::map<int,int> PIDtoEnum;
+  PIDtoEnum.insert(std::pair<int,int>(211,pPip));
+  PIDtoEnum.insert(std::pair<int,int>(-211,pPim));
+  int s_pid,pid;
+
+  // build array of histogram sets
+  Histos *histSet[NY][NPart];
+  std::vector<Histos*> histSetList;
+  std::vector<Histos*> histSetFillList;
+  TString keyN,keyT;
+  // - loop over y cuts
+  for(int hy=0; hy<NY; hy++) {
+    keyN = Form("_ycut%d",hy);
+    keyT = Form(", y>%.2f",ycut[hy]);
+    // loop over particles
+    histSet[hy][pPip] = new Histos("pipTrack"+keyN,"#pi^{+} tracks"+keyT);
+    histSet[hy][pPim] = new Histos("pimTrack"+keyN,"#pi^{-} tracks"+keyT);
+    // add to full list
+    for(int hp=0; hp<NPart; hp++) histSetList.push_back(histSet[hy][hp]);
+  };
 
   // define kinematics
   Kinematics *kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
 
   // tree loop
-  //ENT = 10000; // limiter
-  Int_t s;
+  //ENT = 1000; // limiter
   for(Long64_t e=0; e<ENT; e++) {
     if(e>0&&e%1000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
     tr->ReadEntry(e);
@@ -87,12 +120,30 @@ int main(int argc, char **argv) {
       itTrack.Reset();
       while(Track *trk = (Track*) itTrack()) {
         //cout << e << " " << trk->PID << endl;
-        switch(trk->PID) {
-          case 211: s=pipTrack; break;
-          default: s=-1;
+
+        // chosen PID value
+        pid = trk->PID;
+
+        // decide which histogram sets to fill
+        // - check PID, to see if it's a particle we're interested in for
+        //   histograms; if not, proceed to next
+        auto kv = PIDtoEnum.find(pid);
+        if(kv!=PIDtoEnum.end()) s_pid = kv->second;
+        else continue;
+        // - check y cut; `v_y` will be the list of `s_y`s for which
+        //   the y cut is satisfied
+        v_y.clear();
+        for(int s_y=0; s_y<NY; s_y++) {
+          if( kin->y > ycut[s_y] ) v_y.push_back(s_y);
         };
 
-        if(s>=0) {
+        // build list of histogram sets to fill, and proceed only 
+        // if there are some sets
+        histSetFillList.clear();
+        for(int s_y : v_y) {
+          histSetFillList.push_back(histSet[s_y][s_pid]);
+        };
+        if(histSetFillList.size()>0) {
 
           // calculate hadron kinematics
           kin->vecHadron.SetPtEtaPhiM(
@@ -103,25 +154,29 @@ int main(int argc, char **argv) {
               );
           kin->CalculateHadronKinematics();
 
-          // apply cuts and fill histograms
+          // apply cuts
           if(kin->CutFull()) {
-            // DIS kinematics
-            histSet[s]->Hist("Q2vsX")->Fill(kin->x,kin->Q2);
-            histSet[s]->Hist("W")->Fill(kin->W);
-            histSet[s]->Hist("y")->Fill(kin->y);
-            // hadron 4-momentum
-            histSet[s]->Hist("p")->Fill(trk->P);
-            histSet[s]->Hist("pTlab")->Fill(trk->PT);
-            histSet[s]->Hist("eta")->Fill(trk->Eta);
-            histSet[s]->Hist("phi")->Fill(trk->Phi);
-            // hadron kinematics
-            histSet[s]->Hist("z")->Fill(kin->z);
-            histSet[s]->Hist("pT")->Fill(kin->pT);
-            histSet[s]->Hist("qT")->Fill(kin->qT);
-            histSet[s]->Hist("qTq")->Fill(kin->qT/TMath::Sqrt(kin->Q2));
-            histSet[s]->Hist("mX")->Fill(kin->mX);
-            histSet[s]->Hist("phiH")->Fill(kin->phiH);
-            histSet[s]->Hist("phiS")->Fill(kin->phiS);
+
+            // loop through list of histogram sets, and fill them
+            for(Histos *H : histSetFillList) {
+              // DIS kinematics
+              H->Hist("Q2vsX")->Fill(kin->x,kin->Q2);
+              H->Hist("W")->Fill(kin->W);
+              H->Hist("y")->Fill(kin->y);
+              // hadron 4-momentum
+              H->Hist("p")->Fill(trk->P);
+              H->Hist("pTlab")->Fill(trk->PT);
+              H->Hist("eta")->Fill(trk->Eta);
+              H->Hist("phi")->Fill(trk->Phi);
+              // hadron kinematics
+              H->Hist("z")->Fill(kin->z);
+              H->Hist("pT")->Fill(kin->pT);
+              H->Hist("qT")->Fill(kin->qT);
+              H->Hist("qTq")->Fill(kin->qT/TMath::Sqrt(kin->Q2));
+              H->Hist("mX")->Fill(kin->mX);
+              H->Hist("phiH")->Fill(kin->phiH);
+              H->Hist("phiS")->Fill(kin->phiS);
+            };
           };
         };
       };
@@ -129,6 +184,8 @@ int main(int argc, char **argv) {
 
   // write histograms
   outfile->cd();
-  for(Int_t hs=0; hs<nSets; hs++) histSet[hs]->WriteHists();
+  for(Histos *H : histSetList) H->WriteHists();
+  for(Histos *H : histSetList) H->Write();
+  outfile->Close();
 
 };

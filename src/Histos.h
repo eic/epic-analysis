@@ -7,10 +7,12 @@
 #include <sstream>
 #include <stdexcept>
 #include <map>
+#include <vector>
 
 // ROOT
 #include "TSystem.h"
 #include "TObject.h"
+#include "TNamed.h"
 #include "TFile.h"
 #include "TString.h"
 #include "TH1.h"
@@ -18,17 +20,23 @@
 #include "TMath.h"
 
 using std::map;
+using std::vector;
 using std::cout;
 using std::cerr;
 using std::endl;
 
-class Histos : public TObject
+class Histos : public TNamed
 {
   public:
-    Histos(TString setname_, TString settitle_);
+    Histos(TString setname_="setname", TString settitle_="settitle");
     ~Histos();
 
+    // number of bins
     const Int_t NBINS = 100;
+
+    // accessors
+    TH1 *Hist(TString histName); // access histogram by name
+    vector<TString> VarNameList; // list of histogram names (for external looping)
 
     // histogram builders
     void DefineHist1D(
@@ -48,12 +56,9 @@ class Histos : public TObject
         Bool_t logy = false
         );
 
-    // accessors
-    TH1 *Hist(TString histName);
-
     // writers
     void WriteHists() {
-      histList->Write(setname+"_hists",TObject::kSingleKey);
+      histList->Write("histArr_"+setname,TObject::kSingleKey);
     };
 
     // tools
