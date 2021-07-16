@@ -1,8 +1,11 @@
+#include <stdlib.h>
+
 // root
 #include "TChain.h"
 #include "TClonesArray.h"
 #include "TObjArray.h"
 #include "TFile.h"
+#include "TRegexp.h"
 
 // delphes
 #include "classes/DelphesClasses.h"
@@ -20,24 +23,38 @@ void DrawRatios(Histos *numerSet, Histos *denomSet);
 int main(int argc, char **argv) {
 
   // ARGUMENTS ////////////////////////////////////////////////
-  TString infile="datarec/test_crossDivNrgCrab_25mRad_5x41_v1.root";
+  TString infile;
   Double_t eleBeamEn = 5; // GeV
   Double_t ionBeamEn = 41; // GeV
-  Double_t crossingAngle = 25; // mrad
+  Double_t crossingAngle = 0; // mrad
+  if(argc<=1) {
+    cout << "USAGE: " << argv[0]
+         << " [rootfile with Delphes tree]"
+         << " [eleBeamEn(def=" << eleBeamEn << " GeV)]"
+         << " [ionBeamEn(def=" << ionBeamEn << " GeV)]"
+         << " [crossingAngle(def=" << crossingAngle << " mrad)]"
+         << endl;
+         return 1;
+  };
   if(argc>1) infile = TString(argv[1]);
   if(argc>2) eleBeamEn = (Double_t)strtof(argv[2],NULL);
   if(argc>3) ionBeamEn = (Double_t)strtof(argv[3],NULL);
+  if(argc>4) crossingAngle = (Double_t)strtof(argv[4],NULL);
   /////////////////////////////////////////////////////////////
 
 
   // read delphes tree
+  cout << "-- running analysis of " << infile << endl;
   TChain *chain = new TChain("Delphes");
   chain->Add(infile);
   ExRootTreeReader *tr = new ExRootTreeReader(chain);
   Long64_t ENT = tr->GetEntries();
 
   // define output file
-  TFile *outfile = new TFile("out/histos.root","RECREATE");
+  TString outfileN = infile;
+  outfileN(TRegexp("^.*/")) = "";
+  outfileN = "out/histos."+outfileN;
+  TFile *outfile = new TFile(outfileN,"RECREATE");
 
   // branch iterators
   TObjArrayIter itTrack(tr->UseBranch("Track"));
@@ -187,5 +204,10 @@ int main(int argc, char **argv) {
   for(Histos *H : histSetList) H->WriteHists();
   for(Histos *H : histSetList) H->Write();
   outfile->Close();
+  cout << outfileN << " written." << endl;
+
+  // call draw program
+  TString cmd = "./draw.exe "+outfileN;
+  system(cmd.Data());
 
 };

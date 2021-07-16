@@ -24,7 +24,7 @@ if [ $# -lt 1 ]; then
 fi
 infile=$1
 if [ $# -ge 2 ]; then outfile=$2
-else outfile=$(echo $infile|sed 's/datagen/datarec/g'|sed 's/.hepmc.*$/.root/g'); fi
+else outfile=$(echo $infile|sed 's/^.*\//datarec\//g'|sed 's/.hepmc.*$/.root/g'); fi
 if [ $# -ge 3 ]; then cardfile=$3; fi
 echo "infile = $infile"
 echo "outfile = $outfile"

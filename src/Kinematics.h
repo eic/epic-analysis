@@ -124,13 +124,13 @@ class Kinematics : public TObject
 
     // CUTS =====================================================
     Bool_t CutDIS() {
-      return x>=0 && x<=1 /* open, since set by generator */
+      return x>=0.05
           && W>3.0
           && y>0.00 && y<0.95 /* ymin cut applied elsewhere */
           ;
     };
     Bool_t CutHadron() {
-      return z>0.2
+      return z>0.2 && z<0.9
           && vecHadron.Pt()>0.1 /* tracking limit on pT_lab */
           && xF>0 /* bias toward current fragmentation */
           ;

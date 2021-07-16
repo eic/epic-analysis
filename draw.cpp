@@ -2,18 +2,21 @@
 #include "TFile.h"
 #include "TCanvas.h"
 #include "TRegexp.h"
+#include "TSystem.h"
+#include "TROOT.h"
+#include "TStyle.h"
 
 // largex-eic
 #include "Histos.h"
 #include "Kinematics.h"
 
 // globals
-TString infileN;
+TString infileN, outfileN, pngDir;
 TFile *infile, *outfile;
 Bool_t plotRatioOnly;
 
 // subroutines
-void DrawRatios(Histos *numerSet, Histos *denomSet);
+void DrawRatios(TString outName, TString numerSet, TString denomSet);
 
 //=========================================================================
 
@@ -26,30 +29,42 @@ int main(int argc, char **argv) {
   if(argc>2) plotRatioOnly = ((Int_t)strtof(argv[2],NULL))>0;
   /////////////////////////////////////////////////////////////
 
-  TString outfileN = infileN;
-  outfileN(TRegexp("\\.root$")) = ".canvas.root";
+  cout << "-- drawing histograms from " << infileN << endl;
+  outfileN = infileN;
+  outfileN(TRegexp("\\.root$")) = "";
+  pngDir = outfileN+".images";
+  outfileN += ".canvas.root";
   outfile = new TFile(outfileN,"RECREATE");
   infile = new TFile(infileN,"READ");
 
-  Histos *h= (Histos*)infile->Get("histos_pipTrack_ycut3");
-  DrawRatios(
-      (Histos*)infile->Get("histos_pipTrack_ycut3"),
-      (Histos*)infile->Get("histos_pipTrack_ycut0")
-      );
+  gStyle->SetOptStat(0);
+  gROOT->ProcessLine(".! mkdir -p "+pngDir);
+
+  // ratios y>y_min / y>0
+  for(int y=1; y<4; y++) {
+    DrawRatios(
+        Form("yrat%d",y),
+        Form("histos_pipTrack_ycut%d",y),
+        "histos_pipTrack_ycut0"
+        );
+  };
 
   infile->Close();
   outfile->Close();
+  cout << outfileN << " written." << endl;
 
 };
 
 
 //=========================================================================
 
-void DrawRatios(Histos *numerSet, Histos *denomSet) {
+void DrawRatios(TString outName, TString numerSet, TString denomSet) {
+
+  cout << "draw ratios " << outName << "..." << endl;
   enum HHenum {num,den};
   Histos *HH[2];
-  HH[num] = numerSet;
-  HH[den] = denomSet;
+  HH[num] = (Histos*) infile->Get(numerSet);
+  HH[den] = (Histos*) infile->Get(denomSet);
   TH1 *hist[2];
   TH1D *ratio;
   Double_t ny,ry,err;
@@ -57,11 +72,15 @@ void DrawRatios(Histos *numerSet, Histos *denomSet) {
   TString histT[2], tok[2], uniqT[2], sameT[2];
   Ssiz_t tf;
 
+  outfile->cd("/");
+  outfile->mkdir(outName);
+  outfile->cd(outName);
+
   // loop over 1D histograms
-  for(TString varname : HH[num]->VarNameList) {
-    hist[num] = HH[num]->Hist(varname);
+  for(TString varName : HH[num]->VarNameList) {
+    hist[num] = HH[num]->Hist(varName);
     if(hist[num]->GetDimension()==1) {
-      hist[den] = HH[den]->Hist(varname);
+      hist[den] = HH[den]->Hist(varName);
 
       // filter title
       for(int f=0; f<2; f++)  histT[f] = hist[f]->GetTitle();
@@ -75,9 +94,9 @@ void DrawRatios(Histos *numerSet, Histos *denomSet) {
         };
         sameT[f](TRegexp("^, "))="";
         uniqT[f](TRegexp("^, "))="";
-        cout <<  "histT = " << histT[f] << endl;
-        cout <<  "uniqT = " << uniqT[f] << endl;
-        cout <<  "sameT = " << sameT[f] << endl;
+        /*cout <<  "histT = " << histT[f] << endl;
+          cout <<  "uniqT = " << uniqT[f] << endl;
+          cout <<  "sameT = " << sameT[f] << endl;*/
         hist[f]->SetTitle(sameT[f]);
       };
       TString ratioStr = "ratio("+uniqT[num]+"/"+uniqT[den]+")";
@@ -100,7 +119,8 @@ void DrawRatios(Histos *numerSet, Histos *denomSet) {
       };
 
       // canvas
-      canv = new TCanvas("canv_"+varname,"canv_"+varname, plotRatioOnly ? 800 : 1600, 700);
+      TString canvN = "canv_"+outName+"_"+varName;
+      canv = new TCanvas(canvN,canvN, plotRatioOnly ? 800 : 1600, 700);
 
       if(!plotRatioOnly) {
         canv->Divide(2,1);
@@ -152,9 +172,9 @@ void DrawRatios(Histos *numerSet, Histos *denomSet) {
       ratio->GetYaxis()->SetRangeUser(0,1.3);
       //if(plotName=="PperpDistLin") ratio->GetXaxis()->SetRangeUser(0,1.7);
       ratio->Draw("ERR X0 P");
-      //canv->Print(Form("%s_bin%d.png",outfileN.Data(),b),"png");
-      outfile->cd();
+      canv->Print(pngDir+"/"+canvN+".png");
       canv->Write();
     };
   };
+  outfile->cd("/");
 };

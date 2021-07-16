@@ -7,3 +7,4 @@ sandbox
 *.exe
 *Dict.cxx
 external
+datagen/escalate
