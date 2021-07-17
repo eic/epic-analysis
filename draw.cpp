@@ -146,14 +146,11 @@ void DrawRatios(TString outName, TString numerSet, TString denomSet) {
       canv = new TCanvas(canvN,canvN, dimx*(plotRatioOnly?1:2), dimy);
 
       // draw plots
+      int numPads;
+      if(!plotRatioOnly) { canv->Divide(2,1); numPads=2; }
+      else { canv->Divide(1,1); numPads=1; };
       if(!plotRatioOnly) {
-        canv->Divide(2,1);
         canv->cd(1);
-        canv->GetPad(1)->SetGrid(1,1);
-        //canv->GetPad(1)->SetLogx();
-        //canv->GetPad(1)->SetLogy();
-        canv->GetPad(1)->SetBottomMargin(0.15);
-        canv->GetPad(1)->SetLeftMargin(0.15);
         hist[num]->SetLineColor(kYellow-8);
         hist[den]->SetLineColor(kAzure-7);
         hist[num]->SetMarkerColor(kYellow-8);
@@ -170,17 +167,11 @@ void DrawRatios(TString outName, TString numerSet, TString denomSet) {
           hist[f]->GetXaxis()->SetTitleOffset(1.2);
           //if(plotName=="PperpDistLin") hist[f]->GetXaxis()->SetRangeUser(0,1.7);
         };
-        hist[den]->Draw("ERR P");
-        hist[num]->Draw("ERR P SAME");
+        hist[den]->Draw("EX0 P");
+        hist[num]->Draw("EX0 P SAME");
         canv->cd(2);
-        canv->GetPad(2)->SetGrid(1,1);
-        canv->GetPad(2)->SetBottomMargin(0.15);
-        canv->GetPad(2)->SetLeftMargin(0.15);
       } else {
-        canv->cd();
-        canv->SetGrid(1,1);
-        canv->SetBottomMargin(0.15);
-        canv->SetLeftMargin(0.15);
+        canv->cd(1);
       };
       ratio->GetYaxis()->SetTitle(ratioStr);
       ratio->SetLineColor(kBlack);
@@ -194,8 +185,15 @@ void DrawRatios(TString outName, TString numerSet, TString denomSet) {
       ratio->GetYaxis()->SetTitleSize(0.06);
       ratio->GetXaxis()->SetTitleOffset(1.2);
       ratio->GetYaxis()->SetRangeUser(0,1.3);
-      //if(plotName=="PperpDistLin") ratio->GetXaxis()->SetRangeUser(0,1.7);
-      ratio->Draw("ERR X0 P");
+      ratio->Draw("EX0 P");
+      for(int pad=1; pad<=numPads; pad++) {
+        canv->GetPad(pad)->SetGrid(1,1);
+        canv->GetPad(pad)->SetLogx(HH[num]->GetHistConfig(varName)->logx);
+        canv->GetPad(pad)->SetLogy(HH[num]->GetHistConfig(varName)->logy);
+        canv->GetPad(pad)->SetLogz(HH[num]->GetHistConfig(varName)->logz);
+        canv->GetPad(pad)->SetBottomMargin(0.15);
+        canv->GetPad(pad)->SetLeftMargin(0.15);
+      };
       canv->Print(pngDir+"/"+canvN+".png");
       canv->Write();
 
@@ -215,9 +213,10 @@ void DrawRatios(TString outName, TString numerSet, TString denomSet) {
             "summaryCanv_"+varName,
             dimx,dimy
             );
+        summaryCanv->SetGrid(1,1);
+        summaryCanv->SetLogx(HH[num]->GetHistConfig(varName)->logx);
         summaryCanv->SetBottomMargin(0.15);
         summaryCanv->SetLeftMargin(0.15);
-        summaryCanv->SetGrid(1,1);
         summaryCanvMap.insert(std::pair<TString,TCanvas*>(varName,summaryCanv));
         ratioSummary->Draw();
       } else {

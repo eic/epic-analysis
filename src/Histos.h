@@ -17,14 +17,25 @@
 #include "TString.h"
 #include "TH1.h"
 #include "TH2.h"
+#include "TH3.h"
 #include "TMath.h"
 
-using std::map;
-using std::vector;
-using std::cout;
-using std::cerr;
-using std::endl;
+// container for histogram settings
+class HistConfig : public TNamed {
+  public:
+    Bool_t logx;
+    Bool_t logy;
+    Bool_t logz;
+    HistConfig() {
+      logx=false;
+      logy=false;
+      logz=false;
+    };
+    ~HistConfig() {};
+  ClassDef(HistConfig,1);
+};
 
+// container for histograms
 class Histos : public TNamed
 {
   public:
@@ -36,7 +47,8 @@ class Histos : public TNamed
 
     // accessors
     TH1 *Hist(TString histName); // access histogram by name
-    vector<TString> VarNameList; // list of histogram names (for external looping)
+    HistConfig *GetHistConfig(TString histName); // settings for this histogram
+    std::vector<TString> VarNameList; // list of histogram names (for external looping)
 
     // histogram builders
     void DefineHist1D(
@@ -44,7 +56,8 @@ class Histos : public TNamed
         TString vartitle,
         TString units,
         Int_t numBins, Double_t lowerBound, Double_t upperBound,
-        Bool_t logx = false
+        Bool_t logx = false,
+        Bool_t logy = false
         );
     void DefineHist2D(
         TString varname,
@@ -53,7 +66,8 @@ class Histos : public TNamed
         Int_t numBinsx, Double_t lowerBoundx, Double_t upperBoundx,
         Int_t numBinsy, Double_t lowerBoundy, Double_t upperBoundy,
         Bool_t logx = false,
-        Bool_t logy = false
+        Bool_t logy = false,
+        Bool_t logz = false
         );
 
     // writers
@@ -68,7 +82,9 @@ class Histos : public TNamed
   private:
     TString setname,settitle;
     TObjArray *histList;
-    map<TString,TH1*> histMap;
+    std::map<TString,TH1*> histMap;
+    std::map<TString,HistConfig*> histConfigMap;
+    void RegisterHist(TString varname_, TH1 *hist_, HistConfig *config_);
 
   ClassDef(Histos,1);
 };

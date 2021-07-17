@@ -104,6 +104,19 @@ int main(int argc, char **argv) {
   // define kinematics
   Kinematics *kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
 
+  // calculate integrated luminosity
+  // - cross sections are hard-coded, coped from pythia output
+  Int_t eleBeamEnInt = (Int_t) eleBeamEn;
+  Int_t ionBeamEnInt = (Int_t) ionBeamEn;
+  Double_t xsecTot; // [nb]
+  if     (eleBeamEnInt==5  && ionBeamEnInt==41 ) xsecTot=298.1060;
+  else if(eleBeamEnInt==18 && ionBeamEnInt==275) xsecTot=700.0; // TODO; this is approximate
+  else {
+    cerr << "WARNING: unknown cross section; integrated lumi will be wrong" << endl;
+    xsecTot=1;
+  };
+  Double_t lumi = tr->GetEntries() / xsecTot; // [nb^-1]
+
   // tree loop
   //ENT = 1000; // limiter
   for(Long64_t e=0; e<ENT; e++) {
@@ -193,11 +206,14 @@ int main(int argc, char **argv) {
               H->Hist("mX")->Fill(kin->mX);
               H->Hist("phiH")->Fill(kin->phiH);
               H->Hist("phiS")->Fill(kin->phiS);
+              // cross sections
+              H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),1.0/lumi);
             };
           };
         };
       };
   };
+
 
   // write histograms
   outfile->cd();
