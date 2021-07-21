@@ -12,7 +12,6 @@ Histos::Histos(TString setname_, TString settitle_) {
   setname=setname_;
   settitle=settitle_;
   this->SetName("histos_"+setname);
-  histList = new TObjArray();
 
   // HISTOGRAMS ================================================
   // DIS kinematics
@@ -37,7 +36,7 @@ Histos::Histos(TString setname_, TString settitle_) {
   DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
   DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
   // cross sections
-  DefineHist1D("Q_xsec","Q","GeV",NBINS,1,10,true,true);
+  DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true);
   this->Hist("Q_xsec")->SetMinimum(1e-10);
   // ===========================================================
 };
@@ -105,7 +104,6 @@ void Histos::DefineHist2D(
 
 // add histogram to containers
 void Histos::RegisterHist(TString varname_, TH1 *hist_, HistConfig *config_) {
-  histList->AddLast(hist_);
   VarNameList.push_back(varname_);
   histConfigMap.insert(std::pair<TString,HistConfig*>(varname_,config_));
   histMap.insert(std::pair<TString,TH1*>(varname_,hist_));
@@ -157,6 +155,5 @@ void Histos::BinLog(TAxis *axis) {
 
 
 Histos::~Histos() {
-  if(histList) delete histList;
 };
 

@@ -33,7 +33,7 @@ class Kinematics : public TObject
 
     // kinematics
     Double_t W,Q2,Nu,x,y; // DIS
-    Double_t z,pT,qT,mX,xF,phiH,phiS;
+    Double_t z,pT,qT,mX,xF,phiH,phiS; // hadron
 
     // 4-vectors
     // - lab frame
@@ -123,9 +123,10 @@ class Kinematics : public TObject
 
 
     // CUTS =====================================================
+    const Double_t xMinGlobal = 0.05; // minimum x for "large-x"
     Bool_t CutDIS() {
-      return x>=0.05
-          && W>3.0
+      return x>=xMinGlobal /* large x region */
+          && W>3.0 /* inelastic region */
           && y>0.00 && y<0.95 /* ymin cut applied elsewhere */
           ;
     };

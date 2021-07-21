@@ -71,8 +71,12 @@ class Histos : public TNamed
         );
 
     // writers
-    void WriteHists() {
-      histList->Write("histArr_"+setname,TObject::kSingleKey);
+    void WriteHists(TFile *ofile) {
+      ofile->cd("/");
+      ofile->mkdir("histArr_"+setname);
+      ofile->cd("histArr_"+setname);
+      for(auto const& kv : histMap)  kv.second->Write();
+      ofile->cd("/");
     };
 
     // tools
@@ -81,7 +85,6 @@ class Histos : public TNamed
 
   private:
     TString setname,settitle;
-    TObjArray *histList;
     std::map<TString,TH1*> histMap;
     std::map<TString,HistConfig*> histConfigMap;
     void RegisterHist(TString varname_, TH1 *hist_, HistConfig *config_);
