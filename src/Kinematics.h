@@ -17,7 +17,6 @@
 #include "TLorentzVector.h"
 
 #include "classes/DelphesClasses.h"
-#include "external/ExRootAnalysis/ExRootTreeReader.h"
 
 
 using std::map;

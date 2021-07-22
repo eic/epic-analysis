@@ -1,6 +1,11 @@
 # compiler and flags
 CXX = g++
-FLAGS = -g -Wno-deprecated -fPIC -fno-inline -Wno-write-strings -std=c++11
+FLAGS = -g -Wno-deprecated -fPIC -fno-inline -Wno-write-strings
+
+# extra flags for Mac OS
+ifeq ($(detected_OS),Darwin)
+    FLAGS += -std=c++11
+endif
 
 # extra flags for valgrind
 #FLAGS += -O0
