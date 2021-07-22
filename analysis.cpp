@@ -2,8 +2,8 @@
 
 // root
 #include "TChain.h"
-#include "TClonesArray.h"
 #include "TObjArray.h"
+#include "TClonesArray.h"
 #include "TFile.h"
 #include "TRegexp.h"
 
@@ -14,10 +14,11 @@
 // largex-eic
 #include "Histos.h"
 #include "Kinematics.h"
+#include "CutDef.h"
 
 // subroutines
-void CenterDelta(Double_t center, Double_t delta, Double_t &cutmin, Double_t &cutmax);
 Bool_t CheckDiagonal(int cpt, int cx, int cz);
+void CheckBins(TObjArray *binArr, std::vector<int> &v, Double_t var);
 
 // globals
 Bool_t diagonalBinsOnly;
@@ -45,50 +46,50 @@ int main(int argc, char **argv) {
   if(argc>3) ionBeamEn = (Double_t)strtof(argv[3],NULL);
   if(argc>4) crossingAngle = (Double_t)strtof(argv[4],NULL);
   
-  // ----------------------------------------------------------
+
+  // =========================================
   // BINNING
-  // ----------------------------------------------------------
+  // =========================================
 
-  // - pT bins
-  const int NbinsPT = 4;
-  Double_t ptmin[NbinsPT], ptmax[NbinsPT];
-  ptmin[0]=0.; ptmax[0]=1000.; // element 0 is always full range
-  CenterDelta( 0.15, 0.05, ptmin[1], ptmax[1]); // slide 14
-  CenterDelta( 0.55, 0.05, ptmin[2], ptmax[2]); // slide 13
-  CenterDelta( 0.50, 0.05, ptmin[3], ptmax[3]); // slide 11
-
-  // - x bins
-  const int NbinsX = 4;
-  Double_t xmin[NbinsX], xmax[NbinsX];
-  xmin[0]=0.; xmax[0]=1.; // element 0 is always full range
-  CenterDelta( 0.1, 0.05, xmin[1], xmax[1]);
-  CenterDelta( 0.6, 0.05, xmin[2], xmax[2]);
-  CenterDelta( 0.3, 0.05, xmin[3], xmax[3]);
-
-  // - z bins
-  const int NbinsZ = 4;
-  Double_t zmin[NbinsZ], zmax[NbinsZ];
-  zmin[0]=0.; zmax[0]=1.; // element 0 is always full range
-  CenterDelta( 0.7, 0.05, zmin[1], zmax[1] );
-  CenterDelta( 0.5, 0.05, zmin[2], zmax[2] );
-  CenterDelta( 0.7, 0.05, zmin[3], zmax[3] );
+  // arrays of bins
+  TObjArray *ptBins = new TObjArray();
+  TObjArray *xBins = new TObjArray();
+  TObjArray *zBins = new TObjArray();
+  TObjArray *yBins = new TObjArray();
 
   // if this is true, only take 'diagonal' elements of the multi
   // dimensional array of possible pT,x,z bins; this is useful
   // if you want to check specific bins
+  diagonalBinsOnly = false; // default value, may be overriden below
+
+  // full bins; useful to have these first -----------------
+  ptBins->AddLast(new CutDef("pt","p_{T}","Full"));
+  xBins->AddLast(new CutDef("x","x","Full"));
+  zBins->AddLast(new CutDef("z","z","Full"));
+  yBins->AddLast(new CutDef("y","y","Full"));
+
+
+  // cross check cross section -------------------
   diagonalBinsOnly = true;
+  // slide 11
+  xBins->AddLast(new CutDef("x","x","CenterDelta", 0.3, 0.05 ));
+  zBins->AddLast(new CutDef("z","z","CenterDelta", 0.7, 0.05 ));
+  ptBins->AddLast(new CutDef("pt","p_{T}","CenterDelta", 0.5, 0.05 ));
+  // slide 13
+  xBins->AddLast(new CutDef("x","x","CenterDelta", 0.6, 0.05 ));
+  zBins->AddLast(new CutDef("z","z","CenterDelta", 0.5, 0.05 ));
+  ptBins->AddLast(new CutDef("pt","p_{T}","CenterDelta", 0.55, 0.05 ));
+  // slide 14
+  xBins->AddLast(new CutDef("x","x","CenterDelta", 0.1, 0.05 ));
+  zBins->AddLast(new CutDef("z","z","CenterDelta", 0.7, 0.05 ));
+  ptBins->AddLast(new CutDef("pt","p_{T}","CenterDelta", 0.15, 0.05 ));
 
 
-  // - y-minimum cuts
-  const int NY=1;
-  Double_t ymin[NY] = {
-    0.00
-    //0.03,
-    //0.05,
-    //0.10
-  };
+  // - y-minimum cuts ----------------------------
+  yBins->AddLast(new CutDef("y","y","Min",0.03));
+  yBins->AddLast(new CutDef("y","y","Min",0.05));
 
-  // - particle species
+  // - particle species --------------------------
   std::map<int,int> PIDtoEnum;
   enum partEnum{
     pPip,
@@ -97,6 +98,13 @@ int main(int argc, char **argv) {
   };
   PIDtoEnum.insert(std::pair<int,int>(211,pPip));
   //PIDtoEnum.insert(std::pair<int,int>(-211,pPim));
+
+
+  // ============================================
+  const Int_t NptBins = ptBins->GetEntries();
+  const Int_t NxBins = xBins->GetEntries();
+  const Int_t NzBins = zBins->GetEntries();
+  const Int_t NyBins = yBins->GetEntries();
 
   /////////////////////////////////////////////////////////////
 
@@ -129,34 +137,31 @@ int main(int argc, char **argv) {
   // - `histSet` is a data structure for storing and organizing pointers to
   //   sets of histograms (`Histos` objects)
   // - `histSet*List` are used as temporary lists of relevant `Histos` pointers
-  Histos *histSet[NbinsPT][NbinsX][NbinsZ][NY][NPart];
+  Histos *histSet[NptBins][NxBins][NzBins][NyBins][NPart];
   std::vector<Histos*> histSetList;
   std::vector<Histos*> histSetFillList;
   std::vector<int> v_pt, v_x, v_z, v_y;
   // instantiate Histos sets, and populate 
-  TString keyN,keyT;
+  TString plotN,plotT;
   cout << "Define histograms..." << endl;
-  for(int bpt=0; bpt<NbinsPT; bpt++) { // - loop over pT bins
-    for(int bx=0; bx<NbinsX; bx++) { // - loop over x bins
-      for(int bz=0; bz<NbinsZ; bz++) { // - loop over z bins
+  for(int bpt=0; bpt<NptBins; bpt++) { // - loop over pT bins
+    for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
+      for(int bz=0; bz<NzBins; bz++) { // - loop over z bins
         if(CheckDiagonal(bpt,bx,bz)) continue;
-        for(int by=0; by<NY; by++) { // - loop over y cuts
+        for(int by=0; by<NyBins; by++) { // - loop over y bins
           // set plot name
-          keyN  = Form("_ptbin%d",bpt);
-          keyN += Form("_xbin%d",bx);
-          keyN += Form("_zbin%d",bz);
-          keyN += Form("_ycut%d",by);
+          plotN  = "_" + ((CutDef*)ptBins->At(bpt))->GetVarName() + Form("%d",bpt);
+          plotN += "_" + ((CutDef*)xBins->At(bx))->GetVarName() + Form("%d",bx);
+          plotN += "_" + ((CutDef*)zBins->At(bz))->GetVarName() + Form("%d",bz);
+          plotN += "_" + ((CutDef*)yBins->At(by))->GetVarName() + Form("%d",by);
           // set plot title
-          keyT  = bpt>0 ? Form(", %.2f<p_{T}<%.2f",ptmin[bpt],ptmax[bpt])
-                        : ", full p_{T}";
-          keyT += bx>0 ? Form(", %.2f<x<%.2f",xmin[bx],xmax[bx])
-                       : ", full x";
-          keyT += bz>0 ? Form(", %.2f<z<%.2f",zmin[bz],zmax[bz])
-                       : ", full z";
-          keyT += Form(", y>%.2f",ymin[by]);
+          plotT  = ", " + ((CutDef*)ptBins->At(bpt))->GetCutTitle();
+          plotT += ", " + ((CutDef*)xBins->At(bx))->GetCutTitle();
+          plotT += ", " + ((CutDef*)zBins->At(bz))->GetCutTitle();
+          plotT += ", " + ((CutDef*)yBins->At(by))->GetCutTitle();
           // loop over particles
-          histSet[bpt][bx][bz][by][pPip] = new Histos("pipTrack"+keyN,"#pi^{+} tracks"+keyT);
-          //histSet[bpt][bx][bz][by][pPim] = new Histos("pimTrack"+keyN,"#pi^{-} tracks"+keyT);
+          histSet[bpt][bx][bz][by][pPip] = new Histos("pipTrack"+plotN,"#pi^{+} tracks"+plotT);
+          //histSet[bpt][bx][bz][by][pPim] = new Histos("pimTrack"+plotN,"#pi^{-} tracks"+plotT);
           // add to full list
           for(int bp=0; bp<NPart; bp++) histSetList.push_back(histSet[bpt][bx][bz][by][bp]);
         };
@@ -265,25 +270,11 @@ int main(int argc, char **argv) {
         //    will be a part of; we use these lists to determine the list
         //    of histogram sets to fill
         // - check pT bin
-        v_pt.clear();
-        for(int bpt=0; bpt<NbinsPT; bpt++) {
-          if( kin->pT>ptmin[bpt] && kin->pT<ptmax[bpt] ) v_pt.push_back(bpt);
-        };
-        // - check x bin
-        v_x.clear();
-        for(int bx=0; bx<NbinsX; bx++) {
-          if( kin->x>xmin[bx] && kin->x<xmax[bx] ) v_x.push_back(bx);
-        };
-        // - check z bin
-        v_z.clear();
-        for(int bz=0; bz<NbinsZ; bz++) {
-          if( kin->z>zmin[bz] && kin->z<zmax[bz] ) v_z.push_back(bz);
-        };
-        // - check y cut
-        v_y.clear();
-        for(int by=0; by<NY; by++) {
-          if( kin->y > ymin[by] ) v_y.push_back(by);
-        };
+        CheckBins( ptBins, v_pt, kin->pT );
+        CheckBins( xBins,  v_x,  kin->x );
+        CheckBins( zBins,  v_z,  kin->z );
+        CheckBins( yBins,  v_y,  kin->y );
+
 
         // build list of histogram sets to fill
         histSetFillList.clear();
@@ -358,15 +349,18 @@ int main(int argc, char **argv) {
 
 ////////////////////////////////////////////////////
  
-// define cut using `center` +/- `delta`; set cut minimum and maximum
-void CenterDelta(Double_t center, Double_t delta, Double_t &cutmin, Double_t &cutmax) {
-  cutmin = center - delta;
-  cutmax = center + delta;
-};
-
 // return true, if `diagonalBinsOnly` mode is on, and this is an 
 // off-diagonal bin
 Bool_t CheckDiagonal(int cpt, int cx, int cz) {
   return diagonalBinsOnly &&
       ( cpt!=cx || cx!=cz );
+};
+
+// scan through array of bins `binArr`, checking each one; the vector `v` will
+// contain the list of array indices for which the cut on `var` is satisfied
+void CheckBins(TObjArray *binArr, std::vector<int> &v, Double_t var) {
+  v.clear();
+  for(int b=0; b<binArr->GetEntries(); b++) {
+    if(((CutDef*)binArr->At(b))->Cut(var)) v.push_back(b);
+  };
 };

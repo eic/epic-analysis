@@ -48,12 +48,12 @@ int main(int argc, char **argv) {
   nsum=0;
 
   // ratios y>y_min / y>0
-  TString kinBinStr = "histos_pipTrack_ptbin0_xbin0_zbin0";
+  TString kinBinStr = "histos_pipTrack_pt0_x0_z0";
   for(int y=1; y<4; y++) {
     DrawRatios(
         Form("yrat%d",y),
-        kinBinStr+Form("_ycut%d",y),
-        kinBinStr+"_ycut0"
+        kinBinStr+Form("_y%d",y),
+        kinBinStr+"_y0"
         );
   };
 
