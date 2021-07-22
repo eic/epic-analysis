@@ -118,8 +118,12 @@ int main(int argc, char **argv) {
   // branch iterators
   TObjArrayIter itTrack(tr->UseBranch("Track"));
   TObjArrayIter itElectron(tr->UseBranch("Electron"));
-
-
+  TObjArrayIter itParticle(tr->UseBranch("Particle"));
+  TObjArrayIter itEFlowTrack(tr->UseBranch("EFlowTrack"));
+  TObjArrayIter itEFlowPhoton(tr->UseBranch("EFlowPhoton"));
+  TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
+  TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
+  
 
   // sets of histogram sets
   // - `histSet` is a data structure for storing and organizing pointers to
@@ -216,8 +220,12 @@ int main(int argc, char **argv) {
     };
     if(maxEleP<0.001) continue; // no scattered electron found
 
+    // get hadronic final state variables
+    kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itPIDSystemsTrack, itParticle);
+
     // calculate DIS kinematics
     kin->CalculateDISbyElectron();
+
 
 
     // track loop
@@ -231,6 +239,14 @@ int main(int argc, char **argv) {
       auto kv = PIDtoEnum.find(pid);
       if(kv!=PIDtoEnum.end()) bpart = kv->second;
       else continue;
+
+
+      // get parent particle, to check if pion is from vector meson
+      GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
+      TObjArray *brParticle = (TObjArray*)itParticle.GetCollection();
+      GenParticle *parentParticle = (GenParticle*)brParticle->At(trkParticle->M1);
+      int parentPID = (parentParticle->PID);
+
 
       // calculate hadron kinematics
       kin->vecHadron.SetPtEtaPhiM(

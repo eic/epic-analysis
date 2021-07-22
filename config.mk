@@ -2,6 +2,12 @@
 CXX = g++
 FLAGS = -g -Wno-deprecated -fPIC -fno-inline -Wno-write-strings
 
+# extra flags for Mac OS
+UNAME := $(shell uname)
+ifeq ($(UNAME), Darwin)
+    FLAGS += -std=c++11
+endif
+
 # extra flags for valgrind
 #FLAGS += -O0
 
