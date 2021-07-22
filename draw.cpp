@@ -13,24 +13,39 @@
 #include "Kinematics.h"
 
 // globals
+const Int_t dimx=800; // canvas dimension
+const Int_t dimy=700; // canvas dimension
 TString infileN, outfileN, pngDir;
 TFile *infile, *outfile;
 Bool_t plotRatioOnly;
 std::map<TString,TCanvas*> summaryCanvMap;
 TCanvas *summaryCanv;
 int nsum;
+// formatting for summary canvas
+const int nsumMax=3;
+Color_t summaryColor[nsumMax] = {kRed,kGreen+1,kBlue};
+Style_t summaryStyle[nsumMax] = {kFullCircle,kFullTriangleUp,kFullTriangleDown};
 
 
 // subroutines
+void DumpHist(TString countsFile, TString histSet, TString varName);
+void DrawSingle(TString outName, TString histSet, TString varName);
 void DrawRatios(TString outName, TString numerSet, TString denomSet);
+void ResetSummary() { nsum=0; summaryCanvMap.clear(); };
 
 //=========================================================================
 
 int main(int argc, char **argv) {
 
   // ARGUMENTS ////////////////////////////////////////////////
-  infileN="out/histos.root";
   plotRatioOnly=false;
+  if(argc<=1) {
+    cout << "USAGE: " << argv[0]
+         << " [histograms file]"
+         << " [plotRatioOnly(def=(" << plotRatioOnly << ")]"
+         << endl;
+         return 1;
+  };
   if(argc>1) infileN = TString(argv[1]);
   if(argc>2) plotRatioOnly = ((Int_t)strtof(argv[2],NULL))>0;
   /////////////////////////////////////////////////////////////
@@ -45,27 +60,49 @@ int main(int argc, char **argv) {
 
   gStyle->SetOptStat(0);
   gROOT->ProcessLine(".! mkdir -p "+pngDir);
-  nsum=0;
 
   // ratios y>y_min / y>0
   TString kinBinStr = "histos_pipTrack_pt0_x0_z0";
-  for(int y=1; y<4; y++) {
+  ResetSummary();
+  // draw
+  for(int y=1; y<3; y++) {
     DrawRatios(
-        Form("yrat%d",y),
+        Form("yRatio%d",y),
         kinBinStr+Form("_y%d",y),
         kinBinStr+"_y0"
         );
   };
-
-  // write summary canvases
+  // write summary
   outfile->cd("/");
-  outfile->mkdir("summary");
-  outfile->cd("summary");
+  outfile->mkdir("yRatio_summary");
+  outfile->cd("yRatio_summary");
   for(auto const& kv : summaryCanvMap) {
     kv.second->Write();
-    kv.second->Print(pngDir+"/summary_"+kv.first+".png");
+    kv.second->Print(pngDir+"/yRatio_summary_"+kv.first+".png");
   };
+  outfile->cd("/");
 
+  // cross sections
+  ResetSummary();
+  Int_t ycut=0; // choose y cut
+  TString setStr,histStr;
+  TString yieldOutput = pngDir + "/counts.txt";
+  gSystem->RedirectOutput(yieldOutput,"w");
+  cout << "Counts in bins of Q" << endl;
+  gSystem->RedirectOutput(0);
+  for(int b=1; b<=3; b++) {
+    setStr = Form("histos_pipTrack_pt%d_x%d_z%d_y%d",b,b,b,ycut);
+    DrawSingle(Form("xsec_%d",b),setStr,"Q_xsec");
+    DumpHist(yieldOutput,setStr,"Q");
+  };
+  // write summary
+  outfile->cd("/");
+  summaryCanv->Write();
+  summaryCanv->Print(pngDir+"/xsec_summary.png");
+  // dump
+  gROOT->ProcessLine(".! cat "+yieldOutput);
+  cout << yieldOutput << " written" << endl;
+      
 
   // cleanup
   infile->Close();
@@ -75,9 +112,130 @@ int main(int argc, char **argv) {
 
 };
 
+//=========================================================================
+
+/* dump histogram counts
+ * - output will be appended to `countsFiles`
+ * - so far only implemented for 1D
+ */
+void DumpHist(TString countsFile, TString histSet, TString varName) {
+  cout << "dump " << histSet << " : " << varName << " to " << countsFile << endl;
+  Histos *H = (Histos*) infile->Get(histSet);
+  TH1 *hist = H->Hist(varName);
+  if(hist->GetDimension()>1) return;
+  TString histTformatted = hist->GetTitle();
+  histTformatted.ReplaceAll("#in"," in ");
+  histTformatted.ReplaceAll("#pm","+-");
+
+  gSystem->RedirectOutput(countsFile,"a");
+  cout << endl;
+  cout << "Histogram: " << histTformatted << endl;
+
+  gSystem->RedirectOutput("tempo","w");
+  cout << "bin"
+       << " " << varName << "_min"
+       << " " << varName << "_max"
+       << " " << "counts"
+       << " " << "error"
+       << " " << endl;
+  for(int b=1; b<=hist->GetNbinsX(); b++) {
+    cout << b
+         << " " << hist->GetBinLowEdge(b)
+         << " " << hist->GetBinLowEdge(b+1)
+         << " " << hist->GetBinContent(b)
+         << " " << hist->GetBinError(b)
+         << endl;
+  };
+
+  gSystem->RedirectOutput(countsFile,"a");
+  gROOT->ProcessLine(".! cat tempo | column -t");
+  gSystem->RedirectOutput(0);
+  gROOT->ProcessLine(".! rm tempo");
+
+};
 
 //=========================================================================
 
+/* draw a single histogram to a canvas, and write it
+ * - since `histSet` names can be hard to read, you can use `outName` to give a
+ *   "nickname" to `histSet`, which the canvas name will include
+ */
+void DrawSingle(TString outName, TString histSet, TString varName) {
+
+  cout << "draw single plot " << outName << "..." << endl;
+  Histos *H = (Histos*) infile->Get(histSet);
+  TH1 *hist = H->Hist(varName);
+
+  TString canvN = "canv_"+outName+"_"+varName;
+  TCanvas *canv = new TCanvas(canvN,canvN, dimx, dimy);
+
+  hist->SetLineColor(kBlack);
+  hist->SetMarkerColor(kBlack);
+  hist->SetMarkerStyle(kFullCircle);
+  hist->SetMarkerSize(1.0);
+  hist->SetLineWidth(2);
+  hist->GetXaxis()->SetLabelSize(0.06);
+  hist->GetYaxis()->SetLabelSize(0.06);
+  hist->GetXaxis()->SetTitleSize(0.06);
+  hist->GetYaxis()->SetTitleSize(0.06);
+  hist->GetXaxis()->SetTitleOffset(1.2);
+  
+  TString drawStr = "EX0 P";
+  if(varName=="Q_xsec") {
+    hist->GetXaxis()->SetRangeUser(1,10);
+    hist->GetYaxis()->SetRangeUser(1e-6,1);
+    drawStr = "E P";
+  };
+
+  hist->Draw(drawStr);
+
+  canv->SetGrid(1,1);
+  canv->SetLogx(H->GetHistConfig(varName)->logx);
+  canv->SetLogy(H->GetHistConfig(varName)->logy);
+  canv->SetLogz(H->GetHistConfig(varName)->logz);
+  canv->SetBottomMargin(0.15);
+  canv->SetLeftMargin(0.15);
+  canv->Print(pngDir+"/"+canvN+".png");
+  outfile->cd("/");
+  canv->Write();
+  outfile->cd("/");
+
+  TH1 *histClone = (TH1*) hist->Clone();
+  histClone->SetLineColor  (nsum<nsumMax?summaryColor[nsum]:kBlack);
+  histClone->SetMarkerColor(nsum<nsumMax?summaryColor[nsum]:kBlack);
+  histClone->SetMarkerStyle(nsum<nsumMax?summaryStyle[nsum]:kFullCircle);
+
+  if(nsum==0) {
+    summaryCanv = new TCanvas(
+        "summaryCanv_"+varName,
+        "summaryCanv_"+varName,
+        dimx,dimy
+        );
+    summaryCanv->SetGrid(1,1);
+    summaryCanv->SetLogx(H->GetHistConfig(varName)->logx);
+    summaryCanv->SetLogy(H->GetHistConfig(varName)->logy);
+    summaryCanv->SetLogz(H->GetHistConfig(varName)->logz);
+    summaryCanv->SetBottomMargin(0.15);
+    summaryCanv->SetLeftMargin(0.15);
+  };
+  summaryCanv->cd();
+  histClone->Draw(drawStr+(nsum>0?" SAME":""));
+  nsum++;
+};
+
+
+//=========================================================================
+
+/* draw a ratio of all 1D histograms in the specified histogram set
+* - the ratio will be of `numerSet` over `denomSet`
+* - canvases will be created, and depending on the setting of `plotRatioOnly`,
+*   either just the ratio will be plotted, or the two histograms will also be
+*   plotted
+* - Use `outName` to specify a names for output canvases
+* - summary canvases are also created, which can combine multiple ratio plots;
+*   they are accumulated in `summaryCanvMap` and colors are set by `nsum`; call
+*   `ResetSummary` to reset the accumulation
+*/
 void DrawRatios(TString outName, TString numerSet, TString denomSet) {
 
   cout << "draw ratios " << outName << "..." << endl;
@@ -151,7 +309,7 @@ void DrawRatios(TString outName, TString numerSet, TString denomSet) {
       if(!plotRatioOnly) { canv->Divide(2,1); numPads=2; }
       else { canv->Divide(1,1); numPads=1; };
       if(!plotRatioOnly) {
-        canv->cd(1);
+        canv->cd(2);
         hist[num]->SetLineColor(kYellow-8);
         hist[den]->SetLineColor(kAzure-7);
         hist[num]->SetMarkerColor(kYellow-8);
@@ -170,10 +328,8 @@ void DrawRatios(TString outName, TString numerSet, TString denomSet) {
         };
         hist[den]->Draw("EX0 P");
         hist[num]->Draw("EX0 P SAME");
-        canv->cd(2);
-      } else {
-        canv->cd(1);
       };
+      canv->cd(1);
       ratio->GetYaxis()->SetTitle(ratioStr);
       ratio->SetLineColor(kBlack);
       ratio->SetMarkerColor(kBlack);
@@ -190,8 +346,10 @@ void DrawRatios(TString outName, TString numerSet, TString denomSet) {
       for(int pad=1; pad<=numPads; pad++) {
         canv->GetPad(pad)->SetGrid(1,1);
         canv->GetPad(pad)->SetLogx(HH[num]->GetHistConfig(varName)->logx);
-        canv->GetPad(pad)->SetLogy(HH[num]->GetHistConfig(varName)->logy);
-        canv->GetPad(pad)->SetLogz(HH[num]->GetHistConfig(varName)->logz);
+        if(pad>1) {
+          canv->GetPad(pad)->SetLogy(HH[num]->GetHistConfig(varName)->logy);
+          canv->GetPad(pad)->SetLogz(HH[num]->GetHistConfig(varName)->logz);
+        };
         canv->GetPad(pad)->SetBottomMargin(0.15);
         canv->GetPad(pad)->SetLeftMargin(0.15);
       };
@@ -202,16 +360,14 @@ void DrawRatios(TString outName, TString numerSet, TString denomSet) {
       TH1D *ratioSummary = (TH1D*) ratio->Clone();
       ratioSummary->SetTitle(ratioSummaryT);
       ratioSummary->SetYTitle("ratio");
-      Color_t summaryColor[3] = {kRed,kGreen+1,kBlue};
-      Style_t summaryStyle[3] = {kFullCircle,kFullTriangleUp,kFullTriangleDown};
-      ratioSummary->SetLineColor  (nsum<3?summaryColor[nsum]:kBlack);
-      ratioSummary->SetMarkerColor(nsum<3?summaryColor[nsum]:kBlack);
-      ratioSummary->SetMarkerStyle(nsum<3?summaryStyle[nsum]:kFullCircle);
+      ratioSummary->SetLineColor  (nsum<nsumMax?summaryColor[nsum]:kBlack);
+      ratioSummary->SetMarkerColor(nsum<nsumMax?summaryColor[nsum]:kBlack);
+      ratioSummary->SetMarkerStyle(nsum<nsumMax?summaryStyle[nsum]:kFullCircle);
       auto kv = summaryCanvMap.find(varName);
       if(kv==summaryCanvMap.end()) {
         summaryCanv = new TCanvas(
-            "summaryCanv_"+varName,
-            "summaryCanv_"+varName,
+            "summaryCanv_ratio"+varName,
+            "summaryCanv_ratio"+varName,
             dimx,dimy
             );
         summaryCanv->SetGrid(1,1);

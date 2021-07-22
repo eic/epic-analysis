@@ -12,10 +12,10 @@ Histos::Histos(TString setname_, TString settitle_) {
   setname=setname_;
   settitle=settitle_;
   this->SetName("histos_"+setname);
-  cout << "Histos:  " << settitle << endl;
+  if(settitle!="settitle") cout << "Histos:  " << settitle << endl;
 
   // HISTOGRAMS ================================================
-  // DIS kinematics
+  // -- DIS kinematics
   DefineHist2D("Q2vsX","x","Q^{2}","","GeV^{2}",
       NBINS,1e-3,1,
       NBINS,1,100,
@@ -23,12 +23,14 @@ Histos::Histos(TString setname_, TString settitle_) {
       );
   DefineHist1D("W","W","GeV",NBINS,0,15);
   DefineHist1D("y","y","",NBINS,1e-5,1,true);
-  // hadron 4-momentum
+  //DefineHist1D("Q","Q","GeV",10,0.5,10.5,false,true); // linear
+  DefineHist1D("Q","Q","GeV",10,1.0,10.0,true,true); // log
+  // -- hadron 4-momentum
   DefineHist1D("p","p","GeV",NBINS,0,10);
   DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
   DefineHist1D("eta","#eta","",NBINS,-5,5);
   DefineHist1D("phi","#phi","",NBINS,-TMath::Pi(),TMath::Pi());
-  // hadron kinematics
+  // -- hadron kinematics
   DefineHist1D("z","z","",NBINS,0,1);
   DefineHist1D("pT","p_{T}","GeV",NBINS,1e-2,3,true);
   DefineHist1D("qT","q_{T}","GeV",NBINS,1e-2,5,true);
@@ -36,8 +38,9 @@ Histos::Histos(TString setname_, TString settitle_) {
   DefineHist1D("mX","m_{X}","GeV",NBINS,0,20);
   DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
   DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
-  // cross sections
-  DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,true,true);
+  // -- cross sections
+  //DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
+  DefineHist1D("Q_xsec","Q","GeV",10,1.0,10.0,true,true); // log
   this->Hist("Q_xsec")->SetMinimum(1e-10);
   // ===========================================================
 };
