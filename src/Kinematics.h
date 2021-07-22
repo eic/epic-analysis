@@ -35,6 +35,11 @@ class Kinematics : public TObject
     Double_t W,Q2,Nu,x,y; // DIS
     Double_t z,pT,qT,mX,xF,phiH,phiS; // hadron
 
+    // nucleon transverse spin; if you set this externally,
+    // it must be done before calculating `phiS` (before
+    // `CalculateHadronKinematics`)
+    Int_t tSpin; 
+
     // 4-vectors
     // - lab frame
     TLorentzVector vecEleBeam, vecIonBeam;
@@ -53,7 +58,7 @@ class Kinematics : public TObject
     TLorentzVector IvecElectron, IvecW, IvecQ;
     TLorentzVector IvecHadron;
     // other
-    TVector3 vecSpin;
+    TLorentzVector vecSpin, IvecSpin;
 
 
     // particle masses

@@ -16,7 +16,11 @@
 #include "Kinematics.h"
 
 // subroutines
-void DrawRatios(Histos *numerSet, Histos *denomSet);
+void CenterDelta(Double_t center, Double_t delta, Double_t &cutmin, Double_t &cutmax);
+Bool_t CheckDiagonal(int cpt, int cx, int cz);
+
+// globals
+Bool_t diagonalBinsOnly;
 
 //=========================================================================
 
@@ -40,7 +44,62 @@ int main(int argc, char **argv) {
   if(argc>2) eleBeamEn = (Double_t)strtof(argv[2],NULL);
   if(argc>3) ionBeamEn = (Double_t)strtof(argv[3],NULL);
   if(argc>4) crossingAngle = (Double_t)strtof(argv[4],NULL);
+  
+  // ----------------------------------------------------------
+  // BINNING
+  // ----------------------------------------------------------
+
+  // - pT bins
+  const int NbinsPT = 4;
+  Double_t ptmin[NbinsPT], ptmax[NbinsPT];
+  ptmin[0]=0.; ptmax[0]=1000.; // element 0 is always full range
+  CenterDelta( 0.15, 0.05, ptmin[1], ptmax[1]); // slide 14
+  CenterDelta( 0.55, 0.05, ptmin[2], ptmax[2]); // slide 13
+  CenterDelta( 0.50, 0.05, ptmin[3], ptmax[3]); // slide 11
+
+  // - x bins
+  const int NbinsX = 4;
+  Double_t xmin[NbinsX], xmax[NbinsX];
+  xmin[0]=0.; xmax[0]=1.; // element 0 is always full range
+  CenterDelta( 0.1, 0.05, xmin[1], xmax[1]);
+  CenterDelta( 0.6, 0.05, xmin[2], xmax[2]);
+  CenterDelta( 0.3, 0.05, xmin[3], xmax[3]);
+
+  // - z bins
+  const int NbinsZ = 4;
+  Double_t zmin[NbinsZ], zmax[NbinsZ];
+  zmin[0]=0.; zmax[0]=1.; // element 0 is always full range
+  CenterDelta( 0.7, 0.05, zmin[1], zmax[1] );
+  CenterDelta( 0.5, 0.05, zmin[2], zmax[2] );
+  CenterDelta( 0.7, 0.05, zmin[3], zmax[3] );
+
+  // if this is true, only take 'diagonal' elements of the multi
+  // dimensional array of possible pT,x,z bins; this is useful
+  // if you want to check specific bins
+  diagonalBinsOnly = true;
+
+
+  // - y-minimum cuts
+  const int NY=1;
+  Double_t ymin[NY] = {
+    0.00
+    //0.03,
+    //0.05,
+    //0.10
+  };
+
+  // - particle species
+  std::map<int,int> PIDtoEnum;
+  enum partEnum{
+    pPip,
+    //pPim,
+    NPart
+  };
+  PIDtoEnum.insert(std::pair<int,int>(211,pPip));
+  //PIDtoEnum.insert(std::pair<int,int>(-211,pPim));
+
   /////////////////////////////////////////////////////////////
+
 
 
   // read delphes tree
@@ -60,61 +119,23 @@ int main(int argc, char **argv) {
   TObjArrayIter itTrack(tr->UseBranch("Track"));
   TObjArrayIter itElectron(tr->UseBranch("Electron"));
 
-  // vars
-  Double_t eleP,maxEleP;
 
 
-  // define histogram sets
-  // - pT bins
-  const int NbinsPT = 2;
-  Double_t ptmin[NbinsPT];
-  Double_t ptmax[NbinsPT];
-  ptmin[0]=0.;         ptmax[0]=1000.;    // element 0 is always full range
-  ptmin[1]=0.5-0.01;   ptmax[1]=0.5+0.01; // test bin
-  std::vector<int> v_pt;
-  // - x bins
-  const int NbinsX = 2;
-  Double_t xmin[NbinsX];
-  Double_t xmax[NbinsX];
-  xmin[0]=0.;          xmax[0]=1.;       // element 0 is always full range
-  xmin[1]=0.3-0.01;    xmax[1]=0.3+0.01; // test bin
-  std::vector<int> v_x;
-  // - z bins
-  const int NbinsZ = 2;
-  Double_t zmin[NbinsZ];
-  Double_t zmax[NbinsZ];
-  zmin[0]=0.;          zmax[0]=1.;       // element 0 is always full range
-  zmin[1]=0.3-0.01;    zmax[1]=0.3+0.01; // test bin
-  std::vector<int> v_z;
-  // - y-minimum cuts
-  const int NY=4;
-  Double_t ymin[NY] = {
-    0.00,
-    0.03,
-    0.05,
-    0.10
-  };
-  std::vector<int> v_y;
-  // - particle species
-  enum partEnum{
-    pPip,
-    pPim,
-    NPart
-  };
-  std::map<int,int> PIDtoEnum;
-  PIDtoEnum.insert(std::pair<int,int>(211,pPip));
-  PIDtoEnum.insert(std::pair<int,int>(-211,pPim));
-  int pid,bpart;
-
-
-  // build array of histogram sets
+  // sets of histogram sets
+  // - `histSet` is a data structure for storing and organizing pointers to
+  //   sets of histograms (`Histos` objects)
+  // - `histSet*List` are used as temporary lists of relevant `Histos` pointers
   Histos *histSet[NbinsPT][NbinsX][NbinsZ][NY][NPart];
   std::vector<Histos*> histSetList;
   std::vector<Histos*> histSetFillList;
+  std::vector<int> v_pt, v_x, v_z, v_y;
+  // instantiate Histos sets, and populate 
   TString keyN,keyT;
+  cout << "Define histograms..." << endl;
   for(int bpt=0; bpt<NbinsPT; bpt++) { // - loop over pT bins
     for(int bx=0; bx<NbinsX; bx++) { // - loop over x bins
       for(int bz=0; bz<NbinsZ; bz++) { // - loop over z bins
+        if(CheckDiagonal(bpt,bx,bz)) continue;
         for(int by=0; by<NY; by++) { // - loop over y cuts
           // set plot name
           keyN  = Form("_ptbin%d",bpt);
@@ -131,7 +152,7 @@ int main(int argc, char **argv) {
           keyT += Form(", y>%.2f",ymin[by]);
           // loop over particles
           histSet[bpt][bx][bz][by][pPip] = new Histos("pipTrack"+keyN,"#pi^{+} tracks"+keyT);
-          histSet[bpt][bx][bz][by][pPim] = new Histos("pimTrack"+keyN,"#pi^{-} tracks"+keyT);
+          //histSet[bpt][bx][bz][by][pPim] = new Histos("pimTrack"+keyN,"#pi^{-} tracks"+keyT);
           // add to full list
           for(int bp=0; bp<NPart; bp++) histSetList.push_back(histSet[bpt][bx][bz][by][bp]);
         };
@@ -139,8 +160,6 @@ int main(int argc, char **argv) {
     };
   };
 
-  // define kinematics
-  Kinematics *kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
 
   // calculate integrated luminosity
   // - cross sections are hard-coded, coped from pythia output
@@ -153,12 +172,30 @@ int main(int argc, char **argv) {
     cerr << "WARNING: unknown cross section; integrated lumi will be wrong" << endl;
     xsecTot=1;
   };
-  Double_t lumi = tr->GetEntries() / xsecTot; // [nb^-1]
+  Long64_t numGen = tr->GetEntries();
+  Double_t lumi = numGen/xsecTot; // [nb^-1]
+  TString sep = "--------------------------------------------";
+  cout << sep << endl;
+  cout << "assumed total cross section: " << xsecTot << " nb" << endl;
+  cout << "number of generated events:  " << numGen << endl;
+  cout << "Integrated Luminosity:       " << lumi << "/nb" << endl;
+  cout << sep << endl;
 
-  // tree loop
+
+  // define kinematics
+  Kinematics *kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
+
+
+  // vars
+  Double_t eleP,maxEleP;
+  int pid,bpart;
+
+
+  // event loop =========================================================
   //ENT = 1000; // limiter
+  cout << "begin event loop..." << endl;
   for(Long64_t e=0; e<ENT; e++) {
-    if(e>0&&e%1000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
+    if(e>0&&e%100000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
     tr->ReadEntry(e);
 
     // electron loop
@@ -238,43 +275,57 @@ int main(int argc, char **argv) {
           for(int bx : v_x) {
             for(int bz : v_z) {
               for(int by : v_y) {
-                histSetFillList.push_back(histSet[bpt][bx][bz][by][bpart]);
+                if(!CheckDiagonal(bpt,bx,bz)) {
+                  histSetFillList.push_back(histSet[bpt][bx][bz][by][bpart]);
+                };
               };
             };
           };
         };
 
         // loop through list of histogram sets, and fill them
-        if(histSetFillList.size()>0) {
-          for(Histos *H : histSetFillList) {
-            // DIS kinematics
-            H->Hist("Q2vsX")->Fill(kin->x,kin->Q2);
-            H->Hist("W")->Fill(kin->W);
-            H->Hist("y")->Fill(kin->y);
-            // hadron 4-momentum
-            H->Hist("p")->Fill(trk->P);
-            H->Hist("pTlab")->Fill(trk->PT);
-            H->Hist("eta")->Fill(trk->Eta);
-            H->Hist("phi")->Fill(trk->Phi);
-            // hadron kinematics
-            H->Hist("z")->Fill(kin->z);
-            H->Hist("pT")->Fill(kin->pT);
-            H->Hist("qT")->Fill(kin->qT);
-            H->Hist("qTq")->Fill(kin->qT/TMath::Sqrt(kin->Q2));
-            H->Hist("mX")->Fill(kin->mX);
-            H->Hist("phiH")->Fill(kin->phiH);
-            H->Hist("phiS")->Fill(kin->phiS);
-            // cross sections
-            H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),1.0/lumi);
-          };
+        for(Histos *H : histSetFillList) {
+          // DIS kinematics
+          H->Hist("Q2vsX")->Fill(kin->x,kin->Q2);
+          H->Hist("W")->Fill(kin->W);
+          H->Hist("y")->Fill(kin->y);
+          // hadron 4-momentum
+          H->Hist("p")->Fill(trk->P);
+          H->Hist("pTlab")->Fill(trk->PT);
+          H->Hist("eta")->Fill(trk->Eta);
+          H->Hist("phi")->Fill(trk->Phi);
+          // hadron kinematics
+          H->Hist("z")->Fill(kin->z);
+          H->Hist("pT")->Fill(kin->pT);
+          H->Hist("qT")->Fill(kin->qT);
+          H->Hist("qTq")->Fill(kin->qT/TMath::Sqrt(kin->Q2));
+          H->Hist("mX")->Fill(kin->mX);
+          H->Hist("phiH")->Fill(kin->phiH);
+          H->Hist("phiS")->Fill(kin->phiS);
+          // cross sections
+          H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),1.0/lumi);
         };
 
       };
     };
   };
+  cout << "end event loop" << endl;
+  // event loop end =========================================================
+
+
+
+  // print yields in each bin
+  cout << sep << endl << "Histogram Entries:" << endl;
+  for(Histos *H : histSetList) {
+    cout << H->GetSetTitle() << " ::: "
+         << H->Hist("Q2vsX")->GetEntries()
+         << endl;
+  };
+
 
 
   // write histograms
+  cout << sep << endl;
   outfile->cd();
   for(Histos *H : histSetList) H->WriteHists(outfile);
   for(Histos *H : histSetList) H->Write();
@@ -282,7 +333,24 @@ int main(int argc, char **argv) {
   cout << outfileN << " written." << endl;
 
   // call draw program
+  /*
   TString cmd = "./draw.exe "+outfileN;
   system(cmd.Data());
+  */
 
+};
+
+////////////////////////////////////////////////////
+ 
+// define cut using `center` +/- `delta`; set cut minimum and maximum
+void CenterDelta(Double_t center, Double_t delta, Double_t &cutmin, Double_t &cutmax) {
+  cutmin = center - delta;
+  cutmax = center + delta;
+};
+
+// return true, if `diagonalBinsOnly` mode is on, and this is an 
+// off-diagonal bin
+Bool_t CheckDiagonal(int cpt, int cx, int cz) {
+  return diagonalBinsOnly &&
+      ( cpt!=cx || cx!=cz );
 };

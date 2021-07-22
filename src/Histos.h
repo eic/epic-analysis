@@ -49,6 +49,8 @@ class Histos : public TNamed
     TH1 *Hist(TString histName); // access histogram by name
     HistConfig *GetHistConfig(TString histName); // settings for this histogram
     std::vector<TString> VarNameList; // list of histogram names (for external looping)
+    TString GetSetName() { return setname; };
+    TString GetSetTitle() { return settitle; };
 
     // histogram builders
     void DefineHist1D(

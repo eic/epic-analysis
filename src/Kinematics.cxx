@@ -30,6 +30,9 @@ Kinematics::Kinematics(
       enIonBeam
       );
 
+  // default transverse spin (needed for phiS calculation)
+  tSpin = 1; // +1=spin-up, -1=spin-down
+
 };
 
 
@@ -70,10 +73,11 @@ void Kinematics::CalculateHadronKinematics() {
       IvecQ.Vect(), IvecHadron.Vect()
       );
   // phiS
-  vecSpin.SetXYZ(0,1,0); // assume spin-up ion
+  vecSpin.SetXYZT(0,tSpin,0,0); // Pauli-Lubanski pseudovector
+  //this->BoostToBreitFrame(vecSpin,IvecSpin); // TODO: check if other frames matter
   phiS = PlaneAngle(
       IvecQ.Vect(), IvecElectron.Vect(),
-      IvecQ.Vect(), vecSpin
+      IvecQ.Vect(), vecSpin.Vect()
       );
   // pT, in perp frame (transverse to q), in ion rest frame
   pT = Reject(

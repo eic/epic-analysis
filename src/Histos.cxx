@@ -12,6 +12,7 @@ Histos::Histos(TString setname_, TString settitle_) {
   setname=setname_;
   settitle=settitle_;
   this->SetName("histos_"+setname);
+  cout << "Histos:  " << settitle << endl;
 
   // HISTOGRAMS ================================================
   // DIS kinematics
@@ -36,7 +37,7 @@ Histos::Histos(TString setname_, TString settitle_) {
   DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
   DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
   // cross sections
-  DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true);
+  DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,true,true);
   this->Hist("Q_xsec")->SetMinimum(1e-10);
   // ===========================================================
 };
