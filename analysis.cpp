@@ -15,6 +15,7 @@
 #include "Histos.h"
 #include "Kinematics.h"
 #include "CutDef.h"
+#include "BinSet.h"
 
 // subroutines
 Bool_t CheckDiagonal(int cpt, int cx, int cz);
@@ -55,6 +56,7 @@ int main(int argc, char **argv) {
   TObjArray *ptBins = new TObjArray();
   TObjArray *xBins = new TObjArray();
   TObjArray *zBins = new TObjArray();
+  TObjArray *qBins = new TObjArray();
   TObjArray *yBins = new TObjArray();
 
   // if this is true, only take 'diagonal' elements of the multi
@@ -71,6 +73,7 @@ int main(int argc, char **argv) {
 
   // cross check cross section -------------------
   diagonalBinsOnly = true;
+  /*
   // slide 11
   xBins->AddLast(new CutDef("x","x","CenterDelta", 0.3, 0.05 ));
   zBins->AddLast(new CutDef("z","z","CenterDelta", 0.7, 0.05 ));
@@ -83,11 +86,17 @@ int main(int argc, char **argv) {
   xBins->AddLast(new CutDef("x","x","CenterDelta", 0.1, 0.05 ));
   zBins->AddLast(new CutDef("z","z","CenterDelta", 0.7, 0.05 ));
   ptBins->AddLast(new CutDef("pt","p_{T}","CenterDelta", 0.15, 0.05 ));
+  */
 
+  // - Q bins ------------------------------------
+  BinSet *qBinScheme = new BinSet("Q","Q",10,0.5,10.5,false);
+  qBins = qBinScheme->bins;
 
   // - y-minimum cuts ----------------------------
+  /*
   yBins->AddLast(new CutDef("y","y","Min",0.03));
   yBins->AddLast(new CutDef("y","y","Min",0.05));
+  */
 
   // - particle species --------------------------
   std::map<int,int> PIDtoEnum;
@@ -104,6 +113,7 @@ int main(int argc, char **argv) {
   const Int_t NptBins = ptBins->GetEntries();
   const Int_t NxBins = xBins->GetEntries();
   const Int_t NzBins = zBins->GetEntries();
+  const Int_t NqBins = qBins->GetEntries();
   const Int_t NyBins = yBins->GetEntries();
 
   /////////////////////////////////////////////////////////////
@@ -137,33 +147,39 @@ int main(int argc, char **argv) {
   // - `histSet` is a data structure for storing and organizing pointers to
   //   sets of histograms (`Histos` objects)
   // - `histSet*List` are used as temporary lists of relevant `Histos` pointers
-  Histos *histSet[NptBins][NxBins][NzBins][NyBins][NPart];
+  // - TODO: if we add one more dimension, 7D array will probably break; need
+  //         better data structure
+  Histos *histSet[NptBins][NxBins][NzBins][NqBins][NyBins][NPart];
   std::vector<Histos*> histSetList;
   std::vector<Histos*> histSetFillList;
-  std::vector<int> v_pt, v_x, v_z, v_y;
+  std::vector<int> v_pt, v_x, v_z, v_q, v_y;
   // instantiate Histos sets, and populate 
   TString plotN,plotT;
   cout << "Define histograms..." << endl;
   for(int bpt=0; bpt<NptBins; bpt++) { // - loop over pT bins
     for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
       for(int bz=0; bz<NzBins; bz++) { // - loop over z bins
-        if(CheckDiagonal(bpt,bx,bz)) continue;
-        for(int by=0; by<NyBins; by++) { // - loop over y bins
-          // set plot name
-          plotN  = "_" + ((CutDef*)ptBins->At(bpt))->GetVarName() + Form("%d",bpt);
-          plotN += "_" + ((CutDef*)xBins->At(bx))->GetVarName() + Form("%d",bx);
-          plotN += "_" + ((CutDef*)zBins->At(bz))->GetVarName() + Form("%d",bz);
-          plotN += "_" + ((CutDef*)yBins->At(by))->GetVarName() + Form("%d",by);
-          // set plot title
-          plotT  = ", " + ((CutDef*)ptBins->At(bpt))->GetCutTitle();
-          plotT += ", " + ((CutDef*)xBins->At(bx))->GetCutTitle();
-          plotT += ", " + ((CutDef*)zBins->At(bz))->GetCutTitle();
-          plotT += ", " + ((CutDef*)yBins->At(by))->GetCutTitle();
-          // loop over particles
-          histSet[bpt][bx][bz][by][pPip] = new Histos("pipTrack"+plotN,"#pi^{+} tracks"+plotT);
-          //histSet[bpt][bx][bz][by][pPim] = new Histos("pimTrack"+plotN,"#pi^{-} tracks"+plotT);
-          // add to full list
-          for(int bp=0; bp<NPart; bp++) histSetList.push_back(histSet[bpt][bx][bz][by][bp]);
+        for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
+          if(CheckDiagonal(bpt,bx,bz)) continue;
+          for(int by=0; by<NyBins; by++) { // - loop over y bins
+            // set plot name
+            plotN  = "_" + ((CutDef*)ptBins->At(bpt))->GetVarName() + Form("%d",bpt);
+            plotN += "_" + ((CutDef*)xBins->At(bx))->GetVarName() + Form("%d",bx);
+            plotN += "_" + ((CutDef*)zBins->At(bz))->GetVarName() + Form("%d",bz);
+            plotN += "_" + ((CutDef*)qBins->At(bq))->GetVarName() + Form("%d",bq);
+            plotN += "_" + ((CutDef*)yBins->At(by))->GetVarName() + Form("%d",by);
+            // set plot title
+            plotT  = ", " + ((CutDef*)ptBins->At(bpt))->GetCutTitle();
+            plotT += ", " + ((CutDef*)xBins->At(bx))->GetCutTitle();
+            plotT += ", " + ((CutDef*)zBins->At(bz))->GetCutTitle();
+            plotT += ", " + ((CutDef*)qBins->At(bq))->GetCutTitle();
+            plotT += ", " + ((CutDef*)yBins->At(by))->GetCutTitle();
+            // loop over particles
+            histSet[bpt][bx][bz][bq][by][pPip] = new Histos("pipTrack"+plotN,"#pi^{+} tracks"+plotT);
+            //histSet[bpt][bx][bz][bq][by][pPim] = new Histos("pimTrack"+plotN,"#pi^{-} tracks"+plotT);
+            // add to full list
+            for(int bp=0; bp<NPart; bp++) histSetList.push_back(histSet[bpt][bx][bz][bq][by][bp]);
+          };
         };
       };
     };
@@ -273,6 +289,7 @@ int main(int argc, char **argv) {
         CheckBins( ptBins, v_pt, kin->pT );
         CheckBins( xBins,  v_x,  kin->x );
         CheckBins( zBins,  v_z,  kin->z );
+        CheckBins( qBins,  v_q,  TMath::Sqrt(kin->Q2) );
         CheckBins( yBins,  v_y,  kin->y );
 
 
@@ -281,9 +298,11 @@ int main(int argc, char **argv) {
         for(int bpt : v_pt) {
           for(int bx : v_x) {
             for(int bz : v_z) {
-              for(int by : v_y) {
-                if(!CheckDiagonal(bpt,bx,bz)) {
-                  histSetFillList.push_back(histSet[bpt][bx][bz][by][bpart]);
+              for(int bq : v_q) {
+                for(int by : v_y) {
+                  if(!CheckDiagonal(bpt,bx,bz)) {
+                    histSetFillList.push_back(histSet[bpt][bx][bz][bq][by][bpart]);
+                  };
                 };
               };
             };
