@@ -17,6 +17,7 @@
 class CutDef : public TObject
 {
   public:
+    CutDef();
     CutDef(
         TString varName_, TString varTitle_, TString cutType_,
         Double_t arg1=-1, Double_t arg2=-1

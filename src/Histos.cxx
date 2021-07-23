@@ -8,9 +8,11 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-Histos::Histos(TString setname_, TString settitle_) {
-  setname=setname_;
-  settitle=settitle_;
+// constructor
+Histos::Histos(TString setname_, TString settitle_)
+  : setname(setname_)
+  , settitle(settitle_)
+{
   this->SetName("histos_"+setname);
   if(settitle!="settitle") cout << "Histos:  " << settitle << endl;
 

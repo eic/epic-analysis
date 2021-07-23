@@ -22,6 +22,7 @@
 
 // largex-eic
 #include "BinSet.h"
+#include "CutDef.h"
 
 // container for histogram settings
 class HistConfig : public TNamed {
@@ -52,8 +53,12 @@ class Histos : public TNamed
     TH1 *Hist(TString histName); // access histogram by name
     HistConfig *GetHistConfig(TString histName); // settings for this histogram
     std::vector<TString> VarNameList; // list of histogram names (for external looping)
+    std::vector<CutDef*> CutDefList; // list of associated cut definitions
     TString GetSetName() { return setname; };
     TString GetSetTitle() { return settitle; };
+
+    // store associated cut definitions
+    void AddCutDef(CutDef *cut) { CutDefList.push_back(cut); };
 
     // histogram builders
     void DefineHist1D(

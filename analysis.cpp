@@ -89,7 +89,7 @@ int main(int argc, char **argv) {
   */
 
   // - Q bins ------------------------------------
-  BinSet *qBinScheme = new BinSet("Q","Q",10,0.5,10.5,false);
+  BinSet *qBinScheme = new BinSet("q","Q",10,0.5,10.5,false);
   qBins = qBinScheme->bins;
 
   // - y-minimum cuts ----------------------------
@@ -162,23 +162,35 @@ int main(int argc, char **argv) {
         for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
           if(CheckDiagonal(bpt,bx,bz)) continue;
           for(int by=0; by<NyBins; by++) { // - loop over y bins
+
             // set plot name
             plotN  = "_" + ((CutDef*)ptBins->At(bpt))->GetVarName() + Form("%d",bpt);
             plotN += "_" + ((CutDef*)xBins->At(bx))->GetVarName() + Form("%d",bx);
             plotN += "_" + ((CutDef*)zBins->At(bz))->GetVarName() + Form("%d",bz);
             plotN += "_" + ((CutDef*)qBins->At(bq))->GetVarName() + Form("%d",bq);
             plotN += "_" + ((CutDef*)yBins->At(by))->GetVarName() + Form("%d",by);
+
             // set plot title
             plotT  = ", " + ((CutDef*)ptBins->At(bpt))->GetCutTitle();
             plotT += ", " + ((CutDef*)xBins->At(bx))->GetCutTitle();
             plotT += ", " + ((CutDef*)zBins->At(bz))->GetCutTitle();
             plotT += ", " + ((CutDef*)qBins->At(bq))->GetCutTitle();
             plotT += ", " + ((CutDef*)yBins->At(by))->GetCutTitle();
+
             // loop over particles
             histSet[bpt][bx][bz][bq][by][pPip] = new Histos("pipTrack"+plotN,"#pi^{+} tracks"+plotT);
             //histSet[bpt][bx][bz][bq][by][pPim] = new Histos("pimTrack"+plotN,"#pi^{-} tracks"+plotT);
-            // add to full list
-            for(int bp=0; bp<NPart; bp++) histSetList.push_back(histSet[bpt][bx][bz][bq][by][bp]);
+
+            // store cut definitions with histogram sets, then add histogram sets full list
+            for(int bp=0; bp<NPart; bp++) {
+              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef((CutDef*)ptBins->At(bpt));
+              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef((CutDef*)xBins->At(bx));
+              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef((CutDef*)zBins->At(bz));
+              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef((CutDef*)qBins->At(bq));
+              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef((CutDef*)yBins->At(by));
+              histSetList.push_back(histSet[bpt][bx][bz][bq][by][bp]);
+            };
+
           };
         };
       };
