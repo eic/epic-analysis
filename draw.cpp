@@ -1,4 +1,5 @@
 #include <map>
+#include <iomanip>
 
 // root
 #include "TFile.h"
@@ -11,6 +12,7 @@
 // largex-eic
 #include "Histos.h"
 #include "Kinematics.h"
+#include "CutDef.h"
 
 // globals
 const Int_t dimx=800; // canvas dimension
@@ -19,8 +21,10 @@ TString infileN, outfileN, pngDir;
 TFile *infile, *outfile;
 Bool_t plotRatioOnly;
 std::map<TString,TCanvas*> summaryCanvMap;
+std::vector<TString> varList;
 TCanvas *summaryCanv;
-int nsum;
+int nsum,ndump;
+CutDef *dumpCut;
 // formatting for summary canvas
 const int nsumMax=3;
 Color_t summaryColor[nsumMax] = {kRed,kGreen+1,kBlue};
@@ -28,10 +32,11 @@ Style_t summaryStyle[nsumMax] = {kFullCircle,kFullTriangleUp,kFullTriangleDown};
 
 
 // subroutines
-void DumpHist(TString countsFile, TString histSet, TString varName);
+void DumpHist(TString datFile, TString histSet, TString varName);
+void DumpAve(TString datFile, TString histSet, TString cutName);
 void DrawSingle(TString outName, TString histSet, TString varName);
 void DrawRatios(TString outName, TString numerSet, TString denomSet);
-void ResetSummary() { nsum=0; summaryCanvMap.clear(); };
+void Reset();
 
 //=========================================================================
 
@@ -60,10 +65,18 @@ int main(int argc, char **argv) {
 
   gStyle->SetOptStat(0);
   gROOT->ProcessLine(".! mkdir -p "+pngDir);
+  Reset();
 
+  cout << std::fixed; // fixed float precision
+  cout << std::setprecision(3);
+
+  // ===================================
+
+
+  /*
   // ratios y>y_min / y>0
-  TString kinBinStr = "histos_pipTrack_pt0_x0_z0";
-  ResetSummary();
+  TString kinBinStr = "histos_pipTrack_pt0_x0_z0_q0";
+  Reset();
   // draw
   for(int y=1; y<3; y++) {
     DrawRatios(
@@ -74,35 +87,67 @@ int main(int argc, char **argv) {
   };
   // write summary
   outfile->cd("/");
-  outfile->mkdir("yRatio_summary");
-  outfile->cd("yRatio_summary");
+  outfile->mkdir("summary_yRatio");
+  outfile->cd("summary_yRatio");
   for(auto const& kv : summaryCanvMap) {
     kv.second->Write();
-    kv.second->Print(pngDir+"/yRatio_summary_"+kv.first+".png");
+    kv.second->Print(pngDir+"/summary_yRatio_"+kv.first+".png");
   };
   outfile->cd("/");
+  */
 
+  // -------------------------------------------------
+
+  /*
   // cross sections
-  ResetSummary();
+  Reset();
   Int_t ycut=0; // choose y cut
   TString setStr,histStr;
-  TString yieldOutput = pngDir + "/counts.txt";
+  TString yieldOutput = pngDir + "/table_counts.txt";
   gSystem->RedirectOutput(yieldOutput,"w");
   cout << "Counts in bins of Q" << endl;
   gSystem->RedirectOutput(0);
-  for(int b=1; b<=3; b++) {
-    setStr = Form("histos_pipTrack_pt%d_x%d_z%d_y%d",b,b,b,ycut);
+  for(int b=0; b<=3; b++) {
+    setStr = Form("histos_pipTrack_pt%d_x%d_z%d_q%d_y%d",b,b,b,0,ycut);
     DrawSingle(Form("xsec_%d",b),setStr,"Q_xsec");
     DumpHist(yieldOutput,setStr,"Q");
   };
   // write summary
   outfile->cd("/");
   summaryCanv->Write();
-  summaryCanv->Print(pngDir+"/xsec_summary.png");
+  summaryCanv->Print(pngDir+"/summary_xsec.png");
   // dump
   gROOT->ProcessLine(".! cat "+yieldOutput);
   cout << yieldOutput << " written" << endl;
+  */
       
+  // -------------------------------------------------
+
+  // average kinematics in Q bins
+  Reset();
+  Int_t ycut=0; // choose y cut
+  TString setStr,histStr;
+  TString aveOutput = pngDir + "/table_counts_qbins.txt";
+  gSystem->RedirectOutput(aveOutput,"w");
+  cout << "Counts and averages in bins of Q" << endl;
+  gSystem->RedirectOutput(0);
+  for(int b=0; b<=0; b++) {
+    Reset();
+    for(int q=0; q<10; q++) {
+      setStr = Form("histos_pipTrack_pt%d_x%d_z%d_q%d_y%d",b,b,b,q,ycut);
+      DumpAve(aveOutput,setStr,"q");
+    };
+    // concatenate temp file
+    gSystem->RedirectOutput(aveOutput,"a");
+    gROOT->ProcessLine(".! cat "+aveOutput+".tmp | column -t");
+    gSystem->RedirectOutput(0);
+  };
+  // dump
+  gROOT->ProcessLine(".! rm "+aveOutput+".tmp");
+  gROOT->ProcessLine(".! cat "+aveOutput);
+  cout << aveOutput << " written" << endl;
+
+  // ===================================
 
   // cleanup
   infile->Close();
@@ -118,8 +163,8 @@ int main(int argc, char **argv) {
  * - output will be appended to `countsFiles`
  * - so far only implemented for 1D
  */
-void DumpHist(TString countsFile, TString histSet, TString varName) {
-  cout << "dump " << histSet << " : " << varName << " to " << countsFile << endl;
+void DumpHist(TString datFile, TString histSet, TString varName) {
+  cout << "dump " << histSet << " : " << varName << " to " << datFile << endl;
   Histos *H = (Histos*) infile->Get(histSet);
   TH1 *hist = H->Hist(varName);
   if(hist->GetDimension()>1) return;
@@ -127,7 +172,7 @@ void DumpHist(TString countsFile, TString histSet, TString varName) {
   histTformatted.ReplaceAll("#in"," in ");
   histTformatted.ReplaceAll("#pm","+-");
 
-  gSystem->RedirectOutput(countsFile,"a");
+  gSystem->RedirectOutput(datFile,"a");
   cout << endl;
   cout << "Histogram: " << histTformatted << endl;
 
@@ -147,10 +192,103 @@ void DumpHist(TString countsFile, TString histSet, TString varName) {
          << endl;
   };
 
-  gSystem->RedirectOutput(countsFile,"a");
+  gSystem->RedirectOutput(datFile,"a");
   gROOT->ProcessLine(".! cat tempo | column -t");
   gSystem->RedirectOutput(0);
   gROOT->ProcessLine(".! rm tempo");
+
+};
+
+//=========================================================================
+
+/* dump averages of all histograms from `histSet` to the file `datFile`
+ * - it is best to call this function in a loop, this function will only dump
+ *   one line of information; if it's the first time you called it, it will
+ *   dump header information as well
+ * - since histograms in `histSet` have an associated cut set, use `cutName` to
+ *   specify a cut defintion you want to print; e.g., loop over x bins and set
+ *   the `cutName` to the x cut, to include columns for x bin boundaries
+ */
+void DumpAve(TString datFile, TString histSet, TString cutName) {
+  cout << "dump averages from " << histSet
+       << " to " << datFile << endl;
+  Histos *H = (Histos*) infile->Get(histSet);
+
+  // get associated cut, and print header info if it's the first time
+  dumpCut = nullptr;
+  if(ndump==0) {
+    gSystem->RedirectOutput(datFile,"a");
+    cout << endl << "Histogram Set:";
+  };
+  for(CutDef *cut : H->CutDefList) {
+    if(cutName.CompareTo(cut->GetVarName(),TString::kIgnoreCase)==0) {
+      dumpCut = cut;
+    }
+    else if(ndump==0) {
+      cout << "   " + cut->GetCutTitle();
+    };
+  };
+  if(ndump==0) {
+    cout << endl;
+    cout << "--------------" << endl;
+    gSystem->RedirectOutput(0);
+  };
+  if(dumpCut==nullptr) {
+    cerr << "ERROR: in DumpAve, cannot find cut def" << endl;
+    return;
+  };
+
+  // start temporary file for output; later we will pipe through `column -t`
+  // for pretty print to full `datFile`
+  gSystem->RedirectOutput(datFile+".tmp",ndump>0?"a":"w");
+
+  // if this is the first time, populate ordered list of histograms; we keep a
+  // local list, in case you call this function on a `Histos` with different
+  // ordering; we want to maintain order for printout
+  if(ndump==0) {
+    // header for bin columns
+    cout << "bin"
+         << " " << dumpCut->GetVarTitle() << "_min"
+         << " " << dumpCut->GetVarTitle() << "_max"
+         << " counts";
+    // loop over 1D histograms, build `varList`,
+    // and print header for ave columns
+    for(TString varName : H->VarNameList) {
+      if(H->Hist(varName)->GetDimension()==1) {
+        if(varName.Contains("xsec")) continue;
+        varList.push_back(varName);
+        cout << " <" + varName + ">";
+      };
+    };
+    // header newline
+    cout << endl;
+  };
+
+  // loop over local list of variables, and print their averages
+  TH1 *hist;
+  cout << ndump
+       << " " << dumpCut->GetMin()
+       << " " << dumpCut->GetMax();
+  Bool_t first=true;
+  Double_t counts;
+  for(TString varName : varList) {
+    hist = H->Hist(varName);
+    if(first) {
+      counts = hist->GetEntries();
+      cout << " " << counts;
+      first=false;
+    }
+    else if(hist->GetEntries()!=counts) {
+      cerr << "WARNING: mismatch counts" << endl;
+    };
+    cout << " " << hist->GetMean();
+  };
+  cout << endl;
+  gSystem->RedirectOutput(0);
+
+
+  // iterate row counter
+  ndump++;
 
 };
 
@@ -234,7 +372,7 @@ void DrawSingle(TString outName, TString histSet, TString varName) {
 * - Use `outName` to specify a names for output canvases
 * - summary canvases are also created, which can combine multiple ratio plots;
 *   they are accumulated in `summaryCanvMap` and colors are set by `nsum`; call
-*   `ResetSummary` to reset the accumulation
+*   `Reset` to reset the accumulation
 */
 void DrawRatios(TString outName, TString numerSet, TString denomSet) {
 
@@ -385,4 +523,13 @@ void DrawRatios(TString outName, TString numerSet, TString denomSet) {
   };
   outfile->cd("/");
   nsum++;
+};
+
+
+//=========================================================================
+// reset global variables, such as summary canvases
+void Reset() {
+  nsum=0;
+  ndump=0;
+  summaryCanvMap.clear();
 };

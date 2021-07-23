@@ -326,6 +326,7 @@ int main(int argc, char **argv) {
           // DIS kinematics
           H->Hist("Q2vsX")->Fill(kin->x,kin->Q2);
           H->Hist("Q")->Fill(TMath::Sqrt(kin->Q2));
+          H->Hist("x")->Fill(kin->x);
           H->Hist("W")->Fill(kin->W);
           H->Hist("y")->Fill(kin->y);
           // hadron 4-momentum

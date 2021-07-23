@@ -30,6 +30,9 @@ class CutDef : public TObject
     // accessors
     TString GetCutTitle() { return cutTitle; };
     TString GetVarName() { return varName; };
+    TString GetVarTitle() { return varTitle; };
+    Double_t GetMin() { return min; };
+    Double_t GetMax() { return max; };
 
 
   private:

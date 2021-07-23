@@ -23,10 +23,10 @@ Histos::Histos(TString setname_, TString settitle_)
       NBINS,1,100,
       true,true
       );
-  DefineHist1D("W","W","GeV",NBINS,0,15);
+  DefineHist1D("Q","Q","GeV",NBINS,1.0,10.0,true,true);
+  DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
   DefineHist1D("y","y","",NBINS,1e-5,1,true);
-  //DefineHist1D("Q","Q","GeV",10,0.5,10.5,false,true); // linear
-  DefineHist1D("Q","Q","GeV",10,1.0,10.0,true,true); // log
+  DefineHist1D("W","W","GeV",NBINS,0,15);
   // -- hadron 4-momentum
   DefineHist1D("p","p","GeV",NBINS,0,10);
   DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
