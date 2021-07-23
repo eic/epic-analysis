@@ -20,6 +20,9 @@
 #include "TH3.h"
 #include "TMath.h"
 
+// largex-eic
+#include "BinSet.h"
+
 // container for histogram settings
 class HistConfig : public TNamed {
   public:
@@ -80,9 +83,6 @@ class Histos : public TNamed
       for(auto const& kv : histMap)  kv.second->Write();
       ofile->cd("/");
     };
-
-    // tools
-    static void BinLog(TAxis *axis);
 
 
   private:

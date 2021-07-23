@@ -65,7 +65,7 @@ void Histos::DefineHist1D(
       histT+", "+settitle+";"+vartitle+units,
       numBins,lowerBound,upperBound
       );
-  if(logx) BinLog(hist->GetXaxis());
+  if(logx) BinSet::BinLog(hist->GetXaxis());
   HistConfig *config = new HistConfig();
   config->logx = logx;
   config->logy = logy;
@@ -96,8 +96,8 @@ void Histos::DefineHist2D(
       numBinsx,lowerBoundx,upperBoundx,
       numBinsy,lowerBoundy,upperBoundy
       );
-  if(logx) BinLog(hist->GetXaxis());
-  if(logy) BinLog(hist->GetYaxis());
+  if(logx) BinSet::BinLog(hist->GetXaxis());
+  if(logy) BinSet::BinLog(hist->GetYaxis());
   HistConfig *config = new HistConfig();
   config->logx = logx;
   config->logy = logy;
@@ -136,26 +136,6 @@ HistConfig *Histos::GetHistConfig(TString histName) {
   };
   return retConfig;
 };
-
-
-// make equal-width log-scale bins
-void Histos::BinLog(TAxis *axis) {
-  Float_t lb = axis->GetXmin();
-  Float_t ub = axis->GetXmax();
-  if(lb<=0||ub<=0||lb>=ub) {
-    fprintf(stderr,"ERROR: bad axis range for Tools::BinLog\n");
-    return;
-  };
-  lb = TMath::Log10(lb);
-  ub = TMath::Log10(ub);
-  Int_t nb = axis->GetNbins();
-  Float_t wd = (ub-lb)/nb;
-  Float_t * newBins = new Float_t[nb+1];
-  for (int b=0; b<=nb; b++) newBins[b] = TMath::Power(10,lb+b*wd);
-  axis->Set(nb,newBins);
-  delete[] newBins;
-}; 
-
 
 
 Histos::~Histos() {
