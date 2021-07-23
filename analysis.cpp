@@ -68,12 +68,13 @@ int main(int argc, char **argv) {
   ptBins->AddLast(new CutDef("pt","p_{T}","Full"));
   xBins->AddLast(new CutDef("x","x","Full"));
   zBins->AddLast(new CutDef("z","z","Full"));
+  qBins->AddLast(new CutDef("q","Q","Full"));
   yBins->AddLast(new CutDef("y","y","Full"));
 
 
   // cross check cross section -------------------
+  ///*
   diagonalBinsOnly = true;
-  /*
   // slide 11
   xBins->AddLast(new CutDef("x","x","CenterDelta", 0.3, 0.05 ));
   zBins->AddLast(new CutDef("z","z","CenterDelta", 0.7, 0.05 ));
@@ -86,17 +87,26 @@ int main(int argc, char **argv) {
   xBins->AddLast(new CutDef("x","x","CenterDelta", 0.1, 0.05 ));
   zBins->AddLast(new CutDef("z","z","CenterDelta", 0.7, 0.05 ));
   ptBins->AddLast(new CutDef("pt","p_{T}","CenterDelta", 0.15, 0.05 ));
+  //*/
+
+  // cross check dihadrons from EIC smear ------------
+  /*
+  zBins->AddLast(new CutDef("z","z","Range", 0.2, 0.3 ));
+  zBins->AddLast(new CutDef("z","z","Range", 0.3, 0.9 ));
   */
 
   // - Q bins ------------------------------------
-  BinSet *qBinScheme = new BinSet("q","Q",10,0.5,10.5,false);
-  qBins = qBinScheme->bins;
+  ///*
+  BinSet *qBinScheme = new BinSet("q","Q",10,1,11,false);
+  qBins = qBinScheme->bins; // (overwrites any previous qBins)
+  //*/
 
   // - y-minimum cuts ----------------------------
-  /*
-  yBins->AddLast(new CutDef("y","y","Min",0.03));
+  ///*
+  //yBins->AddLast(new CutDef("y","y","Min",0.03));
   yBins->AddLast(new CutDef("y","y","Min",0.05));
-  */
+  //yBins->AddLast(new CutDef("y","y","Min",0.10));
+  //*/
 
   // - particle species --------------------------
   std::map<int,int> PIDtoEnum;
@@ -330,10 +340,10 @@ int main(int argc, char **argv) {
           H->Hist("W")->Fill(kin->W);
           H->Hist("y")->Fill(kin->y);
           // hadron 4-momentum
-          H->Hist("p")->Fill(trk->P);
-          H->Hist("pTlab")->Fill(trk->PT);
-          H->Hist("eta")->Fill(trk->Eta);
-          H->Hist("phi")->Fill(trk->Phi);
+          H->Hist("pLab")->Fill(kin->pLab);
+          H->Hist("pTlab")->Fill(kin->pTlab);
+          H->Hist("etaLab")->Fill(kin->etaLab);
+          H->Hist("phiLab")->Fill(kin->phiLab);
           // hadron kinematics
           H->Hist("z")->Fill(kin->z);
           H->Hist("pT")->Fill(kin->pT);

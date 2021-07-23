@@ -116,6 +116,11 @@ void Kinematics::CalculateDISbyMixed(){
 // - calculate DIS kinematics first, so we have `vecQ`, etc.
 // - needs `vecHadron` set
 void Kinematics::CalculateHadronKinematics() {
+  // hadron momentum
+  pLab = vecHadron.P();
+  pTlab = vecHadron.Pt();
+  phiLab = vecHadron.Phi();
+  etaLab = vecHadron.Eta();
   // hadron z
   z = vecIonBeam.Dot(vecHadron) / vecIonBeam.Dot(vecQ);
   // missing mass

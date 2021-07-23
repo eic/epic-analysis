@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
   TString kinBinStr = "histos_pipTrack_pt0_x0_z0_q0";
   Reset();
   // draw
-  for(int y=1; y<3; y++) {
+  for(int y=1; y<=3; y++) {
     DrawRatios(
         Form("yRatio%d",y),
         kinBinStr+Form("_y%d",y),
@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
   // -------------------------------------------------
 
   /*
-  // cross sections
+  // dump counts in Q bins
   Reset();
   Int_t ycut=0; // choose y cut
   TString setStr,histStr;
@@ -123,29 +123,32 @@ int main(int argc, char **argv) {
       
   // -------------------------------------------------
 
-  // average kinematics in Q bins
+  ///*
+  // dump average kinematics in Q bins
   Reset();
-  Int_t ycut=0; // choose y cut
   TString setStr,histStr;
   TString aveOutput = pngDir + "/table_counts_qbins.txt";
   gSystem->RedirectOutput(aveOutput,"w");
   cout << "Counts and averages in bins of Q" << endl;
   gSystem->RedirectOutput(0);
-  for(int b=0; b<=0; b++) {
-    Reset();
-    for(int q=0; q<10; q++) {
-      setStr = Form("histos_pipTrack_pt%d_x%d_z%d_q%d_y%d",b,b,b,q,ycut);
-      DumpAve(aveOutput,setStr,"q");
+  for(int b=0; b<=3; b++) {
+    for(int y=0; y<=1; y++) {
+      Reset();
+      for(int q=0; q<10; q++) {
+        setStr = Form("histos_pipTrack_pt%d_x%d_z%d_q%d_y%d",b,b,b,q,y);
+        DumpAve(aveOutput,setStr,"q");
+      };
+      // concatenate temp file
+      gSystem->RedirectOutput(aveOutput,"a");
+      gROOT->ProcessLine(".! cat "+aveOutput+".tmp | column -t");
+      gSystem->RedirectOutput(0);
     };
-    // concatenate temp file
-    gSystem->RedirectOutput(aveOutput,"a");
-    gROOT->ProcessLine(".! cat "+aveOutput+".tmp | column -t");
-    gSystem->RedirectOutput(0);
   };
   // dump
   gROOT->ProcessLine(".! rm "+aveOutput+".tmp");
   gROOT->ProcessLine(".! cat "+aveOutput);
   cout << aveOutput << " written" << endl;
+  //*/
 
   // ===================================
 
@@ -225,12 +228,16 @@ void DumpAve(TString datFile, TString histSet, TString cutName) {
       dumpCut = cut;
     }
     else if(ndump==0) {
-      cout << "   " + cut->GetCutTitle();
+      TString cutT = cut->GetCutTitle();
+      cutT.ReplaceAll("#in"," in ");
+      cutT.ReplaceAll("#pm","+-");
+      cout << "   " + cutT;
     };
   };
   if(ndump==0) {
     cout << endl;
-    cout << "--------------" << endl;
+    cout << "Averages in bins of " << dumpCut->GetVarTitle() << ":" << endl;
+    cout << "------------------------" << endl;
     gSystem->RedirectOutput(0);
   };
   if(dumpCut==nullptr) {
@@ -532,4 +539,5 @@ void Reset() {
   nsum=0;
   ndump=0;
   summaryCanvMap.clear();
+  varList.clear();
 };
