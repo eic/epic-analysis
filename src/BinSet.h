@@ -28,25 +28,40 @@ class BinSet : public TObject
      * - `varName` and `varTitle` are passed to the `CutDef` objects
      * - set `log` to true for equal-width binning in log scale
      */
-    BinSet(
-        TString varName_, TString varTitle_,
-        Int_t nbins_, Double_t min_, Double_t max_, Bool_t log_=false
-        );
+    BinSet(TString varName_="unknown", TString varTitle_="unknown");
     ~BinSet();
 
-    /* bin list container, of `CutDef` pointers, one for each bin
+    // bin list container, of `CutDef` pointers, one for each bin
+    TObjArray *GetBinList() { return binList; };
+
+    /* bin builders
+     * - at construction, you will start with zero bins
+     * - call any bin builder to sequentiall add bins to the list of bins
      */
-    TObjArray *bins;
+    /* build a single bin
+     * - bin is created by specifying a `CutDef` (see CutDef.h)
+     */
+    void BuildBin(TString cutType_, Double_t arg1_=-1, Double_t arg2_=-1);
+    void BuildBin(CutDef *cut_);
+    /* build list of bins
+     * - define the number of bins `nbins`, in the * range `min` to `max`
+     * - default is equal width bins in linear scale
+     * - set `log` to true for equal-width bins in log scale
+     * - you may instead specify a `TAxis`, for any arbitrary binning
+     * - a list of `CutDef`s is generated
+     */
+    void BuildBins(Int_t nbins_, Double_t min_, Double_t max_, Bool_t log_=false);
+    void BuildBins(TAxis *ax, Bool_t log_=false);
 
     /* make equal-width log-scale bins
      * - the axis `ax` will be modified
-     * - it is possible to use this on histogram axes; just call this method
-     *   on the histogram axis, prior to filling the histogram
+     * - you can use this on histogram axes too; just call this method
+     *   on any histogram axis, prior to filling the histogram
      */
     static void BinLog(TAxis *ax);
 
   private:
-    TAxis *axis;
+    TObjArray *binList;
     TString varName,varTitle;
     Int_t nbins;
     Double_t min,max;

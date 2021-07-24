@@ -52,12 +52,12 @@ int main(int argc, char **argv) {
   // BINNING
   // =========================================
 
-  // arrays of bins
-  TObjArray *ptBins = new TObjArray();
-  TObjArray *xBins = new TObjArray();
-  TObjArray *zBins = new TObjArray();
-  TObjArray *qBins = new TObjArray();
-  TObjArray *yBins = new TObjArray();
+  // binning schemes for each variable
+  BinSet *ptBinScheme = new BinSet("pt","p_{T}");
+  BinSet *xBinScheme = new BinSet("x","x");
+  BinSet *zBinScheme = new BinSet("z","z");
+  BinSet *qBinScheme = new BinSet("q","Q");
+  BinSet *yBinScheme = new BinSet("y","y");
 
   // if this is true, only take 'diagonal' elements of the multi
   // dimensional array of possible pT,x,z bins; this is useful
@@ -65,47 +65,46 @@ int main(int argc, char **argv) {
   diagonalBinsOnly = false; // default value, may be overriden below
 
   // full bins; useful to have these first -----------------
-  ptBins->AddLast(new CutDef("pt","p_{T}","Full"));
-  xBins->AddLast(new CutDef("x","x","Full"));
-  zBins->AddLast(new CutDef("z","z","Full"));
-  qBins->AddLast(new CutDef("q","Q","Full"));
-  yBins->AddLast(new CutDef("y","y","Full"));
+  ptBinScheme->BuildBin("Full");
+  xBinScheme->BuildBin("Full");
+  zBinScheme->BuildBin("Full");
+  qBinScheme->BuildBin("Full");
+  yBinScheme->BuildBin("Full");
 
 
   // cross check cross section -------------------
   ///*
   diagonalBinsOnly = true;
   // slide 11
-  xBins->AddLast(new CutDef("x","x","CenterDelta", 0.3, 0.05 ));
-  zBins->AddLast(new CutDef("z","z","CenterDelta", 0.7, 0.05 ));
-  ptBins->AddLast(new CutDef("pt","p_{T}","CenterDelta", 0.5, 0.05 ));
+  xBinScheme->BuildBin("CenterDelta", 0.3, 0.05 );
+  zBinScheme->BuildBin("CenterDelta", 0.7, 0.05 );
+  ptBinScheme->BuildBin("CenterDelta", 0.5, 0.05 );
   // slide 13
-  xBins->AddLast(new CutDef("x","x","CenterDelta", 0.6, 0.05 ));
-  zBins->AddLast(new CutDef("z","z","CenterDelta", 0.5, 0.05 ));
-  ptBins->AddLast(new CutDef("pt","p_{T}","CenterDelta", 0.55, 0.05 ));
+  xBinScheme->BuildBin("CenterDelta", 0.6, 0.05 );
+  zBinScheme->BuildBin("CenterDelta", 0.5, 0.05 );
+  ptBinScheme->BuildBin("CenterDelta", 0.55, 0.05 );
   // slide 14
-  xBins->AddLast(new CutDef("x","x","CenterDelta", 0.1, 0.05 ));
-  zBins->AddLast(new CutDef("z","z","CenterDelta", 0.7, 0.05 ));
-  ptBins->AddLast(new CutDef("pt","p_{T}","CenterDelta", 0.15, 0.05 ));
+  xBinScheme->BuildBin("CenterDelta", 0.1, 0.05 );
+  zBinScheme->BuildBin("CenterDelta", 0.7, 0.05 );
+  ptBinScheme->BuildBin("CenterDelta", 0.15, 0.05 );
   //*/
 
   // cross check dihadrons from EIC smear ------------
   /*
-  zBins->AddLast(new CutDef("z","z","Range", 0.2, 0.3 ));
-  zBins->AddLast(new CutDef("z","z","Range", 0.3, 0.9 ));
+  zBinScheme->BuildBin("Range", 0.2, 0.3 );
+  zBinScheme->BuildBin("Range", 0.3, 0.9 );
   */
 
   // - Q bins ------------------------------------
   ///*
-  BinSet *qBinScheme = new BinSet("q","Q",10,1,11,false);
-  qBins = qBinScheme->bins; // (overwrites any previous qBins)
+  qBinScheme->BuildBins(10,1,11,false);
   //*/
 
   // - y-minimum cuts ----------------------------
   ///*
-  //yBins->AddLast(new CutDef("y","y","Min",0.03));
-  yBins->AddLast(new CutDef("y","y","Min",0.05));
-  //yBins->AddLast(new CutDef("y","y","Min",0.10));
+  //yBinScheme->BuildBin("Min",0.03);
+  yBinScheme->BuildBin("Min",0.05);
+  //yBinScheme->BuildBin("Min",0.10);
   //*/
 
   // - particle species --------------------------
@@ -120,11 +119,6 @@ int main(int argc, char **argv) {
 
 
   // ============================================
-  const Int_t NptBins = ptBins->GetEntries();
-  const Int_t NxBins = xBins->GetEntries();
-  const Int_t NzBins = zBins->GetEntries();
-  const Int_t NqBins = qBins->GetEntries();
-  const Int_t NyBins = yBins->GetEntries();
 
   /////////////////////////////////////////////////////////////
 
@@ -151,7 +145,18 @@ int main(int argc, char **argv) {
   TObjArrayIter itEFlowPhoton(tr->UseBranch("EFlowPhoton"));
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
   TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
-  
+
+  // bin lists
+  TObjArray *ptBins = ptBinScheme->GetBinList();
+  TObjArray *xBins = xBinScheme->GetBinList();
+  TObjArray *zBins = zBinScheme->GetBinList();
+  TObjArray *qBins = qBinScheme->GetBinList();
+  TObjArray *yBins = yBinScheme->GetBinList();
+  const Int_t NptBins = ptBins->GetEntries();
+  const Int_t NxBins = xBins->GetEntries();
+  const Int_t NzBins = zBins->GetEntries();
+  const Int_t NqBins = qBins->GetEntries();
+  const Int_t NyBins = yBins->GetEntries();
 
   // sets of histogram sets
   // - `histSet` is a data structure for storing and organizing pointers to

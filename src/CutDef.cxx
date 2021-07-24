@@ -8,8 +8,8 @@ using std::endl;
 
 // default constructor (for streaming compatibility only)
 CutDef::CutDef()
-  : varName("empty")
-  , varTitle("empty")
+  : varName("unknown")
+  , varTitle("unknown")
   , cutType("Full")
   , min(-1)
   , max(-1)
