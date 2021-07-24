@@ -1,5 +1,7 @@
-# largex-eic
+# Largex-eic
 
+# Delphes
+- this repository provides a simple wrapper for `delphes`
 - first make sure you have a build of `delphes` somewhere, preferably
   in a separate directory
 - set env vars before doing anything, so this repo knows where your
@@ -16,11 +18,29 @@
   - run `exeDelphes.sh` with no arguments for usage guide
   - this script is a convenience, for automatically handling filenames
     and streaming through `gunzip`, if reading a `.gz` file
+
+
+# Analysis
 - build analysis code with `make`
   - it requires a `root` build as well as `delphes`
-- run analysis code: `analysis.exe [delphes output root file]`
+  - all classes are stored in the `src/` directory
+- the `Analysis` class is the main class that performs the analysis; you 
+  can control it from a macro
+  - example macros will eventually be added; for now you can assume any macro
+    named `analysis_*.C` is an example
+  - the analysis macro must the following
+    - instantiate `Analysis` (with file names, beam energies, etc.)
+    - set up bin schemes and bins (arbitrary specification)
+    - set up anything else
+    - run analysis
   - the output will be a `root` file, filled with `TObjArray`s of
     histograms
-  - each `TObjArray` can be for a different subset of events, e.g., 
-    different minimum y cuts, so that their histograms can be compared
-    and divided
+    - each `TObjArray` can be for a different subset of events (bin), e.g.,
+      different minimum y cuts, so that their histograms can be compared and
+      divided
+    - the `Histos` class contains the histograms, and instances of `Histos`
+      will also be streamed to `root` files
+
+# Process
+- results processing is handled by `draw.cpp`, which does things like printing
+  tables of average values, and drawing ratios of histograms
