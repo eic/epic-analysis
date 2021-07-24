@@ -23,10 +23,8 @@
 class BinSet : public TObject
 {
   public:
-    /* builds container `bins` of `CutDef`s, for your specified binning with
-     * `nbins`, `min`, and `max`
+    /* this class stores `CutDef`s, for your specified binning
      * - `varName` and `varTitle` are passed to the `CutDef` objects
-     * - set `log` to true for equal-width binning in log scale
      */
     BinSet(TString varName_="unknown", TString varTitle_="unknown");
     ~BinSet();
