@@ -9,5 +9,6 @@
 #pragma link C++ class HistConfig+;
 #pragma link C++ class Histos+;
 #pragma link C++ class Kinematics+;
+#pragma link C++ class Analysis+;
 
 #endif

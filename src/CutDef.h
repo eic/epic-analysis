@@ -25,7 +25,7 @@ class CutDef : public TObject
     ~CutDef();
 
     // apply cut
-    Bool_t Cut(Double_t arg1=-1);
+    Bool_t CheckCut(Double_t arg1=-1);
 
     // accessors
     TString GetCutTitle() { return cutTitle; };

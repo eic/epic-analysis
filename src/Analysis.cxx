@@ -1,128 +1,42 @@
-#include <stdlib.h>
+#include "Analysis.h"
 
-// root
-#include "TChain.h"
-#include "TObjArray.h"
-#include "TClonesArray.h"
-#include "TFile.h"
-#include "TRegexp.h"
+ClassImp(Analysis)
 
-// delphes
-#include "classes/DelphesClasses.h"
-#include "external/ExRootAnalysis/ExRootTreeReader.h"
+using std::map;
+using std::vector;
+using std::cout;
+using std::cerr;
+using std::endl;
 
-// largex-eic
-#include "Histos.h"
-#include "Kinematics.h"
-#include "CutDef.h"
-#include "BinSet.h"
-
-// subroutines
-Bool_t CheckDiagonal(int cpt, int cx, int cz);
-void CheckBins(TObjArray *binArr, std::vector<int> &v, Double_t var);
-
-// globals
-Bool_t diagonalBinsOnly;
-
-//=========================================================================
-
-int main(int argc, char **argv) {
-
-  // ARGUMENTS ////////////////////////////////////////////////
-  TString infile;
-  Double_t eleBeamEn = 5; // GeV
-  Double_t ionBeamEn = 41; // GeV
-  Double_t crossingAngle = 0; // mrad
-  if(argc<=1) {
-    cout << "USAGE: " << argv[0]
-         << " [rootfile with Delphes tree]"
-         << " [eleBeamEn(def=" << eleBeamEn << " GeV)]"
-         << " [ionBeamEn(def=" << ionBeamEn << " GeV)]"
-         << " [crossingAngle(def=" << crossingAngle << " mrad)]"
-         << endl;
-         return 1;
-  };
-  if(argc>1) infile = TString(argv[1]);
-  if(argc>2) eleBeamEn = (Double_t)strtof(argv[2],NULL);
-  if(argc>3) ionBeamEn = (Double_t)strtof(argv[3],NULL);
-  if(argc>4) crossingAngle = (Double_t)strtof(argv[4],NULL);
-  
-
-  // =========================================
-  // BINNING
-  // =========================================
-
-  // binning schemes for each variable
-  BinSet *ptBinScheme = new BinSet("pt","p_{T}");
-  BinSet *xBinScheme = new BinSet("x","x");
-  BinSet *zBinScheme = new BinSet("z","z");
-  BinSet *qBinScheme = new BinSet("q","Q");
-  BinSet *yBinScheme = new BinSet("y","y");
-
-  // if this is true, only take 'diagonal' elements of the multi
-  // dimensional array of possible pT,x,z bins; this is useful
-  // if you want to check specific bins
-  diagonalBinsOnly = false; // default value, may be overriden below
-
-  // full bins; useful to have these first -----------------
-  ptBinScheme->BuildBin("Full");
-  xBinScheme->BuildBin("Full");
-  zBinScheme->BuildBin("Full");
-  qBinScheme->BuildBin("Full");
-  yBinScheme->BuildBin("Full");
-
-
-  // cross check cross section -------------------
-  ///*
-  diagonalBinsOnly = true;
-  // slide 11
-  xBinScheme->BuildBin("CenterDelta", 0.3, 0.05 );
-  zBinScheme->BuildBin("CenterDelta", 0.7, 0.05 );
-  ptBinScheme->BuildBin("CenterDelta", 0.5, 0.05 );
-  // slide 13
-  xBinScheme->BuildBin("CenterDelta", 0.6, 0.05 );
-  zBinScheme->BuildBin("CenterDelta", 0.5, 0.05 );
-  ptBinScheme->BuildBin("CenterDelta", 0.55, 0.05 );
-  // slide 14
-  xBinScheme->BuildBin("CenterDelta", 0.1, 0.05 );
-  zBinScheme->BuildBin("CenterDelta", 0.7, 0.05 );
-  ptBinScheme->BuildBin("CenterDelta", 0.15, 0.05 );
-  //*/
-
-  // cross check dihadrons from EIC smear ------------
-  /*
-  zBinScheme->BuildBin("Range", 0.2, 0.3 );
-  zBinScheme->BuildBin("Range", 0.3, 0.9 );
-  */
-
-  // - Q bins ------------------------------------
-  ///*
-  qBinScheme->BuildBins(10,1,11,false);
-  //*/
-
-  // - y-minimum cuts ----------------------------
-  ///*
-  //yBinScheme->BuildBin("Min",0.03);
-  yBinScheme->BuildBin("Min",0.05);
-  //yBinScheme->BuildBin("Min",0.10);
-  //*/
-
-  // - particle species --------------------------
-  std::map<int,int> PIDtoEnum;
-  enum partEnum{
-    pPip,
-    //pPim,
-    NPart
-  };
+// constructor
+Analysis::Analysis(
+  TString infile_,
+  Double_t eleBeamEn_,
+  Double_t ionBeamEn_,
+  Double_t crossingAngle_
+)
+  : infile(infile_)
+  , eleBeamEn(eleBeamEn_)
+  , ionBeamEn(ionBeamEn_)
+  , crossingAngle(crossingAngle_)
+{
+  // set bin schemes
+  AddBinScheme("pt","p_{T}");
+  AddBinScheme("z","z");
+  AddBinScheme("x","x");
+  AddBinScheme("q","Q");
+  AddBinScheme("y","y");
+  // set final states
+  // TODO: consider making this another bin scheme
   PIDtoEnum.insert(std::pair<int,int>(211,pPip));
   //PIDtoEnum.insert(std::pair<int,int>(-211,pPim));
+};
 
 
-  // ============================================
-
-  /////////////////////////////////////////////////////////////
-
-
+//=============================================
+// perform the analysis
+//=============================================
+void Analysis::Execute() {
 
   // read delphes tree
   cout << "-- running analysis of " << infile << endl;
@@ -146,17 +60,12 @@ int main(int argc, char **argv) {
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
   TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
 
-  // bin lists
-  TObjArray *ptBins = ptBinScheme->GetBinList();
-  TObjArray *xBins = xBinScheme->GetBinList();
-  TObjArray *zBins = zBinScheme->GetBinList();
-  TObjArray *qBins = qBinScheme->GetBinList();
-  TObjArray *yBins = yBinScheme->GetBinList();
-  const Int_t NptBins = ptBins->GetEntries();
-  const Int_t NxBins = xBins->GetEntries();
-  const Int_t NzBins = zBins->GetEntries();
-  const Int_t NqBins = qBins->GetEntries();
-  const Int_t NyBins = yBins->GetEntries();
+  // number of bins
+  const Int_t NptBins = BinScheme("pt")->GetBinList()->GetEntries();
+  const Int_t NxBins = BinScheme("x")->GetBinList()->GetEntries();
+  const Int_t NzBins = BinScheme("z")->GetBinList()->GetEntries();
+  const Int_t NqBins = BinScheme("q")->GetBinList()->GetEntries();
+  const Int_t NyBins = BinScheme("y")->GetBinList()->GetEntries();
 
   // sets of histogram sets
   // - `histSet` is a data structure for storing and organizing pointers to
@@ -179,18 +88,18 @@ int main(int argc, char **argv) {
           for(int by=0; by<NyBins; by++) { // - loop over y bins
 
             // set plot name
-            plotN  = "_" + ((CutDef*)ptBins->At(bpt))->GetVarName() + Form("%d",bpt);
-            plotN += "_" + ((CutDef*)xBins->At(bx))->GetVarName() + Form("%d",bx);
-            plotN += "_" + ((CutDef*)zBins->At(bz))->GetVarName() + Form("%d",bz);
-            plotN += "_" + ((CutDef*)qBins->At(bq))->GetVarName() + Form("%d",bq);
-            plotN += "_" + ((CutDef*)yBins->At(by))->GetVarName() + Form("%d",by);
+            plotN  = "_" + BinScheme("pt")->Cut(bpt)->GetVarName() + Form("%d",bpt);
+            plotN += "_" + BinScheme("x")->Cut(bx)->GetVarName() + Form("%d",bx);
+            plotN += "_" + BinScheme("z")->Cut(bz)->GetVarName() + Form("%d",bz);
+            plotN += "_" + BinScheme("q")->Cut(bq)->GetVarName() + Form("%d",bq);
+            plotN += "_" + BinScheme("y")->Cut(by)->GetVarName() + Form("%d",by);
 
             // set plot title
-            plotT  = ", " + ((CutDef*)ptBins->At(bpt))->GetCutTitle();
-            plotT += ", " + ((CutDef*)xBins->At(bx))->GetCutTitle();
-            plotT += ", " + ((CutDef*)zBins->At(bz))->GetCutTitle();
-            plotT += ", " + ((CutDef*)qBins->At(bq))->GetCutTitle();
-            plotT += ", " + ((CutDef*)yBins->At(by))->GetCutTitle();
+            plotT  = ", " + BinScheme("pt")->Cut(bpt)->GetCutTitle();
+            plotT += ", " + BinScheme("x")->Cut(bx)->GetCutTitle();
+            plotT += ", " + BinScheme("z")->Cut(bz)->GetCutTitle();
+            plotT += ", " + BinScheme("q")->Cut(bq)->GetCutTitle();
+            plotT += ", " + BinScheme("y")->Cut(by)->GetCutTitle();
 
             // loop over particles
             histSet[bpt][bx][bz][bq][by][pPip] = new Histos("pipTrack"+plotN,"#pi^{+} tracks"+plotT);
@@ -198,11 +107,11 @@ int main(int argc, char **argv) {
 
             // store cut definitions with histogram sets, then add histogram sets full list
             for(int bp=0; bp<NPart; bp++) {
-              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef((CutDef*)ptBins->At(bpt));
-              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef((CutDef*)xBins->At(bx));
-              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef((CutDef*)zBins->At(bz));
-              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef((CutDef*)qBins->At(bq));
-              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef((CutDef*)yBins->At(by));
+              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef(BinScheme("pt")->Cut(bpt));
+              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef(BinScheme("x")->Cut(bx));
+              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef(BinScheme("z")->Cut(bz));
+              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef(BinScheme("q")->Cut(bq));
+              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef(BinScheme("y")->Cut(by));
               histSetList.push_back(histSet[bpt][bx][bz][bq][by][bp]);
             };
 
@@ -313,11 +222,11 @@ int main(int argc, char **argv) {
         //    will be a part of; we use these lists to determine the list
         //    of histogram sets to fill
         // - check pT bin
-        CheckBins( ptBins, v_pt, kin->pT );
-        CheckBins( xBins,  v_x,  kin->x );
-        CheckBins( zBins,  v_z,  kin->z );
-        CheckBins( qBins,  v_q,  TMath::Sqrt(kin->Q2) );
-        CheckBins( yBins,  v_y,  kin->y );
+        CheckBins( BinScheme("pt"), v_pt, kin->pT );
+        CheckBins( BinScheme("x"),  v_x,  kin->x );
+        CheckBins( BinScheme("z"),  v_z,  kin->z );
+        CheckBins( BinScheme("q"),  v_q,  TMath::Sqrt(kin->Q2) );
+        CheckBins( BinScheme("y"),  v_y,  kin->y );
 
 
         // build list of histogram sets to fill
@@ -392,23 +301,57 @@ int main(int argc, char **argv) {
   TString cmd = "./draw.exe "+outfileN;
   system(cmd.Data());
   */
-
 };
 
-////////////////////////////////////////////////////
+
+
+//=============================================
+
+
+
+// access bin scheme by name
+BinSet *Analysis::BinScheme(TString varname) {
+  BinSet *ret;
+  try { ret = binSchemes.at(varname); }
+  catch(const std::out_of_range &ex) {
+    cerr << "ERROR: bin scheme "
+         << varname << " not found" << endl;
+    return nullptr;
+  };
+  return ret;
+};
+
+// add a new bin scheme
+void Analysis::AddBinScheme(TString varname, TString vartitle) {
+  binSchemes.insert(
+    std::pair<TString,BinSet*>(varname,new BinSet(varname,vartitle))
+    );
+  // TODO: for now, we need to have at least one bin in each dimension,
+  // otherwise for loops won't run; when we generalize the `histSet` data
+  // structure, hopefully we can also drop this requirement; the current
+  // workaround is to add a `full` bin to each dimension
+  BinScheme(varname)->BuildBin("Full");
+  // TODO: generalized diagonalizer
+  diagonalBinsOnly = false;
+};
  
 // return true, if `diagonalBinsOnly` mode is on, and this is an 
 // off-diagonal bin
-Bool_t CheckDiagonal(int cpt, int cx, int cz) {
+Bool_t Analysis::CheckDiagonal(int cpt, int cx, int cz) {
   return diagonalBinsOnly &&
       ( cpt!=cx || cx!=cz );
 };
 
-// scan through array of bins `binArr`, checking each one; the vector `v` will
+// scan through bin set `bs`, checking each one; the vector `v` will
 // contain the list of array indices for which the cut on `var` is satisfied
-void CheckBins(TObjArray *binArr, std::vector<int> &v, Double_t var) {
+void Analysis::CheckBins(BinSet *bs, std::vector<int> &v, Double_t var) {
   v.clear();
-  for(int b=0; b<binArr->GetEntries(); b++) {
-    if(((CutDef*)binArr->At(b))->Cut(var)) v.push_back(b);
+  for(int b=0; b<bs->GetBinList()->GetEntries(); b++) {
+    if(bs->Cut(b)->CheckCut(var)) v.push_back(b);
   };
 };
+
+// destructor
+Analysis::~Analysis() {
+};
+

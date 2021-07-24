@@ -75,7 +75,7 @@ CutDef::CutDef(
 
 
 // apply cut
-Bool_t CutDef::Cut(Double_t arg1) {
+Bool_t CutDef::CheckCut(Double_t arg1) {
 
   // minimum cut
   if(cutType.CompareTo("Min",TString::kIgnoreCase)==0) {
