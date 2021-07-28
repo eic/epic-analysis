@@ -182,8 +182,12 @@ void Analysis::Execute() {
 	  
 	  int NBINS = histSetJets[bpt][bx][bq][by]->NBINS;
 
+	  // jet kinematics plots
 	  histSetJets[bpt][bx][bq][by]->DefineHist1D("pT_jet","p_{T}","GeV", NBINS, 1e-2, 50);
-	    
+	  histSetJets[bpt][bx][bq][by]->DefineHist1D("mT_jet","m_{T}","GeV", NBINS, 1e-2, 20);
+	  histSetJets[bpt][bx][bq][by]->DefineHist1D("z_jet","z","GeV", NBINS,0, 1);
+	  histSetJets[bpt][bx][bq][by]->DefineHist1D("eta_jet","#eta_{lab}","GeV", NBINS,-5,5);
+
 	  // store cut definitions with histogram sets, then add histogram sets full list
 
 	  histSetJets[bpt][bx][bq][by]->AddCutDef(BinScheme("pt_jet")->Cut(bpt));
@@ -354,7 +358,10 @@ void Analysis::Execute() {
     if(kin->CutDIS()){
       for(int i = 0; i < kin->jetsRec.size(); i++){
 	PseudoJet jet = kin->jetsRec[i];
-
+	TLorentzVector pjet(jet.px(), jet.py(), jet.pz(), jet.E());
+	double zjet = (kin->vecIonBeam*pjet)/((kin->vecIonBeam)*(kin->vecQ));	
+	
+	
 	// following same procedure as in track loop	
 	CheckBins( BinScheme("pt_jet"), v_pt, jet.pt() );
         CheckBins( BinScheme("x"),  v_x,  kin->x );        
@@ -375,6 +382,9 @@ void Analysis::Execute() {
 	};
 	for(Histos *H : histSetFillList) {	  
           H->Hist("pT_jet")->Fill(jet.pt());
+	  H->Hist("mT_jet")->Fill(jet.mt());
+	  H->Hist("z_jet")->Fill(zjet);
+	  H->Hist("eta_jet")->Fill(jet.eta());
 	};
 	
       };      
