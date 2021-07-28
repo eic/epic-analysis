@@ -46,9 +46,6 @@ class Histos : public TNamed
     Histos(TString setname_="setname", TString settitle_="settitle");
     ~Histos();
 
-    // number of bins
-    const Int_t NBINS = 50;
-
     // accessors
     TH1 *Hist(TString histName); // access histogram by name
     HistConfig *GetHistConfig(TString histName); // settings for this histogram
@@ -85,7 +82,7 @@ class Histos : public TNamed
       ofile->cd("/");
       ofile->mkdir("histArr_"+setname);
       ofile->cd("histArr_"+setname);
-      for(auto const& kv : histMap)  kv.second->Write();
+      for(auto const &kv : histMap) kv.second->Write();
       ofile->cd("/");
     };
 

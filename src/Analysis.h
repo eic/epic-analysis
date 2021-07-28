@@ -37,26 +37,35 @@ class Analysis : public TNamed
         );
     ~Analysis();
 
+    // number of bins
+    const Int_t NBINS = 50;
+
     // access bin scheme by name
     BinSet *BinScheme(TString varname);
 
     // add a new bin scheme
     void AddBinScheme(TString varname, TString vartitle);
 
-    // if this is true, only take 'diagonal' elements of the multi
-    // dimensional array of possible pT,x,z bins; this is useful
+
+    // if these are true, only take 'diagonal' elements of the multi
+    // dimensional array of possible bins; this is useful
     // if you want to check specific bins
-    Bool_t diagonalBinsOnly;
+    // TODO: generalize
+    Bool_t diagonalPtXZ;
+    Bool_t diagonalXZQ;
 
     // perform the analysis
     void Execute();
 
 
+    // tools
+    Bool_t CheckDiagonal(int cpt, int cx, int cz, int cq);
+
   protected:
-    Bool_t CheckDiagonal(int cpt, int cx, int cz);
     void CheckBins(BinSet *bs, std::vector<int> &v, Double_t var);
 
   private:
+    Histos *HS;
     TString infile;
     Double_t eleBeamEn = 5; // GeV
     Double_t ionBeamEn = 41; // GeV

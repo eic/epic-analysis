@@ -30,6 +30,9 @@ Analysis::Analysis(
   // TODO: consider making this another bin scheme
   PIDtoEnum.insert(std::pair<int,int>(211,pPip));
   //PIDtoEnum.insert(std::pair<int,int>(-211,pPim));
+  // TODO: generalized diagonalizer
+  diagonalPtXZ = false;
+  diagonalXZQ = false;
 };
 
 
@@ -84,7 +87,7 @@ void Analysis::Execute() {
     for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
       for(int bz=0; bz<NzBins; bz++) { // - loop over z bins
         for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
-          if(CheckDiagonal(bpt,bx,bz)) continue;
+          if(CheckDiagonal(bpt,bx,bz,bq)) continue;
           for(int by=0; by<NyBins; by++) { // - loop over y bins
 
             // set plot name
@@ -105,8 +108,41 @@ void Analysis::Execute() {
             histSet[bpt][bx][bz][bq][by][pPip] = new Histos("pipTrack"+plotN,"#pi^{+} tracks"+plotT);
             //histSet[bpt][bx][bz][bq][by][pPim] = new Histos("pimTrack"+plotN,"#pi^{-} tracks"+plotT);
 
-            // store cut definitions with histogram sets, then add histogram sets full list
+            // define set of histograms for this bin
             for(int bp=0; bp<NPart; bp++) {
+              HS = histSet[bpt][bx][bz][bq][by][bp];
+
+              // HISTOGRAMS ================================================
+              // -- DIS kinematics
+              HS->DefineHist2D("Q2vsX","x","Q^{2}","","GeV^{2}",
+                  NBINS,1e-3,1,
+                  NBINS,1,100,
+                  true,true
+                  );
+              HS->DefineHist1D("Q","Q","GeV",NBINS,1.0,11.0,true,true);
+              HS->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
+              HS->DefineHist1D("y","y","",NBINS,1e-5,1,true);
+              HS->DefineHist1D("W","W","GeV",NBINS,0,15);
+              // -- hadron 4-momentum
+              HS->DefineHist1D("pLab","p_{lab}","GeV",NBINS,0,10);
+              HS->DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
+              HS->DefineHist1D("etaLab","#eta_{lab}","",NBINS,-5,5);
+              HS->DefineHist1D("phiLab","#phi_{lab}","",NBINS,-TMath::Pi(),TMath::Pi());
+              // -- hadron kinematics
+              HS->DefineHist1D("z","z","",NBINS,0,1);
+              HS->DefineHist1D("pT","p_{T}","GeV",NBINS,1e-2,3,true);
+              HS->DefineHist1D("qT","q_{T}","GeV",NBINS,1e-2,5,true);
+              HS->DefineHist1D("qTq","q_{T}/Q","",NBINS,1e-2,3,true);
+              HS->DefineHist1D("mX","m_{X}","GeV",NBINS,0,20);
+              HS->DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
+              HS->DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
+              // -- cross sections
+              //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
+              HS->DefineHist1D("Q_xsec","Q","GeV",10,1.0,10.0,true,true); // log
+              HS->Hist("Q_xsec")->SetMinimum(1e-10);
+              // ===========================================================
+
+              // store cut definitions with histogram sets, then add histogram sets full list
               histSet[bpt][bx][bz][bq][by][bp]->AddCutDef(BinScheme("pt")->Cut(bpt));
               histSet[bpt][bx][bz][bq][by][bp]->AddCutDef(BinScheme("x")->Cut(bx));
               histSet[bpt][bx][bz][bq][by][bp]->AddCutDef(BinScheme("z")->Cut(bz));
@@ -236,7 +272,7 @@ void Analysis::Execute() {
             for(int bz : v_z) {
               for(int bq : v_q) {
                 for(int by : v_y) {
-                  if(!CheckDiagonal(bpt,bx,bz)) {
+                  if(!CheckDiagonal(bpt,bx,bz,bq)) {
                     histSetFillList.push_back(histSet[bpt][bx][bz][bq][by][bpart]);
                   };
                 };
@@ -293,6 +329,11 @@ void Analysis::Execute() {
   outfile->cd();
   for(Histos *H : histSetList) H->WriteHists(outfile);
   for(Histos *H : histSetList) H->Write();
+
+  // write binning schemes
+  for(auto const &kv : binSchemes) kv.second->Write(kv.first+"_bins");
+
+  // close output
   outfile->Close();
   cout << outfileN << " written." << endl;
 
@@ -331,15 +372,15 @@ void Analysis::AddBinScheme(TString varname, TString vartitle) {
   // structure, hopefully we can also drop this requirement; the current
   // workaround is to add a `full` bin to each dimension
   BinScheme(varname)->BuildBin("Full");
-  // TODO: generalized diagonalizer
-  diagonalBinsOnly = false;
 };
  
-// return true, if `diagonalBinsOnly` mode is on, and this is an 
-// off-diagonal bin
-Bool_t Analysis::CheckDiagonal(int cpt, int cx, int cz) {
-  return diagonalBinsOnly &&
-      ( cpt!=cx || cx!=cz );
+// return true, if a diagonal mode is on and this is an 
+// off-diagonal bin; if a diagonal mode is not on, always 
+// return true
+Bool_t Analysis::CheckDiagonal(int cpt, int cx, int cz, int cq) {
+  if(diagonalPtXZ) return ( cpt!=cx || cx!=cz );
+  else if(diagonalXZQ) return ( cx!=cz || cz!=cq );
+  else return true;
 };
 
 // scan through bin set `bs`, checking each one; the vector `v` will

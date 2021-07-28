@@ -1,60 +1,31 @@
-#include <map>
-#include <iomanip>
+#include "PostProcessor.h"
 
-// root
-#include "TFile.h"
-#include "TCanvas.h"
-#include "TRegexp.h"
-#include "TSystem.h"
-#include "TROOT.h"
-#include "TStyle.h"
+ClassImp(PostProcessor)
 
-// largex-eic
-#include "Histos.h"
-#include "Kinematics.h"
-#include "CutDef.h"
+using std::cout;
+using std::cerr;
+using std::endl;
 
-// globals
-const Int_t dimx=800; // canvas dimension
-const Int_t dimy=700; // canvas dimension
-TString infileN, outfileN, pngDir;
-TFile *infile, *outfile;
-Bool_t plotRatioOnly;
-std::map<TString,TCanvas*> summaryCanvMap;
-std::vector<TString> varList;
-TCanvas *summaryCanv;
-int nsum,ndump;
-CutDef *dumpCut;
-// formatting for summary canvas
-const int nsumMax=3;
-Color_t summaryColor[nsumMax] = {kRed,kGreen+1,kBlue};
-Style_t summaryStyle[nsumMax] = {kFullCircle,kFullTriangleUp,kFullTriangleDown};
+// constructor
+PostProcessor::PostProcessor(
+  TString infileN_,
+  Bool_t plotRatioOnly_
+)
+  : infileN(infileN_)
+  , plotRatioOnly(plotRatioOnly_)
+{
 
+  // settings
+  // - summary canvas formatting
+  summaryColor[0] = kRed;     summaryStyle[0] = kFullCircle;
+  summaryColor[1] = kGreen+1; summaryStyle[1] = kFullTriangleUp;
+  summaryColor[2] = kBlue;    summaryStyle[2] = kFullTriangleDown;
+  // - general
+  gStyle->SetOptStat(0);
+  cout << std::fixed; // fixed float precision
+  cout << std::setprecision(3);
 
-// subroutines
-void DumpHist(TString datFile, TString histSet, TString varName);
-void DumpAve(TString datFile, TString histSet, TString cutName);
-void DrawSingle(TString outName, TString histSet, TString varName);
-void DrawRatios(TString outName, TString numerSet, TString denomSet);
-void Reset();
-
-//=========================================================================
-
-int main(int argc, char **argv) {
-
-  // ARGUMENTS ////////////////////////////////////////////////
-  plotRatioOnly=false;
-  if(argc<=1) {
-    cout << "USAGE: " << argv[0]
-         << " [histograms file]"
-         << " [plotRatioOnly(def=(" << plotRatioOnly << ")]"
-         << endl;
-         return 1;
-  };
-  if(argc>1) infileN = TString(argv[1]);
-  if(argc>2) plotRatioOnly = ((Int_t)strtof(argv[2],NULL))>0;
-  /////////////////////////////////////////////////////////////
-
+  // set up input and output files
   cout << "-- drawing histograms from " << infileN << endl;
   outfileN = infileN;
   outfileN(TRegexp("\\.root$")) = "";
@@ -62,111 +33,40 @@ int main(int argc, char **argv) {
   outfileN += ".canvas.root";
   outfile = new TFile(outfileN,"RECREATE");
   infile = new TFile(infileN,"READ");
-
-  gStyle->SetOptStat(0);
   gROOT->ProcessLine(".! mkdir -p "+pngDir);
-  Reset();
 
-  cout << std::fixed; // fixed float precision
-  cout << std::setprecision(3);
+  // initialize algorithm-specific vars
+  this->ResetVars();
 
-  // ===================================
+};
 
 
-  /*
-  // ratios y>y_min / y>0
-  TString kinBinStr = "histos_pipTrack_pt0_x0_z0_q0";
-  Reset();
-  // draw
-  for(int y=1; y<=3; y++) {
-    DrawRatios(
-        Form("yRatio%d",y),
-        kinBinStr+Form("_y%d",y),
-        kinBinStr+"_y0"
-        );
-  };
-  // write summary
-  outfile->cd("/");
-  outfile->mkdir("summary_yRatio");
-  outfile->cd("summary_yRatio");
-  for(auto const& kv : summaryCanvMap) {
-    kv.second->Write();
-    kv.second->Print(pngDir+"/summary_yRatio_"+kv.first+".png");
-  };
-  outfile->cd("/");
-  */
-
-  // -------------------------------------------------
-
-  /*
-  // dump counts in Q bins
-  Reset();
-  Int_t ycut=0; // choose y cut
-  TString setStr,histStr;
-  TString yieldOutput = pngDir + "/table_counts.txt";
-  gSystem->RedirectOutput(yieldOutput,"w");
-  cout << "Counts in bins of Q" << endl;
-  gSystem->RedirectOutput(0);
-  for(int b=0; b<=3; b++) {
-    setStr = Form("histos_pipTrack_pt%d_x%d_z%d_q%d_y%d",b,b,b,0,ycut);
-    DrawSingle(Form("xsec_%d",b),setStr,"Q_xsec");
-    DumpHist(yieldOutput,setStr,"Q");
-  };
-  // write summary
-  outfile->cd("/");
-  summaryCanv->Write();
-  summaryCanv->Print(pngDir+"/summary_xsec.png");
-  // dump
-  gROOT->ProcessLine(".! cat "+yieldOutput);
-  cout << yieldOutput << " written" << endl;
-  */
-      
-  // -------------------------------------------------
-
-  ///*
-  // dump average kinematics in Q bins
-  Reset();
-  TString setStr,histStr;
-  TString aveOutput = pngDir + "/table_counts_qbins.txt";
-  gSystem->RedirectOutput(aveOutput,"w");
-  cout << "Counts and averages in bins of Q" << endl;
-  gSystem->RedirectOutput(0);
-  for(int b=0; b<=3; b++) {
-    for(int y=0; y<=1; y++) {
-      Reset();
-      for(int q=0; q<10; q++) {
-        setStr = Form("histos_pipTrack_pt%d_x%d_z%d_q%d_y%d",b,b,b,q,y);
-        DumpAve(aveOutput,setStr,"q");
-      };
-      // concatenate temp file
-      gSystem->RedirectOutput(aveOutput,"a");
-      gROOT->ProcessLine(".! cat "+aveOutput+".tmp | column -t");
-      gSystem->RedirectOutput(0);
-    };
-  };
-  // dump
-  gROOT->ProcessLine(".! rm "+aveOutput+".tmp");
-  gROOT->ProcessLine(".! cat "+aveOutput);
-  cout << aveOutput << " written" << endl;
-  //*/
-
-  // ===================================
-
-  // cleanup
+//=========================================================================
+// cleanup and close open files and streams
+void PostProcessor::Finish() {
   infile->Close();
   outfile->Close();
   cout << outfileN << " written." << endl;
   cout << pngDir << "/ images written." << endl;
-
 };
 
-//=========================================================================
 
-/* dump histogram counts
+//=========================================================================
+// reset global variables, such as summary canvases
+void PostProcessor::ResetVars() {
+  nsum=0;
+  ndump=0;
+  summaryCanvMap.clear();
+  varList.clear();
+};
+
+
+//=========================================================================
+/* ALGORITHM: dump histogram counts
  * - output will be appended to `countsFiles`
  * - so far only implemented for 1D
  */
-void DumpHist(TString datFile, TString histSet, TString varName) {
+void PostProcessor::DumpHist(TString datFile, TString histSet, TString varName) {
   cout << "dump " << histSet << " : " << varName << " to " << datFile << endl;
   Histos *H = (Histos*) infile->Get(histSet);
   TH1 *hist = H->Hist(varName);
@@ -204,15 +104,17 @@ void DumpHist(TString datFile, TString histSet, TString varName) {
 
 //=========================================================================
 
-/* dump averages of all histograms from `histSet` to the file `datFile`
+/* ALGORITHM: dump averages of all histograms from `histSet` to the file `datFile`
  * - it is best to call this function in a loop, this function will only dump
  *   one line of information; if it's the first time you called it, it will
  *   dump header information as well
  * - since histograms in `histSet` have an associated cut set, use `cutName` to
  *   specify a cut defintion you want to print; e.g., loop over x bins and set
  *   the `cutName` to the x cut, to include columns for x bin boundaries
+ * - the table entries will be output to `datfile.tmp`, so you need to call
+ *   `Columnify` afterwards to stream the formatted table to `datFile`
  */
-void DumpAve(TString datFile, TString histSet, TString cutName) {
+void PostProcessor::DumpAve(TString datFile, TString histSet, TString cutName) {
   cout << "dump averages from " << histSet
        << " to " << datFile << endl;
   Histos *H = (Histos*) infile->Get(histSet);
@@ -245,7 +147,7 @@ void DumpAve(TString datFile, TString histSet, TString cutName) {
     return;
   };
 
-  // start temporary file for output; later we will pipe through `column -t`
+  // start temporary file for output; this is so you can use `Columnify` later
   // for pretty print to full `datFile`
   gSystem->RedirectOutput(datFile+".tmp",ndump>0?"a":"w");
 
@@ -301,11 +203,11 @@ void DumpAve(TString datFile, TString histSet, TString cutName) {
 
 //=========================================================================
 
-/* draw a single histogram to a canvas, and write it
+/* ALGORITHM: draw a single histogram to a canvas, and write it
  * - since `histSet` names can be hard to read, you can use `outName` to give a
  *   "nickname" to `histSet`, which the canvas name will include
  */
-void DrawSingle(TString outName, TString histSet, TString varName) {
+void PostProcessor::DrawSingle(TString outName, TString histSet, TString varName) {
 
   cout << "draw single plot " << outName << "..." << endl;
   Histos *H = (Histos*) infile->Get(histSet);
@@ -371,7 +273,7 @@ void DrawSingle(TString outName, TString histSet, TString varName) {
 
 //=========================================================================
 
-/* draw a ratio of all 1D histograms in the specified histogram set
+/* ALGORITHM: draw a ratio of all 1D histograms in the specified histogram set
 * - the ratio will be of `numerSet` over `denomSet`
 * - canvases will be created, and depending on the setting of `plotRatioOnly`,
 *   either just the ratio will be plotted, or the two histograms will also be
@@ -379,9 +281,9 @@ void DrawSingle(TString outName, TString histSet, TString varName) {
 * - Use `outName` to specify a names for output canvases
 * - summary canvases are also created, which can combine multiple ratio plots;
 *   they are accumulated in `summaryCanvMap` and colors are set by `nsum`; call
-*   `Reset` to reset the accumulation
+*   `ResetVars` to reset the accumulation
 */
-void DrawRatios(TString outName, TString numerSet, TString denomSet) {
+void PostProcessor::DrawRatios(TString outName, TString numerSet, TString denomSet) {
 
   cout << "draw ratios " << outName << "..." << endl;
   enum HHenum {num,den};
@@ -534,10 +436,16 @@ void DrawRatios(TString outName, TString numerSet, TString denomSet) {
 
 
 //=========================================================================
-// reset global variables, such as summary canvases
-void Reset() {
-  nsum=0;
-  ndump=0;
-  summaryCanvMap.clear();
-  varList.clear();
+// ALGORITHM: pipe `inputFile` through `column -t` and append output to `outputFile`
+void PostProcessor::Columnify(TString inputFile, TString outputFile) {
+  gSystem->RedirectOutput(outputFile,"a");
+  gROOT->ProcessLine(".! cat "+inputFile+" | column -t");
+  gSystem->RedirectOutput(0);
 };
+
+
+//=========================================================================
+// destructor
+PostProcessor::~PostProcessor() {
+};
+

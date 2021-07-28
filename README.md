@@ -21,7 +21,7 @@
 
 
 # Analysis
-- build analysis code with `make`
+- build analysis code with `make` (env vars must be set first (see above))
   - it requires a `root` build as well as `delphes`
   - all classes are stored in the `src/` directory
 - the `Analysis` class is the main class that performs the analysis; you 
@@ -41,6 +41,9 @@
     - the `Histos` class contains the histograms, and instances of `Histos`
       will also be streamed to `root` files
 
-# Process
-- results processing is handled by `draw.cpp`, which does things like printing
-  tables of average values, and drawing ratios of histograms
+# PostProcess
+- results processing is handled by the `PostProcessor` class, which does tasks
+  such as printing tables of average values, and drawing ratios of histograms
+  - this class is steered by postprocessor macros
+  - example macros will eventually be added; for now you can assume any macro
+    named `postprocessor_*.C` is an example
