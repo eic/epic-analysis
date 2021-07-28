@@ -39,19 +39,33 @@ Kinematics::Kinematics(
 
 // calculates q,W, boost vecs from quadratic formula
 void Kinematics::getqWQuadratic(){
-  float a = 1 - (vecIonBeam.E()/vecIonBeam.Pz())*(vecIonBeam.E()/vecIonBeam.Pz());
-  float b = 2*y*vecIonBeam.E()*(vecIonBeam*vecEleBeam)/(vecIonBeam.Pz()*vecIonBeam.Pz());
-  float c = Q2 - Pxh*Pxh - Pyh*Pyh - pow(y*(vecIonBeam*vecEleBeam)/(vecIonBeam.Pz()),2.0);
+  double f = y*(vecIonBeam.Dot(vecEleBeam));
+  double hx = Pxh;
+  double hy = Pyh;
+  double pz = vecIonBeam.Pz();
+  double py = vecIonBeam.Py();
+  double px = vecIonBeam.Px();
+  double pE = vecIonBeam.E();
   
-  float qE1, qE2, qE, qz;
+  double a = 1.0 - (pE*pE)/(pz*pz);
+  double b = (2*pE/(pz*pz))*(px*hx + py*hy + f);
+  double c = Q2 - hx*hx - hy*hy - (1/(pz*pz))*pow( (f+px*hx+py*hy) ,2.0);
+  
+  double qz1, qz2, qE1, qE2, qE, qz;
   if(b*b>4*a*c && a != 0){
     qE1 = (-1*b+sqrt(b*b-4*a*c))/(2*a);
-    qE2 = (-1*b-sqrt(b*b-4*a*c))/(2*a);
-    
-    if( (qE1) < (qE2) ) qE = qE1;
-    else qE = qE2;
-    
-    qz = (-1*y*(vecEleBeam*vecIonBeam)+vecIonBeam.E()*qE)/(vecIonBeam.Pz());
+    qE2 = (-1*b-sqrt(b*b-4*a*c))/(2*a);    
+    qz1 = (-1*f + pE*qE1 - px*hx - py*hy)/(pz);
+    qz2 = (-1*f + pE*qE2 - px*hx - py*hy)/(pz);
+
+    if(fabs(qE1) < fabs(qE2)){
+      qE = qE1;
+      qz = qz1;
+    }
+    else{
+      qE = qE2;
+      qz = qz2;
+    }
     
     vecQ.SetPxPyPzE(Pxh, Pyh, qz, qE);
     vecW = vecIonBeam - vecQ;
@@ -181,7 +195,7 @@ void Kinematics::GetHadronicFinalState(TObjArrayIter itTrack, TObjArrayIter itEF
   while(Track *track = (Track*)itTrack() ){  
     TLorentzVector  trackp4 = track->P4();
     if(!isnan(trackp4.E())){
-      if( std::abs(track->Eta) >= 4.0  ){ // eta cut?                                                                                                                                                                                    
+      if( std::abs(track->Eta) >= 4.0  ){ 
 	int pidTrack = getTrackPID(track, itParticle, itPIDSystemsTrack);
 	float trackPt = trackp4.Pt();
 	float trackEta = trackp4.Eta();
@@ -244,6 +258,79 @@ void Kinematics::GetHadronicFinalState(TObjArrayIter itTrack, TObjArrayIter itEF
     Pyh -= vecElectron.Py();
   }           
 };
+
+void Kinematics::GetJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle){
+  itEFlowTrack.Reset();
+  itEFlowPhoton.Reset();
+  itEFlowNeutralHadron.Reset();
+  itParticle.Reset();
+  
+  while(GenParticle *partTrue = (GenParticle*)itParticle() ){
+    if( (partTrue->PID == 1 || partTrue->PID == 2) && (partTrue->Status == 23) ){
+      // Status: 23->outgoing, but there's also 63->outgoing beam remnant. Which do we want?
+      // from pythia 8 documentation
+      quarkpT = partTrue->PT;
+    }    
+  }
+  
+  std::vector<PseudoJet> particles;
+  std::vector<PseudoJet> particlesTrue;
+  
+  // looping over final state particles, adding to particles vector 
+  while(Track *eflowTrack = (Track*)itEFlowTrack() ){
+    TLorentzVector eflowTrackp4 = eflowTrack->P4();
+    if(!isnan(eflowTrackp4.E())){
+      if(std::abs(eflowTrack->Eta) < 4.0){
+	particles.push_back(PseudoJet(eflowTrackp4.Px(),eflowTrackp4.Py(),eflowTrackp4.Pz(),eflowTrackp4.E()));
+
+	GenParticle *trackParticle = (GenParticle*)eflowTrack->Particle.GetObject();
+	TLorentzVector partp4 = trackParticle->P4();	
+	particlesTrue.push_back(PseudoJet(partp4.Px(),partp4.Py(),partp4.Pz(),partp4.E()));
+      }
+    }
+  }
+  while(Tower* towerPhoton = (Tower*)itEFlowPhoton() ){
+    TLorentzVector  towerPhotonp4 = towerPhoton->P4();
+    if(!isnan(towerPhotonp4.E())){
+      if( std::abs(towerPhoton->Eta) < 4.0 ){
+	particles.push_back(PseudoJet(towerPhotonp4.Px(),towerPhotonp4.Py(),towerPhotonp4.Pz(),towerPhotonp4.E()));
+	
+	for(int i = 0; i < towerPhoton->Particles.GetEntries(); i++){
+	  GenParticle *photonPart = (GenParticle*)towerPhoton->Particles.At(i);
+	  TLorentzVector photonp4 = photonPart->P4();
+	  particlesTrue.push_back(PseudoJet(photonp4.Px(),photonp4.Py(),photonp4.Pz(),photonp4.E()));	  
+	}
+      }
+    }
+  }
+
+  while(Tower* towerNeutralHadron = (Tower*)itEFlowNeutralHadron() ){
+    TLorentzVector  towerNeutralHadronp4 = towerNeutralHadron->P4();
+    if(!isnan(towerNeutralHadronp4.E())){
+      if( std::abs(towerNeutralHadron->Eta) < 4.0 ){
+	particles.push_back(PseudoJet(towerNeutralHadronp4.Px(),towerNeutralHadronp4.Py(),towerNeutralHadronp4.Pz(),towerNeutralHadronp4.E()));
+
+        for(int i = 0; i < towerNeutralHadron->Particles.GetEntries(); i++){
+          GenParticle *nhadPart = (GenParticle*)towerNeutralHadron->Particles.At(i);
+          TLorentzVector nhadp4 = nhadPart->P4();
+          particlesTrue.push_back(PseudoJet(nhadp4.Px(),nhadp4.Py(),nhadp4.Pz(),nhadp4.E()));
+	}	
+      }
+    }
+  }
+
+  double R = 0.7;
+  // antikt algorithm as a test/example, do we want an option for other methods?/what method do we use?
+  JetDefinition jet_def(antikt_algorithm, R);
+
+  ClusterSequence cs(particles, jet_def);
+  ClusterSequence csTrue(particlesTrue, jet_def);
+  jetsRec = sorted_by_pt(cs.inclusive_jets());
+  jetsTrue = sorted_by_pt(csTrue.inclusive_jets());  
+
+};
+
+
 
 
 Kinematics::~Kinematics() {

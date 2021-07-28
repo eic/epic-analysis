@@ -26,6 +26,10 @@ Analysis::Analysis(
   AddBinScheme("x","x");
   AddBinScheme("q","Q");
   AddBinScheme("y","y");
+
+  AddBinScheme("pt_jet", "jet p_{T}");
+
+
   // set final states
   // TODO: consider making this another bin scheme
   PIDtoEnum.insert(std::pair<int,int>(211,pPip));
@@ -67,6 +71,9 @@ void Analysis::Execute() {
   const Int_t NqBins = BinScheme("q")->GetBinList()->GetEntries();
   const Int_t NyBins = BinScheme("y")->GetBinList()->GetEntries();
 
+  const Int_t NptjetBins = BinScheme("pt_jet")->GetBinList()->GetEntries();
+
+
   // sets of histogram sets
   // - `histSet` is a data structure for storing and organizing pointers to
   //   sets of histograms (`Histos` objects)
@@ -74,7 +81,12 @@ void Analysis::Execute() {
   // - TODO: if we add one more dimension, 7D array will probably break; need
   //         better data structure
   Histos *histSet[NptBins][NxBins][NzBins][NqBins][NyBins][NPart];
+  Histos *histSetJets[NptjetBins][NxBins][NqBins][NyBins];
+  // add histos here?
+  
   std::vector<Histos*> histSetList;
+  std::vector<Histos*> histSetListJets;
+  
   std::vector<Histos*> histSetFillList;
   std::vector<int> v_pt, v_x, v_z, v_q, v_y;
   // instantiate Histos sets, and populate 
@@ -103,8 +115,34 @@ void Analysis::Execute() {
 
             // loop over particles
             histSet[bpt][bx][bz][bq][by][pPip] = new Histos("pipTrack"+plotN,"#pi^{+} tracks"+plotT);
+	    int NBINS = histSet[bpt][bx][bz][bq][by][pPip]->NBINS;
             //histSet[bpt][bx][bz][bq][by][pPim] = new Histos("pimTrack"+plotN,"#pi^{-} tracks"+plotT);
 
+	    // Defining histograms (moved from Histos constructor)
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist2D("Q2vsX","x","Q^{2}","","GeV^{2}",NBINS,1e-3,1,NBINS,1,100,true,true);
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("Q","Q","GeV",NBINS,1.0,11.0,true,true);
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("y","y","",NBINS,1e-5,1,true);
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("W","W","GeV",NBINS,0,15);
+	    // -- hadron 4-momentum                                                                                                                                                                                                                        
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("pLab","p_{lab}","GeV",NBINS,0,10);
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("etaLab","#eta_{lab}","",NBINS,-5,5);
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("phiLab","#phi_{lab}","",NBINS,-TMath::Pi(),TMath::Pi());
+	    // -- hadron kinematics
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("z","z","",NBINS,0,1);
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("pT","p_{T}","GeV",NBINS,1e-2,3,true);
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("qT","q_{T}","GeV",NBINS,1e-2,5,true);
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("qTq","q_{T}/Q","",NBINS,1e-2,3,true);
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("mX","m_{X}","GeV",NBINS,0,20);
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
+	    // -- cross sections                                                                                                                                                                                                                      
+  //DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear                                                                                                                                                                                        
+	    histSet[bpt][bx][bz][bq][by][pPip]->DefineHist1D("Q_xsec","Q","GeV",10,1.0,10.0,true,true); // log
+	    
+	    histSet[bpt][bx][bz][bq][by][pPip]->Hist("Q_xsec")->SetMinimum(1e-10);
+	    
             // store cut definitions with histogram sets, then add histogram sets full list
             for(int bp=0; bp<NPart; bp++) {
               histSet[bpt][bx][bz][bq][by][bp]->AddCutDef(BinScheme("pt")->Cut(bpt));
@@ -120,7 +158,44 @@ void Analysis::Execute() {
       };
     };
   };
+  for(int bpt=0; bpt<NptjetBins; bpt++) { // - loop over jet pT bins
+    for(int bx=0; bx<NxBins; bx++) { // - loop over x bins      
+      for(int bq=0; bq<NqBins; bq++) { // - loop over q bins                                                                                                                                                                                       
 
+	for(int by=0; by<NyBins; by++) { // - loop over y bins
+	  // set plot name
+	  plotN  = "_" + BinScheme("pt_jet")->Cut(bpt)->GetVarName() + Form("%d",bpt);
+	  plotN += "_" + BinScheme("x")->Cut(bx)->GetVarName() + Form("%d",bx);	  
+	  plotN += "_" + BinScheme("q")->Cut(bq)->GetVarName() + Form("%d",bq);
+	  plotN += "_" + BinScheme("y")->Cut(by)->GetVarName() + Form("%d",by);
+	  
+	  // set plot title
+	  plotT  = ", " + BinScheme("pt_jet")->Cut(bpt)->GetCutTitle();
+	  plotT += ", " + BinScheme("x")->Cut(bx)->GetCutTitle();	  
+	  plotT += ", " + BinScheme("q")->Cut(bq)->GetCutTitle();
+	  plotT += ", " + BinScheme("y")->Cut(by)->GetCutTitle();
+	  
+	  // loop over particles
+	  // one test plot, jet pT
+	  histSetJets[bpt][bx][bq][by] = new Histos("jets"+plotN,"jets" +plotT);
+	  //histSet[bpt][bx][bz][bq][by][pPim] = new Histos("pimTrack"+plotN,"#pi^{-} tracks"+plotT);
+	  
+	  int NBINS = histSetJets[bpt][bx][bq][by]->NBINS;
+
+	  histSetJets[bpt][bx][bq][by]->DefineHist1D("pT_jet","p_{T}","GeV", NBINS, 1e-2, 50);
+	    
+	  // store cut definitions with histogram sets, then add histogram sets full list
+
+	  histSetJets[bpt][bx][bq][by]->AddCutDef(BinScheme("pt_jet")->Cut(bpt));
+	  histSetJets[bpt][bx][bq][by]->AddCutDef(BinScheme("x")->Cut(bx));	    
+	  histSetJets[bpt][bx][bq][by]->AddCutDef(BinScheme("q")->Cut(bq));
+	  histSetJets[bpt][bx][bq][by]->AddCutDef(BinScheme("y")->Cut(by));
+	  histSetListJets.push_back(histSetJets[bpt][bx][bq][by]);	  
+	};	
+      };
+    };
+  };
+  
 
   // calculate integrated luminosity
   // - cross sections are hard-coded, coped from pythia output
@@ -179,7 +254,9 @@ void Analysis::Execute() {
 
     // get hadronic final state variables
     kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itPIDSystemsTrack, itParticle);
-
+    // get vector of jets
+    // should this have an option for clustering method?
+    kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
     // calculate DIS kinematics
     kin->CalculateDISbyElectron();
 
@@ -272,6 +349,37 @@ void Analysis::Execute() {
 
       };
     };
+
+    // jet loop
+    if(kin->CutDIS()){
+      for(int i = 0; i < kin->jetsRec.size(); i++){
+	PseudoJet jet = kin->jetsRec[i];
+
+	// following same procedure as in track loop	
+	CheckBins( BinScheme("pt_jet"), v_pt, jet.pt() );
+        CheckBins( BinScheme("x"),  v_x,  kin->x );        
+        CheckBins( BinScheme("q"),  v_q,  TMath::Sqrt(kin->Q2) );
+        CheckBins( BinScheme("y"),  v_y,  kin->y );
+
+	histSetFillList.clear();
+        for(int bpt : v_pt) {
+          for(int bx : v_x) {      
+	    for(int bq : v_q) {
+	      for(int by : v_y) {
+		
+		histSetFillList.push_back(histSetJets[bpt][bx][bq][by]);
+		
+	      };
+	    };	    
+          };
+	};
+	for(Histos *H : histSetFillList) {	  
+          H->Hist("pT_jet")->Fill(jet.pt());
+	};
+	
+      };      
+    };
+    
   };
   cout << "end event loop" << endl;
   // event loop end =========================================================
@@ -293,6 +401,10 @@ void Analysis::Execute() {
   outfile->cd();
   for(Histos *H : histSetList) H->WriteHists(outfile);
   for(Histos *H : histSetList) H->Write();
+  
+  for(Histos *H : histSetListJets) H->WriteHists(outfile);
+  for(Histos *H : histSetListJets) H->Write();
+
   outfile->Close();
   cout << outfileN << " written." << endl;
 

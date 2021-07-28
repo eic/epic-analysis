@@ -6,10 +6,10 @@ void analysis_test() {
 
   // setup analysis ========================================
   Analysis *A = new Analysis(
-      "datarec/arc/dire_5x41.brian.hiDiv.root",
+      "datarec/cross_5x41_25_newcard.root",
       5,
       41,
-      0
+      25
       );
 
 
@@ -36,6 +36,9 @@ void analysis_test() {
   // y minima
   A->BinScheme("y")->BuildBin("Min",0.05);
 
+
+  // jet test, minimum pT cut
+  A->BinScheme("pt_jet")->BuildBin("Min",10.0);
 
   // perform the analysis ==================================
   A->Execute();
