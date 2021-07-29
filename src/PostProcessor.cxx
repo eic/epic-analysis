@@ -108,11 +108,10 @@ void PostProcessor::DumpHist(TString datFile, TString histSet, TString varName) 
  * - it is best to call this function in a loop, this function will only dump
  *   one line of information; if it's the first time you called it, it will
  *   dump header information as well
- * - since histograms in `histSet` have an associated cut set, use `cutName` to
- *   specify a cut defintion you want to print; e.g., loop over x bins and set
- *   the `cutName` to the x cut, to include columns for x bin boundaries
- * - the table entries will be output to `datfile.tmp`, so you need to call
- *   `Columnify` afterwards to stream the formatted table to `datFile`
+ * - use `cutName` to specify a cut defintion you want to print; e.g., loop
+ *   over x bins and set the `cutName` to the x cut, to include columns for x
+ *   bin boundaries
+ * - when done looping, call `FinishDumpAve(datFile)`
  */
 void PostProcessor::DumpAve(TString datFile, TString histSet, TString cutName) {
   cout << "dump averages from " << histSet
@@ -199,6 +198,11 @@ void PostProcessor::DumpAve(TString datFile, TString histSet, TString cutName) {
   // iterate row counter
   ndump++;
 
+};
+void PostProcessor::FinishDumpAve(TString datFile) {
+  this->Columnify(aveOutput+".tmp",aveOutput);
+  gROOT->ProcessLine(".! rm "+aveOutput+".tmp");
+  this->ResetVars();
 };
 
 //=========================================================================
@@ -435,13 +439,47 @@ void PostProcessor::DrawRatios(TString outName, TString numerSet, TString denomS
 };
 
 
+
 //=========================================================================
-// ALGORITHM: pipe `inputFile` through `column -t` and append output to `outputFile`
+// TEXT FILE: start new text file, or append to text file
+void PostProcessor::StartTextFile(TString datFile, TString firstLine="") {
+  gSystem->RedirectOutput(datFile,"w");
+  if(fistLine!="") cout << firstLine << endl;
+  gSystem->RedirectOutput(0);
+};
+void PostProcessor::AppendToTextFile(TString datFile, TString appendText="") {
+  gSystem->RedirectOutput(datFile,"a");
+  cout << appendText << endl;
+  gSystem->RedirectOutput(0);
+};
+
+
+//=========================================================================
+// TEXT FILE: pipe `inputFile` through `column -t` and append output to `outputFile`
 void PostProcessor::Columnify(TString inputFile, TString outputFile) {
   gSystem->RedirectOutput(outputFile,"a");
   gROOT->ProcessLine(".! cat "+inputFile+" | column -t");
   gSystem->RedirectOutput(0);
 };
+
+
+//=========================================================================
+// get pointer to BinSet associated with variable
+BinSet *PostProcessor::GetBinSet(TString varName) {
+  return (BinSet*) infile->Get(varName+"_bins");
+};
+// get list of bin numbers
+std::vector<int> PostProcessor::GetBinNums(TString varName) {
+  BinSet *B = this->GetBinSet(varName);
+  std::vector<int> retVec;
+  if(B==nullptr) {
+    cerr << "ERROR: unknown variable in PostProcessor::GetBinNums" << endl;
+  } else {
+    for(int n=0; n<B->GetBinList()->GetEntries(); n++) retVec.insert(n);
+  };
+  return retVec;
+};
+
 
 
 //=========================================================================

@@ -12,37 +12,30 @@ void postprocess_xsecQ() {
 
 
   // start output file  ========================================
-  TString setStr,histStr;
   TString aveOutput = P->GetPngDir() + "/table_counts_qbins.txt";
-  gSystem->RedirectOutput(aveOutput,"w");
-  cout << "Counts and averages in bins of Q" << endl;
-  gSystem->RedirectOutput(0);
+  P->StartTextFile(aveOutput,"Counts and averages in bins of Q");
 
   // loop over relevant bins
-  // TODO: `BinSet` objects are now streamed to root files; use their iterators instead
-  //
-  for(int b=0; b<=2; b++) {
-    gSystem->RedirectOutput(aveOutput,"a");
-    cout << endl << "Kinematic Bin: " << b 
-         << " ============================================== " << endl;
-    gSystem->RedirectOutput(0);
-    for(int y=0; y<=3; y++) {
-
-      P->ResetVars(); // starting a new table, call this to reprint headers
+  for(int bpt : P->GetBinNums("pt")) {
+  for(int bx  : P->GetBinNums("x")) {
+  for(int bz  : P->GetBinNums("z")) {
+    P->AppendToTextFile(Form("\nKinematic Bin: %d =========================",b));
+    for(int by  : P->GetBinNums("y")) {
 
       // loop over Q bins
-      for(int q=1; q<=10; q++) {
-        setStr = Form("histos_pipTrack_pt%d_x%d_z%d_q%d_y%d",b,b,b,q,y);
-        P->DumpAve(aveOutput,setStr,"q");
+      for(int bq  : P->GetBinNums("q")) {
+
+        // algorithm: dump tables of average values, in bins of "Q"
+        P->DumpAve(
+            aveOutput,
+            Analysis::GetSetString(bpt,bx,bz,bq,by,0), /* TODO */
+            "q");
       };
 
-      // format the table (stored in `tmp` file) and stream to main output file
-      P->Columnify(aveOutput+".tmp",aveOutput);
-
-      // remove `tmp` file
-      gROOT->ProcessLine(".! rm "+aveOutput+".tmp");
+      // finish algorithm
+      P->FinishDumpAve(aveOutput);
     };
-  };
+  }}};
 
   // print dump to stdout
   gROOT->ProcessLine(".! cat "+aveOutput);
