@@ -17,7 +17,7 @@ LIBS = $(shell root-config --glibs)
 #LIBS += -lMinuit -lRooFitCore -lRooFit -lRooStats -lProof -lMathMore
 
 # DELPHES
-DEPS += -I${DELPHES_HOME}
+DEPS += -I${DELPHES_HOME} -I${DELPHES_HOME}/external
 LIBS += -L${DELPHES_HOME} -lDelphes
 
 # shared object name and source directory

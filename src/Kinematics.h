@@ -18,6 +18,9 @@
 
 #include "classes/DelphesClasses.h"
 
+#include "fastjet/ClusterSequence.hh"
+using namespace fastjet;
+
 
 using std::map;
 using std::cout;
@@ -39,6 +42,8 @@ class Kinematics : public TObject
     void getqWQuadratic();
     void CalculateHadronKinematics();
     void GetHadronicFinalState(TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itPIDSystemsTrack, TObjArrayIter itParticle);
+
+    void GetJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
   
     // kinematics
     Double_t W,Q2,Nu,x,y,s; // DIS
@@ -55,6 +60,11 @@ class Kinematics : public TObject
     TLorentzVector vecEleBeam, vecIonBeam;
     TLorentzVector vecElectron, vecW, vecQ;
     TLorentzVector vecHadron;
+    // jets
+    std::vector<PseudoJet> jetsRec, jetsTrue;
+    // struck quark information
+    Double_t quarkpT;
+    
     // - c.o.m. frame of virtual photon and ion
     TLorentzVector CvecBoost;
     TVector3 Cboost;

@@ -27,6 +27,7 @@ Analysis::Analysis(
   AddBinScheme("x","x");
   AddBinScheme("q","Q");
   AddBinScheme("y","y");
+  AddBinScheme("pt_jet", "jet p_{T}");
 
   // final state bins (e.g., tracks or jets)
   AddBinScheme("finalState","finalState");
@@ -74,6 +75,7 @@ void Analysis::Execute() {
   const Int_t NqBins = BinScheme("q")->GetNumBins();
   const Int_t NyBins = BinScheme("y")->GetNumBins();
   const Int_t NfinalStateBins = BinScheme("finalState")->GetNumBins();
+  const Int_t NptjetBins = BinScheme("pt_jet")->GetNumBins();
 
 
   // sets of histogram sets
@@ -83,12 +85,17 @@ void Analysis::Execute() {
   // - TODO: if we add one more dimension, 7D array will probably break; need
   //         better data structure
   Histos *histSet[NptBins][NxBins][NzBins][NqBins][NyBins][NfinalStateBins];
+  Histos *histSetJets[NptjetBins][NxBins][NqBins][NyBins];
+  
   std::vector<Histos*> histSetList;
+  std::vector<Histos*> histSetListJets;
+  
   std::vector<Histos*> histSetFillList;
   std::vector<int> v_pt, v_x, v_z, v_q, v_y;
   // instantiate Histos sets, and populate 
   TString histosN,histosT;
-  cout << "Define histograms..." << endl;
+
+  cout << "Define track histograms..." << endl;
   for(int bpt=0; bpt<NptBins; bpt++) { // - loop over pT bins
     for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
       for(int bz=0; bz<NzBins; bz++) { // - loop over z bins
@@ -152,6 +159,51 @@ void Analysis::Execute() {
     };
   };
 
+  cout << "Define jet histograms..." << endl;
+  for(int bpt=0; bpt<NptjetBins; bpt++) { // - loop over jet pT bins
+    for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
+      for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
+        for(int by=0; by<NyBins; by++) { // - loop over y bins
+
+          // TODO: use GetHistosName and GetHistosTitle here.... may need to write 
+          //       new functions GetJetHistosName and GetJetHistosTitle; this will
+          //       be useful for PostProcessor
+          // set plot name
+          histosN = "jets";
+          histosN += "_" + BinScheme("pt_jet")->Cut(bpt)->GetVarName() + Form("%d",bpt);
+          histosN += "_" + BinScheme("x")->Cut(bx)->GetVarName() + Form("%d",bx);	  
+          histosN += "_" + BinScheme("q")->Cut(bq)->GetVarName() + Form("%d",bq);
+          histosN += "_" + BinScheme("y")->Cut(by)->GetVarName() + Form("%d",by);
+
+          // set plot title
+          histosT = "jets";
+          histosT += ", " + BinScheme("pt_jet")->Cut(bpt)->GetCutTitle();
+          histosT += ", " + BinScheme("x")->Cut(bx)->GetCutTitle();	  
+          histosT += ", " + BinScheme("q")->Cut(bq)->GetCutTitle();
+          histosT += ", " + BinScheme("y")->Cut(by)->GetCutTitle();
+
+          // loop over particles
+          // one test plot, jet pT
+          histSetJets[bpt][bx][bq][by] = new Histos(histosN,histosT);
+          HS = histSetJets[bpt][bx][bq][by]; // shorthand pointer
+
+          // jet kinematics plots
+          HS->DefineHist1D("pT_jet","p_{T}","GeV", NBINS, 1e-2, 50);
+          HS->DefineHist1D("mT_jet","m_{T}","GeV", NBINS, 1e-2, 20);
+          HS->DefineHist1D("z_jet","z","GeV", NBINS,0, 1);
+          HS->DefineHist1D("eta_jet","#eta_{lab}","GeV", NBINS,-5,5);
+
+          // store cut definitions with histogram sets, then add histogram sets full list
+          HS->AddCutDef(BinScheme("pt_jet")->Cut(bpt));
+          HS->AddCutDef(BinScheme("x")->Cut(bx));	    
+          HS->AddCutDef(BinScheme("q")->Cut(bq));
+          HS->AddCutDef(BinScheme("y")->Cut(by));
+          histSetListJets.push_back(histSetJets[bpt][bx][bq][by]);	  
+        };	
+      };
+    };
+  };
+  
 
   // calculate integrated luminosity
   // - cross sections are hard-coded, coped from pythia output
@@ -210,7 +262,9 @@ void Analysis::Execute() {
 
     // get hadronic final state variables
     kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itPIDSystemsTrack, itParticle);
-
+    // get vector of jets
+    // should this have an option for clustering method?
+    kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
     // calculate DIS kinematics
     kin->CalculateDISbyElectron();
 
@@ -304,6 +358,43 @@ void Analysis::Execute() {
 
       };
     };
+
+    // jet loop
+    if(kin->CutDIS()){
+      for(int i = 0; i < kin->jetsRec.size(); i++){
+        PseudoJet jet = kin->jetsRec[i];
+        TLorentzVector pjet(jet.px(), jet.py(), jet.pz(), jet.E());
+        double zjet = (kin->vecIonBeam*pjet)/((kin->vecIonBeam)*(kin->vecQ));	
+
+
+        // following same procedure as in track loop	
+        CheckBins( BinScheme("pt_jet"), v_pt, jet.pt() );
+        CheckBins( BinScheme("x"),  v_x,  kin->x );        
+        CheckBins( BinScheme("q"),  v_q,  TMath::Sqrt(kin->Q2) );
+        CheckBins( BinScheme("y"),  v_y,  kin->y );
+
+        histSetFillList.clear();
+        for(int bpt : v_pt) {
+          for(int bx : v_x) {      
+            for(int bq : v_q) {
+              for(int by : v_y) {
+
+                histSetFillList.push_back(histSetJets[bpt][bx][bq][by]);
+
+              };
+            };	    
+          };
+        };
+        for(Histos *H : histSetFillList) {	  
+          H->Hist("pT_jet")->Fill(jet.pt());
+          H->Hist("mT_jet")->Fill(jet.mt());
+          H->Hist("z_jet")->Fill(zjet);
+          H->Hist("eta_jet")->Fill(jet.eta());
+        };
+
+      };      
+    };
+
   };
   cout << "end event loop" << endl;
   // event loop end =========================================================
@@ -325,6 +416,8 @@ void Analysis::Execute() {
   outfile->cd();
   for(Histos *H : histSetList) H->WriteHists(outfile);
   for(Histos *H : histSetList) H->Write();
+  for(Histos *H : histSetListJets) H->WriteHists(outfile);
+  for(Histos *H : histSetListJets) H->Write();
 
   // write binning schemes
   for(auto const &kv : binSchemes) kv.second->Write(kv.first+"_bins");

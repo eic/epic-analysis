@@ -33,6 +33,9 @@ void analysis_xsecQ_OLD() {
   A->BinScheme("y")->BuildBin("Min",0.05);
 
 
+  // jet test, minimum pT cut
+  A->BinScheme("pt_jet")->BuildBin("Min",10.0);
+
   // perform the analysis ==================================
   A->Execute();
 };
