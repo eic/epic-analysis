@@ -39,7 +39,8 @@ class PostProcessor : public TNamed
     //   all algorithms have finished
     void Finish();
 
-    // algorithms
+
+    // algorithms: useful to run in loops over bins
     // - see PostProcessor.cxx for descriptions for how to use these
     // - these are general functions that operate either on Histos 
     //   objects, or on histograms
@@ -51,10 +52,20 @@ class PostProcessor : public TNamed
     void DumpAve(TString datFile, TString histSet, TString cutName);
     void DrawSingle(TString outName, TString histSet, TString varName);
     void DrawRatios(TString outName, TString numerSet, TString denomSet);
-    void Columnify(TString inputFile, TString outputFile);
+
+    // algorithm finish methods; to be called after loops
+    void FinishDumpAve(TString datFile);
 
     // accessors
     TString GetPngDir() { return pngDir; };
+    BinSet *GetBinSet(TString varName);
+    std::vector<int> GetBinNums(TString varName);
+
+    // text file manipulation
+    void StartTextFile(TString datFile, TString firstLine="");
+    void AppendToTextFile(TString datFile, TString appendText);
+    void Columnify(TString inputFile, TString outputFile);
+    void PrintTextFile(TString datFile);
 
     // reset algorithm-specific variables
     void ResetVars();

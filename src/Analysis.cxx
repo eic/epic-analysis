@@ -20,16 +20,20 @@ Analysis::Analysis(
   , ionBeamEn(ionBeamEn_)
   , crossingAngle(crossingAngle_)
 {
+
   // set bin schemes
   AddBinScheme("pt","p_{T}");
   AddBinScheme("z","z");
   AddBinScheme("x","x");
   AddBinScheme("q","Q");
   AddBinScheme("y","y");
-  // set final states
-  // TODO: consider making this another bin scheme
-  PIDtoEnum.insert(std::pair<int,int>(211,pPip));
-  //PIDtoEnum.insert(std::pair<int,int>(-211,pPim));
+
+  // final state bins (e.g., tracks or jets)
+  AddBinScheme("finalState","finalState");
+  AddFinalState("pipTrack","#pi^{+} tracks", 211);
+  //AddFinalState("pimTrack","#pi^{-} tracks",-211);
+  
+  // initialize diagonalizer settings
   // TODO: generalized diagonalizer
   diagonalPtXZ = false;
   diagonalXZQ = false;
@@ -64,11 +68,13 @@ void Analysis::Execute() {
   TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
 
   // number of bins
-  const Int_t NptBins = BinScheme("pt")->GetBinList()->GetEntries();
-  const Int_t NxBins = BinScheme("x")->GetBinList()->GetEntries();
-  const Int_t NzBins = BinScheme("z")->GetBinList()->GetEntries();
-  const Int_t NqBins = BinScheme("q")->GetBinList()->GetEntries();
-  const Int_t NyBins = BinScheme("y")->GetBinList()->GetEntries();
+  const Int_t NptBins = BinScheme("pt")->GetNumBins();
+  const Int_t NxBins = BinScheme("x")->GetNumBins();
+  const Int_t NzBins = BinScheme("z")->GetNumBins();
+  const Int_t NqBins = BinScheme("q")->GetNumBins();
+  const Int_t NyBins = BinScheme("y")->GetNumBins();
+  const Int_t NfinalStateBins = BinScheme("finalState")->GetNumBins();
+
 
   // sets of histogram sets
   // - `histSet` is a data structure for storing and organizing pointers to
@@ -76,41 +82,28 @@ void Analysis::Execute() {
   // - `histSet*List` are used as temporary lists of relevant `Histos` pointers
   // - TODO: if we add one more dimension, 7D array will probably break; need
   //         better data structure
-  Histos *histSet[NptBins][NxBins][NzBins][NqBins][NyBins][NPart];
+  Histos *histSet[NptBins][NxBins][NzBins][NqBins][NyBins][NfinalStateBins];
   std::vector<Histos*> histSetList;
   std::vector<Histos*> histSetFillList;
   std::vector<int> v_pt, v_x, v_z, v_q, v_y;
   // instantiate Histos sets, and populate 
-  TString plotN,plotT;
+  TString histosN,histosT;
   cout << "Define histograms..." << endl;
   for(int bpt=0; bpt<NptBins; bpt++) { // - loop over pT bins
     for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
       for(int bz=0; bz<NzBins; bz++) { // - loop over z bins
         for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
-          if(CheckDiagonal(bpt,bx,bz,bq)) continue;
+          if(CheckDiagonal(bpt,bx,bz,bq)) continue; // diagonalizer
           for(int by=0; by<NyBins; by++) { // - loop over y bins
+            for(int bfs=0; bfs<NfinalStateBins; bfs++) { // - loop over final states
 
-            // set plot name
-            plotN  = "_" + BinScheme("pt")->Cut(bpt)->GetVarName() + Form("%d",bpt);
-            plotN += "_" + BinScheme("x")->Cut(bx)->GetVarName() + Form("%d",bx);
-            plotN += "_" + BinScheme("z")->Cut(bz)->GetVarName() + Form("%d",bz);
-            plotN += "_" + BinScheme("q")->Cut(bq)->GetVarName() + Form("%d",bq);
-            plotN += "_" + BinScheme("y")->Cut(by)->GetVarName() + Form("%d",by);
+              // set Histos name and title
+              histosN = this->GetHistosName (bpt,bx,bz,bq,by,bfs);
+              histosT = this->GetHistosTitle(bpt,bx,bz,bq,by,bfs);
 
-            // set plot title
-            plotT  = ", " + BinScheme("pt")->Cut(bpt)->GetCutTitle();
-            plotT += ", " + BinScheme("x")->Cut(bx)->GetCutTitle();
-            plotT += ", " + BinScheme("z")->Cut(bz)->GetCutTitle();
-            plotT += ", " + BinScheme("q")->Cut(bq)->GetCutTitle();
-            plotT += ", " + BinScheme("y")->Cut(by)->GetCutTitle();
-
-            // loop over particles
-            histSet[bpt][bx][bz][bq][by][pPip] = new Histos("pipTrack"+plotN,"#pi^{+} tracks"+plotT);
-            //histSet[bpt][bx][bz][bq][by][pPim] = new Histos("pimTrack"+plotN,"#pi^{-} tracks"+plotT);
-
-            // define set of histograms for this bin
-            for(int bp=0; bp<NPart; bp++) {
-              HS = histSet[bpt][bx][bz][bq][by][bp];
+              // define set of histograms for this bin
+              histSet[bpt][bx][bz][bq][by][bfs] = new Histos(histosN,histosT);
+              HS = histSet[bpt][bx][bz][bq][by][bfs]; // shorthand pointer
 
               // HISTOGRAMS ================================================
               // -- DIS kinematics
@@ -142,15 +135,17 @@ void Analysis::Execute() {
               HS->Hist("Q_xsec")->SetMinimum(1e-10);
               // ===========================================================
 
-              // store cut definitions with histogram sets, then add histogram sets full list
-              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef(BinScheme("pt")->Cut(bpt));
-              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef(BinScheme("x")->Cut(bx));
-              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef(BinScheme("z")->Cut(bz));
-              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef(BinScheme("q")->Cut(bq));
-              histSet[bpt][bx][bz][bq][by][bp]->AddCutDef(BinScheme("y")->Cut(by));
-              histSetList.push_back(histSet[bpt][bx][bz][bq][by][bp]);
-            };
+              // store cut definitions with histogram sets
+              HS->AddCutDef(BinScheme("pt")->Cut(bpt));
+              HS->AddCutDef(BinScheme("x")->Cut(bx));
+              HS->AddCutDef(BinScheme("z")->Cut(bz));
+              HS->AddCutDef(BinScheme("q")->Cut(bq));
+              HS->AddCutDef(BinScheme("y")->Cut(by));
+              HS->AddCutDef(BinScheme("finalState")->Cut(bfs));
 
+              // add histogram set full list
+              histSetList.push_back(histSet[bpt][bx][bz][bq][by][bfs]);
+            };
           };
         };
       };
@@ -185,7 +180,7 @@ void Analysis::Execute() {
 
   // vars
   Double_t eleP,maxEleP;
-  int pid,bpart;
+  int pid,bFinalState;
 
 
   // event loop =========================================================
@@ -226,11 +221,12 @@ void Analysis::Execute() {
     while(Track *trk = (Track*) itTrack()) {
       //cout << e << " " << trk->PID << endl;
 
-      // - check PID, to see if it's a particle we're interested in for
+      // final state cut
+      // - check PID, to see if it's a final state we're interested in for
       //   histograms; if not, proceed to next
       pid = trk->PID;
       auto kv = PIDtoEnum.find(pid);
-      if(kv!=PIDtoEnum.end()) bpart = kv->second;
+      if(kv!=PIDtoEnum.end()) bFinalState = kv->second;
       else continue;
 
 
@@ -273,7 +269,7 @@ void Analysis::Execute() {
               for(int bq : v_q) {
                 for(int by : v_y) {
                   if(!CheckDiagonal(bpt,bx,bz,bq)) {
-                    histSetFillList.push_back(histSet[bpt][bx][bz][bq][by][bpart]);
+                    histSetFillList.push_back(histSet[bpt][bx][bz][bq][by][bFinalState]);
                   };
                 };
               };
@@ -371,26 +367,65 @@ void Analysis::AddBinScheme(TString varname, TString vartitle) {
   // otherwise for loops won't run; when we generalize the `histSet` data
   // structure, hopefully we can also drop this requirement; the current
   // workaround is to add a `full` bin to each dimension
-  BinScheme(varname)->BuildBin("Full");
+  if(varname!="finalState") BinScheme(varname)->BuildBin("Full");
 };
+
+
+// add a final state bin
+void Analysis::AddFinalState(TString finalStateN, TString finalStateT, Int_t pid_) {
+  // get bin number (we are adding a new bin, so new bin number = curent number of bins)
+  Int_t binNum = BinScheme("finalState")->GetNumBins();
+  // map : pid_ -> bin number
+  PIDtoEnum.insert(std::pair<int,int>( pid_, binNum ));
+  // map : bin number -> final state name (needed because this isn't stored in `CutDef`)
+  finalStateName.insert(std::pair<int,TString>( binNum, finalStateN ));
+  // build bin with custom `CutDef` ("custom" means that `CutDef` will not apply cuts,
+  // rather the cuts are applied here)
+  BinScheme("finalState")->BuildCustomBin(finalStateT);
+};
+
  
 // return true, if a diagonal mode is on and this is an 
 // off-diagonal bin; if a diagonal mode is not on, always 
-// return true
+// return false
 Bool_t Analysis::CheckDiagonal(int cpt, int cx, int cz, int cq) {
   if(diagonalPtXZ) return ( cpt!=cx || cx!=cz );
   else if(diagonalXZQ) return ( cx!=cz || cz!=cq );
-  else return true;
+  else return false;
 };
 
 // scan through bin set `bs`, checking each one; the vector `v` will
 // contain the list of array indices for which the cut on `var` is satisfied
 void Analysis::CheckBins(BinSet *bs, std::vector<int> &v, Double_t var) {
   v.clear();
-  for(int b=0; b<bs->GetBinList()->GetEntries(); b++) {
+  for(int b=0; b<bs->GetNumBins(); b++) {
     if(bs->Cut(b)->CheckCut(var)) v.push_back(b);
   };
 };
+
+// get name of Histos object for specified bin
+TString Analysis::GetHistosName(int cpt, int cx, int cz, int cq, int cy, int cfs) {
+  TString retStr;
+  retStr = "histos_";
+  retStr += finalStateName[cfs];
+  retStr += Form("_pt%d",cpt);
+  retStr += Form("_x%d",cx);
+  retStr += Form("_z%d",cz);
+  retStr += Form("_q%d",cq);
+  retStr += Form("_y%d",cy);
+  return retStr;
+};
+TString Analysis::GetHistosTitle(int cpt, int cx, int cz, int cq, int cy, int cfs) {
+  TString retStr;
+  retStr  =        BinScheme("finalState")->Cut(cfs)->GetCutTitle();
+  retStr += ", " + BinScheme("pt")->Cut(cpt)->GetCutTitle();
+  retStr += ", " + BinScheme("x")->Cut(cx)->GetCutTitle();
+  retStr += ", " + BinScheme("z")->Cut(cz)->GetCutTitle();
+  retStr += ", " + BinScheme("q")->Cut(cq)->GetCutTitle();
+  retStr += ", " + BinScheme("y")->Cut(cy)->GetCutTitle();
+  return retStr;
+};
+
 
 // destructor
 Analysis::~Analysis() {

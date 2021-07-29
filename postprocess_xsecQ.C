@@ -4,49 +4,54 @@ R__LOAD_LIBRARY(Largex)
 // dump counts and average kinematics in Q bins
 void postprocess_xsecQ() {
 
+  // instantiate empty analysis object ================================
+  // - needed for some general information about binning
+  // - specify settings such as diagonalized binnings
+  Analysis *A = new Analysis();
+  A->diagonalPtXZ = true;
+
   // setup postprocessor ========================================
   PostProcessor *P = new PostProcessor(
-      "out/histos.dire_5x41.brian.hiDiv.root", /* histograms file */
+      "out/histos.dire_5x41.brian.hiAcc.10milEvents.root", /* histograms file */
       false
       );
 
-
   // start output file  ========================================
-  TString setStr,histStr;
-  TString aveOutput = P->GetPngDir() + "/table_counts_qbins.txt";
-  gSystem->RedirectOutput(aveOutput,"w");
-  cout << "Counts and averages in bins of Q" << endl;
-  gSystem->RedirectOutput(0);
+  TString tableFile = P->GetPngDir() + "/table_counts_qbins.txt";
+  P->StartTextFile(tableFile,"Counts and averages in bins of Q");
 
-  // loop over relevant bins
-  // TODO: `BinSet` objects are now streamed to root files; use their iterators instead
-  //
-  for(int b=0; b<=2; b++) {
-    gSystem->RedirectOutput(aveOutput,"a");
-    cout << endl << "Kinematic Bin: " << b 
-         << " ============================================== " << endl;
-    gSystem->RedirectOutput(0);
-    for(int y=0; y<=3; y++) {
+  // loop over (pt,x,z) bins, diagonalized
+  for(int bpt : P->GetBinNums("pt")) {
+  for(int bx  : P->GetBinNums("x")) {
+  for(int bz  : P->GetBinNums("z")) {
+    if(A->CheckDiagonal(bpt,bx,bz,-1)) continue; // diagonalize
 
-      P->ResetVars(); // starting a new table, call this to reprint headers
+    // header for this (pt,x,z) bin
+    P->AppendToTextFile(tableFile,Form("\nKinematic Bin: %d =========================",bpt));
 
-      // loop over Q bins
-      for(int q=1; q<=10; q++) {
-        setStr = Form("histos_pipTrack_pt%d_x%d_z%d_q%d_y%d",b,b,b,q,y);
-        P->DumpAve(aveOutput,setStr,"q");
+    // loop over y minima and final states; we will have one table per iteration
+    for(int by  : P->GetBinNums("y")) {
+    for(int bfs : P->GetBinNums("finalState")) {
+
+      // loop over Q bins; these are the rows of the table
+      for(int bq : P->GetBinNums("q")) {
+
+        // ALGORITHM: dump tables of average values, in bins of "Q"
+        P->DumpAve(
+            tableFile,
+            A->GetHistosName(bpt,bx,bz,bq,by,bfs),
+            "q");
       };
 
-      // format the table (stored in `tmp` file) and stream to main output file
-      P->Columnify(aveOutput+".tmp",aveOutput);
+      // finish ALGORITHM - called after the loop over table rows, so that
+      // PostProcessor knows to start a new table for the next y minimum
+      P->FinishDumpAve(tableFile);
+    }};
+  }}};
 
-      // remove `tmp` file
-      gROOT->ProcessLine(".! rm "+aveOutput+".tmp");
-    };
-  };
-
-  // print dump to stdout
-  gROOT->ProcessLine(".! cat "+aveOutput);
-  cout << aveOutput << " written" << endl;
+  // dump final table to stdout
+  P->PrintTextFile(tableFile);
+  cout << tableFile << " written" << endl;
 
   // finish
   P->Finish();

@@ -14,17 +14,19 @@ void analysis_xsecQ() {
 
 
   // set binning scheme ====================================
-  A->diagonalPtXZ = true;
-  
-  // slide 11
+
+  // bin 1 (cf Harut slide 11)
   A->BinScheme("x")->BuildBin("CenterDelta", 0.3, 0.05 );
   A->BinScheme("z")->BuildBin("CenterDelta", 0.7, 0.05 );
   A->BinScheme("pt")->BuildBin("CenterDelta", 0.5, 0.05 );
 
-  // slide 14
-  A->BinScheme("x")->BuildBin("CenterDelta", 0.1, 0.05 );
-  A->BinScheme("z")->BuildBin("CenterDelta", 0.7, 0.05 );
+  // bin 2
+  A->BinScheme("x")->BuildBin("CenterDelta", 0.3, 0.05 );
+  A->BinScheme("z")->BuildBin("CenterDelta", 0.4, 0.05 );
   A->BinScheme("pt")->BuildBin("CenterDelta", 0.15, 0.05 );
+
+  // diagonalization of (pt,x,z) bins
+  A->diagonalPtXZ = true;
 
   // Q bins
   A->BinScheme("q")->BuildBins(10,1,11,false);
