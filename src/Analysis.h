@@ -46,6 +46,12 @@ class Analysis : public TNamed
     // add a new bin scheme
     void AddBinScheme(TString varname, TString vartitle);
 
+    // add a new final state bin
+    void AddFinalState(TString finalStateN, TString finalStateT, Int_t pid_);
+
+    // get Histos object name and title
+    TString GetHistosName(int cpt, int cx, int cz, int cq, int cy, int cfs);
+    TString GetHistosTitle(int cpt, int cx, int cz, int cq, int cy, int cfs);
 
     // if these are true, only take 'diagonal' elements of the multi
     // dimensional array of possible bins; this is useful
@@ -56,7 +62,6 @@ class Analysis : public TNamed
 
     // perform the analysis
     void Execute();
-
 
     // tools
     Bool_t CheckDiagonal(int cpt, int cx, int cz, int cq);
@@ -71,12 +76,9 @@ class Analysis : public TNamed
     Double_t ionBeamEn = 41; // GeV
     Double_t crossingAngle = 0; // mrad
     std::map<TString,BinSet*> binSchemes;
+
     std::map<int,int> PIDtoEnum;
-    enum partEnum{
-      pPip,
-      //pPim,
-      NPart
-    };
+    std::map<int,TString> finalStateName;
 
   ClassDef(Analysis,1);
 };

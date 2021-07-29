@@ -62,6 +62,11 @@ CutDef::CutDef(
     cutTitle = Form("full %s",varTitle.Data());
   }
 
+  // custom cut (cut applied externally)
+  else if(cutType.CompareTo("Custom",TString::kIgnoreCase)==0) {
+    cutTitle = varTitle;
+  }
+
   // default to no cut
   else {
     cerr << "ERROR: unknown cutType " << cutType << endl;
@@ -101,7 +106,13 @@ Bool_t CutDef::CheckCut(Double_t arg1) {
   // full (no) cut
   else if(cutType.CompareTo("Full",TString::kIgnoreCase)==0) {
     return true;
-  };
+  }
+
+  // custom cut (cut applied externally)
+  else if(cutType.CompareTo("Custom",TString::kIgnoreCase)==0) {
+    cerr << "WARNING: unnecessary call to CutDef::CheckCut for Custom cut" << endl;
+    return true;
+  }
 
   return false;
 };

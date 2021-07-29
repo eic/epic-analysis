@@ -54,7 +54,7 @@ class PostProcessor : public TNamed
     void DrawRatios(TString outName, TString numerSet, TString denomSet);
 
     // algorithm finish methods; to be called after loops
-    void PostProcessor::FinishDumpAve(TString datFile);
+    void FinishDumpAve(TString datFile);
 
     // accessors
     TString GetPngDir() { return pngDir; };
@@ -65,6 +65,7 @@ class PostProcessor : public TNamed
     void StartTextFile(TString datFile, TString firstLine="");
     void AppendToTextFile(TString datFile, TString appendText);
     void Columnify(TString inputFile, TString outputFile);
+    void PrintTextFile(TString datFile);
 
     // reset algorithm-specific variables
     void ResetVars();

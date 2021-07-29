@@ -13,7 +13,7 @@ Histos::Histos(TString setname_, TString settitle_)
   : setname(setname_)
   , settitle(settitle_)
 {
-  this->SetName("histos_"+setname);
+  this->SetName(setname);
   if(settitle!="settitle") cout << "Histos:  " << settitle << endl;
 };
 

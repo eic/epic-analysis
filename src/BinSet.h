@@ -31,6 +31,7 @@ class BinSet : public TObject
 
     // bin list container, of `CutDef` pointers, one for each bin
     TObjArray *GetBinList() { return binList; };
+    Int_t GetNumBins() { return (Int_t) binList->GetEntries(); };
 
     /* bin builders
      * - at construction, you will start with zero bins
@@ -41,6 +42,8 @@ class BinSet : public TObject
      */
     void BuildBin(TString cutType_, Double_t arg1_=-1, Double_t arg2_=-1);
     void BuildBin(CutDef *cut_);
+    // build custom bin (`CutDef` only stores title, and does not apply cuts)
+    void BuildCustomBin(TString varTitle_);
     /* build list of bins
      * - define the number of bins `nbins`, in the * range `min` to `max`
      * - default is equal width bins in linear scale

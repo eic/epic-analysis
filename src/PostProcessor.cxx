@@ -26,7 +26,7 @@ PostProcessor::PostProcessor(
   cout << std::setprecision(3);
 
   // set up input and output files
-  cout << "-- drawing histograms from " << infileN << endl;
+  cout << "-- postprocess histograms from " << infileN << endl;
   outfileN = infileN;
   outfileN(TRegexp("\\.root$")) = "";
   pngDir = outfileN+".images";
@@ -200,8 +200,8 @@ void PostProcessor::DumpAve(TString datFile, TString histSet, TString cutName) {
 
 };
 void PostProcessor::FinishDumpAve(TString datFile) {
-  this->Columnify(aveOutput+".tmp",aveOutput);
-  gROOT->ProcessLine(".! rm "+aveOutput+".tmp");
+  this->Columnify(datFile+".tmp",datFile);
+  gROOT->ProcessLine(".! rm "+datFile+".tmp");
   this->ResetVars();
 };
 
@@ -441,16 +441,19 @@ void PostProcessor::DrawRatios(TString outName, TString numerSet, TString denomS
 
 
 //=========================================================================
-// TEXT FILE: start new text file, or append to text file
-void PostProcessor::StartTextFile(TString datFile, TString firstLine="") {
+// TEXT FILE: start new text file, append to text file, print text file
+void PostProcessor::StartTextFile(TString datFile, TString firstLine) {
   gSystem->RedirectOutput(datFile,"w");
-  if(fistLine!="") cout << firstLine << endl;
+  if(firstLine!="") cout << firstLine << endl;
   gSystem->RedirectOutput(0);
 };
 void PostProcessor::AppendToTextFile(TString datFile, TString appendText="") {
   gSystem->RedirectOutput(datFile,"a");
   cout << appendText << endl;
   gSystem->RedirectOutput(0);
+};
+void PostProcessor::PrintTextFile(TString datFile) {
+  gROOT->ProcessLine(".! cat "+datFile);
 };
 
 
@@ -475,7 +478,7 @@ std::vector<int> PostProcessor::GetBinNums(TString varName) {
   if(B==nullptr) {
     cerr << "ERROR: unknown variable in PostProcessor::GetBinNums" << endl;
   } else {
-    for(int n=0; n<B->GetBinList()->GetEntries(); n++) retVec.insert(n);
+    for(int n=0; n<B->GetBinList()->GetEntries(); n++) retVec.push_back(n);
   };
   return retVec;
 };
