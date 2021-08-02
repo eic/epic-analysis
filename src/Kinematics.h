@@ -19,6 +19,8 @@
 #include "classes/DelphesClasses.h"
 
 #include "fastjet/ClusterSequence.hh"
+#include "fastjet/contrib/Centauro.hh"
+#include "Centauro.hh" 
 using namespace fastjet;
 
 
@@ -34,6 +36,7 @@ class Kinematics : public TObject
     ~Kinematics();
 
     // calculators
+    void CalculateDIS(TString recmethod);
     void CalculateDISbyElectron();
     void CalculateDISbyJB();
     void CalculateDISbyDA();
@@ -44,7 +47,10 @@ class Kinematics : public TObject
     void GetHadronicFinalState(TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itPIDSystemsTrack, TObjArrayIter itParticle);
 
     void GetJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
-  
+    void GetBreitFrameJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
+
+    void CalculateJetKinematics(PseudoJet jet);
+    void CalculateBreitJetKinematics(PseudoJet jet);
     // kinematics
     Double_t W,Q2,Nu,x,y,s; // DIS
     Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // hadron
@@ -62,6 +68,11 @@ class Kinematics : public TObject
     TLorentzVector vecHadron;
     // jets
     std::vector<PseudoJet> jetsRec, jetsTrue;
+    std::vector<PseudoJet> breitJetsRec, breitJetsTrue;
+    ClusterSequence* csRec;
+    ClusterSequence* csTrue;
+    Double_t zjet, pTjet, qTjet;
+    std::vector<double> jperp;
     // struck quark information
     Double_t quarkpT;
     
@@ -123,7 +134,7 @@ class Kinematics : public TObject
     // - vector rejection: returns vC projected onto plane transverse to vD
     static TVector3 Reject(TVector3 vC, TVector3 vD) {
       if(fabs(vD.Dot(vD))<0.0001) {
-        cerr << "WARNING: Kinematics::Reject to null vector" << endl;
+        //cerr << "WARNING: Kinematics::Reject to null vector" << endl;
         return TVector3(0,0,0);
       };
       return vC - Project(vC,vD);

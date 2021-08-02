@@ -75,6 +75,23 @@ void Kinematics::getqWQuadratic(){
   }   
 };
 
+// function to call different reconstruction methods
+void Kinematics::CalculateDIS(TString recmethod){
+  if( recmethod.CompareTo("Ele", TString::kIgnoreCase) == 0 ){
+    Kinematics::CalculateDISbyElectron();
+  }
+  if( recmethod.CompareTo("DA", TString::kIgnoreCase) == 0 ){
+    Kinematics::CalculateDISbyDA();
+  }
+  if( recmethod.CompareTo("JB", TString::kIgnoreCase) == 0 ){
+    Kinematics::CalculateDISbyJB();
+  }
+  if( recmethod.CompareTo("Mixed", TString::kIgnoreCase) == 0){
+    Kinematics::CalculateDISbyMixed();
+  }
+
+  
+};
 
 // calculate DIS kinematics using scattered electron
 // - needs `vecElectron` set
@@ -280,7 +297,7 @@ void Kinematics::GetJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton
   while(Track *eflowTrack = (Track*)itEFlowTrack() ){
     TLorentzVector eflowTrackp4 = eflowTrack->P4();
     if(!isnan(eflowTrackp4.E())){
-      if(std::abs(eflowTrack->Eta) < 4.0){
+      if(std::abs(eflowTrack->Eta) < 4.0 && eflowTrack->PT > 0.2){
 	particles.push_back(PseudoJet(eflowTrackp4.Px(),eflowTrackp4.Py(),eflowTrackp4.Pz(),eflowTrackp4.E()));
 
 	GenParticle *trackParticle = (GenParticle*)eflowTrack->Particle.GetObject();
@@ -292,7 +309,7 @@ void Kinematics::GetJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton
   while(Tower* towerPhoton = (Tower*)itEFlowPhoton() ){
     TLorentzVector  towerPhotonp4 = towerPhoton->P4();
     if(!isnan(towerPhotonp4.E())){
-      if( std::abs(towerPhoton->Eta) < 4.0 ){
+      if( std::abs(towerPhoton->Eta) < 4.0 && sqrt(towerPhotonp4.Px()*towerPhotonp4.Px()+towerPhotonp4.Py()*towerPhotonp4.Py()) > 0.2){
 	particles.push_back(PseudoJet(towerPhotonp4.Px(),towerPhotonp4.Py(),towerPhotonp4.Pz(),towerPhotonp4.E()));
 	
 	for(int i = 0; i < towerPhoton->Particles.GetEntries(); i++){
@@ -307,7 +324,7 @@ void Kinematics::GetJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton
   while(Tower* towerNeutralHadron = (Tower*)itEFlowNeutralHadron() ){
     TLorentzVector  towerNeutralHadronp4 = towerNeutralHadron->P4();
     if(!isnan(towerNeutralHadronp4.E())){
-      if( std::abs(towerNeutralHadron->Eta) < 4.0 ){
+      if( std::abs(towerNeutralHadron->Eta) < 4.0 && sqrt(towerNeutralHadronp4.Px()*towerNeutralHadronp4.Px()+towerNeutralHadronp4.Py()*towerNeutralHadronp4.Py()) > 0.2){
 	particles.push_back(PseudoJet(towerNeutralHadronp4.Px(),towerNeutralHadronp4.Py(),towerNeutralHadronp4.Pz(),towerNeutralHadronp4.E()));
 
         for(int i = 0; i < towerNeutralHadron->Particles.GetEntries(); i++){
@@ -319,18 +336,142 @@ void Kinematics::GetJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton
     }
   }
 
-  double R = 0.7;
-  // antikt algorithm as a test/example, do we want an option for other methods?/what method do we use?
+  double R = 0.8;
+
   JetDefinition jet_def(antikt_algorithm, R);
 
-  ClusterSequence cs(particles, jet_def);
-  ClusterSequence csTrue(particlesTrue, jet_def);
-  jetsRec = sorted_by_pt(cs.inclusive_jets());
-  jetsTrue = sorted_by_pt(csTrue.inclusive_jets());  
+  csRec = new ClusterSequence(particles, jet_def);
+  csTrue = new ClusterSequence(particlesTrue, jet_def);
+  jetsRec = sorted_by_pt(csRec->inclusive_jets());
+  jetsTrue = sorted_by_pt(csTrue->inclusive_jets());  
 
 };
 
+void Kinematics::GetBreitFrameJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle){
+  itEFlowTrack.Reset();
+  itEFlowPhoton.Reset();
+  itEFlowNeutralHadron.Reset();
+  itParticle.Reset();
+  std::vector<PseudoJet> particles;
+  std::vector<PseudoJet> particlesTrue;
 
+  double highPT = -1;
+  TLorentzVector eleTrue;
+  while(GenParticle* part = (GenParticle*) itParticle()){
+    if(part->PID == 11){
+      if(part->PT > highPT){
+	highPT = part->PT;
+	eleTrue = part->P4();
+      }
+    }
+  }
+  TLorentzVector vecQTrue = vecEleBeam - eleTrue;
+  TLorentzVector breitTrue = vecQTrue + vecIonBeam;
+  TVector3 breitBoostTrue = -1*breitTrue.BoostVector();
+  itParticle.Reset();
+
+
+  
+  while(Track *eflowTrack = (Track*)itEFlowTrack() ){
+    TLorentzVector eflowTrackp4 = eflowTrack->P4();
+    if(!isnan(eflowTrackp4.E())){
+      if(std::abs(eflowTrack->Eta) < 4.0 && eflowTrack->PT > 0.2){
+	eflowTrackp4.Boost(Cboost);
+        particles.push_back(PseudoJet(eflowTrackp4.Px(),eflowTrackp4.Py(),eflowTrackp4.Pz(),eflowTrackp4.E()));
+
+        GenParticle *trackParticle = (GenParticle*)eflowTrack->Particle.GetObject();
+        TLorentzVector partp4 = trackParticle->P4();
+	partp4.Boost(breitBoostTrue);
+        particlesTrue.push_back(PseudoJet(partp4.Px(),partp4.Py(),partp4.Pz(),partp4.E()));
+      }
+    }
+  }
+  while(Tower* towerPhoton = (Tower*)itEFlowPhoton() ){
+    TLorentzVector  towerPhotonp4 = towerPhoton->P4();
+    if(!isnan(towerPhotonp4.E())){
+      if( std::abs(towerPhoton->Eta) < 4.0 && sqrt(towerPhotonp4.Px()*towerPhotonp4.Px()+towerPhotonp4.Py()*towerPhotonp4.Py()) > 0.2){
+	towerPhotonp4.Boost(Cboost);
+	particles.push_back(PseudoJet(towerPhotonp4.Px(),towerPhotonp4.Py(),towerPhotonp4.Pz(),towerPhotonp4.E()));
+	
+        for(int i = 0; i < towerPhoton->Particles.GetEntries(); i++){
+          GenParticle *photonPart = (GenParticle*)towerPhoton->Particles.At(i);
+          TLorentzVector photonp4 = photonPart->P4();
+	  photonp4.Boost(breitBoostTrue);
+          particlesTrue.push_back(PseudoJet(photonp4.Px(),photonp4.Py(),photonp4.Pz(),photonp4.E()));
+        }
+      }
+    }
+  }
+  while(Tower* towerNeutralHadron = (Tower*)itEFlowNeutralHadron() ){
+    TLorentzVector  towerNeutralHadronp4 = towerNeutralHadron->P4();
+    if(!isnan(towerNeutralHadronp4.E()) && sqrt(towerNeutralHadronp4.Px()*towerNeutralHadronp4.Px()+towerNeutralHadronp4.Py()*towerNeutralHadronp4.Py()) > 0.2){
+      if( std::abs(towerNeutralHadron->Eta) < 4.0 ){
+	towerNeutralHadronp4.Boost(Cboost);
+        particles.push_back(PseudoJet(towerNeutralHadronp4.Px(),towerNeutralHadronp4.Py(),towerNeutralHadronp4.Pz(),towerNeutralHadronp4.E()));
+
+        for(int i = 0; i < towerNeutralHadron->Particles.GetEntries(); i++){
+          GenParticle *nhadPart = (GenParticle*)towerNeutralHadron->Particles.At(i);
+          TLorentzVector nhadp4 = nhadPart->P4();
+	  nhadp4.Boost(breitBoostTrue);
+          particlesTrue.push_back(PseudoJet(nhadp4.Px(),nhadp4.Py(),nhadp4.Pz(),nhadp4.E()));
+        }
+      }
+    }
+  }
+
+  double R = 0.8;
+  contrib::CentauroPlugin centauroPlugin(R);
+  JetDefinition jet_def(&centauroPlugin);
+  
+  csRec = new ClusterSequence(particles, jet_def);
+  csTrue = new ClusterSequence(particlesTrue, jet_def);
+  breitJetsRec = sorted_by_pt(csRec->inclusive_jets());
+  breitJetsTrue = sorted_by_pt(csTrue->inclusive_jets());
+  
+};
+
+void Kinematics::CalculateJetKinematics(PseudoJet jet){
+  TLorentzVector pjet(jet.px(), jet.py(), jet.pz(), jet.E());
+  TVector3 qT( vecElectron.Px()+pjet.Px(), vecElectron.Py()+pjet.Py(), 0);
+  qTjet = qT.Mag();
+
+  zjet = (vecIonBeam*pjet)/((vecIonBeam)*(vecQ));
+  pTjet = jet.pt(); // lab frame pT
+
+  jperp.clear();
+  std::vector<PseudoJet> constituents = jet.constituents();
+  for(int i = 0; i < constituents.size(); i++){
+    TLorentzVector partVec(constituents[i].px(), constituents[i].py(), constituents[i].pz(), constituents[i].E());
+    TVector3 jperpVec = Reject(partVec.Vect(),pjet.Vect());
+    jperp.push_back(jperpVec.Mag());
+  }
+
+  
+};
+
+void Kinematics::CalculateBreitJetKinematics(PseudoJet jet){
+  TLorentzVector pjet(jet.px(), jet.py(), jet.pz(), jet.E());
+  TLorentzVector pjetLab = pjet;
+  pjetLab.Boost(-1*Cboost);
+  pTjet = sqrt(pjetLab.Px()*pjetLab.Px() + pjetLab.Py()*pjetLab.Py());
+  
+  TLorentzVector vecElectronBreit = vecElectron;
+  vecElectronBreit.Boost(Cboost);
+  TVector3 qT(vecElectronBreit.Px()+pjet.Px(), vecElectronBreit.Py()+pjet.Py(), 0);
+  qTjet = qT.Mag();
+  
+  TLorentzVector nbreit(1/sqrt(Q2),0,0,1/sqrt(Q2));
+  double zjet = nbreit*pjet;
+
+  jperp.clear();
+  std::vector<PseudoJet> constituents = jet.constituents();
+  for(int i = 0; i < constituents.size(); i++){
+    TLorentzVector partVec(constituents[i].px(), constituents[i].py(), constituents[i].pz(), constituents[i].E());
+    TVector3 jperpVec = Reject(partVec.Vect(),pjet.Vect());   	
+    jperp.push_back(jperpVec.Mag());
+  }  
+
+};
 
 
 Kinematics::~Kinematics() {
