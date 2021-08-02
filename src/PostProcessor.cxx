@@ -8,11 +8,9 @@ using std::endl;
 
 // constructor
 PostProcessor::PostProcessor(
-  TString infileN_,
-  Bool_t plotRatioOnly_
+  TString infileN_
 )
   : infileN(infileN_)
-  , plotRatioOnly(plotRatioOnly_)
 {
 
   // settings
@@ -286,8 +284,11 @@ void PostProcessor::DrawSingle(TString outName, TString histSet, TString varName
 * - summary canvases are also created, which can combine multiple ratio plots;
 *   they are accumulated in `summaryCanvMap` and colors are set by `nsum`; call
 *   `ResetVars` to reset the accumulation
+ * - when done looping, call `FinishDrawRatios`
 */
-void PostProcessor::DrawRatios(TString outName, TString numerSet, TString denomSet) {
+void PostProcessor::DrawRatios(
+    TString outName, TString numerSet, TString denomSet, Bool_t plotRatioOnly
+) {
 
   cout << "draw ratios " << outName << "..." << endl;
   enum HHenum {num,den};
@@ -437,6 +438,18 @@ void PostProcessor::DrawRatios(TString outName, TString numerSet, TString denomS
   outfile->cd("/");
   nsum++;
 };
+void PostProcessor::FinishDrawRatios(TString summaryDir) {
+  // write summary canvas
+  outfile->cd("/");
+  outfile->mkdir(summaryDir);
+  outfile->cd(summaryDir);
+  for(auto const& kv : summaryCanvMap) {
+    kv.second->Write();
+    kv.second->Print(pngDir+"/"+summaryDir+"_"+kv.first+".png");
+  };
+  outfile->cd("/");
+  this->ResetVars();
+};
 
 
 
@@ -471,12 +484,16 @@ void PostProcessor::Columnify(TString inputFile, TString outputFile) {
 BinSet *PostProcessor::GetBinSet(TString varName) {
   return (BinSet*) infile->Get(varName+"_bins");
 };
+// get pointer to CutDef associated with a particular bin
+CutDef *PostProcessor::GetBinCut(TString varName, Int_t binNum) {
+  return this->GetBinSet(varName)->Cut(binNum);
+};
 // get list of bin numbers
 std::vector<int> PostProcessor::GetBinNums(TString varName) {
   BinSet *B = this->GetBinSet(varName);
   std::vector<int> retVec;
   if(B==nullptr) {
-    cerr << "ERROR: unknown variable in PostProcessor::GetBinNums" << endl;
+    cerr << "ERROR: unknown variable " << varName << " in PostProcessor::GetBinNums" << endl;
   } else {
     for(int n=0; n<B->GetBinList()->GetEntries(); n++) retVec.push_back(n);
   };

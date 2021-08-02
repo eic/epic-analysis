@@ -54,8 +54,8 @@ class BinSet : public TObject
     void BuildBins(Int_t nbins_, Double_t min_, Double_t max_, Bool_t log_=false);
     void BuildBins(TAxis *ax, Bool_t log_=false);
 
-    // access a bin's cut (by index)
-    CutDef *Cut(Int_t idx) { return (CutDef*)binList->At(idx); };
+    // access a bin's cut (by bin number)
+    CutDef *Cut(Int_t binNum) { return (CutDef*)binList->At(binNum); };
 
     /* make equal-width log-scale bins
      * - the axis `ax` will be modified

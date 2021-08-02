@@ -31,6 +31,7 @@ class CutDef : public TObject
     TString GetCutTitle() { return cutTitle; };
     TString GetVarName() { return varName; };
     TString GetVarTitle() { return varTitle; };
+    TString GetCutType() { return cutType; };
     Double_t GetMin() { return min; };
     Double_t GetMax() { return max; };
 

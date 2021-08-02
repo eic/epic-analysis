@@ -30,10 +30,11 @@ class Analysis : public TNamed
 {
   public:
     Analysis(
-        TString infile_="",
+        TString infileName_="",
         Double_t eleBeamEn_=5,
         Double_t ionBeamEn_=41,
-        Double_t crossingAngle_=0
+        Double_t crossingAngle_=0,
+        TString outfilePrefix_=""
         );
     ~Analysis();
 
@@ -71,7 +72,7 @@ class Analysis : public TNamed
 
   private:
     Histos *HS;
-    TString infile;
+    TString infileName,outfileName;
     Double_t eleBeamEn = 5; // GeV
     Double_t ionBeamEn = 41; // GeV
     Double_t crossingAngle = 0; // mrad

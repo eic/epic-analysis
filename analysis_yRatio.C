@@ -1,13 +1,13 @@
 R__LOAD_LIBRARY(Largex)
 #include "Analysis.h"
 
-// cross section in Q bins
-void analysis_xsecPT(
-    TString infiles="datarec/arc/crossCheck*.root", /* delphes tree(s) */
+// ratios of histograms with y-cut enabled to those with y-cut disabled
+void analysis_yRatio(
+    TString infiles="datarec/arc/dire_5x41.brian.hiDiv.root", /* delphes tree(s) */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=0, /* crossing angle [mrad] */
-    TString outfilePrefix="xsecPT" /* output filename prefix*/
+    TString outfilePrefix="yRatio" /* output filename prefix*/
 ) {
 
   // setup analysis ========================================
@@ -21,22 +21,6 @@ void analysis_xsecPT(
 
 
   // set binning scheme ====================================
-
-  // bin 1
-  A->BinScheme("x")->BuildBin("CenterDelta", 0.3, 0.05 );
-  A->BinScheme("z")->BuildBin("CenterDelta", 0.7, 0.05 );
-  A->BinScheme("q")->BuildBin("Range", 2.0, 3.0 );
-
-  // bin 2
-  A->BinScheme("x")->BuildBin("CenterDelta", 0.1, 0.05 );
-  A->BinScheme("z")->BuildBin("CenterDelta", 0.7, 0.05 );
-  A->BinScheme("q")->BuildBin("Range", 2.0, 3.0 );
-
-  // diagonalization of (x,z,Q) bins
-  A->diagonalXZQ = true;
-
-  // pT bins
-  A->BinScheme("pt")->BuildBins(10,1e-2,3,true);
 
   // y minima
   A->BinScheme("y")->BuildBin("Min",0.03);

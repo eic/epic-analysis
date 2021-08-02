@@ -22,8 +22,7 @@ class PostProcessor : public TNamed
 {
   public:
     PostProcessor(
-        TString infileN_,
-        Bool_t plotRatioOnly_=false
+        TString infileN_
         );
     ~PostProcessor();
 
@@ -51,14 +50,19 @@ class PostProcessor : public TNamed
     void DumpHist(TString datFile, TString histSet, TString varName);
     void DumpAve(TString datFile, TString histSet, TString cutName);
     void DrawSingle(TString outName, TString histSet, TString varName);
-    void DrawRatios(TString outName, TString numerSet, TString denomSet);
+    void DrawRatios(
+        TString outName, TString numerSet, TString denomSet, Bool_t plotRatioOnly=false
+        );
 
     // algorithm finish methods; to be called after loops
     void FinishDumpAve(TString datFile);
+    void FinishDrawRatios(TString summaryDir);
 
     // accessors
     TString GetPngDir() { return pngDir; };
+    TString GetOutfileName() { return outfileN; };
     BinSet *GetBinSet(TString varName);
+    CutDef *GetBinCut(TString varName, Int_t binNum);
     std::vector<int> GetBinNums(TString varName);
 
     // text file manipulation
@@ -77,7 +81,6 @@ class PostProcessor : public TNamed
     TFile *infile, *outfile;
 
     // algorithm-specific variables
-    Bool_t plotRatioOnly;
     std::map<TString,TCanvas*> summaryCanvMap;
     std::vector<TString> varList;
     int nsum,ndump;

@@ -10,12 +10,13 @@ using std::endl;
 
 // constructor
 Analysis::Analysis(
-  TString infile_,
+  TString infileName_,
   Double_t eleBeamEn_,
   Double_t ionBeamEn_,
-  Double_t crossingAngle_
+  Double_t crossingAngle_,
+  TString outfilePrefix_
 )
-  : infile(infile_)
+  : infileName(infileName_)
   , eleBeamEn(eleBeamEn_)
   , ionBeamEn(ionBeamEn_)
   , crossingAngle(crossingAngle_)
@@ -38,6 +39,14 @@ Analysis::Analysis(
   // TODO: generalized diagonalizer
   diagonalPtXZ = false;
   diagonalXZQ = false;
+
+  // define output file name
+  outfileName = infileName;
+  outfileName(TRegexp("^.*/")) = ""; // remove path
+  outfileName(TRegexp("\\*")) = ""; // remove asterisk wildcard
+  if(outfilePrefix_!="") outfilePrefix_+=".";
+  outfileName = "out/"+outfilePrefix_+outfileName;
+  cout << "-- output file: " << outfileName << endl;
 };
 
 
@@ -47,17 +56,14 @@ Analysis::Analysis(
 void Analysis::Execute() {
 
   // read delphes tree
-  cout << "-- running analysis of " << infile << endl;
+  cout << "-- running analysis of " << infileName << endl;
   TChain *chain = new TChain("Delphes");
-  chain->Add(infile);
+  chain->Add(infileName);
   ExRootTreeReader *tr = new ExRootTreeReader(chain);
   Long64_t ENT = tr->GetEntries();
 
-  // define output file
-  TString outfileN = infile;
-  outfileN(TRegexp("^.*/")) = "";
-  outfileN = "out/histos."+outfileN;
-  TFile *outfile = new TFile(outfileN,"RECREATE");
+  // open output file
+  TFile *outfile = new TFile(outfileName,"RECREATE");
 
   // branch iterators
   TObjArrayIter itTrack(tr->UseBranch("Track"));
@@ -424,11 +430,11 @@ void Analysis::Execute() {
 
   // close output
   outfile->Close();
-  cout << outfileN << " written." << endl;
+  cout << outfileName << " written." << endl;
 
   // call draw program
   /*
-  TString cmd = "./draw.exe "+outfileN;
+  TString cmd = "./draw.exe "+outfileName;
   system(cmd.Data());
   */
 };

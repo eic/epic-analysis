@@ -2,14 +2,21 @@ R__LOAD_LIBRARY(Largex)
 #include "Analysis.h"
 
 // cross section in Q bins
-void analysis_xsecQ() {
+void analysis_xsecQ(
+    TString infiles="datarec/arc/crossCheck*.root", /* delphes tree(s) */
+    Double_t eleBeamEn=5, /* electron beam energy [GeV] */
+    Double_t ionBeamEn=41, /* ion beam energy [GeV] */
+    Double_t crossingAngle=0, /* crossing angle [mrad] */
+    TString outfilePrefix="xsecQ" /* output filename prefix*/
+) {
 
   // setup analysis ========================================
   Analysis *A = new Analysis(
-      "datarec/arc/dire_5x41.brian.hiDiv.root", /* delphes tree */
-      5, /* electron beam energy [GeV] */
-      41, /* ion beam energy [GeV] */
-      0 /* crossing angle [mrad] */
+      infiles,
+      eleBeamEn,
+      ionBeamEn,
+      crossingAngle,
+      outfilePrefix
       );
 
 
