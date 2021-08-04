@@ -1,7 +1,7 @@
 R__LOAD_LIBRARY(Largex)
 #include "Analysis.h"
 
-// cross section in Q bins
+// cross section in pT bins
 void analysis_xsecPT(
     TString infiles="datarec/arc/crossCheck*.root", /* delphes tree(s) */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
