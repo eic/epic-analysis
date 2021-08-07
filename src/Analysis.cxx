@@ -35,18 +35,24 @@ Analysis::Analysis(
   AddFinalState("pipTrack","#pi^{+} tracks", 211);
   //AddFinalState("pimTrack","#pi^{-} tracks",-211);
   
-  // initialize diagonalizer settings
-  // TODO: generalized diagonalizer
+  // initialize settings
   diagonalPtXZ = false;
   diagonalXZQ = false;
+  writeSimpleTree = false;
+  maxEvents = 0;
 
-  // define output file name
+  // define output file
   outfileName = infileName;
   outfileName(TRegexp("^.*/")) = ""; // remove path
   outfileName(TRegexp("\\*")) = ""; // remove asterisk wildcard
   if(outfilePrefix_!="") outfilePrefix_+=".";
   outfileName = "out/"+outfilePrefix_+outfileName;
   cout << "-- output file: " << outfileName << endl;
+  outFile = new TFile(outfileName,"RECREATE");
+
+  // objects
+  kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
+  ST = new SimpleTree("tree",kin);
 };
 
 
@@ -61,9 +67,6 @@ void Analysis::Execute() {
   chain->Add(infileName);
   ExRootTreeReader *tr = new ExRootTreeReader(chain);
   Long64_t ENT = tr->GetEntries();
-
-  // open output file
-  TFile *outfile = new TFile(outfileName,"RECREATE");
 
   // branch iterators
   TObjArrayIter itTrack(tr->UseBranch("Track"));
@@ -232,9 +235,6 @@ void Analysis::Execute() {
   cout << sep << endl;
 
 
-  // define kinematics
-  Kinematics *kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
-
 
   // vars
   Double_t eleP,maxEleP;
@@ -242,7 +242,7 @@ void Analysis::Execute() {
 
 
   // event loop =========================================================
-  //ENT = 1000; // limiter
+  if(maxEvents>0) ENT = maxEvents; // limiter
   cout << "begin event loop..." << endl;
   for(Long64_t e=0; e<ENT; e++) {
     if(e>0&&e%100000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
@@ -362,6 +362,9 @@ void Analysis::Execute() {
           H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),1.0/lumi);
         };
 
+        // fill simple tree (not binned)
+        if( writeSimpleTree && histSetFillList.size()>0 ) ST->FillTree();
+
       };
     };
 
@@ -419,17 +422,18 @@ void Analysis::Execute() {
 
   // write histograms
   cout << sep << endl;
-  outfile->cd();
-  for(Histos *H : histSetList) H->WriteHists(outfile);
+  outFile->cd();
+  if(writeSimpleTree) ST->WriteTree();
+  for(Histos *H : histSetList) H->WriteHists(outFile);
   for(Histos *H : histSetList) H->Write();
-  for(Histos *H : histSetListJets) H->WriteHists(outfile);
+  for(Histos *H : histSetListJets) H->WriteHists(outFile);
   for(Histos *H : histSetListJets) H->Write();
 
   // write binning schemes
   for(auto const &kv : binSchemes) kv.second->Write(kv.first+"_bins");
 
   // close output
-  outfile->Close();
+  outFile->Close();
   cout << outfileName << " written." << endl;
 
   // call draw program
