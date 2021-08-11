@@ -69,10 +69,12 @@ class Kinematics : public TObject
     // jets
     std::vector<PseudoJet> jetsRec, jetsTrue;
     std::vector<PseudoJet> breitJetsRec, breitJetsTrue;
+    std::map<double, int> jetConstituents;
     ClusterSequence* csRec;
     ClusterSequence* csTrue;
     Double_t zjet, pTjet, qTjet;
     std::vector<double> jperp;
+    std::vector<double> zhad_jet;
     // struck quark information
     Double_t quarkpT;
     
@@ -134,7 +136,7 @@ class Kinematics : public TObject
     // - vector rejection: returns vC projected onto plane transverse to vD
     static TVector3 Reject(TVector3 vC, TVector3 vD) {
       if(fabs(vD.Dot(vD))<0.0001) {
-        //cerr << "WARNING: Kinematics::Reject to null vector" << endl;
+        cerr << "WARNING: Kinematics::Reject to null vector" << endl;
         return TVector3(0,0,0);
       };
       return vC - Project(vC,vD);
