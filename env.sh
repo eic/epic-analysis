@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# do `source env.sh /path/to/delphes/repo`; otherwise pass no
-# argument to use the default location
+# run `source env.sh /path/to/delphes/repo`, otherwise pass no
+# argument to use the default location; it may be useful to
+# set your own default location
 if [ $# -eq 1 ]; then
   delphesDir=$1
 else
