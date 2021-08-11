@@ -64,7 +64,9 @@ class Analysis : public TNamed
 
     // additional settings
     Bool_t writeSimpleTree; // if true, write SimpleTree (not binned)
-    Long64_t maxEvents; // if >0, run only this many events (limiter)
+    Long64_t maxEvents; /* default=0, which runs all events;
+                         * if > 0, run a maximum number of `maxEvents` events (useful for quick tests)
+			 */
 
     // perform the analysis
     void Execute();
