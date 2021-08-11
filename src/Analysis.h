@@ -24,6 +24,7 @@
 #include "Kinematics.h"
 #include "CutDef.h"
 #include "BinSet.h"
+#include "SimpleTree.h"
 
 
 class Analysis : public TNamed
@@ -61,6 +62,12 @@ class Analysis : public TNamed
     Bool_t diagonalPtXZ;
     Bool_t diagonalXZQ;
 
+    // additional settings
+    Bool_t writeSimpleTree; // if true, write SimpleTree (not binned)
+    Long64_t maxEvents; /* default=0, which runs all events;
+                         * if > 0, run a maximum number of `maxEvents` events (useful for quick tests)
+			 */
+
     // perform the analysis
     void Execute();
 
@@ -72,7 +79,10 @@ class Analysis : public TNamed
 
   private:
     Histos *HS;
+    SimpleTree *ST;
+    Kinematics *kin;
     TString infileName,outfileName;
+    TFile *outFile;
     Double_t eleBeamEn = 5; // GeV
     Double_t ionBeamEn = 41; // GeV
     Double_t crossingAngle = 0; // mrad
