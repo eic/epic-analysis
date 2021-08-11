@@ -123,18 +123,18 @@ respective macros for the stages.
       class; you can either:
       - Automatically define a set of bins, e.g., `N` bins between `a` and `b`
         - Equal width in linear scale
-	- Equal width in log scale (useful for `x` and `Q2`)
-	- Any custom `TAxis`
+        - Equal width in log scale (useful for `x` and `Q2`)
+        - Any custom `TAxis`
       - Manually define each bin
-	- example: specific bins in `z` and `pT`:
-	  - `|z-0.3|<0.1` and `|pT-0.2|<0.05`
-	  - `|z-0.7|<0.1` and `|pT-0.5|<0.05`
+        - example: specific bins in `z` and `pT`:
+          - `|z-0.3|<0.1` and `|pT-0.2|<0.05`
+          - `|z-0.7|<0.1` and `|pT-0.5|<0.05`
         - example: 3 different `y` minima:
-	  - `y>0.05`
-	  - `y>0.03`
-	  - `y>0` (no cut)
-	  - note that the arbitrary specification permits bins to overlap, e.g.,
-	    an event with `y=0.1` will appear in all three bins
+          - `y>0.05`
+          - `y>0.03`
+          - `y>0` (no cut)
+          - note that the arbitrary specification permits bins to overlap, e.g.,
+            an event with `y=0.1` will appear in all three bins
 - Multi-dimensional binning
   - Binning in multi-dimensions is allowed, e.g., 3D binning in `x`,`Q2`,`z`
   - TODO: the current implementation is a prototype and there is a limit on the
