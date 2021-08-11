@@ -2,6 +2,7 @@
  * - provides a simple tree, for common usage in any Analysis or
  *   Analysis derived class; this tree is designed to be compatible
  *   with BruFit for asymmetry analysis
+ *   (see `https://github.com/c-dilks/dispin/tree/master/src`)
  */
 #ifndef SimpleTree_
 #define SimpleTree_

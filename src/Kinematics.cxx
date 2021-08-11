@@ -34,6 +34,9 @@ Kinematics::Kinematics(
   // default transverse spin (needed for phiS calculation)
   tSpin = 1; // +1=spin-up, -1=spin-down
 
+  // default proton polarization
+  pol = 0.80;
+
 };
 
 

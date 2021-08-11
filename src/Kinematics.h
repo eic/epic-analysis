@@ -53,7 +53,10 @@ class Kinematics : public TObject
     // nucleon transverse spin; if you set this externally,
     // it must be done before calculating `phiS` (before
     // `CalculateHadronKinematics`)
-    Int_t tSpin; 
+    Int_t tSpin; // should be +1 or -1
+
+    // polarization
+    Double_t pol;
 
     // 4-vectors
     // - lab frame

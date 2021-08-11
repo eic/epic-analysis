@@ -363,6 +363,7 @@ void Analysis::Execute() {
         };
 
         // fill simple tree (not binned)
+	// TODO: consider adding a `finalState` cut
         if( writeSimpleTree && histSetFillList.size()>0 ) ST->FillTree();
 
       };
