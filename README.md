@@ -145,6 +145,18 @@ respective macros for the stages.
     - You can restrict the binning in certain dimensions by taking only diagonal
       elements of a matrix of bins (see `diagonal` settings in `src/Analysis.h`)
 
+### Simple Tree
+
+- The `Analysis` class is capable of producing a simple `TTree`, handled by the
+  `SimpleTree` class, which can also be useful for analysis
+  - As the name suggests, it is a flat tree with a minimal set of variables,
+    specifically needed for asymmetry analysis
+  - The tree branches are configured to be compatible with 
+    [asymmetry analysis code](https://github.com/c-dilks/dispin),
+    built on the [BruFit](https://github.com/dglazier/brufit) framework
+  - There is a switch in `Analysis` to enable/disable whether this tree is 
+    written
+
 
 # Post-Processing
 
