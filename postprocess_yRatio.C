@@ -43,10 +43,10 @@ void postprocess_yRatio(
 
       // ALGORITHM: draw ratios of two Histos
       P->DrawRatios(
-	  Form("yRatio%d",by),
-	  A->GetHistosName(bpt,bx,bz,bq,by,bfs),
-	  A->GetHistosName(bpt,bx,bz,bq,byFull,bfs)
-	  );
+          Form("yRatio%d",by),
+          A->GetHistosName(bpt,bx,bz,bq,by,bfs),
+          A->GetHistosName(bpt,bx,bz,bq,byFull,bfs)
+          );
     };
 
     // finish ALGORITHM - called after the loop to save canvases

@@ -37,8 +37,8 @@ void postprocess_xsecPT(
       // loop over pT bins; these are the rows of the table
       for(int bpt : P->GetBinNums("pt")) {
 
-	// skip full bin
-	if(P->GetBinCut("pt",bpt)->GetCutType()=="Full") continue;
+        // skip full bin
+        if(P->GetBinCut("pt",bpt)->GetCutType()=="Full") continue;
 
         // ALGORITHM: dump tables of average values, in bins of pT
         P->DumpAve(
