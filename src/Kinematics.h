@@ -19,8 +19,12 @@
 #include "classes/DelphesClasses.h"
 
 #include "fastjet/ClusterSequence.hh"
-#include "fastjet/contrib/Centauro.hh"
-#include "Centauro.hh" 
+
+//bool incfastjet = true;
+//#ifdef __FASTJET_CONTRIB_CENTAUROJETALGORITHM_HH__
+#if false
+#include "fastjet/plugins/Centauro/Centauro.hh"
+#endif
 using namespace fastjet;
 
 
@@ -47,10 +51,12 @@ class Kinematics : public TObject
     void GetHadronicFinalState(TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itPIDSystemsTrack, TObjArrayIter itParticle);
 
     void GetJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
-    void GetBreitFrameJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
-
     void CalculateJetKinematics(PseudoJet jet);
+
+    #ifdef __FASTJET_CONTRIB_CENTAUROJETALGORITHM_HH__
+    void GetBreitFrameJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
     void CalculateBreitJetKinematics(PseudoJet jet);
+    #endif
     // kinematics
     Double_t W,Q2,Nu,x,y,s; // DIS
     Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // hadron

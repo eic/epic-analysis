@@ -198,7 +198,7 @@ void Analysis::Execute() {
       };
     };
   };
-
+  #ifdef __FASTJET_CONTRIB_CENTAUROJETALGORITHM_HH__
   for(int bpt=0; bpt<NptjetBins; bpt++) { // - loop over jet pT bins                                                                                                                                   
     for(int bz=0; bz<NzjetBins; bz++){
       for(int bx=0; bx<NxBins; bx++) { // - loop over x bins                                                                                                                                            
@@ -233,7 +233,7 @@ void Analysis::Execute() {
       };
     };
   };
-
+  #endif
   // calculate integrated luminosity
   // - cross sections are hard-coded, coped from pythia output
   Int_t eleBeamEnInt = (Int_t) eleBeamEn;
@@ -265,7 +265,7 @@ void Analysis::Execute() {
 
 
   // event loop =========================================================
-  //ENT = 1000; // limiter
+  ENT = 1000; // limiter
   cout << "begin event loop..." << endl;
   for(Long64_t e=0; e<ENT; e++) {
     if(e>0&&e%100000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
@@ -429,6 +429,7 @@ void Analysis::Execute() {
 	};      
       };
     };
+    #ifdef __FASTJET_CONTRIB_CENTAUROJETALGORITHM_HH__
     for(int brec = 0; brec < NrecMethodBins; brec++){
       TString recname = recMethodName.find(brec)->second;      
       kin->CalculateDIS(recname);      
@@ -479,6 +480,7 @@ void Analysis::Execute() {
       };
       
     };
+    #endif
   };
     cout << "end event loop" << endl;
   // event loop end =========================================================
@@ -502,9 +504,10 @@ void Analysis::Execute() {
   for(Histos *H : histSetList) H->Write();
   for(Histos *H : histSetListJets) H->WriteHists(outfile);
   for(Histos *H : histSetListJets) H->Write();
+  #ifdef __FASTJET_CONTRIB_CENTAUROJETALGORITHM_HH__
   for(Histos *H : histSetListBreitJets) H->WriteHists(outfile);
   for(Histos *H : histSetListBreitJets) H->Write();
-
+  #endif
   // write binning schemes
   for(auto const &kv : binSchemes) kv.second->Write(kv.first+"_bins");
 

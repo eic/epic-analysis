@@ -19,7 +19,8 @@
 #include "classes/DelphesClasses.h"
 #include "external/ExRootAnalysis/ExRootTreeReader.h"
 
-#include "fastjet/contrib/Centauro.hh"
+//#include "fastjet/contrib/Centauro.hh"
+//#include "fastjet/plugins/Centauro/Centauro.hh"
 
 // largex-eic
 #include "Histos.h"
