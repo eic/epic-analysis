@@ -81,6 +81,7 @@ class Analysis : public TNamed
     Histos *HS;
     SimpleTree *ST;
     Kinematics *kin;
+    Kinematics *kinTrue;
     TString infileName,outfileName;
     TFile *outFile;
     Double_t eleBeamEn = 5; // GeV

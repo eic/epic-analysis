@@ -52,6 +52,7 @@ Analysis::Analysis(
 
   // objects
   kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
+  kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
   ST = new SimpleTree("tree",kin);
 };
 
@@ -95,6 +96,7 @@ void Analysis::Execute() {
   //         better data structure
   Histos *histSet[NptBins][NxBins][NzBins][NqBins][NyBins][NfinalStateBins];
   Histos *histSetJets[NptjetBins][NxBins][NqBins][NyBins];
+  Histos *histSetDIS[NxBins][NqBins][NyBins];
   
   std::vector<Histos*> histSetList;
   std::vector<Histos*> histSetListJets;
@@ -239,8 +241,8 @@ void Analysis::Execute() {
   // vars
   Double_t eleP,maxEleP;
   int pid,bFinalState;
-
-
+  Double_t elePtrue, maxElePtrue;
+  
   // event loop =========================================================
   if(maxEvents>0) ENT = maxEvents; // limiter
   cout << "begin event loop..." << endl;
@@ -266,6 +268,22 @@ void Analysis::Execute() {
     };
     if(maxEleP<0.001) continue; // no scattered electron found
 
+    maxElePtrue = 0;
+    while(GenParticle *part = (GenParticle*) itParticle()){
+      if(part->PID == 11){
+	elePtrue = part->PT;
+	if(elePtrue > maxElePtrue){
+	  maxElePtrue = elePtrue;
+	  kinTrue->vecElectron.SetPtEtaPhiM(
+	          part->PT,
+		  part->Eta,
+		  part->Phi,
+		  Kinematics::ElectronMass()
+		  );
+	};
+      };
+    };
+
     // get hadronic final state variables
     kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itPIDSystemsTrack, itParticle);
     // get vector of jets
@@ -273,8 +291,14 @@ void Analysis::Execute() {
     kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
     // calculate DIS kinematics
     kin->CalculateDISbyElectron();
+    // calculate true DIS kinematics                                                                                                                                                                                              
+    kinTrue->CalculateDISbyElectron();
 
 
+
+
+
+    
 
     // track loop
     itTrack.Reset();
@@ -304,8 +328,17 @@ void Analysis::Execute() {
           trk->Phi,
           trk->Mass /* TODO: do we use track mass here ?? */
           );
+      GenParticle* trkPart = (GenParticle*)trk->Particle.GetObject();
+      kinTrue->vecHadron.SetPtEtaPhiM(
+          trkPart->PT,
+          trkPart->Eta,
+          trkPart->Phi,
+          trkPart->Mass /* TODO: do we use track mass here ?? */
+          );
+      
       kin->CalculateHadronKinematics();
-
+      kinTrue->CalculateHadronKinematics();
+      
       // apply cuts
       if(kin->CutFull()) {
 
