@@ -34,6 +34,7 @@ class DAGnode : public TObject
     Int_t GetNodeType() { return nodeType; };
     void SetNodeType(Int_t nodeType_) { nodeType=nodeType_; };
     TString GetID() { return id; };
+    void SetID(TString id_) { id=id_; };
 
     void AddInput(DAGnode *N);
     void AddOutput(DAGnode *N);

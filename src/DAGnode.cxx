@@ -20,8 +20,8 @@ void DAGnode::Print() {
   switch(nodeType) {
     case tBin: nodeTypeStr="Bin"; break;
     case tControl: nodeTypeStr="Control"; break;
-    case tTop: nodeTypeStr="Top Control"; break;
-    case tBottom: nodeTypeStr="Bottom Control"; break;
+    case tTop: nodeTypeStr="Top"; break;
+    case tBottom: nodeTypeStr="Bottom"; break;
     default: nodeTypeStr="Unknown";
   };
   cout << "NODE ::: " << id << " ::: " << nodeTypeStr << endl;

@@ -4,32 +4,14 @@ R__LOAD_LIBRARY(Largex)
 void test_DAG() {
   DAG *D = new DAG();
 
-  D->AddNode(new DAGnode(tTop,"top0"));
+  D->Print("initial DAG");
 
-  D->AddNode(new DAGnode(tBin,"l0_b0"));
-  D->AddNode(new DAGnode(tBin,"l0_b1"));
-  D->AddNode(new DAGnode(tBin,"l0_b2"));
+  std::vector<DAGnode*> lay0;
+  lay0.push_back(new DAGnode(tBin,"l0_b0"));
+  lay0.push_back(new DAGnode(tBin,"l0_b1"));
+  lay0.push_back(new DAGnode(tBin,"l0_b2"));
 
-  D->AddNode(new DAGnode(tBin,"l1_b0"));
-  D->AddNode(new DAGnode(tBin,"l1_b1"));
+  D->AddLayer(lay0);
 
-  D->AddNode(new DAGnode(tBottom,"bottom0"));
-
-  D->AddEdge("top0","l0_b0");
-  D->AddEdge("top0","l0_b1");
-  D->AddEdge("top0","l0_b2");
-
-  D->AddEdge("l0_b0","l1_b0");
-  D->AddEdge("l0_b0","l1_b1");
-
-  D->AddEdge("l0_b1","l1_b0");
-  D->AddEdge("l0_b1","l1_b1");
-
-  D->AddEdge("l0_b2","l1_b0");
-  D->AddEdge("l0_b2","l1_b1");
-
-  D->AddEdge("l1_b0","bottom0");
-  D->AddEdge("l1_b1","bottom0");
-
-  D->Print();
+  D->Print("final DAG");
 };

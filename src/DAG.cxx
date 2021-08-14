@@ -10,6 +10,13 @@ using std::endl;
 DAG::DAG()
   : debug(true)
 {
+  Initialize();
+};
+
+
+void DAG::Initialize() {
+  nodeMap.clear();
+  AddEdge(new DAGnode(tTop,"top0"),new DAGnode(tBottom,"bottom0"));
 };
 
 
@@ -18,10 +25,29 @@ void DAG::AddNode(DAGnode *N, Bool_t silence) {
   if(debug) cout << "ADD TO DAG: Node " << id_ << endl;
   if(GetNode(id_,true)) {
     if(!silence)
-      cerr << "WARNING: tried to add duplicate node " << id_ << "to DAG" << endl;
+      cerr << "WARNING: tried to add duplicate node " << id_ << " to DAG" << endl;
     return;
   } else {
     nodeMap.insert(std::pair<TString,DAGnode*>(id_,N));
+  };
+};
+
+
+void DAG::RenameNode(DAGnode *N, TString newName, Int_t newType) {
+  nodeMap.erase(N->GetID());
+  N->SetID(newName);
+  if(newType>=0) N->SetNodeType(newType);
+  nodeMap.insert(std::pair<TString,DAGnode*>(newName,N));
+};
+
+
+void DAG::AddLayer(std::vector<DAGnode*> nodes) {
+  auto C = GetBottomNode();
+  RenameNode(C,"tmp",tControl);
+  AddNode(new DAGnode(tBottom,"bottom0"));
+  for(auto N : nodes) {
+    AddEdge(C,N);
+    AddEdge(N,"bottom0");
   };
 };
 
@@ -41,10 +67,11 @@ void DAG::AddEdge(DAGnode *inN, DAGnode *outN) {
 };
 
 
-void DAG::Print() {
-  cout << "\nDAG\n====================\n";
+void DAG::Print(TString header) {
+  TString sep = "=========================";
+  cout << endl << header << endl << sep << endl;
   TraverseLayers( GetTopNode(), [](DAGnode *N){ N->Print(); cout << endl; });
-  cout << "====================\n";
+  cout << sep << endl;
 };
 
 
@@ -59,16 +86,18 @@ DAGnode *DAG::GetNode(TString id_, Bool_t silence) {
 };
 
 
-DAGnode *DAG::GetTopNode() {
+DAGnode *DAG::GetTopNode() { return GetUniqueNode(tTop,"top"); };
+DAGnode *DAG::GetBottomNode() { return GetUniqueNode(tBottom,"bottom"); };
+DAGnode *DAG::GetUniqueNode(Int_t type_,TString typeStr) {
   DAGnode * ret = nullptr;
   for(auto kv : nodeMap) {
     auto N = kv.second;
-    if(N->GetNodeType()==tTop) {
-      if(ret!=nullptr) cerr << "WARNING: this DAG has more than one top node" << endl;
+    if(N->GetNodeType()==type_) {
+      if(ret!=nullptr) cerr << "WARNING: this DAG has more than one " << typeStr << " node" << endl;
       ret = N;
     };
   };
-  if(ret==nullptr) cerr << "WARNING: this DAG has no top node" << endl;
+  if(ret==nullptr) cerr << "WARNING: this DAG has no " << typeStr << " node" << endl;
   return ret;
 };
 

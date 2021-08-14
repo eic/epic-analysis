@@ -26,10 +26,18 @@ class DAG : public TObject
     DAG();
     ~DAG();
 
+    void Initialize();
+
     DAGnode *GetNode(TString id_, Bool_t silence=false);
+
     DAGnode *GetTopNode();
+    DAGnode *GetBottomNode();
+    DAGnode *GetUniqueNode(Int_t type_,TString typeStr);
 
     void AddNode(DAGnode *N, Bool_t silence=false);
+    void RenameNode(DAGnode *N, TString newName, Int_t newType=-1);
+
+    void AddLayer(std::vector<DAGnode*> nodes);
 
     void AddEdge(TString inID, TString outID);
     void AddEdge(DAGnode *inN, TString outID);
@@ -38,7 +46,7 @@ class DAG : public TObject
 
     void TraverseLayers(DAGnode *N, void (*lambda)(DAGnode*));
 
-    void Print();
+    void Print(TString header="DAG");
 
   protected:
     Bool_t Visited(TString id_);
