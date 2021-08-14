@@ -37,6 +37,8 @@ class DAGnode : public TObject
 
     void AddInput(DAGnode *N);
     void AddOutput(DAGnode *N);
+    std::vector<DAGnode*> GetInputs() { return inputList; };
+    std::vector<DAGnode*> GetOutputs() { return outputList; };
 
     void Print();
 

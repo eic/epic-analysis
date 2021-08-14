@@ -42,12 +42,9 @@ void DAG::AddEdge(DAGnode *inN, DAGnode *outN) {
 
 
 void DAG::Print() {
-  cout << "\nDAG\n--------------------\n";
-  for(auto kv : nodeMap) {
-    kv.second->Print();
-    cout << endl;
-  };
-  cout << "-----------------------\n";
+  cout << "\nDAG\n====================\n";
+  TraverseLayers( GetTopNode(), [](DAGnode *N){ N->Print(); cout << endl; });
+  cout << "====================\n";
 };
 
 
@@ -59,6 +56,41 @@ DAGnode *DAG::GetNode(TString id_, Bool_t silence) {
       cerr << "ERROR: cannot find node " << id_ << " in DAG" << endl;
     return nullptr;
   };
+};
+
+
+DAGnode *DAG::GetTopNode() {
+  DAGnode * ret = nullptr;
+  for(auto kv : nodeMap) {
+    auto N = kv.second;
+    if(N->GetNodeType()==tTop) {
+      if(ret!=nullptr) cerr << "WARNING: this DAG has more than one top node" << endl;
+      ret = N;
+    };
+  };
+  if(ret==nullptr) cerr << "WARNING: this DAG has no top node" << endl;
+  return ret;
+};
+
+
+
+void DAG::TraverseLayers(DAGnode *N, void (*lambda)(DAGnode*)) {
+  TString id_ = N->GetID();
+  if(N->GetNodeType()==tTop) {
+    lambda(N);
+    visitList.clear();
+  };
+  if(!Visited(id_)) {
+    visitList.push_back(id_);
+    for(auto M : N->GetOutputs()) {
+      if(!Visited(M->GetID())) lambda(M);
+    };
+    for(auto M : N->GetOutputs()) TraverseLayers(M,lambda);
+  };
+};
+
+Bool_t DAG::Visited(TString id_) {
+  return std::find(visitList.begin(),visitList.end(),id_) != visitList.end();
 };
 
 

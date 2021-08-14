@@ -27,6 +27,7 @@ class DAG : public TObject
     ~DAG();
 
     DAGnode *GetNode(TString id_, Bool_t silence=false);
+    DAGnode *GetTopNode();
 
     void AddNode(DAGnode *N, Bool_t silence=false);
 
@@ -35,12 +36,17 @@ class DAG : public TObject
     void AddEdge(TString inID, DAGnode *outN);
     void AddEdge(DAGnode *inN, DAGnode *outN);
 
+    void TraverseLayers(DAGnode *N, void (*lambda)(DAGnode*));
+
     void Print();
 
+  protected:
+    Bool_t Visited(TString id_);
 
   private:
     Bool_t debug;
     std::map<TString,DAGnode*> nodeMap;
+    std::vector<TString> visitList;
 
   ClassDef(DAG,1);
 };
