@@ -87,7 +87,6 @@ void Analysis::Execute() {
   const Int_t NfinalStateBins = BinScheme("finalState")->GetNumBins();
   const Int_t NptjetBins = BinScheme("pt_jet")->GetNumBins();
 
-
   // sets of histogram sets
   // - `histSet` is a data structure for storing and organizing pointers to
   //   sets of histograms (`Histos` objects)
@@ -96,7 +95,6 @@ void Analysis::Execute() {
   //         better data structure
   Histos *histSet[NptBins][NxBins][NzBins][NqBins][NyBins][NfinalStateBins];
   Histos *histSetJets[NptjetBins][NxBins][NqBins][NyBins];
-  Histos *histSetDIS[NxBins][NqBins][NyBins];
   
   std::vector<Histos*> histSetList;
   std::vector<Histos*> histSetListJets;
@@ -134,6 +132,8 @@ void Analysis::Execute() {
               HS->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
               HS->DefineHist1D("y","y","",NBINS,1e-5,1,true);
               HS->DefineHist1D("W","W","GeV",NBINS,0,15);
+	      // -- DIS kinematics resolution
+	      HS->DefineHist1D("xRes","x - x_{true}","", NBINS, -1, 1);                                                                                           	     
               // -- hadron 4-momentum
               HS->DefineHist1D("pLab","p_{lab}","GeV",NBINS,0,10);
               HS->DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
@@ -237,7 +237,6 @@ void Analysis::Execute() {
   cout << sep << endl;
 
 
-
   // vars
   Double_t eleP,maxEleP;
   int pid,bFinalState;
@@ -291,14 +290,8 @@ void Analysis::Execute() {
     kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
     // calculate DIS kinematics
     kin->CalculateDISbyElectron();
-    // calculate true DIS kinematics                                                                                                                                                                                              
+    // calculate true DIS kinematics                                                                                                                                                         
     kinTrue->CalculateDISbyElectron();
-
-
-
-
-
-    
 
     // track loop
     itTrack.Reset();
@@ -312,7 +305,6 @@ void Analysis::Execute() {
       auto kv = PIDtoEnum.find(pid);
       if(kv!=PIDtoEnum.end()) bFinalState = kv->second;
       else continue;
-
 
       // get parent particle, to check if pion is from vector meson
       GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
@@ -378,6 +370,8 @@ void Analysis::Execute() {
           H->Hist("x")->Fill(kin->x);
           H->Hist("W")->Fill(kin->W);
           H->Hist("y")->Fill(kin->y);
+	  // DIS kinematics resolution
+	  H->Hist("xRes")->Fill(kin->x - kinTrue->x);
           // hadron 4-momentum
           H->Hist("pLab")->Fill(kin->pLab);
           H->Hist("pTlab")->Fill(kin->pTlab);
