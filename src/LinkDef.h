@@ -6,7 +6,7 @@
 
 #pragma link C++ class CutDef+;
 #pragma link C++ class BinSet+;
-#pragma link C++ class DAGnode+;
+#pragma link C++ class Node+;
 #pragma link C++ class DAG+;
 #pragma link C++ class HistConfig+;
 #pragma link C++ class Histos+;
