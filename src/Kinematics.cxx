@@ -174,41 +174,31 @@ void Kinematics::CalculateHadronKinematics() {
 
 // get PID information from PID systems tracks
 int getTrackPID(Track *track, TObjArrayIter itParticle, TObjArrayIter itPIDSystemsTrack){
-  GenParticle *trackParticle = (GenParticle*)track->Particle.GetObject();                                                                                                                                            
-  GenParticle *detectorParticle;                                                                                                                                                                                                 
-  int pidOut = -1;                                                                                                                                                                                                  
-  while(Track *detectorTrack = (Track*)itPIDSystemsTrack() ){                                                                                                                                                              
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();                                                                                                                                                             
-    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;                                                                                                                                               
-  }                                                                                                                                                                                                                                         
+  GenParticle *trackParticle = (GenParticle*)track->Particle.GetObject();                                                                                                                      
+  GenParticle *detectorParticle;                                                                                                                                                       
+  int pidOut = -1;                                                                                                                                                                      
+  while(Track *detectorTrack = (Track*)itPIDSystemsTrack() ){                                                                                                                               
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();                                                                                                              
+    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;                                                                                                                    
+  }
+  
   return pidOut;
 }
 
 
 // calculates hadronic final state variables from DELPHES tree branches
 // expects 'vecElectron' set
-void Kinematics::GetHadronicFinalState(TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itPIDSystemsTrack, TObjArrayIter itParticle){
+void Kinematics::GetHadronicFinalState(TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle){
   itTrack.Reset();
   itEFlowTrack.Reset();
   itEFlowPhoton.Reset();
   itEFlowNeutralHadron.Reset();
-  itPIDSystemsTrack.Reset();
 
   itParticle.Reset();
   while(Track *track = (Track*)itTrack() ){  
     TLorentzVector  trackp4 = track->P4();
     if(!isnan(trackp4.E())){
-      if( std::abs(track->Eta) >= 4.0  ){ 
-	int pidTrack = getTrackPID(track, itParticle, itPIDSystemsTrack);
-	float trackPt = trackp4.Pt();
-	float trackEta = trackp4.Eta();
-	float trackPhi = trackp4.Phi();
-	float corrmass = correctMass(pidTrack);
-
-	float trackMass = trackp4.M();
-	if(corrmass!=0) trackMass = corrmass;
-	trackp4.SetPtEtaPhiM(trackPt, trackEta, trackPhi, trackMass);
-	
+      if( std::abs(track->Eta) >= 4.0  ){ 	
 	sigmah += (trackp4.E() - trackp4.Pz());
 	Pxh += trackp4.Px();
 	Pyh +=trackp4.Py();
@@ -219,15 +209,6 @@ void Kinematics::GetHadronicFinalState(TObjArrayIter itTrack, TObjArrayIter itEF
     TLorentzVector eflowTrackp4 = eflowTrack->P4();
     if(!isnan(eflowTrackp4.E())){
       if(std::abs(eflowTrack->Eta) < 4.0){
-	int pidTrack = getTrackPID(eflowTrack, itParticle, itPIDSystemsTrack);
-	float trackPt = eflowTrackp4.Pt();
-	float trackEta = eflowTrackp4.Eta();
-	float trackPhi = eflowTrackp4.Phi();
-	float trackMass = eflowTrackp4.M();
-	float corrmass = correctMass(pidTrack);
-	if(corrmass!=0) trackMass = corrmass;
-	eflowTrackp4.SetPtEtaPhiM(trackPt, trackEta, trackPhi, trackMass);
-	
 	sigmah += (eflowTrackp4.E() - eflowTrackp4.Pz());
 	Pxh += eflowTrackp4.Px();
 	Pyh += eflowTrackp4.Py();
