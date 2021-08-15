@@ -269,7 +269,7 @@ void Analysis::Execute() {
 
     maxElePtrue = 0;
     while(GenParticle *part = (GenParticle*) itParticle()){
-      if(part->PID == 11){
+      if(part->PID == 11 && part->Status == 1){
 	elePtrue = part->PT;
 	if(elePtrue > maxElePtrue){
 	  maxElePtrue = elePtrue;
