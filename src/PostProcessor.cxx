@@ -495,7 +495,7 @@ std::vector<int> PostProcessor::GetBinNums(TString varName) {
   if(B==nullptr) {
     cerr << "ERROR: unknown variable " << varName << " in PostProcessor::GetBinNums" << endl;
   } else {
-    for(int n=0; n<B->GetBinList()->GetEntries(); n++) retVec.push_back(n);
+    for(int n=0; n<B->GetNumBins(); n++) retVec.push_back(n);
   };
   return retVec;
 };

@@ -68,10 +68,10 @@ void DAG::AddNode(Node *N, Bool_t silence) {
 
 
 // add edges
-void DAG::AddEdge(Node *inN, Node *outN) {
+void DAG::AddEdge(Node *inN, Node *outN, Bool_t silence) {
   if(inN && outN) {
-    inN->AddOutput(outN);
-    outN->AddInput(inN);
+    inN->AddOutput(outN,silence);
+    outN->AddInput(inN,silence);
     this->AddNode(inN,true);
     this->AddNode(outN,true);
   } else {
@@ -82,10 +82,12 @@ void DAG::AddEdge(Node *inN, Node *outN) {
 
 // rename or repurpose a node
 void DAG::ModifyNode(Node *N, TString newName, Int_t newType) {
+  if(debug) cout << "RENAME NODE: " << N->GetID();
   nodeMap.erase(N->GetID());
   N->SetID(newName);
   if(newType>=0) N->SetNodeType(newType);
   nodeMap.insert(std::pair<TString,Node*>(newName,N));
+  if(debug) cout << " to " << N->GetID() << endl;
 };
 
 
@@ -106,15 +108,28 @@ void DAG::RemoveEdge(Node *inN, Node *outN) {
 
 // add a layer of nodes, fully connected to the last layer of the DAG
 // - primary usage is to add a layer of bins from a BinSet
+void DAG::AddLayer(BinSet *BS) {
+  std::vector<Node*> nodes;
+  int cnt=0;
+  TObjArrayIter next(BS->GetBinList());
+  while(CutDef *cut = (CutDef*) next()) {
+    nodes.push_back(new Node( NT::bin, cut->GetVarName()+Form("__%d",cnt++), cut ));
+  };
+  AddLayer(nodes);
+};
+// - add layer of nodes
 void DAG::AddLayer(std::vector<Node*> nodes) {
+  // convert the leaf node to a temporary control node
   auto C = GetLeafNode();
   ModifyNode(C,"tmp",NT::control);
+  // create new leaf
   AddNode(NT::leaf,"leaf0");
+  // connect new layer after temporary control node and before new leaf
   for(auto N : nodes) {
     AddEdge(C,N);
     AddEdge(N,GetNode("leaf0"));
   };
-  Simplify();
+  RepatchToFull(C);
 };
 
 
@@ -155,22 +170,53 @@ Bool_t DAG::Visited(TString id_) {
 };
 
 
-// simplify DAG: convert all control nodes into full connections 
-// between the adjacent layers; all control nodes will be removed
-void DAG::Simplify() {
-  auto nodeMapCopy = nodeMap;
-  for(auto kv : nodeMapCopy) RemoveControl(kv.first);
-};
-
-// remove a control node, replacing it with full connection between
-// adjacent layers
-void DAG::RemoveControl(TString id) { RemoveControl(GetNode(id)); };
-void DAG::RemoveControl(Node *N) {
+// convert control patches to full patches; control node(s) will be removed
+void DAG::RepatchToFull(TString id) { RepatchToFull(GetNode(id)); };
+void DAG::RepatchToFull(Node *N) {
   if(N->GetNodeType()!=NT::control) return;
+  // connect each input to each output
   for(auto inN : N->GetInputs()) {
     for(auto outN : N->GetOutputs()) AddEdge(inN,outN);
   };
+  // remove control node and its connections
   RemoveNode(N);
+};
+void DAG::RepatchAllToFull() {
+  auto nodeMapCopy = nodeMap;
+  for(auto kv : nodeMapCopy) RepatchToFull(kv.first);
+};
+
+
+// re-patch a layer to the current leaf node's output, and re-patch the
+// adjacent layers together; the current leaf node will become a control
+// node, and a new leaf node is created
+void DAG::RepatchToLeaf(TString varName) {
+  // convert the leaf node to a control node
+  auto C = GetLeafNode();
+  ModifyNode(C,varName+"__control",NT::control);
+  // create new leaf
+  AddNode(NT::leaf,"leaf0");
+  auto L = GetLeafNode();
+  // repatching lambda
+  auto repatch = [&C,&L,&varName,this](Node *N) {
+    // only act on nodes in the specified layer
+    if(N->GetNodeType()!=NT::bin || N->GetVarName()!=varName) return;
+    // re-patch adjacent layers together
+    for(auto inN : N->GetInputs()) {
+      for(auto outN : N->GetOutputs()) this->AddEdge(inN,outN,true);
+    };
+    // disconnect node N from adjacent layers
+    for(auto inN : N->GetInputs()) this->RemoveEdge(inN,N);
+    for(auto outN : N->GetOutputs()) this->RemoveEdge(N,outN);
+    // re-patch node N to be between control and leaf nodes
+    this->AddEdge(C,N,true);
+    this->AddEdge(N,L,true);
+    // mark node as visited, so we don't try to repatch it again when
+    // the traversal reaches the new layer
+    this->SetVisited(N->GetID());
+  };
+  // traverse
+  TraverseBreadth(GetRootNode(),repatch);
 };
 
 

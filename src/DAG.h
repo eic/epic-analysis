@@ -12,12 +12,14 @@
 // ROOT
 #include "TSystem.h"
 #include "TObject.h"
+#include "TObjArray.h"
 #include "TNamed.h"
 #include "TString.h"
 
 
 // largex-eic
 #include "CutDef.h"
+#include "BinSet.h"
 #include "Node.h"
 
 class DAG : public TObject
@@ -45,11 +47,13 @@ class DAG : public TObject
     //   do nothing (silence=true suppresses error print out)
     void AddNode(Node *N, Bool_t silence=false);
     void AddNode(Int_t nodeType, TString id, Bool_t silence=false);
-    void AddEdge(Node *inN, Node *outN);
+    void AddEdge(Node *inN, Node *outN, Bool_t silence=false);
     void ModifyNode(Node *N, TString newName, Int_t newType=-1); // rename or repurpose a node
 
-    // add a layer of nodes, fully connected to the last layer of the DAG
+    // add a layer of nodes, fully connected ("patched") to the last layer of the DAG
     // - primary usage is to add a layer of bins from a BinSet
+    // - "patch" refers to any set of edges between two layers
+    void AddLayer(BinSet *BS);
     void AddLayer(std::vector<Node*> nodes);
 
     // DAG traversals: iterate through nodes, executing the lambda on each;
@@ -57,12 +61,23 @@ class DAG : public TObject
     void TraverseBreadth(Node *N, std::function<void(Node*)> lambda);
     void TraverseDepth(Node *N, std::function<void(Node*)> lambda);
 
-    // simplify DAG: convert all control nodes into full connections between
-    // the adjacent layers; all control nodes will be removed; you can also
-    // convert a single control node to a full connection
-    void Simplify();
-    void RemoveControl(TString id);
-    void RemoveControl(Node *N);
+    // patch operations: manipulate connections ("patches") between layers
+    /*   - "patch" refers to a set of edges between two layers, which
+     *     can be two types:
+     *     - "full patch": each node of one layer is connected to each node of the other
+     *     - "control patch": each node of one layer is connected to a control node, which
+     *       is then connected to each node of the next layer
+     */
+    // convert control patch(es) to full patch(es); control node(s) will be removed
+    void RepatchToFull(TString id);
+    void RepatchToFull(Node *N);
+    void RepatchAllToFull();
+    // re-patch a layer to the current leaf node's output, and re-patch the
+    // adjacent layers together; the current leaf node will become a control
+    // node, and a new leaf node is created
+    void RepatchToLeaf(TString varName);
+    // mark a node as visited
+    void SetVisited(TString id_) { visitList.push_back(id_); };
 
     // remove nodes and edges
     void RemoveNode(Node *N);

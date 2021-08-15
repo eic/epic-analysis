@@ -7,9 +7,10 @@ using std::cerr;
 using std::endl;
 
 // constructor
-Node::Node(Int_t nodeType_, TString id_)
+Node::Node(Int_t nodeType_, TString id_, CutDef *cut_)
   : nodeType(nodeType_)
   , id(id_)
+  , cut(cut_)
   , debug(true)
 {
 };
@@ -35,16 +36,16 @@ void Node::Print() {
 // add inputs and outputs to nodes 
 // - inputs: nodes that connect to this node via incoming arrows
 // - outputs: nodes that connect to this node via outgoing arrows
-void Node::AddInput(Node *N) { AddIO(N,inputList,"input"); };
-void Node::AddOutput(Node *N) { AddIO(N,outputList,"output"); };
-void Node::AddIO(Node *N, std::vector<Node*> &list, TString listName) {
+void Node::AddInput(Node *N, Bool_t silence) { AddIO(N,inputList,"input",silence); };
+void Node::AddOutput(Node *N, Bool_t silence) { AddIO(N,outputList,"output",silence); };
+void Node::AddIO(Node *N, std::vector<Node*> &list, TString listName, Bool_t silence) {
   if(debug) {
     cout << "ADD TO NODE: " << listName << " " << N->GetID() << " to " << this->GetID() << endl;
   };
   for(Node *M : list) {
     if( M->GetID() == N->GetID() ) {
-      cerr << "WARNING: tried to add duplicate node "
-           << M->GetID() << "to " << listName << " list" << endl;
+      if(!silence) cerr << "WARNING: tried to add duplicate node "
+                        << M->GetID() << "to " << listName << " list" << endl;
       return;
     };
   };
