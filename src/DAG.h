@@ -1,3 +1,10 @@
+/* ADAGE backend data structure: a Directed Acyclic Graph (DAG)
+ * A - Analysis in a
+ * D - Directed
+ * A - Acyclic
+ * G - Graph
+ * E - Environment
+ */
 #ifndef DAG_
 #define DAG_
 
