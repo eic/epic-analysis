@@ -20,6 +20,7 @@ Analysis::Analysis(
   , eleBeamEn(eleBeamEn_)
   , ionBeamEn(ionBeamEn_)
   , crossingAngle(crossingAngle_)
+  , outfilePrefix(outfilePrefix_)
 {
   // set bin schemes
   AddBinScheme("pt","p_{T}");
@@ -43,19 +44,6 @@ Analysis::Analysis(
   diagonalXZQ = false;
   writeSimpleTree = false;
   maxEvents = 0;
-
-  // define output file
-  outfileName = infileName;
-  outfileName(TRegexp("^.*/")) = ""; // remove path
-  outfileName(TRegexp("\\*")) = ""; // remove asterisk wildcard
-  if(outfilePrefix_!="") outfilePrefix_+=".";
-  outfileName = "out/"+outfilePrefix_+outfileName;
-  cout << "-- output file: " << outfileName << endl;
-  outFile = new TFile(outfileName,"RECREATE");
-
-  // objects
-  kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
-  ST = new SimpleTree("tree",kin);
 };
 
 
@@ -64,8 +52,22 @@ Analysis::Analysis(
 //=============================================
 void Analysis::Execute() {
 
-  // read delphes tree
   cout << "-- running analysis of " << infileName << endl;
+
+  // define output file
+  outfileName = infileName;
+  outfileName(TRegexp("^.*/")) = ""; // remove path
+  outfileName(TRegexp("\\*")) = ""; // remove asterisk wildcard
+  if(outfilePrefix!="") outfilePrefix+=".";
+  outfileName = "out/"+outfilePrefix+outfileName;
+  cout << "-- output file: " << outfileName << endl;
+  outFile = new TFile(outfileName,"RECREATE");
+
+  // instantiate objects
+  kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
+  ST = new SimpleTree("tree",kin);
+
+  // read delphes tree
   TChain *chain = new TChain("Delphes");
   chain->Add(infileName);
   ExRootTreeReader *tr = new ExRootTreeReader(chain);
