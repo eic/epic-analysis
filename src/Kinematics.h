@@ -19,6 +19,10 @@
 #include "classes/DelphesClasses.h"
 
 #include "fastjet/ClusterSequence.hh"
+
+#if INCCENTAURO == 1
+#include "fastjet/plugins/Centauro/Centauro.hh"
+#endif
 using namespace fastjet;
 
 
@@ -34,6 +38,7 @@ class Kinematics : public TObject
     ~Kinematics();
 
     // calculators
+    void CalculateDIS(TString recmethod);
     void CalculateDISbyElectron();
     void CalculateDISbyJB();
     void CalculateDISbyDA();
@@ -44,7 +49,13 @@ class Kinematics : public TObject
     void GetHadronicFinalState(TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itPIDSystemsTrack, TObjArrayIter itParticle);
 
     void GetJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
-  
+    void CalculateJetKinematics(PseudoJet jet);
+
+    #if INCCENTAURO == 1
+    void GetBreitFrameJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
+    void CalculateBreitJetKinematics(PseudoJet jet);
+    #endif
+
     // kinematics (should be Double_t, if going in SimpleTree)
     Double_t W,Q2,Nu,x,y,s; // DIS
     Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // hadron
@@ -65,6 +76,13 @@ class Kinematics : public TObject
     TLorentzVector vecHadron;
     // jets
     std::vector<PseudoJet> jetsRec, jetsTrue;
+    std::vector<PseudoJet> breitJetsRec, breitJetsTrue;
+    std::map<double, int> jetConstituents;
+    ClusterSequence* csRec;
+    ClusterSequence* csTrue;
+    Double_t zjet, pTjet, qTjet;
+    std::vector<double> jperp;
+    std::vector<double> zhad_jet;
     // struck quark information
     Double_t quarkpT;
     
