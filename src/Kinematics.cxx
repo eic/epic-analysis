@@ -80,17 +80,19 @@ void Kinematics::CalculateDIS(TString recmethod){
   if( recmethod.CompareTo("Ele", TString::kIgnoreCase) == 0 ){
     this->CalculateDISbyElectron();
   }
-  if( recmethod.CompareTo("DA", TString::kIgnoreCase) == 0 ){
+  else if( recmethod.CompareTo("DA", TString::kIgnoreCase) == 0 ){
     this->CalculateDISbyDA();
   }
-  if( recmethod.CompareTo("JB", TString::kIgnoreCase) == 0 ){
+  else if( recmethod.CompareTo("JB", TString::kIgnoreCase) == 0 ){
     this->CalculateDISbyJB();
   }
-  if( recmethod.CompareTo("Mixed", TString::kIgnoreCase) == 0){
+  else if( recmethod.CompareTo("Mixed", TString::kIgnoreCase) == 0){
     this->CalculateDISbyMixed();
   }
-
-  
+  else {
+    cerr << "ERROR: unknown reconstruction method" << endl;
+    return;
+  };
 };
 
 // calculate DIS kinematics using scattered electron
