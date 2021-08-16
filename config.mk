@@ -20,11 +20,13 @@ LIBS = $(shell root-config --glibs)
 DEPS += -I${DELPHES_HOME} -I${DELPHES_HOME}/external
 LIBS += -L${DELPHES_HOME} -lDelphes 
 
-INCCENTAURO = 
-ifdef INCCENTAURO
+# Fastjet Centauro
+INCCENTAURO = 0
+ifeq ($(INCCENTAURO),1)
 LIBS+= -L${DELPHES_HOME}/external/fastjet/plugins/Centauro -lCentauro
 DEPS+= -I${DELPHES_HOME}/external/fastjet/plugins/Centauro
 endif
+FLAGS += -DINCCENTAURO=$(INCCENTAURO)
 
 # shared object name and source directory
 LARGEX = Largex

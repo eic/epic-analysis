@@ -351,7 +351,7 @@ void Kinematics::GetJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton
 
 };
 
-#ifdef __FASTJET_CONTRIB_CENTAUROJETALGORITHM_HH__
+#if INCCENTAURO == 1
 void Kinematics::GetBreitFrameJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle){
   itEFlowTrack.Reset();
   itEFlowPhoton.Reset();

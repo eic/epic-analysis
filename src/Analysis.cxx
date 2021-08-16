@@ -20,7 +20,6 @@ Analysis::Analysis(
   , ionBeamEn(ionBeamEn_)
   , crossingAngle(crossingAngle_)
 {
-
   // set bin schemes
   AddBinScheme("pt","p_{T}");
   AddBinScheme("z","z");
@@ -198,7 +197,7 @@ void Analysis::Execute() {
       };
     };
   };
-  #ifdef __FASTJET_CONTRIB_CENTAUROJETALGORITHM_HH__
+  #if INCCENTAURO == 1
   for(int bpt=0; bpt<NptjetBins; bpt++) { // - loop over jet pT bins                                                                                                                                   
     for(int bz=0; bz<NzjetBins; bz++){
       for(int bx=0; bx<NxBins; bx++) { // - loop over x bins                                                                                                                                            
@@ -429,7 +428,7 @@ void Analysis::Execute() {
 	};      
       };
     };
-    #ifdef __FASTJET_CONTRIB_CENTAUROJETALGORITHM_HH__
+    #if INCCENTAURO == 1
     for(int brec = 0; brec < NrecMethodBins; brec++){
       TString recname = recMethodName.find(brec)->second;      
       kin->CalculateDIS(recname);      
@@ -504,7 +503,7 @@ void Analysis::Execute() {
   for(Histos *H : histSetList) H->Write();
   for(Histos *H : histSetListJets) H->WriteHists(outfile);
   for(Histos *H : histSetListJets) H->Write();
-  #ifdef __FASTJET_CONTRIB_CENTAUROJETALGORITHM_HH__
+  #if INCCENTAURO == 1
   for(Histos *H : histSetListBreitJets) H->WriteHists(outfile);
   for(Histos *H : histSetListBreitJets) H->Write();
   #endif

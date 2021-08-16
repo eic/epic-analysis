@@ -20,9 +20,7 @@
 
 #include "fastjet/ClusterSequence.hh"
 
-//bool incfastjet = true;
-//#ifdef __FASTJET_CONTRIB_CENTAUROJETALGORITHM_HH__
-#if false
+#if INCCENTAURO == 1
 #include "fastjet/plugins/Centauro/Centauro.hh"
 #endif
 using namespace fastjet;
@@ -53,7 +51,7 @@ class Kinematics : public TObject
     void GetJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
     void CalculateJetKinematics(PseudoJet jet);
 
-    #ifdef __FASTJET_CONTRIB_CENTAUROJETALGORITHM_HH__
+    #if INCCENTAURO == 1
     void GetBreitFrameJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
     void CalculateBreitJetKinematics(PseudoJet jet);
     #endif
