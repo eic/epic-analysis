@@ -16,15 +16,15 @@
 #include "TMath.h"
 #include "TLorentzVector.h"
 
+// Delphes
 #include "classes/DelphesClasses.h"
 
+// Fastjet
 #include "fastjet/ClusterSequence.hh"
-
 #if INCCENTAURO == 1
 #include "fastjet/plugins/Centauro/Centauro.hh"
 #endif
 using namespace fastjet;
-
 
 using std::map;
 using std::cout;
@@ -43,16 +43,23 @@ class Kinematics : public TObject
     void CalculateDISbyJB();
     void CalculateDISbyDA();
     void CalculateDISbyMixed();
-  
     void getqWQuadratic();
     void CalculateHadronKinematics();
-    void GetHadronicFinalState(TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
-
-    void GetJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
+    void GetHadronicFinalState(
+        TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
+        TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
+        );
+    void GetJets(
+        TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
+        TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
+        );
     void CalculateJetKinematics(PseudoJet jet);
 
     #if INCCENTAURO == 1
-    void GetBreitFrameJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
+    void GetBreitFrameJets(
+        TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
+        TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
+        );
     void CalculateBreitJetKinematics(PseudoJet jet);
     #endif
 
@@ -85,7 +92,7 @@ class Kinematics : public TObject
     std::vector<double> zhad_jet;
     // struck quark information
     Double_t quarkpT;
-    
+
     // - c.o.m. frame of virtual photon and ion
     TLorentzVector CvecBoost;
     TVector3 Cboost;
@@ -105,8 +112,8 @@ class Kinematics : public TObject
     // particle masses
     static Double_t ElectronMass() { return 0.000511; };
     static Double_t ProtonMass()   { return 0.938272; };
-    static Double_t KaonMass()   { return 0.493677; };
-    static Double_t PionMass()   { return 0.139570; };
+    static Double_t KaonMass()     { return 0.493677; };
+    static Double_t PionMass()     { return 0.139570; };
     Double_t IonMass;
 
 
@@ -167,22 +174,29 @@ class Kinematics : public TObject
       };
       return sgn * TMath::ACos(numer/denom);
     };
-  
+
     // misc. functions for hadronic final state
     float correctMass(int pid){
-      float massOut = 0;                                                                                                                                                                                                             
+      float massOut = 0;
       switch(std::abs(pid)){
-      case 11:
-	massOut = ElectronMass();
-      case 2212:
-	massOut = ProtonMass();
-      case 321:
-	massOut = KaonMass();
-      case 211:
-	massOut = PionMass();
-      }
+        case 11:
+          massOut = ElectronMass();
+          break;
+        case 2212:
+          massOut = ProtonMass();
+          break;
+        case 321:
+          massOut = KaonMass();
+          break;
+        case 211:
+          massOut = PionMass();
+          break;
+        default:
+          cerr << "ERROR: unknown pid in Kinematics::correctMass" << endl;
+          massOut = -1;
+      };
       return massOut;
-    }
+    };
 
 
     // CUTS =====================================================

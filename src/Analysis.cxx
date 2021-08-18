@@ -103,14 +103,14 @@ void Analysis::Execute() {
   Histos *histSet[NptBins][NxBins][NzBins][NqBins][NyBins][NfinalStateBins];
   Histos *histSetJets[NptjetBins][NzjetBins][NxBins][NqBins][NyBins];
   Histos *histSetBreitJets[NptjetBins][NzjetBins][NxBins][NqBins][NyBins][NrecMethodBins];
- 
+
   std::vector<Histos*> histSetList;
   std::vector<Histos*> histSetListJets;
   std::vector<Histos*> histSetListBreitJets;
 
   std::vector<Histos*> histSetFillList;
   std::vector<int> v_pt, v_x, v_z, v_q, v_y;
-  // instantiate Histos sets, and populate 
+  // instantiate Histos sets, and populate
   TString histosN,histosT;
 
   cout << "Define track histograms..." << endl;
@@ -141,8 +141,8 @@ void Analysis::Execute() {
               HS->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
               HS->DefineHist1D("y","y","",NBINS,1e-5,1,true);
               HS->DefineHist1D("W","W","GeV",NBINS,0,15);
-	      // -- DIS kinematics resolution
-	      HS->DefineHist1D("xRes","x - x_{true}","", NBINS, -1, 1);                                                                                           	     
+              // -- DIS kinematics resolution
+              HS->DefineHist1D("xRes","x - x_{true}","", NBINS, -1, 1);
               // -- hadron 4-momentum
               HS->DefineHist1D("pLab","p_{lab}","GeV",NBINS,0,10);
               HS->DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
@@ -183,65 +183,65 @@ void Analysis::Execute() {
   for(int bpt=0; bpt<NptjetBins; bpt++) { // - loop over jet pT bins
     for(int bz=0; bz<NzjetBins; bz++){
       for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
-	for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
-	  for(int by=0; by<NyBins; by++) { // - loop over y bins
-	    
-	    histosN = this->GetHistosNameJets(bpt, bz, bx, bq, by);
-	    histosT = this->GetHistosTitleJets(bpt, bz, bx, bq, by);
+        for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
+          for(int by=0; by<NyBins; by++) { // - loop over y bins
 
-	    histSetJets[bpt][bz][bx][bq][by] = new Histos(histosN,histosT);
-	    HS = histSetJets[bpt][bz][bx][bq][by]; // shorthand pointer
-	    
-	    // jet kinematics plots
-	    HS->DefineHist1D("pT_jet","p_{T}","GeV", NBINS, 1e-2, 50);
-	    HS->DefineHist1D("mT_jet","m_{T}","GeV", NBINS, 1e-2, 20);
-	    HS->DefineHist1D("z_jet","z","GeV", NBINS,0, 1);
-	    HS->DefineHist1D("eta_jet","#eta_{lab}","GeV", NBINS,-5,5);
-	    HS->DefineHist1D("qT_jet","qT", "GeV", NBINS, 0, 10.0); 
-	    HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
-	    HS->DefineHist1D("qTQ", "q_{T}/Q, jets", "GeV", NBINS, 0, 3.0);
-	    // store cut definitions with histogram sets, then add histogram sets full list
-	    HS->AddCutDef(BinScheme("pt_jet")->Cut(bpt));
-	    HS->AddCutDef(BinScheme("z_jet")->Cut(bz));
-	    HS->AddCutDef(BinScheme("x")->Cut(bx));	    
-	    HS->AddCutDef(BinScheme("q")->Cut(bq));
-	    HS->AddCutDef(BinScheme("y")->Cut(by));
-	    histSetListJets.push_back(histSetJets[bpt][bz][bx][bq][by]);	  
-	  };	
-	};
+            histosN = this->GetHistosNameJets(bpt, bz, bx, bq, by);
+            histosT = this->GetHistosTitleJets(bpt, bz, bx, bq, by);
+
+            histSetJets[bpt][bz][bx][bq][by] = new Histos(histosN,histosT);
+            HS = histSetJets[bpt][bz][bx][bq][by]; // shorthand pointer
+
+            // jet kinematics plots
+            HS->DefineHist1D("pT_jet","p_{T}","GeV", NBINS, 1e-2, 50);
+            HS->DefineHist1D("mT_jet","m_{T}","GeV", NBINS, 1e-2, 20);
+            HS->DefineHist1D("z_jet","z","GeV", NBINS,0, 1);
+            HS->DefineHist1D("eta_jet","#eta_{lab}","GeV", NBINS,-5,5);
+            HS->DefineHist1D("qT_jet","qT", "GeV", NBINS, 0, 10.0);
+            HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
+            HS->DefineHist1D("qTQ", "q_{T}/Q, jets", "GeV", NBINS, 0, 3.0);
+            // store cut definitions with histogram sets, then add histogram sets full list
+            HS->AddCutDef(BinScheme("pt_jet")->Cut(bpt));
+            HS->AddCutDef(BinScheme("z_jet")->Cut(bz));
+            HS->AddCutDef(BinScheme("x")->Cut(bx));
+            HS->AddCutDef(BinScheme("q")->Cut(bq));
+            HS->AddCutDef(BinScheme("y")->Cut(by));
+            histSetListJets.push_back(histSetJets[bpt][bz][bx][bq][by]);
+          };	
+        };
       };
     };
   };
   #if INCCENTAURO == 1
-  for(int bpt=0; bpt<NptjetBins; bpt++) { // - loop over jet pT bins                                                                                                                                   
+  for(int bpt=0; bpt<NptjetBins; bpt++) { // - loop over jet pT bins
     for(int bz=0; bz<NzjetBins; bz++){
-      for(int bx=0; bx<NxBins; bx++) { // - loop over x bins                                                                                                                                            
-        for(int bq=0; bq<NqBins; bq++) { // - loop over q bins                                                                                                                                     
-          for(int by=0; by<NyBins; by++) { // - loop over y bins                                                                                                                                     
-	    for(int brec=0; brec<NrecMethodBins; brec++){
-	      histosN = this->GetHistosNameBreitJets(bpt, bz, bx, bq, by, brec);
-	      histosT = this->GetHistosTitleBreitJets(bpt, bz, bx, bq, by, brec);
-	      histSetBreitJets[bpt][bz][bx][bq][by][brec] = new Histos(histosN,histosT);
-	      HS = histSetBreitJets[bpt][bz][bx][bq][by][brec]; // shorthand pointer                                                                                                                         
-	      
-	      // jet kinematics plots                                                                                                                                                                     
-	      HS->DefineHist1D("pT_jet","p_{T}","GeV", NBINS, 1e-2, 20);
-	      HS->DefineHist1D("mT_jet","m_{T}","GeV", NBINS, 1e-2, 20);
-	      HS->DefineHist1D("z_jet","z","GeV", NBINS,0, 1);
-	      HS->DefineHist1D("eta_jet","#eta_{lab}","GeV", NBINS,-5,5);
-	      HS->DefineHist1D("qT_jet","qT", "GeV", NBINS, 0, 10.0);
-	      HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
-	      HS->DefineHist1D("qTQ", "q_{T}/Q, jets", "GeV", NBINS, 0, 3.0);
+      for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
+        for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
+          for(int by=0; by<NyBins; by++) { // - loop over y bins
+            for(int brec=0; brec<NrecMethodBins; brec++){
+              histosN = this->GetHistosNameBreitJets(bpt, bz, bx, bq, by, brec);
+              histosT = this->GetHistosTitleBreitJets(bpt, bz, bx, bq, by, brec);
+              histSetBreitJets[bpt][bz][bx][bq][by][brec] = new Histos(histosN,histosT);
+              HS = histSetBreitJets[bpt][bz][bx][bq][by][brec]; // shorthand pointer
 
-	      // store cut definitions with histogram sets, then add histogram sets full list                                                                                                       
-	      HS->AddCutDef(BinScheme("pt_jet")->Cut(bpt));
-	      HS->AddCutDef(BinScheme("z_jet")->Cut(bz));
-	      HS->AddCutDef(BinScheme("x")->Cut(bx));
-	      HS->AddCutDef(BinScheme("q")->Cut(bq));
-	      HS->AddCutDef(BinScheme("y")->Cut(by));
-	      HS->AddCutDef(BinScheme("recMethod")->Cut(brec));
-	      histSetListBreitJets.push_back(histSetBreitJets[bpt][bz][bx][bq][by][brec]);
-	    };
+              // jet kinematics plots
+              HS->DefineHist1D("pT_jet","p_{T}","GeV", NBINS, 1e-2, 20);
+              HS->DefineHist1D("mT_jet","m_{T}","GeV", NBINS, 1e-2, 20);
+              HS->DefineHist1D("z_jet","z","GeV", NBINS,0, 1);
+              HS->DefineHist1D("eta_jet","#eta_{lab}","GeV", NBINS,-5,5);
+              HS->DefineHist1D("qT_jet","qT", "GeV", NBINS, 0, 10.0);
+              HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
+              HS->DefineHist1D("qTQ", "q_{T}/Q, jets", "GeV", NBINS, 0, 3.0);
+
+              // store cut definitions with histogram sets, then add histogram sets full list
+              HS->AddCutDef(BinScheme("pt_jet")->Cut(bpt));
+              HS->AddCutDef(BinScheme("z_jet")->Cut(bz));
+              HS->AddCutDef(BinScheme("x")->Cut(bx));
+              HS->AddCutDef(BinScheme("q")->Cut(bq));
+              HS->AddCutDef(BinScheme("y")->Cut(by));
+              HS->AddCutDef(BinScheme("recMethod")->Cut(brec));
+              histSetListBreitJets.push_back(histSetBreitJets[bpt][bz][bx][bq][by][brec]);
+            };
           };
         };
       };
@@ -273,7 +273,7 @@ void Analysis::Execute() {
   Double_t eleP,maxEleP;
   int pid,bFinalState;
   Double_t elePtrue, maxElePtrue;
-  
+
   // event loop =========================================================
   if(maxEvents>0) ENT = maxEvents; // limiter
   cout << "begin event loop..." << endl;
@@ -302,16 +302,16 @@ void Analysis::Execute() {
     maxElePtrue = 0;
     while(GenParticle *part = (GenParticle*) itParticle()){
       if(part->PID == 11 && part->Status == 1){
-	elePtrue = part->PT;
-	if(elePtrue > maxElePtrue){
-	  maxElePtrue = elePtrue;
-	  kinTrue->vecElectron.SetPtEtaPhiM(
-	          part->PT,
-		  part->Eta,
-		  part->Phi,
-		  Kinematics::ElectronMass()
-		  );
-	};
+        elePtrue = part->PT;
+        if(elePtrue > maxElePtrue){
+          maxElePtrue = elePtrue;
+          kinTrue->vecElectron.SetPtEtaPhiM(
+              part->PT,
+              part->Eta,
+              part->Phi,
+              Kinematics::ElectronMass()
+              );
+        };
       };
     };
 
@@ -360,10 +360,10 @@ void Analysis::Execute() {
           trkPart->Phi,
           trkPart->Mass /* TODO: do we use track mass here ?? */
           );
-      
+
       kin->CalculateHadronKinematics();
       kinTrue->CalculateHadronKinematics();
-      
+
       // apply cuts
       if(kin->CutFull()) {
 
@@ -403,8 +403,8 @@ void Analysis::Execute() {
           H->Hist("x")->Fill(kin->x);
           H->Hist("W")->Fill(kin->W);
           H->Hist("y")->Fill(kin->y);
-	  // DIS kinematics resolution
-	  H->Hist("xRes")->Fill(kin->x - kinTrue->x);
+          // DIS kinematics resolution
+          H->Hist("xRes")->Fill(kin->x - kinTrue->x);
           // hadron 4-momentum
           H->Hist("pLab")->Fill(kin->pLab);
           H->Hist("pTlab")->Fill(kin->pTlab);
@@ -423,110 +423,102 @@ void Analysis::Execute() {
         };
 
         // fill simple tree (not binned)
-	// TODO: consider adding a `finalState` cut
+        // TODO: consider adding a `finalState` cut
         if( writeSimpleTree && histSetFillList.size()>0 ) ST->FillTree();
 
       };
     };
 
-    // jet loop            
+    // jet loop
     if(kin->CutDIS()){
       for(int i = 0; i < kin->jetsRec.size(); i++){
-	PseudoJet jet = kin->jetsRec[i];
-	kin->CalculateJetKinematics(jet);
-	
-	// following same procedure as in track loop	
-	CheckBins( BinScheme("pt_jet"), v_pt, kin->pTjet );
-	CheckBins( BinScheme("z_jet"), v_z, kin->zjet );
-	CheckBins( BinScheme("x"),  v_x,  kin->x );        
-	CheckBins( BinScheme("q"),  v_q,  TMath::Sqrt(kin->Q2) );
-	CheckBins( BinScheme("y"),  v_y,  kin->y );
-	
-	histSetFillList.clear();
-	for(int bpt : v_pt) {
-	  for(int bz : v_z){
-	    for(int bx : v_x) {      
-	      for(int bq : v_q) {
-		for(int by : v_y) {
-		  
-		  histSetFillList.push_back(histSetJets[bpt][bz][bx][bq][by]);
-		  
-		};
-	      };
-	      
-	    };
-	  };
-	  for(Histos *H : histSetFillList) {	  
-	    H->Hist("pT_jet")->Fill(kin->pTjet);
-	    H->Hist("mT_jet")->Fill(jet.mt());
-	    H->Hist("z_jet")->Fill(kin->zjet);
-	    H->Hist("eta_jet")->Fill(jet.eta());
-	    H->Hist("qT_jet")->Fill(kin->qTjet);
-	    H->Hist("qTQ")->Fill(kin->qTjet/sqrt(kin->Q2));
-	    for(int j = 0; j < kin->jperp.size(); j++){
-	      H->Hist("jperp")->Fill(kin->jperp[j]);
-	    };
-	  };
-	  
-	};      
+        PseudoJet jet = kin->jetsRec[i];
+        kin->CalculateJetKinematics(jet);
+
+        // following same procedure as in track loop	
+        CheckBins( BinScheme("pt_jet"), v_pt, kin->pTjet );
+        CheckBins( BinScheme("z_jet"), v_z, kin->zjet );
+        CheckBins( BinScheme("x"),  v_x,  kin->x );
+        CheckBins( BinScheme("q"),  v_q,  TMath::Sqrt(kin->Q2) );
+        CheckBins( BinScheme("y"),  v_y,  kin->y );
+
+        histSetFillList.clear();
+        for(int bpt : v_pt) {
+          for(int bz : v_z) {
+            for(int bx : v_x) {
+              for(int bq : v_q) {
+                for(int by : v_y) {
+                  histSetFillList.push_back(histSetJets[bpt][bz][bx][bq][by]);
+                };
+              };
+            };
+          };
+        };
+
+        for(Histos *H : histSetFillList) {
+          H->Hist("pT_jet")->Fill(kin->pTjet);
+          H->Hist("mT_jet")->Fill(jet.mt());
+          H->Hist("z_jet")->Fill(kin->zjet);
+          H->Hist("eta_jet")->Fill(jet.eta());
+          H->Hist("qT_jet")->Fill(kin->qTjet);
+          H->Hist("qTQ")->Fill(kin->qTjet/sqrt(kin->Q2));
+          for(int j = 0; j < kin->jperp.size(); j++){
+            H->Hist("jperp")->Fill(kin->jperp[j]);
+          };
+        };
       };
     };
+
     #if INCCENTAURO == 1
     for(int brec = 0; brec < NrecMethodBins; brec++){
-      TString recname = recMethodName.find(brec)->second;      
-      kin->CalculateDIS(recname);      
+      TString recname = recMethodName.find(brec)->second;
+      kin->CalculateDIS(recname);
       kin->GetBreitFrameJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
-      
+
       if(kin->CutDIS()){
-	for(int i = 0; i < kin->breitJetsRec.size(); i++){
-	  PseudoJet jet = kin->breitJetsRec[i];
-	  kin->CalculateBreitJetKinematics(jet);
-	  
-	  CheckBins( BinScheme("pt_jet"), v_pt, kin->pTjet );
-	  CheckBins( BinScheme("z_jet"), v_z, kin->zjet );
-	  CheckBins( BinScheme("x"),  v_x,  kin->x );
-	  CheckBins( BinScheme("q"),  v_q,  TMath::Sqrt(kin->Q2) );
-	  CheckBins( BinScheme("y"),  v_y,  kin->y );
-	  
-	  histSetFillList.clear();
-	  for(int bpt : v_pt) {
-	    for(int bz : v_z){
-	      for(int bx : v_x) {
-		for(int bq : v_q) {
-		  for(int by : v_y) {
-		    
-		    histSetFillList.push_back(histSetBreitJets[bpt][bz][bx][bq][by][brec]);
-		    
-		  };
-		};
-		
-	      };
-	    };
-	    for(Histos *H : histSetFillList) {
-	      H->Hist("pT_jet")->Fill(kin->pTjet);
-	      H->Hist("mT_jet")->Fill(jet.mt());
-	      H->Hist("z_jet")->Fill(kin->zjet);
-	      H->Hist("eta_jet")->Fill(jet.eta());
-	      H->Hist("qT_jet")->Fill(kin->qTjet);
-	      H->Hist("qTQ")->Fill(kin->qTjet/sqrt(kin->Q2));
-	      for(int j = 0; j < kin->jperp.size(); j++){
-		H->Hist("jperp")->Fill(kin->jperp[j]);
-	      };
-	      
-	    };
-	    
-	  };
-	};
-	
-	
+        for(int i = 0; i < kin->breitJetsRec.size(); i++){
+          PseudoJet jet = kin->breitJetsRec[i];
+          kin->CalculateBreitJetKinematics(jet);
+
+          CheckBins( BinScheme("pt_jet"), v_pt, kin->pTjet );
+          CheckBins( BinScheme("z_jet"), v_z, kin->zjet );
+          CheckBins( BinScheme("x"),  v_x,  kin->x );
+          CheckBins( BinScheme("q"),  v_q,  TMath::Sqrt(kin->Q2) );
+          CheckBins( BinScheme("y"),  v_y,  kin->y );
+
+          histSetFillList.clear();
+          for(int bpt : v_pt) {
+            for(int bz : v_z) {
+              for(int bx : v_x) {
+                for(int bq : v_q) {
+                  for(int by : v_y) {
+                    histSetFillList.push_back(histSetBreitJets[bpt][bz][bx][bq][by][brec]);
+                  };
+                };
+              };
+            };
+          };
+
+          for(Histos *H : histSetFillList) {
+            H->Hist("pT_jet")->Fill(kin->pTjet);
+            H->Hist("mT_jet")->Fill(jet.mt());
+            H->Hist("z_jet")->Fill(kin->zjet);
+            H->Hist("eta_jet")->Fill(jet.eta());
+            H->Hist("qT_jet")->Fill(kin->qTjet);
+            H->Hist("qTQ")->Fill(kin->qTjet/sqrt(kin->Q2));
+            for(int j = 0; j < kin->jperp.size(); j++){
+              H->Hist("jperp")->Fill(kin->jperp[j]);
+            };
+          };
+        };
       };
-      
     };
     #endif
-  };
-    cout << "end event loop" << endl;
-  // event loop end =========================================================
 
+
+  };
+  cout << "end event loop" << endl;
+  // event loop end =========================================================
 
 
   // print yields in each bin
@@ -536,7 +528,6 @@ void Analysis::Execute() {
          << H->Hist("Q2vsX")->GetEntries()
          << endl;
   };
-
 
 
   // write histograms
@@ -558,11 +549,6 @@ void Analysis::Execute() {
   outFile->Close();
   cout << outfileName << " written." << endl;
 
-  // call draw program
-  /*
-  TString cmd = "./draw.exe "+outfileName;
-  system(cmd.Data());
-  */
 };
 
 
@@ -617,9 +603,9 @@ void Analysis::AddRecMethod(TString recMethodN, TString recMethodT){
   BinScheme("recMethod")->BuildCustomBin(recMethodT);
 };
 
- 
-// return true, if a diagonal mode is on and this is an 
-// off-diagonal bin; if a diagonal mode is not on, always 
+
+// return true, if a diagonal mode is on and this is an
+// off-diagonal bin; if a diagonal mode is not on, always
 // return false
 Bool_t Analysis::CheckDiagonal(int cpt, int cx, int cz, int cq) {
   if(diagonalPtXZ) return ( cpt!=cx || cx!=cz );
