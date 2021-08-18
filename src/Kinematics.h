@@ -46,7 +46,7 @@ class Kinematics : public TObject
   
     void getqWQuadratic();
     void CalculateHadronKinematics();
-    void GetHadronicFinalState(TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itPIDSystemsTrack, TObjArrayIter itParticle);
+    void GetHadronicFinalState(TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
 
     void GetJets(TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton, TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle);
     void CalculateJetKinematics(PseudoJet jet);

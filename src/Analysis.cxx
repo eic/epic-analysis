@@ -65,6 +65,7 @@ void Analysis::Execute() {
 
   // instantiate objects
   kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
+  kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
   ST = new SimpleTree("tree",kin);
 
   // read delphes tree
@@ -92,7 +93,7 @@ void Analysis::Execute() {
   const Int_t NptjetBins = BinScheme("pt_jet")->GetNumBins();
   const Int_t NzjetBins = BinScheme("z_jet")->GetNumBins();
   const Int_t NrecMethodBins = BinScheme("recMethod")->GetNumBins();
-  
+
   // sets of histogram sets
   // - `histSet` is a data structure for storing and organizing pointers to
   //   sets of histograms (`Histos` objects)
@@ -140,6 +141,8 @@ void Analysis::Execute() {
               HS->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
               HS->DefineHist1D("y","y","",NBINS,1e-5,1,true);
               HS->DefineHist1D("W","W","GeV",NBINS,0,15);
+	      // -- DIS kinematics resolution
+	      HS->DefineHist1D("xRes","x - x_{true}","", NBINS, -1, 1);                                                                                           	     
               // -- hadron 4-momentum
               HS->DefineHist1D("pLab","p_{lab}","GeV",NBINS,0,10);
               HS->DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
@@ -266,12 +269,11 @@ void Analysis::Execute() {
   cout << sep << endl;
 
 
-
   // vars
   Double_t eleP,maxEleP;
   int pid,bFinalState;
-
-
+  Double_t elePtrue, maxElePtrue;
+  
   // event loop =========================================================
   if(maxEvents>0) ENT = maxEvents; // limiter
   cout << "begin event loop..." << endl;
@@ -297,15 +299,33 @@ void Analysis::Execute() {
     };
     if(maxEleP<0.001) continue; // no scattered electron found
 
-    // get hadronic final state variables
-    kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itPIDSystemsTrack, itParticle);
-    // get vector of jets
-    // should this have an option for clustering method?
-    kin->CalculateDISbyElectron();
-    kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
-    
+    maxElePtrue = 0;
+    while(GenParticle *part = (GenParticle*) itParticle()){
+      if(part->PID == 11 && part->Status == 1){
+	elePtrue = part->PT;
+	if(elePtrue > maxElePtrue){
+	  maxElePtrue = elePtrue;
+	  kinTrue->vecElectron.SetPtEtaPhiM(
+	          part->PT,
+		  part->Eta,
+		  part->Phi,
+		  Kinematics::ElectronMass()
+		  );
+	};
+      };
+    };
 
-      
+    // get hadronic final state variables
+    kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
+
+    // calculate DIS kinematics
+    kin->CalculateDISbyElectron(); // reconstructed
+    kinTrue->CalculateDISbyElectron(); // generated (truth)
+
+    // get vector of jets
+    // TODO: should this have an option for clustering method?
+    kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
+
     // track loop
     itTrack.Reset();
     while(Track *trk = (Track*) itTrack()) {
@@ -318,7 +338,6 @@ void Analysis::Execute() {
       auto kv = PIDtoEnum.find(pid);
       if(kv!=PIDtoEnum.end()) bFinalState = kv->second;
       else continue;
-
 
       // get parent particle, to check if pion is from vector meson
       GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
@@ -334,8 +353,17 @@ void Analysis::Execute() {
           trk->Phi,
           trk->Mass /* TODO: do we use track mass here ?? */
           );
+      GenParticle* trkPart = (GenParticle*)trk->Particle.GetObject();
+      kinTrue->vecHadron.SetPtEtaPhiM(
+          trkPart->PT,
+          trkPart->Eta,
+          trkPart->Phi,
+          trkPart->Mass /* TODO: do we use track mass here ?? */
+          );
+      
       kin->CalculateHadronKinematics();
-
+      kinTrue->CalculateHadronKinematics();
+      
       // apply cuts
       if(kin->CutFull()) {
 
@@ -375,6 +403,8 @@ void Analysis::Execute() {
           H->Hist("x")->Fill(kin->x);
           H->Hist("W")->Fill(kin->W);
           H->Hist("y")->Fill(kin->y);
+	  // DIS kinematics resolution
+	  H->Hist("xRes")->Fill(kin->x - kinTrue->x);
           // hadron 4-momentum
           H->Hist("pLab")->Fill(kin->pLab);
           H->Hist("pTlab")->Fill(kin->pTlab);
