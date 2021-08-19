@@ -54,6 +54,7 @@ Analysis::Analysis(
   kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
   ST = new SimpleTree("tree",kin);
   weight = new WeightsUniform();
+  weightJet = new WeightsUniform();
 };
 
 
@@ -234,6 +235,7 @@ void Analysis::Execute() {
 
 
   Double_t wTotal = 0.;
+  Double_t wJetTotal = 0.;
 
   // vars
   Double_t eleP,maxEleP;
@@ -273,9 +275,6 @@ void Analysis::Execute() {
     // calculate DIS kinematics
     kin->CalculateDISbyElectron();
 
-    Double_t w = weight->GetWeight(*kin);
-    wTotal += w;
-
     // track loop
     itTrack.Reset();
     while(Track *trk = (Track*) itTrack()) {
@@ -305,6 +304,9 @@ void Analysis::Execute() {
           trk->Mass /* TODO: do we use track mass here ?? */
           );
       kin->CalculateHadronKinematics();
+
+	  Double_t w = weight->GetWeight(*kin);
+	  wTotal += w;
 
       // apply cuts
       if(kin->CutFull()) {
@@ -371,6 +373,9 @@ void Analysis::Execute() {
     // jet loop
     if(kin->CutDIS()){
 
+	  Double_t wJet = weightJet->GetWeight(*kin);
+	  wJetTotal += wJet;
+
       for(int i = 0; i < kin->jetsRec.size(); i++){
         PseudoJet jet = kin->jetsRec[i];
         TLorentzVector pjet(jet.px(), jet.py(), jet.pz(), jet.E());
@@ -396,10 +401,10 @@ void Analysis::Execute() {
           };
         };
         for(Histos *H : histSetFillList) {	  
-          H->Hist("pT_jet")->Fill(jet.pt(),w);
-          H->Hist("mT_jet")->Fill(jet.mt(),w);
-          H->Hist("z_jet")->Fill(zjet,w);
-          H->Hist("eta_jet")->Fill(jet.eta(),w);
+          H->Hist("pT_jet")->Fill(jet.pt(),wJet);
+          H->Hist("mT_jet")->Fill(jet.mt(),wJet);
+          H->Hist("z_jet")->Fill(zjet,wJet);
+          H->Hist("eta_jet")->Fill(jet.eta(),wJet);
         };
 
       };      
