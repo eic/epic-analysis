@@ -14,5 +14,11 @@
 #pragma link C++ class SimpleTree+;
 #pragma link C++ class Analysis+;
 #pragma link C++ class PostProcessor+;
+#pragma link C++ class Weights+;
+#pragma link C++ class WeightsUniform+;
+#pragma link C++ class WeightsSivers+;
+#pragma link C++ class WeightsCollins+;
+#pragma link C++ class WeightsProduct+;
+#pragma link C++ class WeightsSum+;
 
 #endif
