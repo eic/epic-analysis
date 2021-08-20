@@ -67,6 +67,8 @@ void Analysis::Execute() {
   kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
   kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
   ST = new SimpleTree("tree",kin);
+  weight = new WeightsUniform();
+  weightJet = new WeightsUniform();
 
   // read delphes tree
   TChain *chain = new TChain("Delphes");
@@ -248,7 +250,8 @@ void Analysis::Execute() {
     };
   };
   #endif
-  // calculate integrated luminosity
+
+  // get cross section and number of events
   // - cross sections are hard-coded, coped from pythia output
   Int_t eleBeamEnInt = (Int_t) eleBeamEn;
   Int_t ionBeamEnInt = (Int_t) ionBeamEn;
@@ -260,14 +263,14 @@ void Analysis::Execute() {
     xsecTot=1;
   };
   Long64_t numGen = tr->GetEntries();
-  Double_t lumi = numGen/xsecTot; // [nb^-1]
   TString sep = "--------------------------------------------";
   cout << sep << endl;
   cout << "assumed total cross section: " << xsecTot << " nb" << endl;
   cout << "number of generated events:  " << numGen << endl;
-  cout << "Integrated Luminosity:       " << lumi << "/nb" << endl;
-  cout << sep << endl;
 
+  // initialize total weights
+  Double_t wTotal = 0.;
+  Double_t wJetTotal = 0.;
 
   // vars
   Double_t eleP,maxEleP;
@@ -364,9 +367,11 @@ void Analysis::Execute() {
       kin->CalculateHadronKinematics();
       kinTrue->CalculateHadronKinematics();
 
+	  Double_t w = weight->GetWeight(*kin);
+	  wTotal += w;
+
       // apply cuts
       if(kin->CutFull()) {
-
         // decide which histogram sets to fill
         // -- `v_A` will be the list of bins that this event's variable `A`
         //    will be a part of; we use these lists to determine the list
@@ -398,39 +403,43 @@ void Analysis::Execute() {
         // loop through list of histogram sets, and fill them
         for(Histos *H : histSetFillList) {
           // DIS kinematics
-          H->Hist("Q2vsX")->Fill(kin->x,kin->Q2);
-          H->Hist("Q")->Fill(TMath::Sqrt(kin->Q2));
-          H->Hist("x")->Fill(kin->x);
-          H->Hist("W")->Fill(kin->W);
-          H->Hist("y")->Fill(kin->y);
-          // DIS kinematics resolution
-          H->Hist("xRes")->Fill(kin->x - kinTrue->x);
+          dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,w);
+          H->Hist("Q")->Fill(TMath::Sqrt(kin->Q2),w);
+          H->Hist("x")->Fill(kin->x,w);
+          H->Hist("W")->Fill(kin->W,w);
+          H->Hist("y")->Fill(kin->y,w);
           // hadron 4-momentum
-          H->Hist("pLab")->Fill(kin->pLab);
-          H->Hist("pTlab")->Fill(kin->pTlab);
-          H->Hist("etaLab")->Fill(kin->etaLab);
-          H->Hist("phiLab")->Fill(kin->phiLab);
+          H->Hist("pLab")->Fill(kin->pLab,w);
+          H->Hist("pTlab")->Fill(kin->pTlab,w);
+          H->Hist("etaLab")->Fill(kin->etaLab,w);
+          H->Hist("phiLab")->Fill(kin->phiLab,w);
           // hadron kinematics
-          H->Hist("z")->Fill(kin->z);
-          H->Hist("pT")->Fill(kin->pT);
-          H->Hist("qT")->Fill(kin->qT);
-          H->Hist("qTq")->Fill(kin->qT/TMath::Sqrt(kin->Q2));
-          H->Hist("mX")->Fill(kin->mX);
-          H->Hist("phiH")->Fill(kin->phiH);
-          H->Hist("phiS")->Fill(kin->phiS);
-          // cross sections
-          H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),1.0/lumi);
+          H->Hist("z")->Fill(kin->z,w);
+          H->Hist("pT")->Fill(kin->pT,w);
+          H->Hist("qT")->Fill(kin->qT,w);
+          H->Hist("qTq")->Fill(kin->qT/TMath::Sqrt(kin->Q2),w);
+          H->Hist("mX")->Fill(kin->mX,w);
+          H->Hist("phiH")->Fill(kin->phiH,w);
+          H->Hist("phiS")->Fill(kin->phiS,w);
+          // cross sections (divide by lumi after all events processed)
+          H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),w);
+          // DIS kinematics resolution
+          H->Hist("xRes")->Fill(kin->x - kinTrue->x,w);
         };
 
         // fill simple tree (not binned)
         // TODO: consider adding a `finalState` cut
-        if( writeSimpleTree && histSetFillList.size()>0 ) ST->FillTree();
+        if( writeSimpleTree && histSetFillList.size()>0 ) ST->FillTree(w);
 
       };
     };
 
     // jet loop
     if(kin->CutDIS()){
+
+	  Double_t wJet = weightJet->GetWeight(*kin);
+	  wJetTotal += wJet;
+
       for(int i = 0; i < kin->jetsRec.size(); i++){
         PseudoJet jet = kin->jetsRec[i];
         kin->CalculateJetKinematics(jet);
@@ -456,16 +465,17 @@ void Analysis::Execute() {
         };
 
         for(Histos *H : histSetFillList) {
-          H->Hist("pT_jet")->Fill(kin->pTjet);
-          H->Hist("mT_jet")->Fill(jet.mt());
-          H->Hist("z_jet")->Fill(kin->zjet);
-          H->Hist("eta_jet")->Fill(jet.eta());
-          H->Hist("qT_jet")->Fill(kin->qTjet);
-          H->Hist("qTQ")->Fill(kin->qTjet/sqrt(kin->Q2));
-          for(int j = 0; j < kin->jperp.size(); j++){
-            H->Hist("jperp")->Fill(kin->jperp[j]);
+          H->Hist("pT_jet")->Fill(kin->pTjet,wJet);
+          H->Hist("mT_jet")->Fill(jet.mt(),wJet);
+          H->Hist("z_jet")->Fill(kin->zjet,wJet);
+          H->Hist("eta_jet")->Fill(jet.eta(),wJet);
+          H->Hist("qT_jet")->Fill(kin->qTjet,wJet);
+          H->Hist("qTQ")->Fill(kin->qTjet/sqrt(kin->Q2),wJet);
+          for(int j = 0; j < kin->jperp.size(); j++) {
+            H->Hist("jperp")->Fill(kin->jperp[j],wJet);
           };
         };
+
       };
     };
 
@@ -520,6 +530,16 @@ void Analysis::Execute() {
   cout << "end event loop" << endl;
   // event loop end =========================================================
 
+  // calculate integrated luminosity
+  Double_t lumi = wTotal/xsecTot; // [nb^-1]
+  cout << "Integrated Luminosity:       " << lumi << "/nb" << endl;
+  cout << sep << endl;
+
+  // calculate cross sections
+  // TODO: generalize (`if (name contains "xsec") ...`)
+  for(Histos *H : histSetList) {
+    H->Hist("Q_xsec")->Scale(1./lumi);
+  };
 
   // print yields in each bin
   cout << sep << endl << "Histogram Entries:" << endl;

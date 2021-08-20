@@ -26,10 +26,11 @@ class SimpleTree : public TObject
 
     TTree *GetTree() { return T; };
     Kinematics *GetKinematics() { return K; };
-    void FillTree() { T->Fill(); };
+    void FillTree(Double_t w) { weight = w; T->Fill(); };
     void WriteTree() { T->Write(); };
 
   private:
+    Double_t weight;
     TTree *T;
     Kinematics *K;
     TString treeName;

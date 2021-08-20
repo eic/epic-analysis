@@ -18,6 +18,7 @@ SimpleTree::SimpleTree(TString treeName_, Kinematics *K_)
   T->Branch("PhiS",      &(K->phiS),   "PhiS/D");
   T->Branch("Pol",       &(K->pol),    "Pol/D");
   T->Branch("Spin_idx",  &(K->tSpin),  "Spin_idx/I");
+  T->Branch("Weight",    &(weight),    "Weight/D");
 };
 
 // destructor

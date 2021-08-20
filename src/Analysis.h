@@ -28,6 +28,7 @@
 #include "CutDef.h"
 #include "BinSet.h"
 #include "SimpleTree.h"
+#include "Weights.h"
 
 
 class Analysis : public TNamed
@@ -82,6 +83,10 @@ class Analysis : public TNamed
     // perform the analysis
     void Execute();
 
+    // set weights
+    void SetWeights(Weights const* w) { weight = w; }
+    void SetWeightsJet(Weights const* w) { weightJet = w; }
+
     // tools
     Bool_t CheckDiagonal(int cpt, int cx, int cz, int cq);
 
@@ -98,6 +103,9 @@ class Analysis : public TNamed
     Double_t ionBeamEn = 41; // GeV
     Double_t crossingAngle = 0; // mrad
     std::map<TString,BinSet*> binSchemes;
+
+    Weights const* weight;
+    Weights const* weightJet;
 
     std::map<int,int> PIDtoEnum;
     std::map<int,TString> finalStateName;
