@@ -3,7 +3,7 @@ R__LOAD_LIBRARY(Largex)
 
 // ratios of histograms with y-cut enabled to those with y-cut disabled
 void analysis_yRatio(
-    TString infiles="datarec/arc/dire_5x41.brian.hiDiv.root", /* delphes tree(s) */
+    TString infiles="datarec/dire_5x41.brian.hiDiv.root", /* delphes tree(s) */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=0, /* crossing angle [mrad] */
