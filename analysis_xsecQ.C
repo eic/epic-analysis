@@ -1,7 +1,7 @@
 R__LOAD_LIBRARY(Largex)
 #include "Analysis.h"
 
-// cross section in Q bins
+// cross section in Q2 bins
 void analysis_xsecQ(
     TString infiles="datarec/arc/crossCheck*.root", /* delphes tree(s) */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
@@ -35,8 +35,8 @@ void analysis_xsecQ(
   // diagonalization of (pt,x,z) bins
   A->diagonalPtXZ = true;
 
-  // Q bins
-  A->BinScheme("q")->BuildBins(10,1,11,false);
+  // Q2 bins
+  A->BinScheme("q2")->BuildBins(10,1,121,false);
 
   // y minima
   A->BinScheme("y")->BuildBin("Min",0.03);

@@ -1,7 +1,7 @@
 R__LOAD_LIBRARY(Largex)
 #include "PostProcessor.h"
 
-// dump counts and average kinematics in Q bins
+// plot ratios of distributions for various y minima
 void postprocess_yRatio(
     TString infile="out/yRatio.dire_5x41.brian.hiDiv.root"
 ) {
@@ -34,7 +34,7 @@ void postprocess_yRatio(
   for(int bpt : P->GetBinNums("pt")) {
   for(int bx  : P->GetBinNums("x")) {
   for(int bz  : P->GetBinNums("z")) {
-  for(int bq  : P->GetBinNums("q")) {
+  for(int bq  : P->GetBinNums("q2")) {
   for(int bfs : P->GetBinNums("finalState")) {
 
     // loop over other y bins, drawing ratios of each of them to the full-y bin

@@ -1,7 +1,7 @@
 R__LOAD_LIBRARY(Largex)
 #include "PostProcessor.h"
 
-// dump counts and average kinematics in Q bins
+// dump counts and average kinematics in Q2 bins
 void postprocess_xsecQ(
     TString infile="out/xsecQ.crossCheck.root"
 ) {
@@ -17,7 +17,7 @@ void postprocess_xsecQ(
 
   // start output file  ========================================
   TString tableFile = P->GetPngDir() + "/table_counts_qbins.txt";
-  P->StartTextFile(tableFile,"Counts and averages in bins of Q");
+  P->StartTextFile(tableFile,"Counts and averages in bins of Q2");
 
   // loop over (pt,x,z) bins, diagonalized
   // TODO: when Analysis::histSet is generalized, loops like this will
@@ -34,17 +34,17 @@ void postprocess_xsecQ(
     for(int by  : P->GetBinNums("y")) {
     for(int bfs : P->GetBinNums("finalState")) {
 
-      // loop over Q bins; these are the rows of the table
-      for(int bq : P->GetBinNums("q")) {
+      // loop over Q2 bins; these are the rows of the table
+      for(int bq : P->GetBinNums("q2")) {
 
 	// skip full bin
-	if(P->GetBinCut("q",bq)->GetCutType()=="Full") continue;
+	if(P->GetBinCut("q2",bq)->GetCutType()=="Full") continue;
 
-        // ALGORITHM: dump tables of average values, in bins of Q
+        // ALGORITHM: dump tables of average values, in bins of Q2
         P->DumpAve(
             tableFile,
             A->GetHistosName(bpt,bx,bz,bq,by,bfs),
-            "q");
+            "q2");
       };
 
       // finish ALGORITHM - called after the loop over table rows, so that

@@ -26,7 +26,7 @@ Analysis::Analysis(
   AddBinScheme("pt","p_{T}");
   AddBinScheme("z","z");
   AddBinScheme("x","x");
-  AddBinScheme("q","Q");
+  AddBinScheme("q2","Q2");
   AddBinScheme("y","y");
   AddBinScheme("pt_jet", "jet p_{T}");
   AddBinScheme("z_jet", "jet z");
@@ -89,7 +89,7 @@ void Analysis::Execute() {
   const Int_t NptBins = BinScheme("pt")->GetNumBins();
   const Int_t NxBins = BinScheme("x")->GetNumBins();
   const Int_t NzBins = BinScheme("z")->GetNumBins();
-  const Int_t NqBins = BinScheme("q")->GetNumBins();
+  const Int_t NqBins = BinScheme("q2")->GetNumBins();
   const Int_t NyBins = BinScheme("y")->GetNumBins();
   const Int_t NfinalStateBins = BinScheme("finalState")->GetNumBins();
   const Int_t NptjetBins = BinScheme("pt_jet")->GetNumBins();
@@ -119,7 +119,7 @@ void Analysis::Execute() {
   for(int bpt=0; bpt<NptBins; bpt++) { // - loop over pT bins
     for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
       for(int bz=0; bz<NzBins; bz++) { // - loop over z bins
-        for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
+        for(int bq=0; bq<NqBins; bq++) { // - loop over q2 bins
           if(CheckDiagonal(bpt,bx,bz,bq)) continue; // diagonalizer
           for(int by=0; by<NyBins; by++) { // - loop over y bins
             for(int bfs=0; bfs<NfinalStateBins; bfs++) { // - loop over final states
@@ -168,7 +168,7 @@ void Analysis::Execute() {
               HS->AddCutDef(BinScheme("pt")->Cut(bpt));
               HS->AddCutDef(BinScheme("x")->Cut(bx));
               HS->AddCutDef(BinScheme("z")->Cut(bz));
-              HS->AddCutDef(BinScheme("q")->Cut(bq));
+              HS->AddCutDef(BinScheme("q2")->Cut(bq));
               HS->AddCutDef(BinScheme("y")->Cut(by));
               HS->AddCutDef(BinScheme("finalState")->Cut(bfs));
 
@@ -185,7 +185,7 @@ void Analysis::Execute() {
   for(int bpt=0; bpt<NptjetBins; bpt++) { // - loop over jet pT bins
     for(int bz=0; bz<NzjetBins; bz++){
       for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
-        for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
+        for(int bq=0; bq<NqBins; bq++) { // - loop over q2 bins
           for(int by=0; by<NyBins; by++) { // - loop over y bins
 
             histosN = this->GetHistosNameJets(bpt, bz, bx, bq, by);
@@ -206,7 +206,7 @@ void Analysis::Execute() {
             HS->AddCutDef(BinScheme("pt_jet")->Cut(bpt));
             HS->AddCutDef(BinScheme("z_jet")->Cut(bz));
             HS->AddCutDef(BinScheme("x")->Cut(bx));
-            HS->AddCutDef(BinScheme("q")->Cut(bq));
+            HS->AddCutDef(BinScheme("q2")->Cut(bq));
             HS->AddCutDef(BinScheme("y")->Cut(by));
             histSetListJets.push_back(histSetJets[bpt][bz][bx][bq][by]);
           };	
@@ -218,7 +218,7 @@ void Analysis::Execute() {
   for(int bpt=0; bpt<NptjetBins; bpt++) { // - loop over jet pT bins
     for(int bz=0; bz<NzjetBins; bz++){
       for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
-        for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
+        for(int bq=0; bq<NqBins; bq++) { // - loop over q2 bins
           for(int by=0; by<NyBins; by++) { // - loop over y bins
             for(int brec=0; brec<NrecMethodBins; brec++){
               histosN = this->GetHistosNameBreitJets(bpt, bz, bx, bq, by, brec);
@@ -239,7 +239,7 @@ void Analysis::Execute() {
               HS->AddCutDef(BinScheme("pt_jet")->Cut(bpt));
               HS->AddCutDef(BinScheme("z_jet")->Cut(bz));
               HS->AddCutDef(BinScheme("x")->Cut(bx));
-              HS->AddCutDef(BinScheme("q")->Cut(bq));
+              HS->AddCutDef(BinScheme("q2")->Cut(bq));
               HS->AddCutDef(BinScheme("y")->Cut(by));
               HS->AddCutDef(BinScheme("recMethod")->Cut(brec));
               histSetListBreitJets.push_back(histSetBreitJets[bpt][bz][bx][bq][by][brec]);
@@ -380,7 +380,7 @@ void Analysis::Execute() {
         CheckBins( BinScheme("pt"), v_pt, kin->pT );
         CheckBins( BinScheme("x"),  v_x,  kin->x );
         CheckBins( BinScheme("z"),  v_z,  kin->z );
-        CheckBins( BinScheme("q"),  v_q,  TMath::Sqrt(kin->Q2) );
+        CheckBins( BinScheme("q2"), v_q,  kin->Q2 );
         CheckBins( BinScheme("y"),  v_y,  kin->y );
 
 
@@ -448,7 +448,7 @@ void Analysis::Execute() {
         CheckBins( BinScheme("pt_jet"), v_pt, kin->pTjet );
         CheckBins( BinScheme("z_jet"), v_z, kin->zjet );
         CheckBins( BinScheme("x"),  v_x,  kin->x );
-        CheckBins( BinScheme("q"),  v_q,  TMath::Sqrt(kin->Q2) );
+        CheckBins( BinScheme("q2"), v_q,  kin->Q2 );
         CheckBins( BinScheme("y"),  v_y,  kin->y );
 
         histSetFillList.clear();
@@ -493,7 +493,7 @@ void Analysis::Execute() {
           CheckBins( BinScheme("pt_jet"), v_pt, kin->pTjet );
           CheckBins( BinScheme("z_jet"), v_z, kin->zjet );
           CheckBins( BinScheme("x"),  v_x,  kin->x );
-          CheckBins( BinScheme("q"),  v_q,  TMath::Sqrt(kin->Q2) );
+          CheckBins( BinScheme("q2"), v_q,  kin->Q2 );
           CheckBins( BinScheme("y"),  v_y,  kin->y );
 
           histSetFillList.clear();
@@ -660,7 +660,7 @@ TString Analysis::GetHistosTitle(int cpt, int cx, int cz, int cq, int cy, int cf
   retStr += ", " + BinScheme("pt")->Cut(cpt)->GetCutTitle();
   retStr += ", " + BinScheme("x")->Cut(cx)->GetCutTitle();
   retStr += ", " + BinScheme("z")->Cut(cz)->GetCutTitle();
-  retStr += ", " + BinScheme("q")->Cut(cq)->GetCutTitle();
+  retStr += ", " + BinScheme("q2")->Cut(cq)->GetCutTitle();
   retStr += ", " + BinScheme("y")->Cut(cy)->GetCutTitle();
   return retStr;
 };
@@ -681,7 +681,7 @@ TString Analysis::GetHistosTitleJets(int cpt, int cz, int cx, int cq, int cy){
   retStr  =        BinScheme("pt_jet")->Cut(cpt)->GetCutTitle();
   retStr += ", " + BinScheme("z_jet")->Cut(cz)->GetCutTitle();
   retStr += ", " + BinScheme("x")->Cut(cx)->GetCutTitle();
-  retStr += ", " + BinScheme("q")->Cut(cq)->GetCutTitle();
+  retStr += ", " + BinScheme("q2")->Cut(cq)->GetCutTitle();
   retStr += ", " + BinScheme("y")->Cut(cy)->GetCutTitle();
   return retStr;
 };
@@ -703,7 +703,7 @@ TString Analysis::GetHistosTitleBreitJets(int cpt, int cz, int cx, int cq, int c
   retStr +=  " " + BinScheme("pt_jet")->Cut(cpt)->GetCutTitle();
   retStr += ", " + BinScheme("z_jet")->Cut(cz)->GetCutTitle();
   retStr += ", " + BinScheme("x")->Cut(cx)->GetCutTitle();
-  retStr += ", " + BinScheme("q")->Cut(cq)->GetCutTitle();
+  retStr += ", " + BinScheme("q2")->Cut(cq)->GetCutTitle();
   retStr += ", " + BinScheme("y")->Cut(cy)->GetCutTitle();
   return retStr;
 };
