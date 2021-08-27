@@ -25,14 +25,14 @@ void analysis_xsecPT(
   // bin 1
   A->BinScheme("x")->BuildBin("CenterDelta", 0.3, 0.05 );
   A->BinScheme("z")->BuildBin("CenterDelta", 0.7, 0.05 );
-  A->BinScheme("q")->BuildBin("Range", 2.0, 3.0 );
+  A->BinScheme("q2")->BuildBin("Range", 4.0, 9.0 );
 
   // bin 2
   A->BinScheme("x")->BuildBin("CenterDelta", 0.1, 0.05 );
   A->BinScheme("z")->BuildBin("CenterDelta", 0.7, 0.05 );
-  A->BinScheme("q")->BuildBin("Range", 2.0, 3.0 );
+  A->BinScheme("q2")->BuildBin("Range", 4.0, 9.0 );
 
-  // diagonalization of (x,z,Q) bins
+  // diagonalization of (x,z,Q2) bins
   A->diagonalXZQ = true;
 
   // pT bins

@@ -24,10 +24,10 @@ void postprocess_xsecPT(
   // be significantly simpler
   for(int bx  : P->GetBinNums("x")) {
   for(int bz  : P->GetBinNums("z")) {
-  for(int bq  : P->GetBinNums("q")) {
+  for(int bq  : P->GetBinNums("q2")) {
     if(A->CheckDiagonal(-1,bx,bz,bq)) continue; // diagonalize
 
-    // header for this (x,z,q) bin
+    // header for this (x,z,q2) bin
     P->AppendToTextFile(tableFile,Form("\nKinematic Bin: %d =========================",bx));
 
     // loop over y minima and final states; we will have one table per iteration
