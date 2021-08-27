@@ -32,13 +32,13 @@ void postprocess_coverage(
           A->GetHistosName(bpt,bx,bz,bq,by,bfs),
           "etaVsP"
           );
-    };
+    }};
 
     // finish ALGORITHM - called after the loop to save summary canvases
     //P->FinishGrid(); // TODO: if you want to make a grid of plots, you could
                        // implement the print out here
 
-  }}}}};
+  }}}};
 
   // finish
   cout << P->GetOutfileName() << " written" << endl;
