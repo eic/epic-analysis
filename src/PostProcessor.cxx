@@ -209,13 +209,13 @@ void PostProcessor::FinishDumpAve(TString datFile) {
  * - since `histSet` names can be hard to read, you can use `outName` to give a
  *   "nickname" to `histSet`, which the canvas name will include
  */
-void PostProcessor::DrawSingle(TString outName, TString histSet, TString varName) {
+void PostProcessor::DrawSingle(TString outName, TString histSet, TString histName) {
 
   cout << "draw single plot " << outName << "..." << endl;
   Histos *H = (Histos*) infile->Get(histSet);
-  TH1 *hist = H->Hist(varName);
+  TH1 *hist = H->Hist(histName);
 
-  TString canvN = "canv_"+outName+"_"+varName;
+  TString canvN = "canv_"+outName+"_"+histName;
   TCanvas *canv = new TCanvas(canvN,canvN, dimx, dimy);
 
   hist->SetLineColor(kBlack);
@@ -229,19 +229,31 @@ void PostProcessor::DrawSingle(TString outName, TString histSet, TString varName
   hist->GetYaxis()->SetTitleSize(0.06);
   hist->GetXaxis()->SetTitleOffset(1.2);
   
-  TString drawStr = "EX0 P";
-  if(varName=="Q_xsec") {
-    hist->GetXaxis()->SetRangeUser(1,10);
-    hist->GetYaxis()->SetRangeUser(1e-6,1);
-    drawStr = "E P";
+  // determine draw type (TODO: probably could be generalized somehow)
+  TString drawStr = "";
+  switch(hist->GetDimension()) {
+    case 1:
+      drawStr = "EX0 P";
+      if(histName=="Q_xsec") {
+        hist->GetXaxis()->SetRangeUser(1,10);
+        hist->GetYaxis()->SetRangeUser(1e-6,1);
+        drawStr = "E P";
+      };
+      break;
+    case 2:
+      drawStr = "COLZ";
+      break;
+    case 3:
+      drawStr = "BOX";
+      break;
   };
 
   hist->Draw(drawStr);
 
   canv->SetGrid(1,1);
-  canv->SetLogx(H->GetHistConfig(varName)->logx);
-  canv->SetLogy(H->GetHistConfig(varName)->logy);
-  canv->SetLogz(H->GetHistConfig(varName)->logz);
+  canv->SetLogx(H->GetHistConfig(histName)->logx);
+  canv->SetLogy(H->GetHistConfig(histName)->logy);
+  canv->SetLogz(H->GetHistConfig(histName)->logz);
   canv->SetBottomMargin(0.15);
   canv->SetLeftMargin(0.15);
   canv->Print(pngDir+"/"+canvN+".png");
@@ -256,14 +268,14 @@ void PostProcessor::DrawSingle(TString outName, TString histSet, TString varName
 
   if(nsum==0) {
     summaryCanv = new TCanvas(
-        "summaryCanv_"+varName,
-        "summaryCanv_"+varName,
+        "summaryCanv_"+histName,
+        "summaryCanv_"+histName,
         dimx,dimy
         );
     summaryCanv->SetGrid(1,1);
-    summaryCanv->SetLogx(H->GetHistConfig(varName)->logx);
-    summaryCanv->SetLogy(H->GetHistConfig(varName)->logy);
-    summaryCanv->SetLogz(H->GetHistConfig(varName)->logz);
+    summaryCanv->SetLogx(H->GetHistConfig(histName)->logx);
+    summaryCanv->SetLogy(H->GetHistConfig(histName)->logy);
+    summaryCanv->SetLogz(H->GetHistConfig(histName)->logz);
     summaryCanv->SetBottomMargin(0.15);
     summaryCanv->SetLeftMargin(0.15);
   };

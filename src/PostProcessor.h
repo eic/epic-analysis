@@ -49,7 +49,7 @@ class PostProcessor : public TNamed
     // - you are welcome to add your own algorithms
     void DumpHist(TString datFile, TString histSet, TString varName);
     void DumpAve(TString datFile, TString histSet, TString cutName);
-    void DrawSingle(TString outName, TString histSet, TString varName);
+    void DrawSingle(TString outName, TString histSet, TString histName);
     void DrawRatios(
         TString outName, TString numerSet, TString denomSet, Bool_t plotRatioOnly=false
         );
