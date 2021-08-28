@@ -6,6 +6,8 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <set>
+#include <functional>
 
 // ROOT
 #include "TSystem.h"
@@ -13,9 +15,12 @@
 #include "TNamed.h"
 #include "TString.h"
 
-
 // largex-eic
 #include "CutDef.h"
+
+// DAG path of Nodes is handled by std::set of Node pointers
+class Node;
+typedef std::set<Node*> NodePath;
 
 // Node Types
 namespace NT {
@@ -55,8 +60,26 @@ class Node : public TObject
     void RemoveInput(Node *N);
     void RemoveOutput(Node *N);
 
+    // lambda staging: attach lamdas to a node (usu. control nodes)
+    // - lambdas can be executed in depth-first DAG traversal
+    // - inbound lambda is executed when traversal enters the node
+    // - outbound lambda is executed when traversal is ready to backtrack
+    void StageInboundOp(std::function<void(Node*,NodePath)> op) { inboundOp=op; };
+    void StageOutboundOp(std::function<void(Node*,NodePath)> op) { outboundOp=op; };
+    void UnstageOps(); // reset
+    // lambda execution
+    void ExecuteInboundOp(NodePath P) { inboundOp(this,P); };
+    void ExecuteOutboundOp(NodePath P) { outboundOp(this,P); };
+
     // print info for this node
     void Print();
+
+    // helper: print a specific NodePath
+    static void PrintPath(NodePath P) {
+      std::cout << "[";
+      for(auto it : P) std::cout << " " << it->GetID();
+      std::cout << "]" << std::endl;
+    };
 
 
   protected:
@@ -69,6 +92,8 @@ class Node : public TObject
     TString id;
     std::vector<Node*> inputList;
     std::vector<Node*> outputList;
+    std::function<void(Node*,NodePath)> inboundOp;
+    std::function<void(Node*,NodePath)> outboundOp;
 
   ClassDef(Node,1);
 };

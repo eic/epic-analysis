@@ -13,6 +13,7 @@ Node::Node(Int_t nodeType_, TString id_, CutDef *cut_)
   , cut(cut_)
   , debug(true)
 {
+  UnstageOps();
 };
 
 // print info for this node
@@ -56,6 +57,17 @@ void Node::AddIO(Node *N, std::vector<Node*> &list, TString listName, Bool_t sil
 // remove inputs or outputs
 void Node::RemoveInput(Node *N) { inputList.erase(std::remove(inputList.begin(),inputList.end(),N)); };
 void Node::RemoveOutput(Node *N) { outputList.erase(std::remove(outputList.begin(),outputList.end(),N)); };
+
+
+// reset a control node by unstaging lambdas
+void Node::UnstageOps() {
+  /*
+  this->StageInboundOp([](Node *N,NodePath P){});
+  this->StageOutboundOp([](Node *N,NodePath P){});
+  */
+  this->StageInboundOp([](Node *N,NodePath P){ cout << "enter :: " << N->GetID() << endl; });
+  this->StageOutboundOp([](Node *N,NodePath P){ cout << "exit  :: " << N->GetID() << endl; });
+};
 
 
 Node::~Node() {

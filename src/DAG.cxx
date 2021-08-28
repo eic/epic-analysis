@@ -144,7 +144,7 @@ void DAG::PrintBreadth(TString header) {
 // print the whole DAG (depth first)
 void DAG::PrintDepth(TString header) {
   TString sep = "=========================";
-  auto printOp = [this](Node *N,NodePath P){ PrintPath(P); };
+  auto printOp = [this](Node *N,NodePath P){ Node::PrintPath(P); };
   cout << endl << header << endl << sep << endl;
   TraverseDepth(GetRootNode(),printOp);
   cout << sep << endl;
@@ -153,17 +153,11 @@ void DAG::PrintDepth(TString header) {
 void DAG::PrintLeafPaths(TString header) {
   TString sep = "=========================";
   auto printOp = [this](Node *N,NodePath P){
-    if(N->GetNodeType()==NT::leaf) PrintPath(P);
+    if(N->GetNodeType()==NT::leaf) Node::PrintPath(P);
   };
   cout << endl << header << endl << sep << endl;
   TraverseDepth(GetRootNode(),printOp);
   cout << sep << endl;
-};
-// helper: print a specific NodePath
-void DAG::PrintPath(NodePath P) {
-  cout << "[";
-  for(auto it : P) cout << " " << it->GetID();
-  cout << "]" << endl;
 };
 
 
@@ -190,6 +184,15 @@ void DAG::TraverseDepth(Node *N, std::function<void(Node*,NodePath)> lambda, Nod
   P.insert(N);
   lambda(N,P);
   for(auto M : N->GetOutputs()) TraverseDepth(M,lambda,P);
+};
+
+// traverse through the DAG (depth first), running each node's staged lambdas
+void DAG::ExecuteOps(Node *N, NodePath P) {
+  if(N==nullptr) N = GetRootNode();
+  P.insert(N);
+  N->ExecuteInboundOp(P);
+  for(auto M : N->GetOutputs()) ExecuteOps(M,P);
+  N->ExecuteOutboundOp(P);
 };
 
 
