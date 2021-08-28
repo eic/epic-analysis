@@ -134,12 +134,38 @@ void DAG::AddLayer(std::vector<Node*> nodes) {
 
 
 // print the whole DAG (breadth first)
-void DAG::Print(TString header) {
+void DAG::PrintBreadth(TString header) {
   TString sep = "=========================";
+  auto printOp = [](Node *N){ N->Print(); cout << endl; };
   cout << endl << header << endl << sep << endl;
-  TraverseBreadth( GetRootNode(), [](Node *N){ N->Print(); cout << endl; });
+  TraverseBreadth(GetRootNode(),printOp);
   cout << sep << endl;
 };
+// print the whole DAG (depth first)
+void DAG::PrintDepth(TString header) {
+  TString sep = "=========================";
+  auto printOp = [this](Node *N,NodePath P){ PrintPath(P); };
+  cout << endl << header << endl << sep << endl;
+  TraverseDepth(GetRootNode(),printOp);
+  cout << sep << endl;
+};
+// print unique paths from the root node to the leaf node
+void DAG::PrintLeafPaths(TString header) {
+  TString sep = "=========================";
+  auto printOp = [this](Node *N,NodePath P){
+    if(N->GetNodeType()==NT::leaf) PrintPath(P);
+  };
+  cout << endl << header << endl << sep << endl;
+  TraverseDepth(GetRootNode(),printOp);
+  cout << sep << endl;
+};
+// helper: print a specific NodePath
+void DAG::PrintPath(NodePath P) {
+  cout << "[";
+  for(auto it : P) cout << " " << it->GetID();
+  cout << "]" << endl;
+};
+
 
 
 // breadth-first traversal
@@ -160,7 +186,10 @@ void DAG::TraverseBreadth(Node *N, std::function<void(Node*)> lambda) {
 
 
 // depth-first traversal
-void DAG::TraverseDepth(Node *N, std::function<void(Node*)> lambda) {
+void DAG::TraverseDepth(Node *N, std::function<void(Node*,NodePath)> lambda, NodePath P) {
+  P.insert(N);
+  lambda(N,P);
+  for(auto M : N->GetOutputs()) TraverseDepth(M,lambda,P);
 };
 
 

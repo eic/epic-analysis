@@ -5,8 +5,6 @@ void test_DAG() {
 
   D->Print("initial DAG");
 
-  std::vector<Node*> lay0;
-
   BinSet *BX = new BinSet("X","X"); BX->BuildBins(2,0,2);
   BinSet *BY = new BinSet("Y","Y"); BY->BuildBins(2,0,2);
   BinSet *BZ = new BinSet("Z","Z"); BZ->BuildBins(2,0,2);
@@ -15,13 +13,11 @@ void test_DAG() {
   D->AddLayer(BY);
   D->AddLayer(BZ);
 
-  D->Print("full DAG");
+  D->PrintBreadth("full DAG");
+  
+  D->PrintDepth("depth traversal:");
+  D->PrintLeafPaths();
+  
+  //D->TraverseDepth( D->GetRootNode(), printOp);
 
-  D->RepatchToLeaf("Y");
-  D->RepatchToLeaf("X");
-
-  //D->RepatchAllToFull();
-  //D->RepatchToFull("Y__control");
-
-  D->Print("repatched DAG");
 };

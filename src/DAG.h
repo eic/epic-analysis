@@ -14,6 +14,7 @@
 #include <sstream>
 #include <vector>
 #include <map>
+#include <set>
 #include <functional>
 
 // ROOT
@@ -23,11 +24,13 @@
 #include "TNamed.h"
 #include "TString.h"
 
-
 // largex-eic
 #include "CutDef.h"
 #include "BinSet.h"
 #include "Node.h"
+
+// Path of Nodes is handled by std::set of Node pointers
+typedef std::set<Node*> NodePath;
 
 class DAG : public TObject
 {
@@ -63,10 +66,12 @@ class DAG : public TObject
     void AddLayer(BinSet *BS);
     void AddLayer(std::vector<Node*> nodes);
 
-    // DAG traversals: iterate through nodes, executing the lambda on each;
-    // breadth-first and depth-first traversals are supported
+    // DAG traversals: iterate through nodes, executing the lambda on each iteration:
+    // breadth-first: loop through nodes of each layer; lambda operates on the node
     void TraverseBreadth(Node *N, std::function<void(Node*)> lambda);
-    void TraverseDepth(Node *N, std::function<void(Node*)> lambda);
+    // depth-first: traverse toward the leaf node, iterating over the possible unique paths;
+    // the lambda operates on the unique path to the current node, in addition to the current node
+    void TraverseDepth(Node *N, std::function<void(Node*,NodePath)> lambda, NodePath P={});
 
     // patch operations: manipulate connections ("patches") between layers
     /*   - "patch" refers to a set of edges between two layers, which
@@ -90,8 +95,13 @@ class DAG : public TObject
     void RemoveNode(Node *N);
     void RemoveEdge(Node *inN, Node *outN);
 
-    // print the whole DAG (breadth first)
-    void Print(TString header="DAG");
+    // print the whole DAG (breadth first or depth first), or
+    // specific parts of it
+    void PrintBreadth(TString header="DAG");
+    void PrintDepth(TString header="DAG");
+    void PrintLeafPaths(TString header="DAG leaf paths");
+    // helper: print a specific NodePath
+    void PrintPath(NodePath P);
 
 
   protected:
