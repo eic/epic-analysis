@@ -19,26 +19,28 @@ void test_DAG() {
   D->PrintDepth("depth traversal:");
   D->PrintLeafPaths();
 
-  D->GetNode("Z__control")->StageInboundOp(
-    [](Node *N,NodePath P){
-      cout << "Z LOOP HEADER" << endl;
-    });
-  D->GetNode("Z__control")->StageOutboundOp(
-    [](Node *N,NodePath P){
-      cout << "Z LOOP FOOTER" << endl;
-    });
 
-  D->GetLeafNode()->StageInboundOp(
-    [&D](Node *N,NodePath P){
-      cout << "ALGORITHM on ";
-      Node::PrintPath(P);
-    });
-  D->GetLeafNode()->StageOutboundOp([](Node *N,NodePath P){});
+  D->GetRootNode()->StageInboundOp([](){
+   cout << "MAIN HEADER" << endl;
+  });
 
-  D->GetRootNode()->StageInboundOp(
-    [](Node *N,NodePath P){ cout << "MAIN HEADER" << endl; });
-  D->GetRootNode()->StageOutboundOp(
-    [](Node *N,NodePath P){ cout << "MAIN FOOTER" << endl; });
+  D->GetNode("Z__control")->StageInboundOp([](){
+    cout << "Z LOOP HEADER" << endl;
+  });
+  D->GetNode("Z__control")->StageOutboundOp([](){
+    cout << "Z LOOP FOOTER" << endl;
+  });
+
+  D->GetLeafNode()->StageInboundOp([](NodePath P){
+    cout << "ALGORITHM on ";
+    Node::PrintPath(P);
+  });
+  D->GetLeafNode()->StageOutboundOp([](){
+  });
+
+  D->GetRootNode()->StageOutboundOp([](){
+    cout << "MAIN FOOTER" << endl;
+  });
 
   D->ExecuteOps();
 

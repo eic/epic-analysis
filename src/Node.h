@@ -60,14 +60,21 @@ class Node : public TObject
     void RemoveInput(Node *N);
     void RemoveOutput(Node *N);
 
-    // lambda staging: attach lamdas to a node (usu. control nodes)
-    // - lambdas can be executed in depth-first DAG traversal
+    // lambda management: attach lamdas to a node (usu. control nodes),
+    // and provide the ability to execute them
     // - inbound lambda is executed when traversal enters the node
-    // - outbound lambda is executed when traversal is ready to backtrack
     void StageInboundOp(std::function<void(Node*,NodePath)> op) { inboundOp=op; };
+    void StageInboundOp(std::function<void(NodePath)> op)       { StageInboundOp([&op](Node *N, NodePath P){ op(P); }); };
+    void StageInboundOp(std::function<void(Node*)> op)          { StageInboundOp([&op](Node *N, NodePath P){ op(N); }); };
+    void StageInboundOp(std::function<void()> op)               { StageInboundOp([&op](Node *N, NodePath P){ op();  }); };
+    // - outbound lambda is executed when traversal is ready to backtrack
     void StageOutboundOp(std::function<void(Node*,NodePath)> op) { outboundOp=op; };
-    void UnstageOps(); // reset
-    // lambda execution
+    void StageOutboundOp(std::function<void(NodePath)> op)       { StageOutboundOp([&op](Node *N, NodePath P){ op(P); }); };
+    void StageOutboundOp(std::function<void(Node*)> op)          { StageOutboundOp([&op](Node *N, NodePath P){ op(N); }); };
+    void StageOutboundOp(std::function<void()> op)               { StageOutboundOp([&op](Node *N, NodePath P){ op();  }); };
+    // - clear both inbound and outbound lambdas
+    void UnstageOps();
+    // - lambda execution
     void ExecuteInboundOp(NodePath P) { inboundOp(this,P); };
     void ExecuteOutboundOp(NodePath P) { outboundOp(this,P); };
 
