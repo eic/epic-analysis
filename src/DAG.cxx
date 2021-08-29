@@ -195,6 +195,12 @@ void DAG::ExecuteOps(Node *N, NodePath P) {
   N->ExecuteOutboundOp(P);
 };
 
+// clear all staged lambdas
+void DAG::ClearOps() {
+  for(auto kv : nodeMap) kv.second->UnstageOps();
+};
+
+
 
 // traversal helper which checks if a node has been visited
 Bool_t DAG::Visited(TString id_) {

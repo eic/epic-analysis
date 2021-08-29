@@ -141,6 +141,8 @@ class DAG : public TObject
     void TraverseDepth(Node *N, std::function<void(Node*,NodePath)> lambda, NodePath P={});
     // -- run each node's staged lambdas, while traversing depth first
     void ExecuteOps(Node *N=nullptr, NodePath P={});
+    // -- clear all staged lambdas
+    void ClearOps();
 
     // patch operations: manipulate connections ("patches") between layers
     /*   - "patch" refers to a set of edges between two layers, which

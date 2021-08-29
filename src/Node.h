@@ -76,11 +76,13 @@ class Node : public TObject
     void Print();
 
     // helper: print a specific NodePath
-    static void PrintPath(NodePath P) {
-      std::cout << "[";
-      for(auto it : P) std::cout << " " << it->GetID();
-      std::cout << "]" << std::endl;
+    static TString PathString(NodePath P) {
+      TString ret = "[";
+      for(auto it : P) ret += " " + it->GetID();
+      ret += " ]";
+      return ret;
     };
+    static void PrintPath(NodePath P) { std::cout << PathString(P) << std::endl; };
 
 
   protected:

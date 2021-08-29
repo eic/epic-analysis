@@ -22,26 +22,38 @@ Analysis::Analysis(
   , crossingAngle(crossingAngle_)
   , outfilePrefix(outfilePrefix_)
 {
-  // set bin schemes
-  AddBinScheme("pt","p_{T}");
-  AddBinScheme("z","z");
-  AddBinScheme("x","x");
-  AddBinScheme("q","Q");
-  AddBinScheme("y","y");
-  AddBinScheme("pt_jet", "jet p_{T}");
-  AddBinScheme("z_jet", "jet z");
-  // final state bins (e.g., tracks or jets)
-  AddBinScheme("finalState","finalState");
+  // build list of variables available for binning (paired with titles)
+  availableBinSchemes.insert(std::pair<TString,TString>("pt","p_{T}"));
+  availableBinSchemes.insert(std::pair<TString,TString>("z","z"));
+  availableBinSchemes.insert(std::pair<TString,TString>("x","x"));
+  availableBinSchemes.insert(std::pair<TString,TString>("q","Q"));
+  availableBinSchemes.insert(std::pair<TString,TString>("y","y"));
+  availableBinSchemes.insert(std::pair<TString,TString>("pt_jet", "jet p_{T}"));
+  availableBinSchemes.insert(std::pair<TString,TString>("z_jet", "jet z"));
+  availableBinSchemes.insert(std::pair<TString,TString>("finalState","finalState"));
+  availableBinSchemes.insert(std::pair<TString,TString>("recMethod","recMethod"));
+
+  /* TODO: re-enable
+  // define final state bins (e.g., tracks or jets)
+  AddBinScheme("finalState");
   AddFinalState("pipTrack","#pi^{+} tracks", 211);
   //AddFinalState("pimTrack","#pi^{-} tracks",-211);
-  AddBinScheme("recMethod", "recMethod");
+
+  // define reconstruction method bins
+  AddBinScheme("recMethod");
   AddRecMethod("Ele", "electron method");
   AddRecMethod("DA", "DA method");
   AddRecMethod("JB", "JB method");
+  */
+
+  /*
   // initialize diagonalizer settings
   // TODO: generalized diagonalizer
   diagonalPtXZ = false;
   diagonalXZQ = false;
+  */
+
+  // initializations
   writeSimpleTree = false;
   maxEvents = 0;
 };
@@ -102,6 +114,9 @@ void Analysis::Execute() {
   // - `histSet*List` are used as temporary lists of relevant `Histos` pointers
   // - TODO: if we add one more dimension, 7D array will probably break; need
   //         better data structure
+
+  //HistosDAG *hDAG = new HistosDAG(binSchemes);
+
   Histos *histSet[NptBins][NxBins][NzBins][NqBins][NyBins][NfinalStateBins];
   Histos *histSetJets[NptjetBins][NzjetBins][NxBins][NqBins][NyBins];
   Histos *histSetBreitJets[NptjetBins][NzjetBins][NxBins][NqBins][NyBins][NrecMethodBins];
@@ -114,6 +129,7 @@ void Analysis::Execute() {
   std::vector<int> v_pt, v_x, v_z, v_q, v_y;
   // instantiate Histos sets, and populate
   TString histosN,histosT;
+
 
   cout << "Define track histograms..." << endl;
   for(int bpt=0; bpt<NptBins; bpt++) { // - loop over pT bins
@@ -590,15 +606,17 @@ BinSet *Analysis::BinScheme(TString varname) {
 };
 
 // add a new bin scheme
-void Analysis::AddBinScheme(TString varname, TString vartitle) {
+void Analysis::AddBinScheme(TString varname) {
+  TString vartitle;
+  try { vartitle = availableBinSchemes.at(varname); }
+  catch(const std::out_of_range &ex) {
+    cerr << "ERROR: bin scheme "
+         << varname << " not available... skipping..." << endl;
+    return;
+  };
   binSchemes.insert(
     std::pair<TString,BinSet*>(varname,new BinSet(varname,vartitle))
     );
-  // TODO: for now, we need to have at least one bin in each dimension,
-  // otherwise for loops won't run; when we generalize the `histSet` data
-  // structure, hopefully we can also drop this requirement; the current
-  // workaround is to add a `full` bin to each dimension
-  if(varname!="finalState" && varname!="recMethod") BinScheme(varname)->BuildBin("Full");
 };
 
 // add a final state bin
@@ -628,9 +646,13 @@ void Analysis::AddRecMethod(TString recMethodN, TString recMethodT){
 // off-diagonal bin; if a diagonal mode is not on, always
 // return false
 Bool_t Analysis::CheckDiagonal(int cpt, int cx, int cz, int cq) {
+  // TODO
+  return true;
+  /*
   if(diagonalPtXZ) return ( cpt!=cx || cx!=cz );
   else if(diagonalXZQ) return ( cx!=cz || cz!=cq );
   else return false;
+  */
 };
 
 // scan through bin set `bs`, checking each one; the vector `v` will

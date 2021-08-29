@@ -50,7 +50,7 @@ class Analysis : public TNamed
     BinSet *BinScheme(TString varname);
 
     // add a new bin scheme
-    void AddBinScheme(TString varname, TString vartitle);
+    void AddBinScheme(TString varname);
 
     // add a new final state bin
     void AddFinalState(TString finalStateN, TString finalStateT, Int_t pid_);
@@ -59,20 +59,23 @@ class Analysis : public TNamed
     void AddRecMethod(TString recMethodN, TString recMethodT);
 
   
-    // get Histos object name and title
+    // get Histos object name and title, and binning
     TString GetHistosName(int cpt, int cx, int cz, int cq, int cy, int cfs);
     TString GetHistosTitle(int cpt, int cx, int cz, int cq, int cy, int cfs);
     TString GetHistosNameJets(int cpt, int cz, int cx, int cq, int cy);
     TString GetHistosTitleJets(int cpt, int cz, int cx, int cq, int cy);
     TString GetHistosNameBreitJets(int cpt, int cz, int cx, int cq, int cy, int crec);
     TString GetHistosTitleBreitJets(int cpt, int cz, int cx, int cq, int cy, int crec);
+    std::map<TString,BinSet*> GetBinSchemes() { return binSchemes; };
 
     // if these are true, only take 'diagonal' elements of the multi
     // dimensional array of possible bins; this is useful
     // if you want to check specific bins
     // TODO: generalize
+    /*
     Bool_t diagonalPtXZ;
     Bool_t diagonalXZQ;
+    */
 
     // additional settings
     Bool_t writeSimpleTree; // if true, write SimpleTree (not binned)
@@ -103,6 +106,7 @@ class Analysis : public TNamed
     Double_t ionBeamEn = 41; // GeV
     Double_t crossingAngle = 0; // mrad
     std::map<TString,BinSet*> binSchemes;
+    std::map<TString,TString> availableBinSchemes;
 
     Weights const* weight;
     Weights const* weightJet;
