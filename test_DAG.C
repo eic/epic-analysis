@@ -1,7 +1,7 @@
 R__LOAD_LIBRARY(Largex)
 
 void test_DAG() {
-  DAG *D = new DAG();
+  HistosDAG *D = new HistosDAG();
 
   D->Print("initial DAG");
 
@@ -13,35 +13,21 @@ void test_DAG() {
   D->AddLayer(BZ);
   D->AddLayer(BY);
 
-  D->RepatchToLeaf("Z");
+  D->Control(
+    {"Z"},
+    [](){ cout << "Z LOOP HEADER" << endl; },
+    [](){ cout << "Z LOOP FOOTER" << endl; }
+    );
 
   D->PrintBreadth("full DAG");
   D->PrintDepth("depth traversal:");
   D->PrintLeafPaths();
 
+  D->Initial([](){ cout << "MAIN HEADER" << endl; });
+  D->Final([](){ cout << "MAIN FOOTER" << endl; });
 
-  D->GetRootNode()->StageInboundOp([](){
-   cout << "MAIN HEADER" << endl;
-  });
+  D->Payload([](Histos*){}); // TODO
 
-  D->GetNode("Z__control")->StageInboundOp([](){
-    cout << "Z LOOP HEADER" << endl;
-  });
-  D->GetNode("Z__control")->StageOutboundOp([](){
-    cout << "Z LOOP FOOTER" << endl;
-  });
-
-  D->GetLeafNode()->StageInboundOp([](NodePath P){
-    cout << "ALGORITHM on ";
-    Node::PrintPath(P);
-  });
-  D->GetLeafNode()->StageOutboundOp([](){
-  });
-
-  D->GetRootNode()->StageOutboundOp([](){
-    cout << "MAIN FOOTER" << endl;
-  });
-
-  D->ExecuteOps();
+  D->Execute();
 
 };

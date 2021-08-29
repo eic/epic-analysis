@@ -63,15 +63,9 @@ class Node : public TObject
     // lambda management: attach lamdas to a node (usu. control nodes),
     // and provide the ability to execute them
     // - inbound lambda is executed when traversal enters the node
-    void StageInboundOp(std::function<void(Node*,NodePath)> op) { inboundOp=op; };
-    void StageInboundOp(std::function<void(NodePath)> op)       { StageInboundOp([&op](Node *N, NodePath P){ op(P); }); };
-    void StageInboundOp(std::function<void(Node*)> op)          { StageInboundOp([&op](Node *N, NodePath P){ op(N); }); };
-    void StageInboundOp(std::function<void()> op)               { StageInboundOp([&op](Node *N, NodePath P){ op();  }); };
+    template<class O> void StageInboundOp(O op) { inboundOp = FormatOp(op); };
     // - outbound lambda is executed when traversal is ready to backtrack
-    void StageOutboundOp(std::function<void(Node*,NodePath)> op) { outboundOp=op; };
-    void StageOutboundOp(std::function<void(NodePath)> op)       { StageOutboundOp([&op](Node *N, NodePath P){ op(P); }); };
-    void StageOutboundOp(std::function<void(Node*)> op)          { StageOutboundOp([&op](Node *N, NodePath P){ op(N); }); };
-    void StageOutboundOp(std::function<void()> op)               { StageOutboundOp([&op](Node *N, NodePath P){ op();  }); };
+    template<class O> void StageOutboundOp(O op) { outboundOp = FormatOp(op); };
     // - clear both inbound and outbound lambdas
     void UnstageOps();
     // - lambda execution
@@ -91,6 +85,23 @@ class Node : public TObject
 
   protected:
     void AddIO(Node *N, std::vector<Node*> &list, TString listName, Bool_t silence);
+
+    // - format lambdas with proper arguments, to allow easy overloading
+    std::function<void(Node*,NodePath)> FormatOp(std::function<void(Node*,NodePath)> op) {
+      return op;
+    };
+    std::function<void(Node*,NodePath)> FormatOp(std::function<void(NodePath,Node*)> op) {
+      return [op](Node *N, NodePath P){ op(P,N); };
+    };
+    std::function<void(Node*,NodePath)> FormatOp(std::function<void(NodePath)> op) {
+      return [op](Node *N, NodePath P){ op(P); };
+    };
+    std::function<void(Node*,NodePath)> FormatOp(std::function<void(Node*)> op) {
+      return [op](Node *N, NodePath P){ op(N); };
+    };
+    std::function<void(Node*,NodePath)> FormatOp(std::function<void()> op) {
+      return [op](Node *N, NodePath P){ op(); };
+    };
 
   private:
     CutDef *cut;

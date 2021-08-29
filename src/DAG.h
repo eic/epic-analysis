@@ -37,7 +37,7 @@ class DAG : public TObject
     ~DAG();
 
     // initialize DAG, with only the root node connected to the leaf node
-    void Initialize();
+    void InitializeDAG();
 
     // node accessors
     // - search for a node by ID; return nullptr if not found;

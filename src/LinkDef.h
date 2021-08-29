@@ -8,6 +8,7 @@
 #pragma link C++ class BinSet+;
 #pragma link C++ class Node+;
 #pragma link C++ class DAG+;
+#pragma link C++ class HistosDAG+;
 #pragma link C++ class HistConfig+;
 #pragma link C++ class Histos+;
 #pragma link C++ class Kinematics+;

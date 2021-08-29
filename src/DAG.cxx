@@ -10,12 +10,12 @@ using std::endl;
 DAG::DAG()
   : debug(true)
 {
-  Initialize();
+  InitializeDAG();
 };
 
 
 // initialize DAG, with only the root node connected to the leaf node
-void DAG::Initialize() {
+void DAG::InitializeDAG() {
   nodeMap.clear();
   AddEdge(new Node(NT::root,"root0"),new Node(NT::leaf,"leaf0"));
 };
