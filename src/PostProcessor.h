@@ -17,6 +17,7 @@
 #include "Kinematics.h"
 #include "CutDef.h"
 #include "BinSet.h"
+#include "HistosDAG.h"
 
 class PostProcessor : public TNamed
 {
@@ -31,6 +32,12 @@ class PostProcessor : public TNamed
     const Int_t dimx=800;
     const Int_t dimy=700;
     static const int nsumMax=3; // number of summary plots with formatting
+
+
+    // DAG interfaces:
+    HistosDAG *GetHistosDAG() { return hDAG; };
+    HistosDAG *Setup() { return GetHistosDAG(); }; // sugar
+    void Execute() { hDAG->ExecuteOps(); };
 
 
     // cleanup and close open files and streams
@@ -79,6 +86,9 @@ class PostProcessor : public TNamed
     // files and names
     TString infileN, outfileN, pngDir;
     TFile *infile, *outfile;
+
+    // DAGs
+    HistosDAG *hDAG;
 
     // algorithm-specific variables
     std::map<TString,TCanvas*> summaryCanvMap;

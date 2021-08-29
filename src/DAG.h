@@ -36,6 +36,76 @@ class DAG : public TObject
     DAG();
     ~DAG();
 
+    // ---------------------------------------------------------------------
+    /* operator staging functions:
+     * - higher order functions to stage operators (lambdas) on the DAG
+     * - some functions will rearrange the DAG layers; use the Print methods
+     *   to help verify it is behaving how you want
+     * - lambdas arguments can be `Node*` or `NodePath`, or both, or neither
+     * - execute the lambdas by calling `ExecuteOps`
+     */
+
+    // `Initial`: initial operator, executed at the beginning of DAG::ExecuteOps
+    template<class O> void Initial(O op) { GetRootNode()->StageInboundOp(op); };
+
+    // `Final`: final operator, executed at the end of DAG::ExecuteOps
+    template<class O> void Final(O op) { GetRootNode()->StageOutboundOp(op); };
+
+    // `Control`: add inbound and outbound operators to a control node, given
+    //            by the first layer in `layers`
+    // - use `Before` or `After` if you only need `opBefore` or `opAfter`
+    // - the specified layers will be moved to the leaf node
+    // - a control node will be added before the first listed layer, and the
+    //   lambdas `opBefore` and `opAfter` will be staged to it
+    // - control nodes for all other listed layers will be removed (and 
+    //   replaced by full patches)
+    template<class O1, class O2>
+    void Control(std::vector<TString> layers, O1 opBefore, O2 opAfter) {
+      if(layers.size()==0) {
+        std::cerr << "ERROR: empty layers list in HistosDAG::Control" << std::endl;
+        return;
+      };
+      bool first = true;
+      TString controlID;
+      for(TString layer : layers) {
+        RepatchToLeaf(layer);
+        if(first) controlID = layer+"__control";
+        else RepatchToFull(layer+"__control");
+        first = false;
+      };
+      GetNode(controlID)->StageInboundOp(opBefore);
+      GetNode(controlID)->StageOutboundOp(opAfter);
+    };
+
+    // `Before`: stage inbound lambda on a control node, given by the first layer in `layers`
+    // - if the control node does not exist, move specified layers to the leaf node,
+    //   then create the control node and stage the lambda
+    // - if the control node exists, only the lambda is staged and layers are not changed
+    template<class O>
+    void Before(std::vector<TString> layers, O op) {
+      Node *controlNode = GetNode(layers.at(0)+"__control");
+      if(controlNode) controlNode->StageInboundOp(op);
+      else Control(layers,op,[](){});
+    };
+
+    // `After`: stage inbound lambda on a control node, given by the first
+    //          layer in `layers` (see `Before`)
+    template<class O>
+    void After(std::vector<TString> layers, O op) {
+      Node *controlNode = GetNode(layers.at(0)+"__control");
+      if(controlNode) controlNode->StageOutboundOp(op);
+      else Control(layers,[](){},op);
+    };
+
+    // `Payload`: add a lambda to the leaf node
+    // - this is the main operator, acting on all full root-to-leaf paths
+    // - there is no difference between inbound and outbound at the leaf
+    template<class O> void Payload(O op) { GetLeafNode()->StageInboundOp(op); };
+
+    // end operator templates
+    // ---------------------------------------------------------------------
+
+
     // initialize DAG, with only the root node connected to the leaf node
     void InitializeDAG();
 

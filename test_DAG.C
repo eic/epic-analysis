@@ -13,21 +13,27 @@ void test_DAG() {
   D->AddLayer(BZ);
   D->AddLayer(BY);
 
-  D->Control(
-    {"Z"},
-    [](){ cout << "Z LOOP HEADER" << endl; },
-    [](){ cout << "Z LOOP FOOTER" << endl; }
-    );
-
   D->PrintBreadth("full DAG");
   D->PrintDepth("depth traversal:");
   D->PrintLeafPaths();
+  
+  // -------------
 
   D->Initial([](){ cout << "MAIN HEADER" << endl; });
   D->Final([](){ cout << "MAIN FOOTER" << endl; });
 
-  D->Payload([](Histos*){}); // TODO
+  D->Control(
+    {"Z","Y"},
+    [](){ cout << "Z LOOP HEADER - CONTROL" << endl; },
+    [](){ cout << "Z LOOP FOOTER - CONTROL" << endl; }
+    );
 
-  D->Execute();
+  //D->Before( {"Z"}, [](){ cout << "Z LOOP HEADER - BEFORE" << endl; });
+  //D->After( {"Z"}, [](){ cout << "Z LOOP FOOTER - AFTER" << endl; });
+  D->Before({"Y"},[](){  cout << "Y LOOP HEADER" << endl; });
+
+  D->ForEach([](Histos*){}); // TODO
+
+  D->ExecuteOps();
 
 };

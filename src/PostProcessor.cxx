@@ -33,6 +33,9 @@ PostProcessor::PostProcessor(
   infile = new TFile(infileN,"READ");
   gROOT->ProcessLine(".! mkdir -p "+pngDir);
 
+  // get DAGs
+  //hDAG = (HistosDAG*) infile->Get("histos"); // TODO+++
+
   // initialize algorithm-specific vars
   this->ResetVars();
 
