@@ -11,7 +11,7 @@
 #include "TSystem.h"
 #include "TROOT.h"
 #include "TStyle.h"
-
+#include "TGaxis.h"
 // largex-eic
 #include "Histos.h"
 #include "Kinematics.h"
@@ -52,8 +52,13 @@ class PostProcessor : public TNamed
     void DrawSingle(TString outName, TString histSet, TString histName);
     void DrawRatios(
         TString outName, TString numerSet, TString denomSet, Bool_t plotRatioOnly=false
+	 );
+    void DrawInBins(
+	TString outName,
+	std::vector<std::vector<TString>>& histList, TString histName,
+	TString var1name, int nvar1, double var1low, double var1high, bool var1log,
+	TString var2name, int nvar2, double var2low, double var2high, bool var2log
         );
-
     // algorithm finish methods; to be called after loops
     void FinishDumpAve(TString datFile);
     void FinishDrawRatios(TString summaryDir);
