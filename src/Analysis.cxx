@@ -158,7 +158,7 @@ void Analysis::Execute() {
               HS->DefineHist1D("mX","m_{X}","GeV",NBINS,0,20);
               HS->DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
               HS->DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
-              HS->DefineHist2D("etaVsP","p","eta","GeV","",
+              HS->DefineHist2D("etaVsP","p","#eta","GeV","",
                   NBINS,0.1,100,
                   NBINS,-5,5,
                   true,false
