@@ -33,7 +33,9 @@ Analysis::Analysis(
   // final state bins (e.g., tracks or jets)
   AddBinScheme("finalState","finalState");
   AddFinalState("pipTrack","#pi^{+} tracks", 211);
+  AddFinalState("KpTrack","#K^{+} tracks", 321);
   //AddFinalState("pimTrack","#pi^{-} tracks",-211);
+  //AddFinalState("KmTrack","#K^{-} tracks", -321);
   AddBinScheme("recMethod", "recMethod");
   AddRecMethod("Ele", "electron method");
   AddRecMethod("DA", "DA method");

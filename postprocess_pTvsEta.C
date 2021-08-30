@@ -1,6 +1,15 @@
 R__LOAD_LIBRARY(Largex)
 #include "PostProcessor.h"
 
+
+/*
+Script to plot histograms binned in two variables in their respective positions
+on those axes. In this script, pT vs Eta plots are plotted in Q2 and 
+x bins. This script assumes that the only "Range" bins for Q2 and x are
+continuous and of the same size (in regular or log scale), e.g. set 
+using the BuildBins function.
+*/
+  
 void postprocess_pTvsEta(
      TString infile = "out/coverage_20x10.cross_5x41_25_newcard.root"
 ){
@@ -26,7 +35,8 @@ void postprocess_pTvsEta(
   for(int bz  : P->GetBinNums("z")) {
   if(P->GetBinCut("z",bz)->GetCutType()=="Full"){
   for(int bfs : P->GetBinNums("finalState")) {
-    if(P->GetBinCut("finalState",bfs)->GetCutTitle() =="#pi^{+} tracks"){ // is there a better way to select a type of track?
+    //    if(P->GetBinCut("finalState",bfs)->GetCutTitle() =="#pi^{+} tracks"){ // is there a better way to select a type of track?
+    if(P->GetBinCut("finalState",bfs)->GetCutTitle() =="#K^{+} tracks"){
     for(int bx  : P->GetBinNums("x")) {
       if(P->GetBinCut("x",bx)->GetCutType()=="Range"){  // not perfect, as there could be some case with another range outside of those we want	
 	for(int bq  : P->GetBinNums("q2")) {
