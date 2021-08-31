@@ -3,10 +3,10 @@ R__LOAD_LIBRARY(Largex)
 
 // eta vs. p in bins of (x,Q2)
 void analysis_coverage(
-    TString infiles="datarec/dire_5x41.brian.hiDiv.root", /* delphes tree(s) */
-    Double_t eleBeamEn=5, /* electron beam energy [GeV] */
-    Double_t ionBeamEn=41, /* ion beam energy [GeV] */
-    Double_t crossingAngle=0, /* crossing angle [mrad] */
+    TString infiles="datarec/pythia8NCDISS3_10x100_Q21_cross-0.025.root", /* delphes tree(s) */
+    Double_t eleBeamEn=10, /* electron beam energy [GeV] */
+    Double_t ionBeamEn=100, /* ion beam energy [GeV] */
+    Double_t crossingAngle=-0.025, /* crossing angle [mrad] */
     TString outfilePrefix="coverage" /* output filename prefix*/
 ) {
 
@@ -23,9 +23,24 @@ void analysis_coverage(
   // set binning scheme ====================================
 
   // (x,Q2) grid of bins, equal width in log-scale
-  A->BinScheme("q2")->BuildBins( 3, 1,    100,  true);
-  A->BinScheme("x")->BuildBins ( 3, 5e-2, 1,    true );
+  A->BinScheme("q2")->BuildBins( 5, 1,    1000,  true);
+  A->BinScheme("x")->BuildBins ( 10, 1e-4, 1,    true );
 
+  A->BinScheme("eta")->BuildBin("Range", -1, -2);
+  A->BinScheme("eta")->BuildBin("Range", -2, -3.5);
+  A->BinScheme("eta")->BuildBin("Range", 1, 2);
+  A->BinScheme("eta")->BuildBin("Range", 2, 3.5);
+
+  A->BinScheme("eta")->BuildBin("Range", -1, 1);
+  
+
+  A->BinScheme("p")->BuildBin("Max", 2.0);
+  A->BinScheme("p")->BuildBin("Max", 4.0);
+  A->BinScheme("p")->BuildBin("Max", 10.0);
+  A->BinScheme("p")->BuildBin("Min", 10.0);
+
+
+  
   // perform the analysis ==================================
   A->Execute();
 };

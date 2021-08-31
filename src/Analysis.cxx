@@ -24,10 +24,12 @@ Analysis::Analysis(
 {
   // set bin schemes
   AddBinScheme("pt","p_{T}");
+  AddBinScheme("p","p");
   AddBinScheme("z","z");
   AddBinScheme("x","x");
   AddBinScheme("q2","Q2");
   AddBinScheme("y","y");
+  AddBinScheme("eta","{Eta}");
   AddBinScheme("pt_jet", "jet p_{T}");
   AddBinScheme("z_jet", "jet z");
   // final state bins (e.g., tracks or jets)
@@ -89,10 +91,12 @@ void Analysis::Execute() {
 
   // number of bins
   const Int_t NptBins = BinScheme("pt")->GetNumBins();
+  const Int_t NpBins = BinScheme("p")->GetNumBins();  
   const Int_t NxBins = BinScheme("x")->GetNumBins();
   const Int_t NzBins = BinScheme("z")->GetNumBins();
   const Int_t NqBins = BinScheme("q2")->GetNumBins();
   const Int_t NyBins = BinScheme("y")->GetNumBins();
+  const Int_t NetaBins = BinScheme("eta")->GetNumBins();
   const Int_t NfinalStateBins = BinScheme("finalState")->GetNumBins();
   const Int_t NptjetBins = BinScheme("pt_jet")->GetNumBins();
   const Int_t NzjetBins = BinScheme("z_jet")->GetNumBins();
@@ -105,15 +109,17 @@ void Analysis::Execute() {
   // - TODO: if we add one more dimension, 7D array will probably break; need
   //         better data structure
   Histos *histSet[NptBins][NxBins][NzBins][NqBins][NyBins][NfinalStateBins];
+  Histos *histSetCoverage[NpBins][NxBins][NetaBins][NqBins][NyBins][NfinalStateBins];
   Histos *histSetJets[NptjetBins][NzjetBins][NxBins][NqBins][NyBins];
   Histos *histSetBreitJets[NptjetBins][NzjetBins][NxBins][NqBins][NyBins][NrecMethodBins];
 
   std::vector<Histos*> histSetList;
+  std::vector<Histos*> histSetListCoverage;  
   std::vector<Histos*> histSetListJets;
   std::vector<Histos*> histSetListBreitJets;
 
   std::vector<Histos*> histSetFillList;
-  std::vector<int> v_pt, v_x, v_z, v_q, v_y;
+  std::vector<int> v_pt, v_x, v_z, v_q, v_y, v_p, v_eta;
   // instantiate Histos sets, and populate
   TString histosN,histosT;
 
@@ -187,7 +193,69 @@ void Analysis::Execute() {
       };
     };
   };
+  cout << "Define coverage histograms..." << endl;
+  for(int bp=0; bp<NpBins; bp++) { // - loop over p bins                                                                                          
+    for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
+      for(int bEta=0; bEta<NetaBins; bEta++) { // - loop over Eta bins                                                                           
+        for(int bq=0; bq<NqBins; bq++) { // - loop over q2 bins                                                                               
+          for(int by=0; by<NyBins; by++) { // - loop over y bins                                                                                  
+            for(int bfs=0; bfs<NfinalStateBins; bfs++) { // - loop over final states
+	      // set Histos name and title                                                                                                            
+	      histosN = this->GetHistosNameCoverage(bp,bx,bEta,bq,by,bfs);
+              histosT = this->GetHistosTitleCoverage(bp,bx,bEta,bq,by,bfs);
+	      
+              // define set of histograms for this bin                                                                                              
+              histSetCoverage[bp][bx][bEta][bq][by][bfs] = new Histos(histosN,histosT);
+              HS = histSetCoverage[bp][bx][bEta][bq][by][bfs]; // shorthand pointer                                                        
 
+              HS->DefineHist2D("Q2vsX","x","Q^{2}","","GeV^{2}",
+                  NBINS,1e-3,1,
+                  NBINS,1,100,
+                  true,true
+                  );
+              HS->DefineHist1D("Q","Q","GeV",NBINS,1.0,11.0,true,true);
+              HS->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
+              HS->DefineHist1D("y","y","",NBINS,1e-5,1,true);
+              HS->DefineHist1D("W","W","GeV",NBINS,0,15);
+              // -- DIS kinematics resolution                                                                                                             
+              HS->DefineHist1D("xRes","x - x_{true}","", NBINS, -1, 1);
+              // -- hadron 4-momentum                                                                                                                    
+              HS->DefineHist1D("pLab","p_{lab}","GeV",NBINS,0,10);
+              HS->DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
+              HS->DefineHist1D("etaLab","#eta_{lab}","",NBINS,-5,5);
+              HS->DefineHist1D("phiLab","#phi_{lab}","",NBINS,-TMath::Pi(),TMath::Pi());
+              // -- hadron kinematics                                                                                                                   
+              HS->DefineHist1D("z","z","",NBINS,0,1);
+              HS->DefineHist1D("pT","p_{T}","GeV",NBINS,1e-2,3,true);
+              HS->DefineHist1D("qT","q_{T}","GeV",NBINS,1e-2,5,true);
+              HS->DefineHist1D("qTq","q_{T}/Q","",NBINS,1e-2,3,true);
+              HS->DefineHist1D("mX","m_{X}","GeV",NBINS,0,20);
+              HS->DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
+              HS->DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
+              HS->DefineHist2D("etaVsP","p","#eta","GeV","",
+                  NBINS,0.1,100,
+                  NBINS,-5,5,
+                  true,false
+			       );
+              // ===========================================================                                                                               
+
+              // store cut definitions with histogram sets                                                                                                 
+              HS->AddCutDef(BinScheme("p")->Cut(bp));
+              HS->AddCutDef(BinScheme("x")->Cut(bx));
+              HS->AddCutDef(BinScheme("eta")->Cut(bEta));
+              HS->AddCutDef(BinScheme("q2")->Cut(bq));
+              HS->AddCutDef(BinScheme("y")->Cut(by));
+              HS->AddCutDef(BinScheme("finalState")->Cut(bfs));
+
+              // add histogram set full list                                                                                                              
+              histSetListCoverage.push_back(histSetCoverage[bp][bx][bEta][bq][by][bfs]);
+	      
+	    };
+	  };
+	};
+      };
+    };
+  };
   cout << "Define jet histograms..." << endl;
   for(int bpt=0; bpt<NptjetBins; bpt++) { // - loop over jet pT bins
     for(int bz=0; bz<NzjetBins; bz++){
@@ -438,6 +506,51 @@ void Analysis::Execute() {
         // fill simple tree (not binned)
         // TODO: consider adding a `finalState` cut
         if( writeSimpleTree && histSetFillList.size()>0 ) ST->FillTree(w);
+	
+      };
+      if(kin->CutFull()) { // second loop for now for coverage plots
+	// remove large x cut for this?
+        CheckBins( BinScheme("p"), v_p, kin->pLab );
+        CheckBins( BinScheme("x"),  v_x,  kin->x );
+        CheckBins( BinScheme("eta"),  v_eta,  kin->etaLab );
+        CheckBins( BinScheme("q2"), v_q,  kin->Q2 );
+        CheckBins( BinScheme("y"),  v_y,  kin->y );
+
+	histSetFillList.clear();
+	for(int bp : v_p) {
+          for(int bx : v_x) {
+            for(int bEta : v_eta) {
+              for(int bq : v_q) {
+                for(int by : v_y) {		  
+		  histSetFillList.push_back(histSetCoverage[bp][bx][bEta][bq][by][bFinalState]);   
+                };
+              };
+            };
+          };
+        };
+	
+	for(Histos *H : histSetFillList) {
+          // DIS kinematics                                                                                                                              
+          dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,w);
+          H->Hist("Q")->Fill(TMath::Sqrt(kin->Q2),w);
+          H->Hist("x")->Fill(kin->x,w);
+          H->Hist("W")->Fill(kin->W,w);
+          H->Hist("y")->Fill(kin->y,w);
+          // hadron 4-momentum                                                                                                                     
+          H->Hist("pLab")->Fill(kin->pLab,w);
+          H->Hist("pTlab")->Fill(kin->pTlab,w);
+          H->Hist("etaLab")->Fill(kin->etaLab,w);
+          H->Hist("phiLab")->Fill(kin->phiLab,w);
+          // hadron kinematics                                                                                                                            
+          H->Hist("z")->Fill(kin->z,w);
+          H->Hist("pT")->Fill(kin->pT,w);
+          H->Hist("qT")->Fill(kin->qT,w);
+          H->Hist("qTq")->Fill(kin->qT/TMath::Sqrt(kin->Q2),w);
+          H->Hist("mX")->Fill(kin->mX,w);
+          H->Hist("phiH")->Fill(kin->phiH,w);
+          H->Hist("phiS")->Fill(kin->phiS,w);
+          dynamic_cast<TH2*>(H->Hist("etaVsP"))->Fill(kin->pLab,kin->etaLab,w); // TODO: lab-frame p, or some other frame?                                
+        };
 
       };
     };
@@ -564,6 +677,8 @@ void Analysis::Execute() {
   if(writeSimpleTree) ST->WriteTree();
   for(Histos *H : histSetList) H->WriteHists(outFile);
   for(Histos *H : histSetList) H->Write();
+  for(Histos *H : histSetListCoverage) H->WriteHists(outFile);
+  for(Histos *H : histSetListCoverage) H->Write();
   for(Histos *H : histSetListJets) H->WriteHists(outFile);
   for(Histos *H : histSetListJets) H->Write();
   #if INCCENTAURO == 1
@@ -672,6 +787,29 @@ TString Analysis::GetHistosTitle(int cpt, int cx, int cz, int cq, int cy, int cf
   retStr += ", " + BinScheme("y")->Cut(cy)->GetCutTitle();
   return retStr;
 };
+
+TString Analysis::GetHistosNameCoverage(int cp, int cx, int ceta, int cq, int cy, int cfs) {
+  TString retStr;
+  retStr = "histos_";
+  retStr += finalStateName[cfs];
+  retStr += Form("_p%d",cp);
+  retStr += Form("_x%d",cx);
+  retStr += Form("_eta%d",ceta);
+  retStr += Form("_q%d",cq);
+  retStr += Form("_y%d",cy);
+  return retStr;
+};
+TString Analysis::GetHistosTitleCoverage(int cp, int cx, int ceta, int cq, int cy, int cfs) {
+  TString retStr;
+  retStr  =        BinScheme("finalState")->Cut(cfs)->GetCutTitle();
+  retStr += ", " + BinScheme("p")->Cut(cp)->GetCutTitle();
+  retStr += ", " + BinScheme("x")->Cut(cx)->GetCutTitle();
+  retStr += ", " + BinScheme("eta")->Cut(ceta)->GetCutTitle();
+  retStr += ", " + BinScheme("q2")->Cut(cq)->GetCutTitle();
+  retStr += ", " + BinScheme("y")->Cut(cy)->GetCutTitle();
+  return retStr;
+};
+
 
 TString Analysis::GetHistosNameJets(int cpt, int cz, int cx, int cq, int cy) {
   TString retStr;

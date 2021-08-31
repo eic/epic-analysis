@@ -200,7 +200,8 @@ class Kinematics : public TObject
 
 
     // CUTS =====================================================
-    const Double_t xMinGlobal = 0.05; // minimum x for "large-x"
+  //    const Double_t xMinGlobal = 0.05; // minimum x for "large-x"
+    const Double_t xMinGlobal = 1e-4; 
     Bool_t CutDIS() {
       return x>xMinGlobal /* large x region */
           && W>3.0 /* inelastic region */

@@ -62,6 +62,8 @@ class Analysis : public TNamed
     // get Histos object name and title
     TString GetHistosName(int cpt, int cx, int cz, int cq, int cy, int cfs);
     TString GetHistosTitle(int cpt, int cx, int cz, int cq, int cy, int cfs);
+    TString GetHistosNameCoverage(int cp, int cx, int ceta, int cq, int cy, int cfs);
+    TString GetHistosTitleCoverage(int cp, int cx, int ceta, int cq, int cy, int cfs);
     TString GetHistosNameJets(int cpt, int cz, int cx, int cq, int cy);
     TString GetHistosTitleJets(int cpt, int cz, int cx, int cq, int cy);
     TString GetHistosNameBreitJets(int cpt, int cz, int cx, int cq, int cy, int crec);
