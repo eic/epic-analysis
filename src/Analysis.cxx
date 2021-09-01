@@ -441,7 +441,7 @@ void Analysis::Execute() {
 	  wJetTotal += wJet;
 
       for(int i = 0; i < kin->jetsRec.size(); i++){
-        PseudoJet jet = kin->jetsRec[i];
+	fastjet::PseudoJet jet = kin->jetsRec[i];
         kin->CalculateJetKinematics(jet);
 
         // following same procedure as in track loop	
