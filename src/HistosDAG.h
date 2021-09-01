@@ -29,6 +29,7 @@ class HistosDAG : public DAG
 
     // payload operator, executed on the specified Histos object
     void ForEach(std::function<void(Histos*)> op);
+    void ForEach(std::function<void(Histos*,NodePath)> op);
 
     // return Histos* associated with the given NodePath
     Histos *GetHistos(NodePath P);

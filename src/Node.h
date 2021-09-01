@@ -60,7 +60,12 @@ class Node : public TObject
     void RemoveInput(Node *N);
     void RemoveOutput(Node *N);
 
-    // lambda management: attach lamdas to a node (usu. control nodes),
+    // active state: use this to attach a boolean to a node; for example,
+    // you can enable and disable certain nodes prior to a traversal
+    void SetActiveState(Bool_t active_) { active=active_; };
+    Bool_t IsActive() { return active; };
+
+    // lambda operators: attach lamdas to a node (usu. control nodes),
     // and provide the ability to execute them
     // - inbound lambda is executed when traversal enters the node
     template<class O> void StageInboundOp(O op) { inboundOp = FormatOp(op); };
@@ -110,6 +115,7 @@ class Node : public TObject
     Bool_t debug;
     Int_t nodeType;
     TString id;
+    Bool_t active;
     std::vector<Node*> inputList;
     std::vector<Node*> outputList;
     std::function<void(Node*,NodePath)> inboundOp;

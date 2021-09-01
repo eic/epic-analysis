@@ -81,6 +81,8 @@ void Analysis::Execute() {
   ST = new SimpleTree("tree",kin);
   weight = new WeightsUniform();
   weightJet = new WeightsUniform();
+  HD = new HistosDAG();
+
 
   // read delphes tree
   TChain *chain = new TChain("Delphes");
@@ -98,6 +100,7 @@ void Analysis::Execute() {
   TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
 
   // number of bins
+  /*
   const Int_t NptBins = BinScheme("pt")->GetNumBins();
   const Int_t NxBins = BinScheme("x")->GetNumBins();
   const Int_t NzBins = BinScheme("z")->GetNumBins();
@@ -107,6 +110,7 @@ void Analysis::Execute() {
   const Int_t NptjetBins = BinScheme("pt_jet")->GetNumBins();
   const Int_t NzjetBins = BinScheme("z_jet")->GetNumBins();
   const Int_t NrecMethodBins = BinScheme("recMethod")->GetNumBins();
+  */
 
   // sets of histogram sets
   // - `histSet` is a data structure for storing and organizing pointers to
@@ -115,88 +119,53 @@ void Analysis::Execute() {
   // - TODO: if we add one more dimension, 7D array will probably break; need
   //         better data structure
 
-  //HistosDAG *hDAG = new HistosDAG(binSchemes);
+  HistosDAG *HD = new HistosDAG();
+  HD->Build(binSchemes);
 
+  /*
   Histos *histSet[NptBins][NxBins][NzBins][NqBins][NyBins][NfinalStateBins];
   Histos *histSetJets[NptjetBins][NzjetBins][NxBins][NqBins][NyBins];
   Histos *histSetBreitJets[NptjetBins][NzjetBins][NxBins][NqBins][NyBins][NrecMethodBins];
-
-  std::vector<Histos*> histSetList;
-  std::vector<Histos*> histSetListJets;
-  std::vector<Histos*> histSetListBreitJets;
-
-  std::vector<Histos*> histSetFillList;
-  std::vector<int> v_pt, v_x, v_z, v_q, v_y;
-  // instantiate Histos sets, and populate
-  TString histosN,histosT;
+  */
 
 
-  cout << "Define track histograms..." << endl;
-  for(int bpt=0; bpt<NptBins; bpt++) { // - loop over pT bins
-    for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
-      for(int bz=0; bz<NzBins; bz++) { // - loop over z bins
-        for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
-          if(CheckDiagonal(bpt,bx,bz,bq)) continue; // diagonalizer
-          for(int by=0; by<NyBins; by++) { // - loop over y bins
-            for(int bfs=0; bfs<NfinalStateBins; bfs++) { // - loop over final states
+  // HISTOGRAMS ================================================
+  HD->ForEach([this](Histos *HS){
+    // -- DIS kinematics
+    HS->DefineHist2D("Q2vsX","x","Q^{2}","","GeV^{2}",
+        NBINS,1e-3,1,
+        NBINS,1,100,
+        true,true
+        );
+    HS->DefineHist1D("Q","Q","GeV",NBINS,1.0,11.0,true,true);
+    HS->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
+    HS->DefineHist1D("y","y","",NBINS,1e-5,1,true);
+    HS->DefineHist1D("W","W","GeV",NBINS,0,15);
+    // -- DIS kinematics resolution
+    HS->DefineHist1D("xRes","x - x_{true}","", NBINS, -1, 1);
+    // -- hadron 4-momentum
+    HS->DefineHist1D("pLab","p_{lab}","GeV",NBINS,0,10);
+    HS->DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
+    HS->DefineHist1D("etaLab","#eta_{lab}","",NBINS,-5,5);
+    HS->DefineHist1D("phiLab","#phi_{lab}","",NBINS,-TMath::Pi(),TMath::Pi());
+    // -- hadron kinematics
+    HS->DefineHist1D("z","z","",NBINS,0,1);
+    HS->DefineHist1D("pT","p_{T}","GeV",NBINS,1e-2,3,true);
+    HS->DefineHist1D("qT","q_{T}","GeV",NBINS,1e-2,5,true);
+    HS->DefineHist1D("qTq","q_{T}/Q","",NBINS,1e-2,3,true);
+    HS->DefineHist1D("mX","m_{X}","GeV",NBINS,0,20);
+    HS->DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
+    HS->DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
+    // -- cross sections
+    //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
+    HS->DefineHist1D("Q_xsec","Q","GeV",10,1.0,10.0,true,true); // log
+    HS->Hist("Q_xsec")->SetMinimum(1e-10);
+    // ===========================================================
+  });
+  HD->ExecuteAndClearOps();
 
-              // set Histos name and title
-              histosN = this->GetHistosName (bpt,bx,bz,bq,by,bfs);
-              histosT = this->GetHistosTitle(bpt,bx,bz,bq,by,bfs);
 
-              // define set of histograms for this bin
-              histSet[bpt][bx][bz][bq][by][bfs] = new Histos(histosN,histosT);
-              HS = histSet[bpt][bx][bz][bq][by][bfs]; // shorthand pointer
-
-              // HISTOGRAMS ================================================
-              // -- DIS kinematics
-              HS->DefineHist2D("Q2vsX","x","Q^{2}","","GeV^{2}",
-                  NBINS,1e-3,1,
-                  NBINS,1,100,
-                  true,true
-                  );
-              HS->DefineHist1D("Q","Q","GeV",NBINS,1.0,11.0,true,true);
-              HS->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
-              HS->DefineHist1D("y","y","",NBINS,1e-5,1,true);
-              HS->DefineHist1D("W","W","GeV",NBINS,0,15);
-              // -- DIS kinematics resolution
-              HS->DefineHist1D("xRes","x - x_{true}","", NBINS, -1, 1);
-              // -- hadron 4-momentum
-              HS->DefineHist1D("pLab","p_{lab}","GeV",NBINS,0,10);
-              HS->DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
-              HS->DefineHist1D("etaLab","#eta_{lab}","",NBINS,-5,5);
-              HS->DefineHist1D("phiLab","#phi_{lab}","",NBINS,-TMath::Pi(),TMath::Pi());
-              // -- hadron kinematics
-              HS->DefineHist1D("z","z","",NBINS,0,1);
-              HS->DefineHist1D("pT","p_{T}","GeV",NBINS,1e-2,3,true);
-              HS->DefineHist1D("qT","q_{T}","GeV",NBINS,1e-2,5,true);
-              HS->DefineHist1D("qTq","q_{T}/Q","",NBINS,1e-2,3,true);
-              HS->DefineHist1D("mX","m_{X}","GeV",NBINS,0,20);
-              HS->DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
-              HS->DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
-              // -- cross sections
-              //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
-              HS->DefineHist1D("Q_xsec","Q","GeV",10,1.0,10.0,true,true); // log
-              HS->Hist("Q_xsec")->SetMinimum(1e-10);
-              // ===========================================================
-
-              // store cut definitions with histogram sets
-              HS->AddCutDef(BinScheme("pt")->Cut(bpt));
-              HS->AddCutDef(BinScheme("x")->Cut(bx));
-              HS->AddCutDef(BinScheme("z")->Cut(bz));
-              HS->AddCutDef(BinScheme("q")->Cut(bq));
-              HS->AddCutDef(BinScheme("y")->Cut(by));
-              HS->AddCutDef(BinScheme("finalState")->Cut(bfs));
-
-              // add histogram set full list
-              histSetList.push_back(histSet[bpt][bx][bz][bq][by][bfs]);
-            };
-          };
-        };
-      };
-    };
-  };
-
+  /*
   cout << "Define jet histograms..." << endl;
   for(int bpt=0; bpt<NptjetBins; bpt++) { // - loop over jet pT bins
     for(int bz=0; bz<NzjetBins; bz++){
@@ -266,6 +235,7 @@ void Analysis::Execute() {
     };
   };
   #endif
+  */
 
   // get cross section and number of events
   // - cross sections are hard-coded, coped from pythia output
@@ -383,41 +353,33 @@ void Analysis::Execute() {
       kin->CalculateHadronKinematics();
       kinTrue->CalculateHadronKinematics();
 
-	  Double_t w = weight->GetWeight(*kin);
-	  wTotal += w;
+      Double_t w = weight->GetWeight(*kin);
+      wTotal += w;
 
-      // apply cuts
+      // APPLY MAIN CUTS
       if(kin->CutFull()) {
-        // decide which histogram sets to fill
-        // -- `v_A` will be the list of bins that this event's variable `A`
-        //    will be a part of; we use these lists to determine the list
-        //    of histogram sets to fill
-        // - check pT bin
-        CheckBins( BinScheme("pt"), v_pt, kin->pT );
-        CheckBins( BinScheme("x"),  v_x,  kin->x );
-        CheckBins( BinScheme("z"),  v_z,  kin->z );
-        CheckBins( BinScheme("q"),  v_q,  TMath::Sqrt(kin->Q2) );
-        CheckBins( BinScheme("y"),  v_y,  kin->y );
 
+        // map varNames to values
+        valueMap.clear();
+        valueMap.insert(std::pair<TString,Double_t>(  "pt",  kin->pT  ));
+        valueMap.insert(std::pair<TString,Double_t>(  "x",   kin->x   ));
+        valueMap.insert(std::pair<TString,Double_t>(  "z",   kin->z   ));
+        valueMap.insert(std::pair<TString,Double_t>(  "q2",  kin->Q2  ));
+        valueMap.insert(std::pair<TString,Double_t>(  "y",   kin->y   ));
 
-        // build list of histogram sets to fill
-        histSetFillList.clear();
-        for(int bpt : v_pt) {
-          for(int bx : v_x) {
-            for(int bz : v_z) {
-              for(int bq : v_q) {
-                for(int by : v_y) {
-                  if(!CheckDiagonal(bpt,bx,bz,bq)) {
-                    histSetFillList.push_back(histSet[bpt][bx][bz][bq][by][bFinalState]);
-                  };
-                };
-              };
-            };
+        // check which bins the event falls in
+        Bool_t activeEvent = false;
+        HD->TraverseBreadth([this,&activeEvent](Node *N){
+          if(N->GetNodeType()==NT::bin) {
+            auto val = valueMap.at(N->GetVarName());
+            Bool_t active = N->GetCut()->CheckCut(val);
+            if(active) activeEvent=true;
+            N->SetActiveState(active);
           };
-        };
+        });
 
-        // loop through list of histogram sets, and fill them
-        for(Histos *H : histSetFillList) {
+        // fill histograms
+        HD->ForEach([this,&w](Histos *H){
           // DIS kinematics
           dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,w);
           H->Hist("Q")->Fill(TMath::Sqrt(kin->Q2),w);
@@ -441,20 +403,22 @@ void Analysis::Execute() {
           H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),w);
           // DIS kinematics resolution
           H->Hist("xRes")->Fill(kin->x - kinTrue->x,w);
-        };
+        });
+        HD->ExecuteOps(true); // save time and don't ClearOps (next loop will overwrite lambda)
 
         // fill simple tree (not binned)
         // TODO: consider adding a `finalState` cut
-        if( writeSimpleTree && histSetFillList.size()>0 ) ST->FillTree(w);
+        if( writeSimpleTree && activeEvent ) ST->FillTree(w);
 
       };
     };
 
     // jet loop
+    /*
     if(kin->CutDIS()){
 
-	  Double_t wJet = weightJet->GetWeight(*kin);
-	  wJetTotal += wJet;
+      Double_t wJet = weightJet->GetWeight(*kin);
+      wJetTotal += wJet;
 
       for(int i = 0; i < kin->jetsRec.size(); i++){
         PseudoJet jet = kin->jetsRec[i];
@@ -540,46 +504,52 @@ void Analysis::Execute() {
       };
     };
     #endif
+    */
 
 
   };
   cout << "end event loop" << endl;
   // event loop end =========================================================
 
+  // reset HD, to clean up after the event loop
+  HD->ActivateAllNodes();
+  HD->ClearOps();
+
   // calculate integrated luminosity
   Double_t lumi = wTotal/xsecTot; // [nb^-1]
   cout << "Integrated Luminosity:       " << lumi << "/nb" << endl;
   cout << sep << endl;
 
-  // calculate cross sections
-  // TODO: generalize (`if (name contains "xsec") ...`)
-  for(Histos *H : histSetList) {
-    H->Hist("Q_xsec")->Scale(1./lumi);
-  };
-
-  // print yields in each bin
-  cout << sep << endl << "Histogram Entries:" << endl;
-  for(Histos *H : histSetList) {
+  // calculate cross sections, and print yields
+  HD->Initial([&sep](){ cout << sep << endl << "Histogram Entries:" << endl; });
+  HD->Final([&sep](){ cout << sep << endl; });
+  HD->ForEach([&lumi](Histos *H){
     cout << H->GetSetTitle() << " ::: "
          << H->Hist("Q2vsX")->GetEntries()
          << endl;
-  };
+    // calculate cross sections
+    H->Hist("Q_xsec")->Scale(1./lumi); // TODO: generalize (`if (name contains "xsec") ...`)
+  });
+  HD->ExecuteAndClearOps();
 
 
   // write histograms
   cout << sep << endl;
   outFile->cd();
   if(writeSimpleTree) ST->WriteTree();
-  for(Histos *H : histSetList) H->WriteHists(outFile);
-  for(Histos *H : histSetList) H->Write();
+  HD->ForEach([this](Histos *H){ H->WriteHists(outFile); });
+  HD->ExecuteAndClearOps();
+  HD->Write("HD");
+  /*
   for(Histos *H : histSetListJets) H->WriteHists(outFile);
   for(Histos *H : histSetListJets) H->Write();
   #if INCCENTAURO == 1
-  for(Histos *H : histSetListBreitJets) H->WriteHists(outfile);
+  for(Histos *H : histSetListBreitJets) H->WriteHists(outFile);
   for(Histos *H : histSetListBreitJets) H->Write();
   #endif
+  */
   // write binning schemes
-  for(auto const &kv : binSchemes) kv.second->Write(kv.first+"_bins");
+  for(auto const &kv : binSchemes) kv.second->Write(kv.first+"_bins"); // TODO: might not need this after DAG upgrade
 
   // close output
   outFile->Close();
@@ -657,12 +627,14 @@ Bool_t Analysis::CheckDiagonal(int cpt, int cx, int cz, int cq) {
 
 // scan through bin set `bs`, checking each one; the vector `v` will
 // contain the list of array indices for which the cut on `var` is satisfied
+/*
 void Analysis::CheckBins(BinSet *bs, std::vector<int> &v, Double_t var) {
   v.clear();
   for(int b=0; b<bs->GetNumBins(); b++) {
     if(bs->Cut(b)->CheckCut(var)) v.push_back(b);
   };
 };
+*/
 
 // get name of Histos object for specified bin
 TString Analysis::GetHistosName(int cpt, int cx, int cz, int cq, int cy, int cfs) {

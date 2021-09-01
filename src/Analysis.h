@@ -24,6 +24,7 @@
 
 // largex-eic
 #include "Histos.h"
+#include "HistosDAG.h"
 #include "Kinematics.h"
 #include "CutDef.h"
 #include "BinSet.h"
@@ -100,6 +101,7 @@ class Analysis : public TNamed
     Histos *HS;
     SimpleTree *ST;
     Kinematics *kin, *kinTrue;
+    HistosDAG *HD;
     TString infileName,outfileName,outfilePrefix;
     TFile *outFile;
     Double_t eleBeamEn = 5; // GeV
@@ -107,6 +109,7 @@ class Analysis : public TNamed
     Double_t crossingAngle = 0; // mrad
     std::map<TString,BinSet*> binSchemes;
     std::map<TString,TString> availableBinSchemes;
+    std::map<TString,Double_t> valueMap;
 
     Weights const* weight;
     Weights const* weightJet;

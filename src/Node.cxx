@@ -11,6 +11,7 @@ Node::Node(Int_t nodeType_, TString id_, CutDef *cut_)
   : nodeType(nodeType_)
   , id(id_)
   , cut(cut_)
+  , active(true)
   , debug(true)
 {
   UnstageOps();

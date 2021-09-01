@@ -28,6 +28,7 @@ void HistosDAG::Build(std::map<TString,BinSet*> binSchemes_) {
     TString histosN = "histos_";
     TString histosT = "";
     if(debug) std::cout << "At path " << Node::PathString(P) << ": ";
+    // set name and title
     for(Node *N : P) {
       if(N->GetNodeType()==NT::bin) { // TODO: improve names and titles, sort them
         histosN += "_" + N->GetID();
@@ -35,19 +36,27 @@ void HistosDAG::Build(std::map<TString,BinSet*> binSchemes_) {
       };
     };
     if(debug) std::cout << "Create " << histosN << std::endl;
-    histosMap.insert(std::pair<NodePath,Histos*>(P, new Histos(histosN,histosT)));
+    // instantiate Histos object
+    Histos *H = new Histos(histosN,histosT);
+    // add CutDefs to Histos object
+    for(Node *N : P) { if(N->GetNodeType()==NT::bin) H->AddCutDef(N->GetCut()); };
+    // append to `histosMap`
+    histosMap.insert(std::pair<NodePath,Histos*>(P,H));
   });
   // execution
   if(debug) std::cout << "Begin Histos instantiation..." << std::endl;
-  ExecuteOps();
-  // remove payload
-  ClearOps();
+  ExecuteAndClearOps();
 };
 
 
-// payload wrapper operator, executed on the specified Histos object
+// payload wrapper operators, executed on the specified Histos object
+// - lambda arguments: ( Histos* )
 void HistosDAG::ForEach(std::function<void(Histos*)> op) {
   Payload( [op,this](NodePath P){ op(this->GetHistos(P)); } );
+};
+// - lambda arguments: ( Histos*, NodePath )
+void HistosDAG::ForEach(std::function<void(Histos*,NodePath)> op) {
+  Payload( [op,this](NodePath P){ op(this->GetHistos(P),P); } );
 };
 
 

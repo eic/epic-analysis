@@ -136,13 +136,18 @@ class DAG : public TObject
     // DAG traversals: iterate through nodes, executing the lambda on each iteration:
     // -- breadth-first: loop through nodes of each layer; lambda operates on the node
     void TraverseBreadth(Node *N, std::function<void(Node*)> lambda);
+    void TraverseBreadth(std::function<void(Node*)> lambda) { TraverseBreadth(GetRootNode(),lambda); };
     // -- depth-first: traverse toward the leaf node, iterating over the possible unique paths;
     //    the lambda operates on the unique path to the current node, in addition to the current node
     void TraverseDepth(Node *N, std::function<void(Node*,NodePath)> lambda, NodePath P={});
-    // -- run each node's staged lambdas, while traversing depth first
-    void ExecuteOps(Node *N=nullptr, NodePath P={});
+    void TraverseDepth(std::function<void(Node*,NodePath)> lambda, NodePath P={}) { TraverseDepth(GetRootNode(),lambda,P); };
+    // -- run each node's staged lambdas, while traversing depth first; if `activeNodesOnly`, all nodes
+    //    must have `active==true` (by default all nodes are active)
+    void ExecuteOps(Bool_t activeNodesOnly=false, Node *N=nullptr, NodePath P={});
     // -- clear all staged lambdas
     void ClearOps();
+    // -- execute then clear
+    void ExecuteAndClearOps(Bool_t activeNodesOnly=false) { ExecuteOps(activeNodesOnly); ClearOps(); };
 
     // patch operations: manipulate connections ("patches") between layers
     /*   - "patch" refers to a set of edges between two layers, which
@@ -165,6 +170,9 @@ class DAG : public TObject
     // remove nodes and edges
     void RemoveNode(Node *N);
     void RemoveEdge(Node *inN, Node *outN);
+
+    // set all nodes to active (the default) or inactive (if active_==false)
+    void ActivateAllNodes(Bool_t active_=true);
 
     // print the whole DAG (breadth first or depth first), or
     // specific parts of it
