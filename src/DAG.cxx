@@ -113,7 +113,7 @@ void DAG::AddLayer(BinSet *BS) {
   int cnt=0;
   TObjArrayIter next(BS->GetBinList());
   while(CutDef *cut = (CutDef*) next()) {
-    nodes.push_back(new Node( NT::bin, cut->GetVarName()+Form("__%d",cnt++), cut ));
+    nodes.push_back(new Node( NT::bin, cut->GetVarName()+Form("_%d",cnt++), cut ));
   };
   AddLayer(nodes);
 };
@@ -238,7 +238,7 @@ void DAG::RepatchAllToFull() {
 void DAG::RepatchToLeaf(TString varName) {
   // convert the leaf node to a control node
   auto C = GetLeafNode();
-  ModifyNode(C,varName+"__control",NT::control);
+  ModifyNode(C,varName+"_control",NT::control);
   // create new leaf
   AddNode(NT::leaf,"leaf0");
   auto L = GetLeafNode();

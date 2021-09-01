@@ -48,7 +48,7 @@ class Node : public TObject
     TString GetID() { return id; };
     void SetID(TString id_) { id=id_; };
     CutDef *GetCut() { return cut; };
-    TString GetVarName() { return ( cut==nullptr ? "" : cut->GetVarName() ); };
+    TString GetVarName();
 
     // inputs and outputs accessors and modifiers
     // - inputs: nodes that connect to this node via incoming arrows

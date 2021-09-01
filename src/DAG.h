@@ -69,8 +69,8 @@ class DAG : public TObject
       TString controlID;
       for(TString layer : layers) {
         RepatchToLeaf(layer);
-        if(first) controlID = layer+"__control";
-        else RepatchToFull(layer+"__control");
+        if(first) controlID = layer+"_control";
+        else RepatchToFull(layer+"_control");
         first = false;
       };
       GetNode(controlID)->StageInboundOp(opBefore);
@@ -83,7 +83,7 @@ class DAG : public TObject
     // - if the control node exists, only the lambda is staged and layers are not changed
     template<class O>
     void Before(std::vector<TString> layers, O op) {
-      Node *controlNode = GetNode(layers.at(0)+"__control");
+      Node *controlNode = GetNode(layers.at(0)+"_control");
       if(controlNode) controlNode->StageInboundOp(op);
       else Control(layers,op,[](){});
     };
@@ -92,7 +92,7 @@ class DAG : public TObject
     //          layer in `layers` (see `Before`)
     template<class O>
     void After(std::vector<TString> layers, O op) {
-      Node *controlNode = GetNode(layers.at(0)+"__control");
+      Node *controlNode = GetNode(layers.at(0)+"_control");
       if(controlNode) controlNode->StageOutboundOp(op);
       else Control(layers,[](){},op);
     };

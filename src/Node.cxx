@@ -70,6 +70,8 @@ void Node::UnstageOps() {
   this->StageOutboundOp([](Node *N,NodePath P){ cout << "exit  :: " << N->GetID() << endl; });
 };
 
+// other
+TString Node::GetVarName() { if(cut) return cut->GetVarName(); else return ""; };
 
 Node::~Node() {
 };
