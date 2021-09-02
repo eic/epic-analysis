@@ -28,6 +28,7 @@
 #include "CutDef.h"
 #include "BinSet.h"
 #include "Node.h"
+#include "NodePath.h"
 
 class DAG : public TObject
 {
@@ -83,7 +84,7 @@ class DAG : public TObject
     // - if the control node exists, only the lambda is staged and layers are not changed
     template<class O>
     void BeforeSubloop(std::vector<TString> layers, O op) {
-      Node *controlNode = GetNode(layers.at(0)+"_control");
+      Node *controlNode = GetNode(layers.at(0)+"_control",true);
       if(controlNode) controlNode->StageInboundOp(op);
       else Subloop(layers,op,[](){});
     };
@@ -92,7 +93,7 @@ class DAG : public TObject
     // layer in `layers` (see `BeforeSubloop`)
     template<class O>
     void AfterSubloop(std::vector<TString> layers, O op) {
-      Node *controlNode = GetNode(layers.at(0)+"_control");
+      Node *controlNode = GetNode(layers.at(0)+"_control",true);
       if(controlNode) controlNode->StageOutboundOp(op);
       else Subloop(layers,[](){},op);
     };
@@ -139,11 +140,12 @@ class DAG : public TObject
     void TraverseBreadth(std::function<void(Node*)> lambda) { TraverseBreadth(GetRootNode(),lambda); };
     // -- depth-first: traverse toward the leaf node, iterating over the possible unique paths;
     //    the lambda operates on the unique path to the current node, in addition to the current node
-    void TraverseDepth(Node *N, std::function<void(Node*,NodePath)> lambda, NodePath P={});
-    void TraverseDepth(std::function<void(Node*,NodePath)> lambda, NodePath P={}) { TraverseDepth(GetRootNode(),lambda,P); };
+    void TraverseDepth(Node *N, std::function<void(Node*,NodePath*)> lambda, NodePath P=NodePath());
+    void TraverseDepth(std::function<void(Node*,NodePath*)> lambda, NodePath P=NodePath()) { 
+      TraverseDepth(GetRootNode(),lambda,P); };
     // -- run each node's staged lambdas, while traversing depth first; if `activeNodesOnly`, all nodes
     //    must have `active==true` (by default all nodes are active)
-    void ExecuteOps(Bool_t activeNodesOnly=false, Node *N=nullptr, NodePath P={});
+    void ExecuteOps(Bool_t activeNodesOnly=false, Node *N=nullptr, NodePath P=NodePath());
     // -- clear all staged lambdas
     void ClearOps();
     // -- execute then clear

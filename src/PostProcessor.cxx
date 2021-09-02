@@ -207,12 +207,35 @@ void PostProcessor::FinishDumpAve(TString datFile) {
   this->ResetVars();
 };
 
-//=========================================================================
 
+//=========================================================================
 /* ALGORITHM: draw a single histogram to a canvas, and write it
- * - since `histSet` names can be hard to read, you can use `outName` to give a
- *   "nickname" to `histSet`, which the canvas name will include
+ * - `histName` is the name of the histogram given in Histos
+ * - `drawFormat` is the formatting string passed to TH1::Draw()
  */
+void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat) {
+  cout << "draw single plot " << histName << "..." << endl;
+  TH1 *hist = H->Hist(histName);
+  if(hist==nullptr) {
+    cerr << "ERROR: cannot find histogram " << histName << endl;
+    return;
+  };
+  TString canvN = "canv_"+histName+"___"+H->GetSetName();
+  TCanvas *canv = new TCanvas(canvN,canvN,dimx,dimy);
+  hist->Draw(drawFormat);
+  canv->SetGrid(1,1);
+  canv->SetLogx(H->GetHistConfig(histName)->logx);
+  canv->SetLogy(H->GetHistConfig(histName)->logy);
+  canv->SetLogz(H->GetHistConfig(histName)->logz);
+  canv->SetBottomMargin(0.15);
+  canv->SetLeftMargin(0.15);
+  canv->Print(pngDir+"/"+canvN+".png");
+};
+
+
+
+
+// OLD VERSION: 
 void PostProcessor::DrawSingle(TString outName, TString histSet, TString varName) {
 
   cout << "draw single plot " << outName << "..." << endl;

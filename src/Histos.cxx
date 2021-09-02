@@ -109,6 +109,17 @@ HistConfig *Histos::GetHistConfig(TString histName) {
   return retConfig;
 };
 
+// get a specific CutDef
+CutDef *Histos::GetCutDef(TString varName) {
+  for(auto cut : CutDefList) {
+    if(cut->GetVarName() == varName) return cut;
+  };
+  cerr << "ERROR: cannot find cut " << varName << " in Histos" << endl;
+  return nullptr;
+};
+
+
+
 
 Histos::~Histos() {
 };

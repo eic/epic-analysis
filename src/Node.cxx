@@ -12,7 +12,7 @@ Node::Node(Int_t nodeType_, TString id_, CutDef *cut_)
   , id(id_)
   , cut(cut_)
   , active(true)
-  , debug(true)
+  , debug(false)
 {
   UnstageOps();
 };
@@ -62,8 +62,8 @@ void Node::RemoveOutput(Node *N) { outputList.erase(std::remove(outputList.begin
 
 // reset a control node by unstaging lambdas
 void Node::UnstageOps() {
-  this->StageInboundOp([](Node *N,NodePath P){});
-  this->StageOutboundOp([](Node *N,NodePath P){});
+  this->StageInboundOp([](Node *N,NodePath *P){});
+  this->StageOutboundOp([](Node *N,NodePath *P){});
 };
 
 // other

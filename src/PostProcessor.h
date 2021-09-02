@@ -36,8 +36,12 @@ class PostProcessor : public TNamed
 
     // DAG interfaces:
     HistosDAG *GetHistosDAG() { return HD; };
-    HistosDAG *Histos() { return GetHistosDAG(); }; // syntactic sugar
-    void Execute() { HD->ExecuteOps(); };
+    HistosDAG *Op() { return GetHistosDAG(); }; // syntactic sugar
+    // execute lambdas (if `clear`==false, lambda operators will not be removed after execution)
+    void Execute(Bool_t clear=true) {
+      if(clear) HD->ExecuteAndClearOps();
+      else HD->ExecuteOps();
+    };
 
 
     // cleanup and close open files and streams
@@ -57,6 +61,7 @@ class PostProcessor : public TNamed
     void DumpHist(TString datFile, TString histSet, TString varName);
     void DumpAve(TString datFile, TString histSet, TString cutName);
     void DrawSingle(TString outName, TString histSet, TString varName);
+    void DrawSingle(Histos *H, TString histName, TString drawFormat="");
     void DrawRatios(
         TString outName, TString numerSet, TString denomSet, Bool_t plotRatioOnly=false
         );

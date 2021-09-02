@@ -19,6 +19,8 @@
 #include "DAG.h"
 #include "Histos.h"
 #include "BinSet.h"
+#include "Node.h"
+#include "NodePath.h"
 
 
 class HistosDAG : public DAG
@@ -36,14 +38,14 @@ class HistosDAG : public DAG
 
     // payload operator, executed on the specified Histos object
     void ForEach(std::function<void(Histos*)> op);
-    void ForEach(std::function<void(Histos*,NodePath)> op);
+    void ForEach(std::function<void(Histos*,NodePath*)> op);
 
     // return Histos* associated with the given NodePath
-    Histos *GetHistos(NodePath P);
+    Histos *GetHistos(NodePath *P);
 
   private:
     Bool_t debug;
-    std::map<NodePath,Histos*> histosMap; // map full DAG path -> Histos*
+    std::map<std::set<Node*>,Histos*> histosMap; // map DAG path of bin nodes -> Histos*
 
   ClassDefOverride(HistosDAG,1);
 };

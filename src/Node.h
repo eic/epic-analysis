@@ -17,10 +17,9 @@
 
 // largex-eic
 #include "CutDef.h"
+#include "NodePath.h"
 
-// DAG path of Nodes is handled by std::set of Node pointers
-class Node;
-typedef std::set<Node*> NodePath;
+class NodePath;
 
 // Node Types
 namespace NT {
@@ -74,40 +73,32 @@ class Node : public TObject
     // - clear both inbound and outbound lambdas
     void UnstageOps();
     // - lambda execution
-    void ExecuteInboundOp(NodePath P) { inboundOp(this,P); };
-    void ExecuteOutboundOp(NodePath P) { outboundOp(this,P); };
+    void ExecuteInboundOp(NodePath *P) { inboundOp(this,P); };
+    void ExecuteOutboundOp(NodePath *P) { outboundOp(this,P); };
 
     // print info for this node
     void Print();
 
-    // helper: print a specific NodePath
-    static TString PathString(NodePath P) {
-      TString ret = "[";
-      for(auto it : P) ret += " " + it->GetID();
-      ret += " ]";
-      return ret;
-    };
-    static void PrintPath(NodePath P) { std::cout << PathString(P) << std::endl; };
 
 
   protected:
     void AddIO(Node *N, std::vector<Node*> &list, TString listName, Bool_t silence);
 
     // - format lambdas with proper arguments, to allow easy overloading
-    std::function<void(Node*,NodePath)> FormatOp(std::function<void(Node*,NodePath)> op) {
+    std::function<void(Node*,NodePath*)> FormatOp(std::function<void(Node*,NodePath*)> op) {
       return op;
     };
-    std::function<void(Node*,NodePath)> FormatOp(std::function<void(NodePath,Node*)> op) {
-      return [op](Node *N, NodePath P){ op(P,N); };
+    std::function<void(Node*,NodePath*)> FormatOp(std::function<void(NodePath*,Node*)> op) {
+      return [op](Node *N, NodePath *P){ op(P,N); };
     };
-    std::function<void(Node*,NodePath)> FormatOp(std::function<void(NodePath)> op) {
-      return [op](Node *N, NodePath P){ op(P); };
+    std::function<void(Node*,NodePath*)> FormatOp(std::function<void(NodePath*)> op) {
+      return [op](Node *N, NodePath *P){ op(P); };
     };
-    std::function<void(Node*,NodePath)> FormatOp(std::function<void(Node*)> op) {
-      return [op](Node *N, NodePath P){ op(N); };
+    std::function<void(Node*,NodePath*)> FormatOp(std::function<void(Node*)> op) {
+      return [op](Node *N, NodePath *P){ op(N); };
     };
-    std::function<void(Node*,NodePath)> FormatOp(std::function<void()> op) {
-      return [op](Node *N, NodePath P){ op(); };
+    std::function<void(Node*,NodePath*)> FormatOp(std::function<void()> op) {
+      return [op](Node *N, NodePath *P){ op(); };
     };
 
   private:
@@ -118,8 +109,8 @@ class Node : public TObject
     Bool_t active;
     std::vector<Node*> inputList;
     std::vector<Node*> outputList;
-    std::function<void(Node*,NodePath)> inboundOp;
-    std::function<void(Node*,NodePath)> outboundOp;
+    std::function<void(Node*,NodePath*)> inboundOp;
+    std::function<void(Node*,NodePath*)> outboundOp;
 
   ClassDef(Node,1);
 };

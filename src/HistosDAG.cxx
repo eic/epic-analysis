@@ -4,7 +4,7 @@ ClassImp(HistosDAG)
 
 // default constructor
 HistosDAG::HistosDAG()
-  : debug(true)
+  : debug(false)
 {
   InitializeDAG();
 };
@@ -22,24 +22,22 @@ void HistosDAG::Build(std::map<TString,BinSet*> binSchemes) {
     if(binScheme->GetNumBins()>0) AddLayer(binScheme);
   };
   // payload to create Histos objects
-  Payload([this](NodePath P){
+  Payload([this](NodePath *P){
     TString histosN = "histos";
     TString histosT = "";
-    if(debug) std::cout << "At path " << Node::PathString(P) << ": ";
+    if(debug) std::cout << "At path " << P->PathString() << ": ";
     // set name and title
-    for(Node *N : P) {
-      if(N->GetNodeType()==NT::bin) { // TODO: improve names and titles, sort them
-        histosN += "__" + N->GetID();
-        histosT += N->GetCut()->GetCutTitle() + ", ";
-      };
+    for(Node *N : P->GetBinNodes()) { // TODO: improve names and titles, sort them
+      histosN += "__" + N->GetID();
+      histosT += N->GetCut()->GetCutTitle() + ", ";
     };
     if(debug) std::cout << "Create " << histosN << std::endl;
     // instantiate Histos object
     Histos *H = new Histos(histosN,histosT);
     // add CutDefs to Histos object
-    for(Node *N : P) { if(N->GetNodeType()==NT::bin) H->AddCutDef(N->GetCut()); };
+    for(Node *N : P->GetBinNodes()) { H->AddCutDef(N->GetCut()); };
     // append to `histosMap`
-    histosMap.insert(std::pair<NodePath,Histos*>(P,H));
+    histosMap.insert(std::pair<std::set<Node*>,Histos*>(P->GetBinNodes(),H));
   });
   // execution
   if(debug) std::cout << "Begin Histos instantiation..." << std::endl;
@@ -71,22 +69,22 @@ void HistosDAG::Build(TFile *rootFile) {
       // get NodePath from Histos name
       if(debug) std::cout << "READ HISTOS " << keyname << std::endl;
       NodePath P;
-      P.insert(GetRootNode());
-      P.insert(GetLeafNode());
+      P.nodes.insert(GetRootNode());
+      P.nodes.insert(GetLeafNode());
       TString tokID;
       Ssiz_t tf=0;
       while(keyname.Tokenize(tokID,tf,"__")) {
         if(tokID=="histos") continue;
         Node *N = GetNode(tokID);
-        if(N) P.insert(N);
+        if(N) P.nodes.insert(N);
         else {
           std::cerr << "ERROR: mismatch of Node \"" << tokID << "\" between Histos and BinSets" << std::endl;
           return;
         };
       };
       // append to `histosMap`
-      if(debug) std::cout << "-> PATH: " << Node::PathString(P) << std::endl;
-      histosMap.insert(std::pair<NodePath,Histos*>(P,(Histos*)key->ReadObj()));
+      if(debug) std::cout << "-> PATH: " << P.PathString() << std::endl;
+      histosMap.insert(std::pair<std::set<Node*>,Histos*>(P.GetBinNodes(),(Histos*)key->ReadObj()));
     };
   };
 };
@@ -95,21 +93,21 @@ void HistosDAG::Build(TFile *rootFile) {
 // payload wrapper operators, executed on the specified Histos object
 // - lambda arguments: ( Histos* )
 void HistosDAG::ForEach(std::function<void(Histos*)> op) {
-  Payload( [op,this](NodePath P){ op(this->GetHistos(P)); } );
+  Payload( [op,this](NodePath *P){ op(this->GetHistos(P)); } );
 };
 // - lambda arguments: ( Histos*, NodePath )
-void HistosDAG::ForEach(std::function<void(Histos*,NodePath)> op) {
-  Payload( [op,this](NodePath P){ op(this->GetHistos(P),P); } );
+void HistosDAG::ForEach(std::function<void(Histos*,NodePath*)> op) {
+  Payload( [op,this](NodePath *P){ op(this->GetHistos(P),P); } );
 };
 
 
 // return Histos* associated with the given NodePath
-Histos *HistosDAG::GetHistos(NodePath P) {
+Histos *HistosDAG::GetHistos(NodePath *P) {
   Histos *ret;
-  try { ret = histosMap.at(P); }
+  try { ret = histosMap.at(P->GetBinNodes()); }
   catch(const std::out_of_range &ex) {
     std::cerr << "ERROR: no Histos associated with NodePath "
-              << Node::PathString(P) << std::endl;
+              << P->PathString() << std::endl;
     return nullptr;
   };
   return ret;

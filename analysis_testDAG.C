@@ -23,6 +23,9 @@ void analysis_testDAG(
 
 
   // set binning scheme ====================================
+
+  A->AddBinScheme("y");
+  A->BinScheme("y")->BuildBins(2,0.03,1,true);
   
   A->AddBinScheme("x");
   A->BinScheme("x")->BuildBins(2,0.05,1,true);

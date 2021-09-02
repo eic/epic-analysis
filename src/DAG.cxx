@@ -8,7 +8,7 @@ using std::endl;
 
 // constructor
 DAG::DAG()
-  : debug(true)
+  : debug(false)
 {
   InitializeDAG();
 };
@@ -144,7 +144,7 @@ void DAG::PrintBreadth(TString header) {
 // print the whole DAG (depth first)
 void DAG::PrintDepth(TString header) {
   TString sep = "=========================";
-  auto printOp = [this](Node *N,NodePath P){ Node::PrintPath(P); };
+  auto printOp = [this](Node *N,NodePath *P){ P->PrintPath(); };
   cout << endl << header << endl << sep << endl;
   TraverseDepth(GetRootNode(),printOp);
   cout << sep << endl;
@@ -152,8 +152,8 @@ void DAG::PrintDepth(TString header) {
 // print unique paths from the root node to the leaf node
 void DAG::PrintLeafPaths(TString header) {
   TString sep = "=========================";
-  auto printOp = [this](Node *N,NodePath P){
-    if(N->GetNodeType()==NT::leaf) Node::PrintPath(P);
+  auto printOp = [this](Node *N,NodePath *P){
+    if(N->GetNodeType()==NT::leaf) P->PrintPath();
   };
   cout << endl << header << endl << sep << endl;
   TraverseDepth(GetRootNode(),printOp);
@@ -180,9 +180,9 @@ void DAG::TraverseBreadth(Node *N, std::function<void(Node*)> lambda) {
 
 
 // depth-first traversal
-void DAG::TraverseDepth(Node *N, std::function<void(Node*,NodePath)> lambda, NodePath P) {
-  P.insert(N);
-  lambda(N,P);
+void DAG::TraverseDepth(Node *N, std::function<void(Node*,NodePath*)> lambda, NodePath P) {
+  P.nodes.insert(N);
+  lambda(N,&P);
   for(auto M : N->GetOutputs()) TraverseDepth(M,lambda,P);
 };
 
@@ -191,10 +191,10 @@ void DAG::TraverseDepth(Node *N, std::function<void(Node*,NodePath)> lambda, Nod
 void DAG::ExecuteOps(Bool_t activeNodesOnly, Node *N, NodePath P) {
   if(N==nullptr) N = GetRootNode();
   if(activeNodesOnly && N->IsActive()==false) return;
-  P.insert(N);
-  N->ExecuteInboundOp(P);
+  P.nodes.insert(N);
+  N->ExecuteInboundOp(&P);
   for(auto M : N->GetOutputs()) ExecuteOps(activeNodesOnly,M,P);
-  N->ExecuteOutboundOp(P);
+  N->ExecuteOutboundOp(&P);
 };
 
 // clear all staged lambdas
@@ -236,6 +236,21 @@ void DAG::RepatchAllToFull() {
 // adjacent layers together; the current leaf node will become a control
 // node, and a new leaf node is created
 void DAG::RepatchToLeaf(TString varName) {
+  // check if the variable exists in this DAG
+  Bool_t nodeExists = false;
+  for(auto kv : nodeMap) {
+    auto N = kv.second;
+    if(N->GetNodeType()==NT::bin) {
+      if(N->GetVarName()==varName) {
+        nodeExists=true;
+        break;
+      };
+    };
+  };
+  if(!nodeExists) {
+    cerr << "\nERROR: variable \"" << varName << "\" not found in DAG; do you have a typo?\n\n";
+    return;
+  };
   // convert the leaf node to a control node
   auto C = GetLeafNode();
   ModifyNode(C,varName+"_control",NT::control);
