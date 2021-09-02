@@ -28,15 +28,21 @@ Analysis::Analysis(
   availableBinSchemes.insert(std::pair<TString,TString>("pt","p_{T}"));
   availableBinSchemes.insert(std::pair<TString,TString>("z","z"));
   availableBinSchemes.insert(std::pair<TString,TString>("x","x"));
-  availableBinSchemes.insert(std::pair<TString,TString>("q","Q"));
+  availableBinSchemes.insert(std::pair<TString,TString>("q2","Q^{2}"));
   availableBinSchemes.insert(std::pair<TString,TString>("y","y"));
   availableBinSchemes.insert(std::pair<TString,TString>("ptJet", "jet p_{T}"));
   availableBinSchemes.insert(std::pair<TString,TString>("zJet", "jet z"));
   availableBinSchemes.insert(std::pair<TString,TString>("finalState","finalState"));
   availableBinSchemes.insert(std::pair<TString,TString>("recMethod","recMethod"));
 
-  /* TODO: re-enable
+  //
+  //
+  // TODO: make these Nodes on HistosDAG?
+  //
+  //
+  PIDtoEnum.insert(std::pair<int,int>(211,0)); // hack, for now
   // define final state bins (e.g., tracks or jets)
+  /*
   AddBinScheme("finalState");
   AddFinalState("pipTrack","#pi^{+} tracks", 211);
   //AddFinalState("pimTrack","#pi^{-} tracks",-211);
@@ -101,26 +107,8 @@ void Analysis::Execute() {
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
   TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
 
-  // number of bins
-  /*
-  const Int_t NptBins = BinScheme("pt")->GetNumBins();
-  const Int_t NxBins = BinScheme("x")->GetNumBins();
-  const Int_t NzBins = BinScheme("z")->GetNumBins();
-  const Int_t NqBins = BinScheme("q")->GetNumBins();
-  const Int_t NyBins = BinScheme("y")->GetNumBins();
-  const Int_t NfinalStateBins = BinScheme("finalState")->GetNumBins();
-  const Int_t NptjetBins = BinScheme("ptJet")->GetNumBins();
-  const Int_t NzjetBins = BinScheme("zJet")->GetNumBins();
-  const Int_t NrecMethodBins = BinScheme("recMethod")->GetNumBins();
-  */
 
-  // sets of histogram sets
-  // - `histSet` is a data structure for storing and organizing pointers to
-  //   sets of histograms (`Histos` objects)
-  // - `histSet*List` are used as temporary lists of relevant `Histos` pointers
-  // - TODO: if we add one more dimension, 7D array will probably break; need
-  //         better data structure
-
+  // HistosDAG: a Directed Acyclic Graph (DAG) storing Histos pointers
   HistosDAG *HD = new HistosDAG();
   HD->Build(binSchemes);
 
@@ -550,7 +538,7 @@ void Analysis::Execute() {
   #endif
   */
   // write binning schemes
-  for(auto const &kv : binSchemes) kv.second->Write(kv.first+"_bins"); // TODO: might not need this after DAG upgrade
+  for(auto const &kv : binSchemes) kv.second->Write("binset__"+kv.first);
 
   // close output
   outFile->Close();
@@ -654,7 +642,7 @@ TString Analysis::GetHistosTitle(int cpt, int cx, int cz, int cq, int cy, int cf
   retStr += ", " + BinScheme("pt")->Cut(cpt)->GetCutTitle();
   retStr += ", " + BinScheme("x")->Cut(cx)->GetCutTitle();
   retStr += ", " + BinScheme("z")->Cut(cz)->GetCutTitle();
-  retStr += ", " + BinScheme("q")->Cut(cq)->GetCutTitle();
+  retStr += ", " + BinScheme("q2")->Cut(cq)->GetCutTitle();
   retStr += ", " + BinScheme("y")->Cut(cy)->GetCutTitle();
   return retStr;
 };
@@ -675,7 +663,7 @@ TString Analysis::GetHistosTitleJets(int cpt, int cz, int cx, int cq, int cy){
   retStr  =        BinScheme("ptJet")->Cut(cpt)->GetCutTitle();
   retStr += ", " + BinScheme("zJet")->Cut(cz)->GetCutTitle();
   retStr += ", " + BinScheme("x")->Cut(cx)->GetCutTitle();
-  retStr += ", " + BinScheme("q")->Cut(cq)->GetCutTitle();
+  retStr += ", " + BinScheme("q2")->Cut(cq)->GetCutTitle();
   retStr += ", " + BinScheme("y")->Cut(cy)->GetCutTitle();
   return retStr;
 };
@@ -697,7 +685,7 @@ TString Analysis::GetHistosTitleBreitJets(int cpt, int cz, int cx, int cq, int c
   retStr +=  " " + BinScheme("ptJet")->Cut(cpt)->GetCutTitle();
   retStr += ", " + BinScheme("zJet")->Cut(cz)->GetCutTitle();
   retStr += ", " + BinScheme("x")->Cut(cx)->GetCutTitle();
-  retStr += ", " + BinScheme("q")->Cut(cq)->GetCutTitle();
+  retStr += ", " + BinScheme("q2")->Cut(cq)->GetCutTitle();
   retStr += ", " + BinScheme("y")->Cut(cy)->GetCutTitle();
   return retStr;
 };

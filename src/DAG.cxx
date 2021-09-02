@@ -17,7 +17,7 @@ DAG::DAG()
 // initialize DAG, with only the root node connected to the leaf node
 void DAG::InitializeDAG() {
   nodeMap.clear();
-  AddEdge(new Node(NT::root,"root0"),new Node(NT::leaf,"leaf0"));
+  AddEdge(new Node(NT::root,"root_0"),new Node(NT::leaf,"leaf_0"));
 };
 
 
@@ -123,11 +123,11 @@ void DAG::AddLayer(std::vector<Node*> nodes) {
   auto C = GetLeafNode();
   ModifyNode(C,"tmp",NT::control);
   // create new leaf
-  AddNode(NT::leaf,"leaf0");
+  AddNode(NT::leaf,"leaf_0");
   // connect new layer after temporary control node and before new leaf
   for(auto N : nodes) {
     AddEdge(C,N);
-    AddEdge(N,GetNode("leaf0"));
+    AddEdge(N,GetNode("leaf_0"));
   };
   RepatchToFull(C);
 };
@@ -240,7 +240,7 @@ void DAG::RepatchToLeaf(TString varName) {
   auto C = GetLeafNode();
   ModifyNode(C,varName+"_control",NT::control);
   // create new leaf
-  AddNode(NT::leaf,"leaf0");
+  AddNode(NT::leaf,"leaf_0");
   auto L = GetLeafNode();
   // repatching lambda
   auto repatch = [&C,&L,&varName,this](Node *N) {

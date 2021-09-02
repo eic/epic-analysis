@@ -19,16 +19,22 @@ void analysis_testDAG(
       outfilePrefix
       );
 
-  A->maxEvents = 100;
+  //A->maxEvents = 100;
 
 
   // set binning scheme ====================================
+  
+  A->AddBinScheme("x");
+  A->BinScheme("x")->BuildBins(2,0.05,1,true);
 
-  // y minima
+  A->AddBinScheme("q2");
+  A->BinScheme("q2")->BuildBins(2,1,100,true);
+
+  /*
   A->AddBinScheme("y");
-  A->BinScheme("y")->BuildBin("Min",0.03);
-  A->BinScheme("y")->BuildBin("Min",0.05);
-  A->BinScheme("y")->BuildBin("Min",0.10);
+  A->BinScheme("y")->BuildBin("Max",0.1);
+  A->BinScheme("y")->BuildBin("Min",0.1);
+  */
 
 
   // perform the analysis ==================================

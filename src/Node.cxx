@@ -62,12 +62,8 @@ void Node::RemoveOutput(Node *N) { outputList.erase(std::remove(outputList.begin
 
 // reset a control node by unstaging lambdas
 void Node::UnstageOps() {
-  /*
   this->StageInboundOp([](Node *N,NodePath P){});
   this->StageOutboundOp([](Node *N,NodePath P){});
-  */
-  this->StageInboundOp([](Node *N,NodePath P){ cout << "enter :: " << N->GetID() << endl; });
-  this->StageOutboundOp([](Node *N,NodePath P){ cout << "exit  :: " << N->GetID() << endl; });
 };
 
 // other

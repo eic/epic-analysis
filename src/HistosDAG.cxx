@@ -11,9 +11,7 @@ HistosDAG::HistosDAG()
 
 
 // build the DAG from specified bin scheme
-void HistosDAG::Build(std::map<TString,BinSet*> binSchemes_) {
-  // copy binSchemes
-  binSchemes = binSchemes_;
+void HistosDAG::Build(std::map<TString,BinSet*> binSchemes) {
   // initialize DAG and histosMap
   InitializeDAG();
   histosMap.clear();
@@ -25,13 +23,13 @@ void HistosDAG::Build(std::map<TString,BinSet*> binSchemes_) {
   };
   // payload to create Histos objects
   Payload([this](NodePath P){
-    TString histosN = "histos_";
+    TString histosN = "histos";
     TString histosT = "";
     if(debug) std::cout << "At path " << Node::PathString(P) << ": ";
     // set name and title
     for(Node *N : P) {
       if(N->GetNodeType()==NT::bin) { // TODO: improve names and titles, sort them
-        histosN += "_" + N->GetID();
+        histosN += "__" + N->GetID();
         histosT += N->GetCut()->GetCutTitle() + ", ";
       };
     };
@@ -46,6 +44,51 @@ void HistosDAG::Build(std::map<TString,BinSet*> binSchemes_) {
   // execution
   if(debug) std::cout << "Begin Histos instantiation..." << std::endl;
   ExecuteAndClearOps();
+};
+
+
+// build the DAG from ROOT file; all BinSets will become layers and
+// all Histos objects will be linked to NodePaths
+void HistosDAG::Build(TFile *rootFile) {
+  // initialize DAG and histosMap, and read rootFile keys
+  InitializeDAG();
+  histosMap.clear();
+  TListIter nextKey(rootFile->GetListOfKeys());
+  TString keyname;
+  // add each BinSet as a new layer
+  while(TKey *key = (TKey*)nextKey()) {
+    keyname = TString(key->GetName());
+    if(keyname.Contains(TRegexp("^binset__"))) {
+      if(debug) std::cout << "READ LAYER " << keyname << std::endl;
+      AddLayer((BinSet*)key->ReadObj());
+    };
+  };
+  nextKey.Reset();
+  // add each Histos to histMap
+  while(TKey *key = (TKey*)nextKey()) {
+    keyname = TString(key->GetName());
+    if(keyname.Contains(TRegexp("^histos__"))) {
+      // get NodePath from Histos name
+      if(debug) std::cout << "READ HISTOS " << keyname << std::endl;
+      NodePath P;
+      P.insert(GetRootNode());
+      P.insert(GetLeafNode());
+      TString tokID;
+      Ssiz_t tf=0;
+      while(keyname.Tokenize(tokID,tf,"__")) {
+        if(tokID=="histos") continue;
+        Node *N = GetNode(tokID);
+        if(N) P.insert(N);
+        else {
+          std::cerr << "ERROR: mismatch of Node \"" << tokID << "\" between Histos and BinSets" << std::endl;
+          return;
+        };
+      };
+      // append to `histosMap`
+      if(debug) std::cout << "-> PATH: " << Node::PathString(P) << std::endl;
+      histosMap.insert(std::pair<NodePath,Histos*>(P,(Histos*)key->ReadObj()));
+    };
+  };
 };
 
 

@@ -11,6 +11,9 @@
 #include "TObject.h"
 #include "TNamed.h"
 #include "TString.h"
+#include "TRegexp.h"
+#include "TFile.h"
+#include "TKey.h"
 
 // largex-eic
 #include "DAG.h"
@@ -25,7 +28,11 @@ class HistosDAG : public DAG
     ~HistosDAG();
 
     // build the DAG from specified bin scheme
-    void Build(std::map<TString,BinSet*> binSchemes_);
+    void Build(std::map<TString,BinSet*> binSchemes);
+
+    // build the DAG from ROOT file; all BinSets will become layers and
+    // all Histos objects will be linked to NodePaths
+    void Build(TFile *rootFile);
 
     // payload operator, executed on the specified Histos object
     void ForEach(std::function<void(Histos*)> op);
@@ -37,7 +44,6 @@ class HistosDAG : public DAG
   private:
     Bool_t debug;
     std::map<NodePath,Histos*> histosMap; // map full DAG path -> Histos*
-    std::map<TString,BinSet*> binSchemes; // map varName -> BinSet*
 
   ClassDefOverride(HistosDAG,1);
 };
