@@ -1,10 +1,10 @@
-#include "AnalysisDD4hep.h"
-
 #include <TTreeReader.h>
 #include <TTreeReaderValue.h>
 #include <TTreeReaderArray.h>
 #include <TLorentzVector.h>
 #include <TMath.h>
+
+#include "AnalysisDD4hep.h"
 
 using std::map;
 using std::vector;
@@ -26,28 +26,31 @@ AnalysisDD4hep::AnalysisDD4hep(
   , outfilePrefix(outfilePrefix_)  
 {
 
+  // define dummy
+  AN = new Analysis();
+
   // set bin schemes
-  AddBinScheme("pt","p_{T}");
-  AddBinScheme("z","z");
-  AddBinScheme("x","x");
-  AddBinScheme("q","Q");
-  AddBinScheme("y","y");
-  AddBinScheme("pt_jet", "jet p_{T}");
-  AddBinScheme("z_jet", "jet z");
+  AN->AddBinScheme("pt","p_{T}");
+  AN->AddBinScheme("z","z");
+  AN->AddBinScheme("x","x");
+  AN->AddBinScheme("q","Q");
+  AN->AddBinScheme("y","y");
+  AN->AddBinScheme("pt_jet", "jet p_{T}");
+  AN->AddBinScheme("z_jet", "jet z");
   // final state bins (e.g., tracks or jets)
-  AddBinScheme("finalState","finalState");
-  AddFinalState("pipTrack","#pi^{+} tracks", 211);
+  AN->AddBinScheme("finalState","finalState");
+  AN->AddFinalState("pipTrack","#pi^{+} tracks", 211);
   //AddFinalState("pimTrack","#pi^{-} tracks",-211);
-  AddBinScheme("recMethod", "recMethod");
-  AddRecMethod("Ele", "electron method");
-  AddRecMethod("DA", "DA method");
-  AddRecMethod("JB", "JB method");  
+  AN->AddBinScheme("recMethod", "recMethod");
+  AN->AddRecMethod("Ele", "electron method");
+  AN->AddRecMethod("DA", "DA method");
+  AN->AddRecMethod("JB", "JB method");  
   // initialize diagonalizer settings
   // TODO: generalized diagonalizer
-  diagonalPtXZ = false;
-  diagonalXZQ = false;
-  writeSimpleTree = false;
-  maxEvents = 0;
+  AN->diagonalPtXZ = false;
+  AN->diagonalXZQ = false;
+  AN->writeSimpleTree = false;
+  AN->maxEvents = 0;
 };
 
 // destructor
@@ -138,15 +141,15 @@ void AnalysisDD4hep::process_event()
   TFile *outfile = new TFile(outfilePrefix,"RECREATE");
 
   // number of bins
-  const Int_t NptBins = BinScheme("pt")->GetNumBins();
-  const Int_t NxBins = BinScheme("x")->GetNumBins();
-  const Int_t NzBins = BinScheme("z")->GetNumBins();
-  const Int_t NqBins = BinScheme("q")->GetNumBins();
-  const Int_t NyBins = BinScheme("y")->GetNumBins();
-  const Int_t NfinalStateBins = BinScheme("finalState")->GetNumBins();
-  const Int_t NptjetBins = BinScheme("pt_jet")->GetNumBins();
-  const Int_t NzjetBins = BinScheme("z_jet")->GetNumBins();
-  const Int_t NrecMethodBins = BinScheme("recMethod")->GetNumBins();
+  const Int_t NptBins = AN->BinScheme("pt")->GetNumBins();
+  const Int_t NxBins = AN->BinScheme("x")->GetNumBins();
+  const Int_t NzBins = AN->BinScheme("z")->GetNumBins();
+  const Int_t NqBins = AN->BinScheme("q")->GetNumBins();
+  const Int_t NyBins = AN->BinScheme("y")->GetNumBins();
+  const Int_t NfinalStateBins = AN->BinScheme("finalState")->GetNumBins();
+  const Int_t NptjetBins = AN->BinScheme("pt_jet")->GetNumBins();
+  const Int_t NzjetBins = AN->BinScheme("z_jet")->GetNumBins();
+  const Int_t NrecMethodBins = AN->BinScheme("recMethod")->GetNumBins();
 
   // sets of histogram sets
   // - `histSet` is a data structure for storing and organizing pointers to
@@ -172,13 +175,13 @@ void AnalysisDD4hep::process_event()
     for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
       for(int bz=0; bz<NzBins; bz++) { // - loop over z bins
         for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
-          if(CheckDiagonal(bpt,bx,bz,bq)) continue; // diagonalizer
+          if(AN->CheckDiagonal(bpt,bx,bz,bq)) continue; // diagonalizer
           for(int by=0; by<NyBins; by++) { // - loop over y bins
             for(int bfs=0; bfs<NfinalStateBins; bfs++) { // - loop over final states
 
               // set Histos name and title
-              histosN = this->GetHistosName (bpt,bx,bz,bq,by,bfs);
-              histosT = this->GetHistosTitle(bpt,bx,bz,bq,by,bfs);
+              histosN = AN->GetHistosName (bpt,bx,bz,bq,by,bfs);
+              histosT = AN->GetHistosTitle(bpt,bx,bz,bq,by,bfs);
 
               // define set of histograms for this bin
               histSet[bpt][bx][bz][bq][by][bfs] = new Histos(histosN,histosT);
@@ -217,12 +220,12 @@ void AnalysisDD4hep::process_event()
               // ===========================================================
 
               // store cut definitions with histogram sets
-              HS->AddCutDef(BinScheme("pt")->Cut(bpt));
-              HS->AddCutDef(BinScheme("x")->Cut(bx));
-              HS->AddCutDef(BinScheme("z")->Cut(bz));
-              HS->AddCutDef(BinScheme("q")->Cut(bq));
-              HS->AddCutDef(BinScheme("y")->Cut(by));
-              HS->AddCutDef(BinScheme("finalState")->Cut(bfs));
+              HS->AddCutDef(AN->BinScheme("pt")->Cut(bpt));
+              HS->AddCutDef(AN->BinScheme("x")->Cut(bx));
+              HS->AddCutDef(AN->BinScheme("z")->Cut(bz));
+              HS->AddCutDef(AN->BinScheme("q")->Cut(bq));
+              HS->AddCutDef(AN->BinScheme("y")->Cut(by));
+              HS->AddCutDef(AN->BinScheme("finalState")->Cut(bfs));
 
               // add histogram set full list
               histSetList.push_back(histSet[bpt][bx][bz][bq][by][bfs]);
@@ -240,8 +243,8 @@ void AnalysisDD4hep::process_event()
         for(int bq=0; bq<NqBins; bq++) { // - loop over q2 bins
           for(int by=0; by<NyBins; by++) { // - loop over y bins
 
-            histosN = this->GetHistosNameJets(bpt, bz, bx, bq, by);
-            histosT = this->GetHistosTitleJets(bpt, bz, bx, bq, by);
+            histosN = AN->GetHistosNameJets(bpt, bz, bx, bq, by);
+            histosT = AN->GetHistosTitleJets(bpt, bz, bx, bq, by);
 
             histSetJets[bpt][bz][bx][bq][by] = new Histos(histosN,histosT);
             HS = histSetJets[bpt][bz][bx][bq][by]; // shorthand pointer
@@ -255,11 +258,11 @@ void AnalysisDD4hep::process_event()
             HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
             HS->DefineHist1D("qTQ", "q_{T}/Q, jets", "GeV", NBINS, 0, 3.0);
             // store cut definitions with histogram sets, then add histogram sets full list
-            HS->AddCutDef(BinScheme("pt_jet")->Cut(bpt));
-            HS->AddCutDef(BinScheme("z_jet")->Cut(bz));
-            HS->AddCutDef(BinScheme("x")->Cut(bx));
-            HS->AddCutDef(BinScheme("q2")->Cut(bq));
-            HS->AddCutDef(BinScheme("y")->Cut(by));
+            HS->AddCutDef(AN->BinScheme("pt_jet")->Cut(bpt));
+            HS->AddCutDef(AN->BinScheme("z_jet")->Cut(bz));
+            HS->AddCutDef(AN->BinScheme("x")->Cut(bx));
+            HS->AddCutDef(AN->BinScheme("q2")->Cut(bq));
+            HS->AddCutDef(AN->BinScheme("y")->Cut(by));
             histSetListJets.push_back(histSetJets[bpt][bz][bx][bq][by]);
           };	
         };
@@ -273,8 +276,8 @@ void AnalysisDD4hep::process_event()
         for(int bq=0; bq<NqBins; bq++) { // - loop over q2 bins
           for(int by=0; by<NyBins; by++) { // - loop over y bins
             for(int brec=0; brec<NrecMethodBins; brec++){
-              histosN = this->GetHistosNameBreitJets(bpt, bz, bx, bq, by, brec);
-              histosT = this->GetHistosTitleBreitJets(bpt, bz, bx, bq, by, brec);
+              histosN = AN->GetHistosNameBreitJets(bpt, bz, bx, bq, by, brec);
+              histosT = AN->GetHistosTitleBreitJets(bpt, bz, bx, bq, by, brec);
               histSetBreitJets[bpt][bz][bx][bq][by][brec] = new Histos(histosN,histosT);
               HS = histSetBreitJets[bpt][bz][bx][bq][by][brec]; // shorthand pointer
 
@@ -288,12 +291,12 @@ void AnalysisDD4hep::process_event()
               HS->DefineHist1D("qTQ", "q_{T}/Q, jets", "GeV", NBINS, 0, 3.0);
 
               // store cut definitions with histogram sets, then add histogram sets full list
-              HS->AddCutDef(BinScheme("pt_jet")->Cut(bpt));
-              HS->AddCutDef(BinScheme("z_jet")->Cut(bz));
-              HS->AddCutDef(BinScheme("x")->Cut(bx));
-              HS->AddCutDef(BinScheme("q2")->Cut(bq));
-              HS->AddCutDef(BinScheme("y")->Cut(by));
-              HS->AddCutDef(BinScheme("recMethod")->Cut(brec));
+              HS->AddCutDef(AN->BinScheme("pt_jet")->Cut(bpt));
+              HS->AddCutDef(AN->BinScheme("z_jet")->Cut(bz));
+              HS->AddCutDef(AN->BinScheme("x")->Cut(bx));
+              HS->AddCutDef(AN->BinScheme("q2")->Cut(bq));
+              HS->AddCutDef(AN->BinScheme("y")->Cut(by));
+              HS->AddCutDef(AN->BinScheme("recMethod")->Cut(brec));
               histSetListBreitJets.push_back(histSetBreitJets[bpt][bz][bx][bq][by][brec]);
             };
           };
@@ -489,11 +492,11 @@ void AnalysisDD4hep::process_event()
 	    //    will be a part of; we use these lists to determine the list
 	    //    of histogram sets to fill
 	    // - check pT bin
-	    CheckBins( BinScheme("pt"), v_pt, kin->pT );
-	    CheckBins( BinScheme("x"),  v_x,  kin->x );
-	    CheckBins( BinScheme("z"),  v_z,  kin->z );
-	    CheckBins( BinScheme("q2"), v_q,  kin->Q2 );
-	    CheckBins( BinScheme("y"),  v_y,  kin->y );
+	    CheckBins( AN->BinScheme("pt"), v_pt, kin->pT );
+	    CheckBins( AN->BinScheme("x"),  v_x,  kin->x );
+	    CheckBins( AN->BinScheme("z"),  v_z,  kin->z );
+	    CheckBins( AN->BinScheme("q2"), v_q,  kin->Q2 );
+	    CheckBins( AN->BinScheme("y"),  v_y,  kin->y );
 
 	    // build list of histogram sets to fill
 	    histSetFillList.clear();
@@ -502,7 +505,7 @@ void AnalysisDD4hep::process_event()
 		for(int bz : v_z) {
 		  for(int bq : v_q) {
 		    for(int by : v_y) {
-		      if(!CheckDiagonal(bpt,bx,bz,bq)) {
+		      if(!AN->CheckDiagonal(bpt,bx,bz,bq)) {
 			histSetFillList.push_back(histSet[bpt][bx][bz][bq][by][bFinalState]);
 		      };
 		    };
@@ -540,7 +543,7 @@ void AnalysisDD4hep::process_event()
 
 	    // fill simple tree (not binned)
 	    // TODO: consider adding a `finalState` cut
-	    if( writeSimpleTree && histSetFillList.size()>0 ) ST->FillTree(w);
+	    if( AN->writeSimpleTree && histSetFillList.size()>0 ) ST->FillTree(w);
 	
 	  }//if cut
 	}//trk loop
@@ -627,3 +630,10 @@ int AnalysisDD4hep::find_electron(std::vector<Clusters*> ecal_cluster, std::vect
   
   return index_max-1;
 }
+
+void AnalysisDD4hep::CheckBins(BinSet *bs, std::vector<int> &v, Double_t var) {
+  v.clear();
+  for(int b=0; b<bs->GetNumBins(); b++) {
+    if(bs->Cut(b)->CheckCut(var)) v.push_back(b);
+  };
+};

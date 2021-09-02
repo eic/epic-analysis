@@ -8,6 +8,7 @@
 class Histos;
 class SimpleTree;
 class Kinematics;
+class Analysis;
 
 class Clusters
 {
@@ -25,7 +26,7 @@ public:
   
 };
 
-class AnalysisDD4hep : public Analysis
+class AnalysisDD4hep
 {
   public:
     AnalysisDD4hep(
@@ -41,10 +42,13 @@ class AnalysisDD4hep : public Analysis
     void process_event();
 
   protected:
+    void CheckBins(BinSet *bs, std::vector<int> &v, Double_t var);
     int find_electron(std::vector<Clusters*> ecal_cluster, std::vector<Clusters*> hcal_cluster, double e_threshold);
     double isolation(double cone_theta, double cone_phi, std::vector<Clusters*> cluster_container, double E_threshold);
 
   private:
+    const int NBINS = 50;
+
     Histos *HS;
     SimpleTree *ST;
     Kinematics *kin, *kinTrue;
@@ -61,6 +65,8 @@ class AnalysisDD4hep : public Analysis
     std::map<int,int> PIDtoEnum;
     std::map<int,TString> finalStateName;
     std::map<int, TString> recMethodName;
+
+    Analysis* AN;
 
 };
 

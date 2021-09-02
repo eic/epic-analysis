@@ -30,7 +30,6 @@
 #include "SimpleTree.h"
 #include "Weights.h"
 
-
 class Analysis : public TNamed
 {
   public:
