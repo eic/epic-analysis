@@ -35,9 +35,9 @@ class PostProcessor : public TNamed
 
 
     // DAG interfaces:
-    HistosDAG *GetHistosDAG() { return hDAG; };
-    HistosDAG *Setup() { return GetHistosDAG(); }; // sugar
-    void Execute() { hDAG->ExecuteOps(); };
+    HistosDAG *GetHistosDAG() { return HD; };
+    HistosDAG *Histos() { return GetHistosDAG(); }; // syntactic sugar
+    void Execute() { HD->ExecuteOps(); };
 
 
     // cleanup and close open files and streams
@@ -88,7 +88,7 @@ class PostProcessor : public TNamed
     TFile *infile, *outfile;
 
     // DAGs
-    HistosDAG *hDAG;
+    HistosDAG *HD;
 
     // algorithm-specific variables
     std::map<TString,TCanvas*> summaryCanvMap;

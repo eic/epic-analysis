@@ -6,6 +6,7 @@ void postprocess_testDAG(
     TString infile="out/yRatioDAG.dire_5x41.brian.hiDiv.root"
 ) {
 
+  /*
   TFile *infileObj = new TFile(infile,"READ");
   HistosDAG *HD = new HistosDAG();
   HD->Build(infileObj);
@@ -16,6 +17,7 @@ void postprocess_testDAG(
 
   return;
   ///////////////////////////
+  */
 
 
   // setup postprocessor ========================================

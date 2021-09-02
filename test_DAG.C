@@ -20,16 +20,16 @@ void test_DAG() {
   D->Final([](){ cout << "MAIN FOOTER" << endl; });
 
   /*
-  D->Control(
+  D->Subloop(
     {"Z","Y"},
     [](){ cout << "Z LOOP HEADER - CONTROL" << endl; },
     [](){ cout << "Z LOOP FOOTER - CONTROL" << endl; }
     );
   */
 
-  //D->Before( {"Z"}, [](){ cout << "Z LOOP HEADER - BEFORE" << endl; });
-  //D->After( {"Z"}, [](){ cout << "Z LOOP FOOTER - AFTER" << endl; });
-  //D->Before({"Y"},[](){  cout << "Y LOOP HEADER" << endl; });
+  //D->BeforeSubloop( {"Z"}, [](){ cout << "Z LOOP HEADER - BEFORE" << endl; });
+  //D->AfterSubloop( {"Z"}, [](){ cout << "Z LOOP FOOTER - AFTER" << endl; });
+  //D->BeforeSubloop({"Y"},[](){  cout << "Y LOOP HEADER" << endl; });
 
   D->ForEach([](Histos* H){
     std::cout << "PAYLOAD: " << std::endl
