@@ -26,14 +26,14 @@ this tutorial dirctory, e.g., `root -b -q tutorial/analysis_template.C`
     the output root file from the analysis macro, to learn what objects
     are stored
 
-1. (x,Q2) Binning
+2. (x,Q2) Binning
   - `analysis_xqbins.C`: bin the analysis in a few 2D bins of x and Q2
     - there is a `switch` statement to allow the choice of various
       example binning schemes
   - `postprocess_xqbins_draw.C`: draws a couple sample histograms for
     the given binning scheme
 
-1. Average kinematics table
+3. Average kinematics table
   - `analysis_qbins.C`: bin the analysis in several Q2 bins, for a couple
     pT bins
   - `postprocess_qbins_tables.C`: produce a text file containing tables
