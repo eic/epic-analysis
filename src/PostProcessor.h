@@ -60,8 +60,8 @@ class PostProcessor : public TNamed
     // - you are welcome to add your own algorithms
     void DumpHist(TString datFile, TString histSet, TString varName);
     void DumpAve(TString datFile, TString histSet, TString cutName);
-    void DrawSingle(TString outName, TString histSet, TString varName);
     void DrawSingle(Histos *H, TString histName, TString drawFormat="");
+    void DrawSingle(TString histSet, TString histName);
     void DrawRatios(
         TString outName, TString numerSet, TString denomSet, Bool_t plotRatioOnly=false
         );
@@ -82,6 +82,10 @@ class PostProcessor : public TNamed
     void AppendToTextFile(TString datFile, TString appendText);
     void Columnify(TString inputFile, TString outputFile);
     void PrintTextFile(TString datFile);
+
+    // return true if the bin is "full" range, and it's not the only bin
+    Bool_t SkipFull(TString varName, Int_t binNum);
+
 
     // reset algorithm-specific variables
     void ResetVars();

@@ -146,6 +146,11 @@ void Analysis::Execute() {
     HS->DefineHist1D("mX","m_{X}","GeV",NBINS,0,20);
     HS->DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
+    HS->DefineHist2D("etaVsP","p","#eta","GeV","",
+        NBINS,0.1,100,
+        NBINS,-5,5,
+        true,false
+        );
     // -- cross sections
     //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
     HS->DefineHist1D("Q_xsec","Q","GeV",10,1.0,10.0,true,true); // log
@@ -160,7 +165,7 @@ void Analysis::Execute() {
   for(int bpt=0; bpt<NptjetBins; bpt++) { // - loop over jet pT bins
     for(int bz=0; bz<NzjetBins; bz++){
       for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
-        for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
+        for(int bq=0; bq<NqBins; bq++) { // - loop over q2 bins
           for(int by=0; by<NyBins; by++) { // - loop over y bins
 
             histosN = this->GetHistosNameJets(bpt, bz, bx, bq, by);
@@ -181,7 +186,7 @@ void Analysis::Execute() {
             HS->AddCutDef(BinScheme("ptJet")->Cut(bpt));
             HS->AddCutDef(BinScheme("zJet")->Cut(bz));
             HS->AddCutDef(BinScheme("x")->Cut(bx));
-            HS->AddCutDef(BinScheme("q")->Cut(bq));
+            HS->AddCutDef(BinScheme("q2")->Cut(bq));
             HS->AddCutDef(BinScheme("y")->Cut(by));
             histSetListJets.push_back(histSetJets[bpt][bz][bx][bq][by]);
           };	
@@ -193,7 +198,7 @@ void Analysis::Execute() {
   for(int bpt=0; bpt<NptjetBins; bpt++) { // - loop over jet pT bins
     for(int bz=0; bz<NzjetBins; bz++){
       for(int bx=0; bx<NxBins; bx++) { // - loop over x bins
-        for(int bq=0; bq<NqBins; bq++) { // - loop over q bins
+        for(int bq=0; bq<NqBins; bq++) { // - loop over q2 bins
           for(int by=0; by<NyBins; by++) { // - loop over y bins
             for(int brec=0; brec<NrecMethodBins; brec++){
               histosN = this->GetHistosNameBreitJets(bpt, bz, bx, bq, by, brec);
@@ -214,7 +219,7 @@ void Analysis::Execute() {
               HS->AddCutDef(BinScheme("ptJet")->Cut(bpt));
               HS->AddCutDef(BinScheme("zJet")->Cut(bz));
               HS->AddCutDef(BinScheme("x")->Cut(bx));
-              HS->AddCutDef(BinScheme("q")->Cut(bq));
+              HS->AddCutDef(BinScheme("q2")->Cut(bq));
               HS->AddCutDef(BinScheme("y")->Cut(by));
               HS->AddCutDef(BinScheme("recMethod")->Cut(brec));
               histSetListBreitJets.push_back(histSetBreitJets[bpt][bz][bx][bq][by][brec]);
@@ -257,7 +262,7 @@ void Analysis::Execute() {
   if(maxEvents>0) ENT = maxEvents; // limiter
   cout << "begin event loop..." << endl;
   for(Long64_t e=0; e<ENT; e++) {
-    if(e>0&&e%100000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
+    if(e>0&&e%10000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
     tr->ReadEntry(e);
 
     // electron loop
@@ -389,6 +394,7 @@ void Analysis::Execute() {
           H->Hist("mX")->Fill(kin->mX,w);
           H->Hist("phiH")->Fill(kin->phiH,w);
           H->Hist("phiS")->Fill(kin->phiS,w);
+          dynamic_cast<TH2*>(H->Hist("etaVsP"))->Fill(kin->pLab,kin->etaLab,w); // TODO: lab-frame p, or some other frame?
           // cross sections (divide by lumi after all events processed)
           H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),w);
           // DIS kinematics resolution
@@ -418,7 +424,7 @@ void Analysis::Execute() {
         CheckBins( BinScheme("ptJet"), v_pt, kin->pTjet );
         CheckBins( BinScheme("zJet"), v_z, kin->zjet );
         CheckBins( BinScheme("x"),  v_x,  kin->x );
-        CheckBins( BinScheme("q"),  v_q,  TMath::Sqrt(kin->Q2) );
+        CheckBins( BinScheme("q2"), v_q,  kin->Q2 );
         CheckBins( BinScheme("y"),  v_y,  kin->y );
 
         histSetFillList.clear();
@@ -463,7 +469,7 @@ void Analysis::Execute() {
           CheckBins( BinScheme("ptJet"), v_pt, kin->pTjet );
           CheckBins( BinScheme("zJet"), v_z, kin->zjet );
           CheckBins( BinScheme("x"),  v_x,  kin->x );
-          CheckBins( BinScheme("q"),  v_q,  TMath::Sqrt(kin->Q2) );
+          CheckBins( BinScheme("q2"), v_q,  kin->Q2 );
           CheckBins( BinScheme("y"),  v_y,  kin->y );
 
           histSetFillList.clear();
