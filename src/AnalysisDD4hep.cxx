@@ -75,64 +75,68 @@ void AnalysisDD4hep::process_event()
   TTreeReader tr(chain);
 
   // Truth
-  TTreeReaderArray<Int_t>    mcparticles2_pdgID(tr, "mcparticles2.pdgID");
-  TTreeReaderArray<Double_t> mcparticles2_psx(tr, "mcparticles2.psx");
-  TTreeReaderArray<Double_t> mcparticles2_psy(tr, "mcparticles2.psy");
-  TTreeReaderArray<Double_t> mcparticles2_psz(tr, "mcparticles2.psz");
-  TTreeReaderArray<Int_t>    mcparticles2_status(tr, "mcparticles2.status");
+  TTreeReaderArray<Int_t>    mcparticles2_pdgID(tr,     "mcparticles2.pdgID");
+  TTreeReaderArray<Double_t> mcparticles2_psx(tr,       "mcparticles2.ps.x");
+  TTreeReaderArray<Double_t> mcparticles2_psy(tr,       "mcparticles2.ps.y");
+  TTreeReaderArray<Double_t> mcparticles2_psz(tr,       "mcparticles2.ps.z");
+  TTreeReaderArray<Int_t>    mcparticles2_status(tr,    "mcparticles2.status");
   TTreeReaderArray<Int_t>    mcparticles2_genStatus(tr, "mcparticles2.genStatus");
-  TTreeReaderArray<Double_t> mcparticles2_mass(tr, "mcparticles2.mass");
+  TTreeReaderArray<Double_t> mcparticles2_mass(tr,      "mcparticles2.mass");
 
   // Reco
-  TTreeReaderArray<Long64_t> ReconstructedParticles_pid(tr, "ReconstructedParticles.pid");
-  TTreeReaderArray<Double_t> ReconstructedParticles_energy(tr, "ReconstructedParticles.energy");
-  TTreeReaderArray<Double_t> ReconstructedParticles_p_x(tr, "ReconstructedParticles.p.x");
-  TTreeReaderArray<Double_t> ReconstructedParticles_p_y(tr, "ReconstructedParticles.p.y");
-  TTreeReaderArray<Double_t> ReconstructedParticles_p_z(tr, "ReconstructedParticles.p.z");
-  TTreeReaderArray<Double_t> ReconstructedParticles_mass(tr, "ReconstructedParticles.mass");
+  TTreeReaderArray<int> ReconstructedParticles_pid(tr, "ReconstructedParticles.pid");
+  TTreeReaderArray<float> ReconstructedParticles_energy(tr, "ReconstructedParticles.energy");
+  TTreeReaderArray<float> ReconstructedParticles_p_x(tr, "ReconstructedParticles.p.x");
+  TTreeReaderArray<float> ReconstructedParticles_p_y(tr, "ReconstructedParticles.p.y");
+  TTreeReaderArray<float> ReconstructedParticles_p_z(tr, "ReconstructedParticles.p.z");
+  TTreeReaderArray<float> ReconstructedParticles_mass(tr, "ReconstructedParticles.mass");
 
   //HcalEndcap
-  TTreeReaderArray<Float_t>  HcalHadronEndcapClusters_energy(tr, "HcalHadronEndcapClusters.energy");
-  TTreeReaderArray<Float_t>  HcalHadronEndcapClusters_edep(tr, "HcalHadronEndcapClusters.edep");
-  TTreeReaderArray<Double_t> HcalHadronEndcapClusters_x(tr, "HcalHadronEndcapClusters.position.x");
-  TTreeReaderArray<Double_t> HcalHadronEndcapClusters_y(tr, "HcalHadronEndcapClusters.position.y");
-  TTreeReaderArray<Double_t> HcalHadronEndcapClusters_z(tr, "HcalHadronEndcapClusters.position.z");
-  TTreeReaderArray<Float_t>  HcalHadronEndcapClusters_theta(tr, "HcalHadronEndcapClusters.polar.theta");
-  TTreeReaderArray<Float_t>  HcalHadronEndcapClusters_phi(tr, "HcalHadronEndcapClusters.polar.phi");
+  TTreeReaderArray<float>  HcalEndcapPClusters_energy(tr, "HcalEndcapPClusters.energy");
+  TTreeReaderArray<float> HcalEndcapPClusters_x(tr,      "HcalEndcapPClusters.position.x");
+  TTreeReaderArray<float> HcalEndcapPClusters_y(tr,      "HcalEndcapPClusters.position.y");
+  TTreeReaderArray<float> HcalEndcapPClusters_z(tr,      "HcalEndcapPClusters.position.z");
+  TTreeReaderArray<float>  HcalEndcapPClusters_theta(tr,  "HcalEndcapPClustersInfo.polar.theta");
+  TTreeReaderArray<float>  HcalEndcapPClusters_phi(tr,    "HcalEndcapPClustersInfo.polar.phi");
+
+  //HcalEndcap
+  TTreeReaderArray<float> HcalEndcapNClusters_energy(tr, "HcalEndcapNClusters.energy");
+  TTreeReaderArray<float> HcalEndcapNClusters_x(tr,      "HcalEndcapNClusters.position.x");
+  TTreeReaderArray<float> HcalEndcapNClusters_y(tr,      "HcalEndcapNClusters.position.y");
+  TTreeReaderArray<float> HcalEndcapNClusters_z(tr,      "HcalEndcapNClusters.position.z");
+  TTreeReaderArray<float> HcalEndcapNClusters_theta(tr,  "HcalEndcapNClustersInfo.polar.theta");
+  TTreeReaderArray<float> HcalEndcapNClusters_phi(tr,    "HcalEndcapNClustersInfo.polar.phi");
 
   //HcalBarrel
-  TTreeReaderArray<Float_t>  HcalBarrelClusters_energy(tr, "HcalBarrelClusters.energy");
-  TTreeReaderArray<Float_t>  HcalBarrelClusters_edep(tr, "HcalBarrelClusters.edep");
-  TTreeReaderArray<Double_t> HcalBarrelClusters_x(tr, "HcalBarrelClusters.position.x");
-  TTreeReaderArray<Double_t> HcalBarrelClusters_y(tr, "HcalBarrelClusters.position.y");
-  TTreeReaderArray<Double_t> HcalBarrelClusters_z(tr, "HcalBarrelClusters.position.z");
-  TTreeReaderArray<Float_t>  HcalBarrelClusters_theta(tr, "HcalBarrelClusters.polar.theta");
-  TTreeReaderArray<Float_t>  HcalBarrelClusters_phi(tr, "HcalBarrelClusters.polar.phi");
+  TTreeReaderArray<float> HcalBarrelClusters_energy(tr, "HcalBarrelClusters.energy");
+  TTreeReaderArray<float> HcalBarrelClusters_x(tr,      "HcalBarrelClusters.position.x");
+  TTreeReaderArray<float> HcalBarrelClusters_y(tr,      "HcalBarrelClusters.position.y");
+  TTreeReaderArray<float> HcalBarrelClusters_z(tr,      "HcalBarrelClusters.position.z");
+  TTreeReaderArray<float> HcalBarrelClusters_theta(tr,  "HcalBarrelClustersInfo.polar.theta");
+  TTreeReaderArray<float> HcalBarrelClusters_phi(tr,    "HcalBarrelClustersInfo.polar.phi");
 
   //Ecal
-  TTreeReaderArray<Float_t>  EcalEndcapPClusters_energy(tr, "EcalEndcapPClusters.energy");
-  TTreeReaderArray<Float_t>  EcalEndcapPClusters_edep(tr, "EcalEndcapPClusters.edep");
-  TTreeReaderArray<Double_t> EcalEndcapPClusters_x(tr, "EcalEndcapPClusters.position.x");
-  TTreeReaderArray<Double_t> EcalEndcapPClusters_y(tr, "EcalEndcapPClusters.position.y");
-  TTreeReaderArray<Double_t> EcalEndcapPClusters_z(tr, "EcalEndcapPClusters.position.z");
-  TTreeReaderArray<Float_t>  EcalEndcapPClusters_theta(tr, "EcalEndcapPClusters.polar.theta");
-  TTreeReaderArray<Float_t>  EcalEndcapPClusters_phi(tr, "EcalEndcapPClusters.polar.phi");
+  TTreeReaderArray<float> EcalEndcapPClusters_energy(tr, "EcalEndcapPClusters.energy");
+  TTreeReaderArray<float> EcalEndcapPClusters_x(tr,      "EcalEndcapPClusters.position.x");
+  TTreeReaderArray<float> EcalEndcapPClusters_y(tr,      "EcalEndcapPClusters.position.y");
+  TTreeReaderArray<float> EcalEndcapPClusters_z(tr,      "EcalEndcapPClusters.position.z");
+  TTreeReaderArray<float> EcalEndcapPClusters_theta(tr,  "EcalEndcapPClustersInfo.polar.theta");
+  TTreeReaderArray<float> EcalEndcapPClusters_phi(tr,    "EcalEndcapPClustersInfo.polar.phi");
 
-  TTreeReaderArray<Float_t>  EcalEndcapNClusters_energy(tr, "EcalEndcapNClusters.energy");
-  TTreeReaderArray<Float_t>  EcalEndcapNClusters_edep(tr, "EcalEndcapNClusters.edep");
-  TTreeReaderArray<Double_t> EcalEndcapNClusters_x(tr, "EcalEndcapNClusters.position.x");
-  TTreeReaderArray<Double_t> EcalEndcapNClusters_y(tr, "EcalEndcapNClusters.position.y");
-  TTreeReaderArray<Double_t> EcalEndcapNClusters_z(tr, "EcalEndcapNClusters.position.z");
-  TTreeReaderArray<Float_t>  EcalEndcapNClusters_theta(tr, "EcalEndcapNClusters.polar.theta");
-  TTreeReaderArray<Float_t>  EcalEndcapNClusters_phi(tr, "EcalEndcapNClusters.polar.phi");
+  TTreeReaderArray<float> EcalEndcapNClusters_energy(tr, "EcalEndcapNClusters.energy");
+  TTreeReaderArray<float> EcalEndcapNClusters_x(tr,      "EcalEndcapNClusters.position.x");
+  TTreeReaderArray<float> EcalEndcapNClusters_y(tr,      "EcalEndcapNClusters.position.y");
+  TTreeReaderArray<float> EcalEndcapNClusters_z(tr,      "EcalEndcapNClusters.position.z");
+  //watch out the branch name
+  TTreeReaderArray<float>  EcalEndcapNClusters_theta(tr,  "EcalEndcapNClusterInfo.polar.theta");
+  TTreeReaderArray<float>  EcalEndcapNClusters_phi(tr,    "EcalEndcapNClusterInfo.polar.phi");
 
-  TTreeReaderArray<Float_t>  EcalBarrelClusters_energy(tr, "EcalBarrelClusters.energy");
-  TTreeReaderArray<Float_t>  EcalBarrelClusters_edep(tr, "EcalBarrelClusters.edep");
-  TTreeReaderArray<Double_t> EcalBarrelClusters_x(tr, "EcalBarrelClusters.position.x");
-  TTreeReaderArray<Double_t> EcalBarrelClusters_y(tr, "EcalBarrelClusters.position.y");
-  TTreeReaderArray<Double_t> EcalBarrelClusters_z(tr, "EcalBarrelClusters.position.z");
-  TTreeReaderArray<Float_t>  EcalBarrelClusters_theta(tr, "EcalBarrelClusters.polar.theta");
-  TTreeReaderArray<Float_t>  EcalBarrelClusters_phi(tr, "EcalBarrelClusters.polar.phi");
+  TTreeReaderArray<float> EcalBarrelClusters_energy(tr, "EcalBarrelImagingClusters.energy");
+  TTreeReaderArray<float> EcalBarrelClusters_x(tr,      "EcalBarrelImagingClusters.position.x");
+  TTreeReaderArray<float> EcalBarrelClusters_y(tr,      "EcalBarrelImagingClusters.position.y");
+  TTreeReaderArray<float> EcalBarrelClusters_z(tr,      "EcalBarrelImagingClusters.position.z");
+  TTreeReaderArray<float> EcalBarrelClusters_theta(tr,  "EcalBarrelImagingClustersInfo.polar.theta");
+  TTreeReaderArray<float>  EcalBarrelClusters_phi(tr,    "EcalBarrelImagingClustersInfo.polar.phi");
 
   TTreeReader::EEntryStatus entrystats = tr.SetEntry(0);
 
@@ -374,16 +378,29 @@ void AnalysisDD4hep::process_event()
 	  clus->phi = HcalBarrelClusters_phi[icl]; // use edep?
 	  v_hcal_clusters.push_back(clus);
 	}
-      // HcalEndcap
-      for(int icl=0; icl<HcalHadronEndcapClusters_x.GetSize(); icl++)
+      // HcalEndcapP
+      for(int icl=0; icl<HcalEndcapPClusters_x.GetSize(); icl++)
 	{
 	  Clusters* clus = new Clusters();
-	  clus->E = HcalHadronEndcapClusters_energy[icl]; // use edep?
-	  clus->x = HcalHadronEndcapClusters_x[icl]; // use edep?
-	  clus->y = HcalHadronEndcapClusters_y[icl]; // use edep?
-	  clus->z = HcalHadronEndcapClusters_z[icl]; // use edep?
-	  clus->theta = HcalHadronEndcapClusters_theta[icl]; // use edep?
-	  clus->phi = HcalHadronEndcapClusters_phi[icl]; // use edep?
+	  clus->E = HcalEndcapPClusters_energy[icl]; // use edep?
+	  clus->x = HcalEndcapPClusters_x[icl]; // use edep?
+	  clus->y = HcalEndcapPClusters_y[icl]; // use edep?
+	  clus->z = HcalEndcapPClusters_z[icl]; // use edep?
+	  clus->theta = HcalEndcapPClusters_theta[icl]; // use edep?
+	  clus->phi = HcalEndcapPClusters_phi[icl]; // use edep?
+	  v_hcal_clusters.push_back(clus);
+	}
+
+      // HcalEndcapN
+      for(int icl=0; icl<HcalEndcapNClusters_x.GetSize(); icl++)
+	{
+	  Clusters* clus = new Clusters();
+	  clus->E = HcalEndcapNClusters_energy[icl]; // use edep?
+	  clus->x = HcalEndcapNClusters_x[icl]; // use edep?
+	  clus->y = HcalEndcapNClusters_y[icl]; // use edep?
+	  clus->z = HcalEndcapNClusters_z[icl]; // use edep?
+	  clus->theta = HcalEndcapNClusters_theta[icl]; // use edep?
+	  clus->phi = HcalEndcapNClusters_phi[icl]; // use edep?
 	  v_hcal_clusters.push_back(clus);
 	}
 
@@ -428,10 +445,10 @@ void AnalysisDD4hep::process_event()
 
       // find scattered electron
       // FIXME: hard-coded e_threshold
-      int electron_index = find_electron(v_ecal_clusters, v_hcal_clusters, 3.0);
+      int electron_index = find_electron(v_ecal_clusters, v_hcal_clusters, eleBeamEn*0.1);
       if(electron_index < 0)
 	{
-	  cout << "No scattered electron found" << endl;
+	  cout << "No scattered electron found " << electron_index << endl;
 	  continue;
 	}
 
@@ -601,6 +618,8 @@ int AnalysisDD4hep::find_electron(std::vector<Clusters*> ecal_cluster, std::vect
       index++;
       auto icluster = *icl;
       double clus_E = icluster.E/1000.0;
+      cout << index << " " << clus_E << endl;
+
       if(clus_E < e_threshold)
 	continue;
       if(icluster.theta * 180./TMath::Pi() < 2)
