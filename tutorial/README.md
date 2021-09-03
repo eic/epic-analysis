@@ -10,7 +10,7 @@ this tutorial dirctory, e.g., `root -b -q tutorial/analysis_template.C`
 
 - currently all of these examples focus on fast simulations
 
-- it is recommended to create two macros:
+- in general it is recommended to use two macros:
   - analysis macro, to run an `Analysis` class, which will analyze 
     simulated data in an event loop, and generate a variety of output
     data structures
@@ -21,7 +21,25 @@ this tutorial dirctory, e.g., `root -b -q tutorial/analysis_template.C`
 
 1. Template
   - `analysis_template.C`: minimal analysis macro to demonstrate how
-    to run `Analysis`
+    to run `Analysis`; no bins are specified
   - there is no postprocessor macro (see other examples); instead, inspect
     the output root file from the analysis macro, to learn what objects
     are stored
+
+1. (x,Q2) Binning
+  - `analysis_xqbins.C`: bin the analysis in a few 2D bins of x and Q2
+    - there is a `switch` statement to allow the choice of various
+      example binning schemes
+  - `postprocess_xqbins_draw.C`: draws a couple sample histograms for
+    the given binning scheme
+
+1. Average kinematics table
+  - `analysis_qbins.C`: bin the analysis in several Q2 bins, for a couple
+    pT bins
+  - `postprocess_qbins_tables.C`: produce a text file containing tables
+    of averages of kinematics variables, where each row is for a Q2 bin;
+    one table is produced for each pT bin
+
+More examples will be added eventually; for now you are encouraged to
+look at other existing analysis and postprocessor macros
+

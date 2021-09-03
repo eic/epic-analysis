@@ -209,13 +209,12 @@ void PostProcessor::FinishDumpAve(TString datFile) {
  * - since `histSet` names can be hard to read, you can use `outName` to give a
  *   "nickname" to `histSet`, which the canvas name will include
  */
-void PostProcessor::DrawSingle(TString outName, TString histSet, TString histName) {
+void PostProcessor::DrawSingle(TString histSet, TString histName) {
 
-  cout << "draw single plot " << outName << "..." << endl;
   Histos *H = (Histos*) infile->Get(histSet);
   TH1 *hist = H->Hist(histName);
 
-  TString canvN = "canv_"+outName+"_"+histName;
+  TString canvN = "canv_"+histName+"_"+H->GetSetName();
   TCanvas *canv = new TCanvas(canvN,canvN, dimx, dimy);
 
   hist->SetLineColor(kBlack);
@@ -261,6 +260,7 @@ void PostProcessor::DrawSingle(TString outName, TString histSet, TString histNam
   canv->Write();
   outfile->cd("/");
 
+  /* // deprecated, for combining single plots; TODO if needed, make a separate method
   TH1 *histClone = (TH1*) hist->Clone();
   histClone->SetLineColor  (nsum<nsumMax?summaryColor[nsum]:kBlack);
   histClone->SetMarkerColor(nsum<nsumMax?summaryColor[nsum]:kBlack);
@@ -282,6 +282,7 @@ void PostProcessor::DrawSingle(TString outName, TString histSet, TString histNam
   summaryCanv->cd();
   histClone->Draw(drawStr+(nsum>0?" SAME":""));
   nsum++;
+  */
 };
 
 
@@ -512,6 +513,11 @@ std::vector<int> PostProcessor::GetBinNums(TString varName) {
   return retVec;
 };
 
+// return true if the bin is "full" range, and it's not the only bin
+Bool_t PostProcessor::SkipFull(TString varName, Int_t binNum) {
+  return GetBinSet(varName)->GetNumBins() > 1 &&
+         GetBinCut(varName,binNum)->GetCutType()=="Full";
+};
 
 
 //=========================================================================

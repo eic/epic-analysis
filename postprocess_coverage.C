@@ -28,7 +28,6 @@ void postprocess_coverage(
 
       // ALGORITHM: draw a specific plot for this (x,Q2) bin
       P->DrawSingle(
-          Form("coverage_q%d_x%d",bq,bx),
           A->GetHistosName(bpt,bx,bz,bq,by,bfs),
           "etaVsP"
           );
