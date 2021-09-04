@@ -13,54 +13,33 @@ using std::cerr;
 using std::endl;
 
 AnalysisDD4hep::AnalysisDD4hep(
-  TString infileName_,
   Double_t eleBeamEn_,
   Double_t ionBeamEn_,
   Double_t crossingAngle_,
   TString outfilePrefix_
 )
-  : infileName(infileName_)
-  , eleBeamEn(eleBeamEn_)
+  : eleBeamEn(eleBeamEn_)
   , ionBeamEn(ionBeamEn_)
   , crossingAngle(crossingAngle_)
   , outfilePrefix(outfilePrefix_)  
 {
 
-  // define dummy
   AN = new Analysis();
-
-  // set bin schemes
-  AN->AddBinScheme("pt","p_{T}");
-  AN->AddBinScheme("z","z");
-  AN->AddBinScheme("x","x");
-  AN->AddBinScheme("q","Q");
-  AN->AddBinScheme("y","y");
-  AN->AddBinScheme("pt_jet", "jet p_{T}");
-  AN->AddBinScheme("z_jet", "jet z");
-  // final state bins (e.g., tracks or jets)
-  AN->AddBinScheme("finalState","finalState");
-  AN->AddFinalState("pipTrack","#pi^{+} tracks", 211);
-  //AddFinalState("pimTrack","#pi^{-} tracks",-211);
-  AN->AddBinScheme("recMethod", "recMethod");
-  AN->AddRecMethod("Ele", "electron method");
-  AN->AddRecMethod("DA", "DA method");
-  AN->AddRecMethod("JB", "JB method");  
-  // initialize diagonalizer settings
-  // TODO: generalized diagonalizer
-  AN->diagonalPtXZ = false;
-  AN->diagonalXZQ = false;
-  AN->writeSimpleTree = false;
-  AN->maxEvents = 0;
+  AN->AddFinalState("pimTrack","#pi^{-} tracks", -211);
+  AN->AddFinalState("kipTrack","#k^{+} tracks", 321);
+  AN->AddFinalState("kimTrack","#k^{-} tracks", -321);
 };
 
 // destructor
 AnalysisDD4hep::~AnalysisDD4hep() {
+  delete AN;
 };
 
 void AnalysisDD4hep::process_event()
 {
-  cout << "-- running analysis of " << infileName << endl;
 
+  PIDtoEnum_ = AN->GetPIDMap();
+      
   // instantiate objects
   kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
   kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
@@ -69,7 +48,11 @@ void AnalysisDD4hep::process_event()
   weightJet = new WeightsUniform();
 
   TChain *chain = new TChain("events");
-  chain->Add(infileName);
+  for(int i=0; i<(int)infiles.size(); i++)
+    {
+      cout << infiles[i].Data() << endl;
+      chain->Add(infiles[i].Data());
+    }
 
   // FIXME: replace it with ExRootTreeReader::UseBranch()?
   TTreeReader tr(chain);
@@ -142,13 +125,14 @@ void AnalysisDD4hep::process_event()
 
   // open output file
   // FIXME: replace name variable
-  TFile *outfile = new TFile(outfilePrefix,"RECREATE");
+  outFile = new TFile(outfilePrefix,"RECREATE");
 
   // number of bins
+
   const Int_t NptBins = AN->BinScheme("pt")->GetNumBins();
   const Int_t NxBins = AN->BinScheme("x")->GetNumBins();
   const Int_t NzBins = AN->BinScheme("z")->GetNumBins();
-  const Int_t NqBins = AN->BinScheme("q")->GetNumBins();
+  const Int_t NqBins = AN->BinScheme("q2")->GetNumBins();
   const Int_t NyBins = AN->BinScheme("y")->GetNumBins();
   const Int_t NfinalStateBins = AN->BinScheme("finalState")->GetNumBins();
   const Int_t NptjetBins = AN->BinScheme("pt_jet")->GetNumBins();
@@ -227,7 +211,7 @@ void AnalysisDD4hep::process_event()
               HS->AddCutDef(AN->BinScheme("pt")->Cut(bpt));
               HS->AddCutDef(AN->BinScheme("x")->Cut(bx));
               HS->AddCutDef(AN->BinScheme("z")->Cut(bz));
-              HS->AddCutDef(AN->BinScheme("q")->Cut(bq));
+              HS->AddCutDef(AN->BinScheme("q2")->Cut(bq));
               HS->AddCutDef(AN->BinScheme("y")->Cut(by));
               HS->AddCutDef(AN->BinScheme("finalState")->Cut(bfs));
 
@@ -337,13 +321,15 @@ void AnalysisDD4hep::process_event()
   int pid,bFinalState;
   Double_t elePtrue, maxElePtrue;
 
+  int noele = 0;
   // event loop =========================================================
   cout << "begin event loop..." << endl;
+  int nevt = 0;
   while(tr.Next())
     {
-      
+      nevt++;      
       double maxP = 0;
-      for(int imc=0; imc>mcparticles2_pdgID.GetSize(); imc++)
+      for(int imc=0; imc<mcparticles2_pdgID.GetSize(); imc++)
 	{
 	  // genStatus 4: beam particle 1: final state 
 	  if(mcparticles2_pdgID[imc] == 11 && mcparticles2_genStatus[imc] == 1)
@@ -445,14 +431,15 @@ void AnalysisDD4hep::process_event()
 
       // find scattered electron
       // FIXME: hard-coded e_threshold
-      int electron_index = find_electron(v_ecal_clusters, v_hcal_clusters, eleBeamEn*0.1);
+      int electron_index = find_electron(v_ecal_clusters, v_hcal_clusters, 3.0);
       if(electron_index < 0)
 	{
-	  cout << "No scattered electron found " << electron_index << endl;
+	  //cout << nevt << " No scattered electron found.. skip this event" << electron_index << endl;
+	  noele++;
 	  continue;
 	}
 
-      double electron_E     = v_ecal_clusters[electron_index]->E/1000.0; 
+      double electron_E     = v_ecal_clusters[electron_index]->E;
       double electron_theta = v_ecal_clusters[electron_index]->theta;
       double electron_phi = v_ecal_clusters[electron_index]->phi;
       // FIXME: use track information?
@@ -473,11 +460,18 @@ void AnalysisDD4hep::process_event()
       TLorentzVector v_had;
       double hpx=0; 
       double hpy=0;
-      for(int itrk=0; itrk<ReconstructedParticles_pid.GetSize(); itrk++)
+      for(int itrk=0; itrk<(int)ReconstructedParticles_pid.GetSize(); itrk++)
 	{
-	  // FIXME: I think pid is using the true information
-	  // Add PID smearing here 
-	  int pid = abs(ReconstructedParticles_pid[itrk]);
+	  // FIXME: pid is using the true information
+	  // Add PID smearing
+	  int pid = ReconstructedParticles_pid[itrk];
+
+	  // pid==0: reconstructed tracks with no matching truth pid
+	  if(pid == 0) continue;
+
+	  auto kv = PIDtoEnum_.find(pid);
+	  if(kv!=PIDtoEnum_.end()) bFinalState = kv->second;
+	  else continue;
 
 	  TLorentzVector v_temp;
 	  double reco_E = ReconstructedParticles_energy[itrk];
@@ -540,6 +534,7 @@ void AnalysisDD4hep::process_event()
 	      H->Hist("W")->Fill(kin->W,w);
 	      H->Hist("y")->Fill(kin->y,w);
 	      // hadron 4-momentum
+
 	      H->Hist("pLab")->Fill(kin->pLab,w);
 	      H->Hist("pTlab")->Fill(kin->pTlab,w);
 	      H->Hist("etaLab")->Fill(kin->etaLab,w);
@@ -572,6 +567,46 @@ void AnalysisDD4hep::process_event()
 
     }// tree reader loop
 
+  cout << "Total no scattered electron found: " << noele << endl;
+  cout << "end event loop" << endl;
+  // event loop end =========================================================                        
+  // calculate integrated luminosity                                                                 
+  Double_t lumi = wTotal/xsecTot; // [nb^-1]                                                         
+  cout << "Integrated Luminosity:       " << lumi << "/nb" << endl;
+  cout << sep << endl;
+
+  // calculate cross sections 
+  // TODO: generalize (`if (name contains "xsec") ...`) 
+  for(Histos *H : histSetList) {
+    H->Hist("Q_xsec")->Scale(1./lumi);
+  };
+  // print yields in each bin
+  cout << sep << endl << "Histogram Entries:" << endl;
+  for(Histos *H : histSetList) {
+    cout << H->GetSetTitle() << " ::: "
+	 << H->Hist("Q2vsX")->GetEntries()
+	 << endl;
+  };
+  
+  // write histograms 
+  cout << sep << endl;
+  outFile->cd();
+  if(AN->writeSimpleTree) ST->WriteTree();
+  for(Histos *H : histSetList) H->WriteHists(outFile);
+  for(Histos *H : histSetList) H->Write();
+  for(Histos *H : histSetListJets) H->WriteHists(outFile);
+  for(Histos *H : histSetListJets) H->Write();
+#if INCCENTAURO == 1
+  for(Histos *H : histSetListBreitJets) H->WriteHists(outfile);
+  for(Histos *H : histSetListBreitJets) H->Write();
+#endif
+  // write binning schemes
+  binSchemes_ = AN->GetBinSchemes();
+  for(auto const &kv : binSchemes_) kv.second->Write(kv.first+"_bins");
+  // close output
+  outFile->Close();
+  cout << outfileName << " written." << endl;
+  
 }//execute
 
 double AnalysisDD4hep::isolation(double cone_theta, double cone_phi, std::vector<Clusters*> cluster_container, double E_threshold)
@@ -590,7 +625,7 @@ double AnalysisDD4hep::isolation(double cone_theta, double cone_phi, std::vector
       double clus_pt    = clus_e*sin(clus_theta);
       
       double dphi = clus_phi - cone_phi;
-      //      dphi = (dphi + TMath::Pi()) % (2 * TMath::Pi()) - TMath::Pi();
+      if( dphi > TMath::Pi() ) dphi = dphi - 2*TMath::Pi();
       double dr = sqrt( pow(dphi,2) + pow((clus_eta - cone_eta), 2) );
 
       // get E_cone
@@ -617,19 +652,17 @@ int AnalysisDD4hep::find_electron(std::vector<Clusters*> ecal_cluster, std::vect
     {
       index++;
       auto icluster = *icl;
-      double clus_E = icluster.E/1000.0;
-      cout << index << " " << clus_E << endl;
+      double clus_E = icluster.E;
+      double clus_theta = icluster.theta;
+      double clus_phi   = icluster.phi;
+      double clus_eta   = -log(tan(clus_theta/2.0));
+      double clus_pt    = clus_E * sin(clus_theta);
 
       if(clus_E < e_threshold)
 	continue;
       if(icluster.theta * 180./TMath::Pi() < 2)
 	continue;
 
-      double clus_theta = icluster.theta;
-      double clus_phi   = icluster.phi;
-      double clus_eta   = -log(tan(clus_theta/2.0));
-      double clus_pt    = clus_E * sin(clus_theta);
-      
       // FIXME hard-coded threshold 
       double clus_ecal_iso = isolation(clus_theta, clus_phi, ecal_cluster, 0.1);
       double clus_hcal_iso = isolation(clus_theta, clus_phi, hcal_cluster, 0.1);

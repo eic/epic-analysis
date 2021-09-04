@@ -22,6 +22,7 @@ Analysis::Analysis(
   , crossingAngle(crossingAngle_)
   , outfilePrefix(outfilePrefix_)
 {
+
   // set bin schemes
   AddBinScheme("pt","p_{T}");
   AddBinScheme("z","z");
@@ -44,8 +45,8 @@ Analysis::Analysis(
   diagonalXZQ = false;
   writeSimpleTree = false;
   maxEvents = 0;
-};
 
+};
 
 //=============================================
 // perform the analysis
@@ -382,7 +383,6 @@ void Analysis::Execute() {
         CheckBins( BinScheme("z"),  v_z,  kin->z );
         CheckBins( BinScheme("q2"), v_q,  kin->Q2 );
         CheckBins( BinScheme("y"),  v_y,  kin->y );
-
 
         // build list of histogram sets to fill
         histSetFillList.clear();

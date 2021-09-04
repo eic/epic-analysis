@@ -50,6 +50,11 @@ class Analysis : public TNamed
 
     // add a new bin scheme
     void AddBinScheme(TString varname, TString vartitle);
+    void InitBinScheme();
+
+    // return binscheme,pid map (for DD4hep)
+    std::map<TString,BinSet*> GetBinSchemes(){ return binSchemes; }
+    std::map<int,int> GetPIDMap(){ return PIDtoEnum; }
 
     // add a new final state bin
     void AddFinalState(TString finalStateN, TString finalStateT, Int_t pid_);

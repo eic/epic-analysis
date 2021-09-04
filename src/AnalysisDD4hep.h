@@ -2,6 +2,7 @@
 #define __AnalysisDD4hep_H__
 
 #include <vector>
+#include <fstream>
 
 #include "Analysis.h"
 
@@ -9,6 +10,7 @@ class Histos;
 class SimpleTree;
 class Kinematics;
 class Analysis;
+class BinSet;
 
 class Clusters
 {
@@ -23,14 +25,13 @@ public:
   double z;
   double theta;
   double phi;
-  
+
 };
 
 class AnalysisDD4hep
 {
   public:
     AnalysisDD4hep(
-        TString infileName_="",
         Double_t eleBeamEn_=5,
         Double_t ionBeamEn_=41,
         Double_t crossingAngle_=0,
@@ -41,6 +42,8 @@ class AnalysisDD4hep
     // perform the analysis
     void process_event();
 
+    Analysis *AN;
+
   protected:
     void CheckBins(BinSet *bs, std::vector<int> &v, Double_t var);
     int find_electron(std::vector<Clusters*> ecal_cluster, std::vector<Clusters*> hcal_cluster, double e_threshold);
@@ -49,24 +52,40 @@ class AnalysisDD4hep
   private:
     const int NBINS = 50;
 
+
     Histos *HS;
     SimpleTree *ST;
     Kinematics *kin, *kinTrue;
-    TString infileName,outfileName,outfilePrefix;
+    TString outfileName,outfilePrefix;
     TFile *outFile;
     Double_t eleBeamEn = 5; // GeV
     Double_t ionBeamEn = 41; // GeV
     Double_t crossingAngle = 0; // mrad
-    std::map<TString,BinSet*> binSchemes;
+    std::map<TString,BinSet*> binSchemes_;
 
     Weights const* weight;
     Weights const* weightJet;
 
-    std::map<int,int> PIDtoEnum;
-    std::map<int,TString> finalStateName;
-    std::map<int, TString> recMethodName;
+    std::map<int,int> PIDtoEnum_;
+    std::vector<TString> infiles;
 
-    Analysis* AN;
+ public:
+    // Add files to TChain
+    void AddFiles(TString infilename)
+    {
+      infiles.clear();
+      std::ifstream ifstr(infilename);
+      TString fname;
+      while(ifstr >> fname)
+	infiles.push_back(fname);
+    }
+
+    void AddFile(TString infilename)
+    {
+      infiles.clear();
+      infiles.push_back(infilename);
+    }
+
 
 };
 
