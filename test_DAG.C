@@ -31,7 +31,7 @@ void test_DAG() {
   //D->AfterSubloop( {"Z"}, [](){ cout << "Z LOOP FOOTER - AFTER" << endl; });
   //D->BeforeSubloop({"Y"},[](){  cout << "Y LOOP HEADER" << endl; });
 
-  D->ForEach([](Histos* H){
+  D->Payload([](Histos* H){
     std::cout << "PAYLOAD: " << std::endl
               << "   " << H->GetSetName() << std::endl
               << "   " << H->GetSetTitle() << std::endl;

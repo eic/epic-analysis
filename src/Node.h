@@ -27,7 +27,8 @@ namespace NT {
     bin,     /* labels a bin, contains a CutDef */
     control, /* a node that can contain lambdas */
     root,    /* top-level control node, with only outgoing edges */
-    leaf     /* bottom-level control node, with only incoming edges */
+    leaf,    /* bottom-level control node, with only incoming edges */
+    multi,   /* a special control node that contains a lambda to alter the leaf node lambda */
   };
 };
 
@@ -48,6 +49,8 @@ class Node : public TObject
     void SetID(TString id_) { id=id_; };
     CutDef *GetCut() { return cut; };
     TString GetVarName();
+    void Print(); // print info for this node
+
 
     // inputs and outputs accessors and modifiers
     // - inputs: nodes that connect to this node via incoming arrows
@@ -64,6 +67,7 @@ class Node : public TObject
     void SetActiveState(Bool_t active_) { active=active_; };
     Bool_t IsActive() { return active; };
 
+
     // lambda operators: attach lamdas to a node (usu. control nodes),
     // and provide the ability to execute them
     // - inbound lambda is executed when traversal enters the node
@@ -76,30 +80,28 @@ class Node : public TObject
     void ExecuteInboundOp(NodePath *P) { inboundOp(this,P); };
     void ExecuteOutboundOp(NodePath *P) { outboundOp(this,P); };
 
-    // print info for this node
-    void Print();
 
+    // format lambdas with proper arguments, to allow easy overloading
+    static std::function<void(Node*,NodePath*)> FormatOp(std::function<void(Node*,NodePath*)> op) {
+      return op;
+    };
+    static std::function<void(Node*,NodePath*)> FormatOp(std::function<void(NodePath*,Node*)> op) {
+      return [op](Node *N, NodePath *P){ op(P,N); };
+    };
+    static std::function<void(Node*,NodePath*)> FormatOp(std::function<void(NodePath*)> op) {
+      return [op](Node *N, NodePath *P){ op(P); };
+    };
+    static std::function<void(Node*,NodePath*)> FormatOp(std::function<void(Node*)> op) {
+      return [op](Node *N, NodePath *P){ op(N); };
+    };
+    static std::function<void(Node*,NodePath*)> FormatOp(std::function<void()> op) {
+      return [op](Node *N, NodePath *P){ op(); };
+    };
 
 
   protected:
     void AddIO(Node *N, std::vector<Node*> &list, TString listName, Bool_t silence);
 
-    // - format lambdas with proper arguments, to allow easy overloading
-    std::function<void(Node*,NodePath*)> FormatOp(std::function<void(Node*,NodePath*)> op) {
-      return op;
-    };
-    std::function<void(Node*,NodePath*)> FormatOp(std::function<void(NodePath*,Node*)> op) {
-      return [op](Node *N, NodePath *P){ op(P,N); };
-    };
-    std::function<void(Node*,NodePath*)> FormatOp(std::function<void(NodePath*)> op) {
-      return [op](Node *N, NodePath *P){ op(P); };
-    };
-    std::function<void(Node*,NodePath*)> FormatOp(std::function<void(Node*)> op) {
-      return [op](Node *N, NodePath *P){ op(N); };
-    };
-    std::function<void(Node*,NodePath*)> FormatOp(std::function<void()> op) {
-      return [op](Node *N, NodePath *P){ op(); };
-    };
 
   private:
     CutDef *cut;

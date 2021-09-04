@@ -218,7 +218,7 @@ Bool_t DAG::Visited(TString id_) {
 // convert control patches to full patches; control node(s) will be removed
 void DAG::RepatchToFull(TString id) { RepatchToFull(GetNode(id)); };
 void DAG::RepatchToFull(Node *N) {
-  if(N->GetNodeType()!=NT::control) return;
+  if(N->GetNodeType()!=NT::control && N->GetNodeType()!=NT::multi) return;
   // connect each input to each output
   for(auto inN : N->GetInputs()) {
     for(auto outN : N->GetOutputs()) AddEdge(inN,outN);
@@ -251,9 +251,13 @@ void DAG::RepatchToLeaf(TString varName) {
     cerr << "\nERROR: variable \"" << varName << "\" not found in DAG; do you have a typo?\n\n";
     return;
   };
+  // check if a control node for this variable exists; if so, repatch it to full
+  TString controlID = varName+"_control";
+  auto Ctmp = GetNode(controlID,true);
+  if(Ctmp!=nullptr) RepatchToFull(Ctmp);
   // convert the leaf node to a control node
   auto C = GetLeafNode();
-  ModifyNode(C,varName+"_control",NT::control);
+  ModifyNode(C,controlID,NT::control);
   // create new leaf
   AddNode(NT::leaf,"leaf_0");
   auto L = GetLeafNode();

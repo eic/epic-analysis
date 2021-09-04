@@ -21,8 +21,8 @@ void HistosDAG::Build(std::map<TString,BinSet*> binSchemes) {
     BinSet *binScheme = kv.second;
     if(binScheme->GetNumBins()>0) AddLayer(binScheme);
   };
-  // payload to create Histos objects
-  Payload([this](NodePath *P){
+  // leaf operator, to create Histos objects
+  LeafOp([this](NodePath *P){
     TString histosN = "histos";
     TString histosT = "";
     if(debug) std::cout << "At path " << P->PathString() << ": ";
@@ -87,17 +87,6 @@ void HistosDAG::Build(TFile *rootFile) {
       histosMap.insert(std::pair<std::set<Node*>,Histos*>(P.GetBinNodes(),(Histos*)key->ReadObj()));
     };
   };
-};
-
-
-// payload wrapper operators, executed on the specified Histos object
-// - lambda arguments: ( Histos* )
-void HistosDAG::ForEach(std::function<void(Histos*)> op) {
-  Payload( [op,this](NodePath *P){ op(this->GetHistos(P)); } );
-};
-// - lambda arguments: ( Histos*, NodePath )
-void HistosDAG::ForEach(std::function<void(Histos*,NodePath*)> op) {
-  Payload( [op,this](NodePath *P){ op(this->GetHistos(P),P); } );
 };
 
 

@@ -52,6 +52,17 @@ TString NodePath::CutListString() {
 };
 
 
+// return the node that has `N` as one of its outputs
+Node *NodePath::GetPreviousNode(Node *N) {
+  for(auto M : nodes) {
+    for(auto outM : M->GetOutputs()) {
+      if(N==outM) return M;
+    };
+  };
+  std::cerr << "ERROR: node " << N->GetID() << "has no previous node in this path" << std::endl;
+  return nullptr;
+};
+
 
 
 NodePath::~NodePath() {

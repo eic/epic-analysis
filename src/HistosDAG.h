@@ -36,9 +36,40 @@ class HistosDAG : public DAG
     // all Histos objects will be linked to NodePaths
     void Build(TFile *rootFile);
 
-    // payload operator, executed on the specified Histos object
-    void ForEach(std::function<void(Histos*)> op);
-    void ForEach(std::function<void(Histos*,NodePath*)> op);
+    // payload operator, executed on the specified Histos object; see `FormatPayload`
+    // for allowed arguments of operator `op`
+    template<class O>
+    void Payload(O op) {
+      auto opFormatted = FormatPayload(op);
+      LeafOp( [opFormatted,this](NodePath *P){ opFormatted(this->GetHistos(P),P); } );
+    };
+
+    // multi-payload operators, for defining multiple payloads for a subloop
+    template<class O1, class O2, class O3>
+    void MultiPayload(std::vector<TString> layers, O1 opPayload, O2 opBefore, O3 opAfter) {
+      auto opFormatted = FormatPayload(opPayload);
+      MultiLeafOp(
+          layers,
+          [opFormatted,this](NodePath *P){ opFormatted(this->GetHistos(P),P); },
+          opBefore,
+          opAfter
+          );
+    };
+    template<class O1, class O2>
+    void MultiPayload(std::vector<TString> layers, O1 opPayload, O2 opBefore) { MultiPayload(layers,opPayload,opBefore,[](){}); };
+    template<class O1>
+    void MultiPayload(std::vector<TString> layers, O1 opPayload) { MultiPayload(layers,opPayload,[](){},[](){}); };
+
+    // format payload operators with proper arguments, to allow easy overloading
+    static std::function<void(Histos*,NodePath*)> FormatPayload(std::function<void(Histos*,NodePath*)> op) {
+      return op;
+    };
+    static std::function<void(Histos*,NodePath*)> FormatPayload(std::function<void(NodePath*,Histos*)> op) {
+      return [op](Histos *H, NodePath *P){ op(P,H); };
+    };
+    static std::function<void(Histos*,NodePath*)> FormatPayload(std::function<void(Histos*)> op) {
+      return [op](Histos *H, NodePath *P){ op(H); };
+    };
 
     // return Histos* associated with the given NodePath
     Histos *GetHistos(NodePath *P);

@@ -29,6 +29,7 @@ class NodePath : public TObject
     TString BinListString(); // return a string of bin names
     void PrintBinList(); // print a string of node names
     TString CutListString(); // return a string of cuts (CutDef titles)
+    Node *GetPreviousNode(Node *N); // return the node that has `N` as one of its outputs
     // get the full set of bin nodes, useful for iteration; if you need
     // all nodes (including leaf, root, and control nodes), use `NodePath::nodes`)
     std::set<Node*> GetBinNodes();

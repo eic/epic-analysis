@@ -120,7 +120,7 @@ void Analysis::Execute() {
 
 
   // HISTOGRAMS ================================================
-  HD->ForEach([this](Histos *HS){
+  HD->Payload([this](Histos *HS){
     // -- DIS kinematics
     HS->DefineHist2D("Q2vsX","x","Q^{2}","","GeV^{2}",
         NBINS,1e-3,1,
@@ -374,7 +374,7 @@ void Analysis::Execute() {
         });
 
         // fill histograms
-        HD->ForEach([this,&w](Histos *H){
+        HD->Payload([this,&w](Histos *H){
           // DIS kinematics
           dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,w);
           H->Hist("Q")->Fill(TMath::Sqrt(kin->Q2),w);
@@ -519,7 +519,7 @@ void Analysis::Execute() {
   // calculate cross sections, and print yields
   HD->Initial([&sep](){ cout << sep << endl << "Histogram Entries:" << endl; });
   HD->Final([&sep](){ cout << sep << endl; });
-  HD->ForEach([&lumi](Histos *H){
+  HD->Payload([&lumi](Histos *H){
     cout << H->GetSetTitle() << " ::: "
          << H->Hist("Q2vsX")->GetEntries()
          << endl;
@@ -533,8 +533,8 @@ void Analysis::Execute() {
   cout << sep << endl;
   outFile->cd();
   if(writeSimpleTree) ST->WriteTree();
-  HD->ForEach([this](Histos *H){ H->WriteHists(outFile); }); HD->ExecuteAndClearOps();
-  HD->ForEach([this](Histos *H){ H->Write(); }); HD->ExecuteAndClearOps();
+  HD->Payload([this](Histos *H){ H->WriteHists(outFile); }); HD->ExecuteAndClearOps();
+  HD->Payload([this](Histos *H){ H->Write(); }); HD->ExecuteAndClearOps();
   /*
   for(Histos *H : histSetListJets) H->WriteHists(outFile);
   for(Histos *H : histSetListJets) H->Write();

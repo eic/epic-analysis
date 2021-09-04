@@ -68,15 +68,20 @@ class DAG : public TObject
       };
       bool first = true;
       TString controlID;
+      // loop over layers
       for(TString layer : layers) {
         RepatchToLeaf(layer);
         if(first) controlID = layer+"_control";
         else RepatchToFull(layer+"_control");
         first = false;
       };
+      // stage lambdas
       GetNode(controlID)->StageInboundOp(opBefore);
       GetNode(controlID)->StageOutboundOp(opAfter);
     };
+    template<class O>
+    void Subloop(std::vector<TString> layers, O opBefore) { Subloop(layers,opBefore,[](){}); };
+    void Subloop(std::vector<TString> layers) { Subloop(layers,[](){},[](){}); };
 
     // `BeforeSubloop`: stage inbound lambda on a control node, given by the first layer in `layers`
     // - if the control node does not exist, move specified layers to the leaf node,
@@ -98,10 +103,67 @@ class DAG : public TObject
       else Subloop(layers,[](){},op);
     };
 
-    // `Payload`: add a lambda to the leaf node
+
+    // `LeafOp`: add a lambda to the leaf node
     // - this is the main operator, acting on all full root-to-leaf paths
     // - there is no difference between inbound and outbound at the leaf
-    template<class O> void Payload(O op) { GetLeafNode()->StageInboundOp(op); };
+    template<class O> void LeafOp(O op) { GetLeafNode()->StageInboundOp(op); };
+
+
+    // `MultiLeafOp`: make a multiControl node, which will alter the LeafOp to
+    // be `opLeaf`; you can make multiple `MultiLeafOp`s controlling the same layer,
+    // and they will be executed sequentially
+    // - the inbound operator will change the current LeafOp, thus it is not recommended
+    //   to use `MultiLeafOp` if you also use `LeafOp`; moreover, do not define `MultiLeafOp`s
+    //   to control different layers, or their LeafOps will overwrite each other
+    template<class O1, class O2, class O3>
+    void MultiLeafOp(std::vector<TString> layers, O1 opLeaf, O2 opBefore, O3 opAfter) {
+      if(layers.size()==0) {
+        std::cerr << "ERROR: empty layers list in HistosDAG::MultiLeafOp" << std::endl;
+        return;
+      };
+      // count how many multi-control nodes exist for the first layer in `layers`
+      TString controlVar = layers.at(0);
+      Int_t nMulti = 0;
+      for(auto kv : nodeMap) {
+        auto N = kv.second;
+        if( N->GetNodeType()==NT::multi && N->GetVarName()==controlVar) nMulti++;
+      };
+      TString multiID;
+      // if this is the first multi-control node, call Subloop to create an empty control node,
+      // then convert it to a multi-control node
+      if(nMulti==0) {
+        Subloop(layers);
+        Node *C = GetNode(controlVar+"_control",true);
+        multiID = controlVar+"_multi_0";
+        ModifyNode(C,multiID,NT::multi);
+      }
+      // if this is not the first multi-control node, add a new multi-control node by
+      // copying a previous multi-control node's connections
+      else {
+        multiID = Form("%s_multi_%d",controlVar.Data(),nMulti+1);
+        TString oldMultiID = Form("%s_multi_%d",controlVar.Data(),nMulti);
+        AddNode(NT::multi,multiID);
+        Node *newMultiNode = GetNode(multiID);
+        Node *oldMultiNode = GetNode(oldMultiID);
+        for(auto N : oldMultiNode->GetInputs())  AddEdge(N,newMultiNode);
+        for(auto N : oldMultiNode->GetOutputs()) AddEdge(newMultiNode,N);
+      };
+      // stage lambdas: setting the leaf lambda is combined with the inbound lambda
+      Node *multiNode = GetNode(multiID);
+      auto opBeforeFormatted = Node::FormatOp(opBefore);
+      auto opBeforeModded = [this,&opBeforeFormatted,&opLeaf](Node* N,NodePath *P){
+        opBeforeFormatted(N,P);
+        LeafOp(opLeaf);
+      };
+      multiNode->StageInboundOp(opBeforeModded);
+      multiNode->StageOutboundOp(opAfter);
+    };
+    template<class O1, class O2>
+    void MultiLeafOp(std::vector<TString> layers, O1 opLeaf, O2 opBefore) { MultiLeafOp(layers,opLeaf,opBefore,[](){}); };
+    template<class O1>
+    void MultiLeafOp(std::vector<TString> layers, O1 opLeaf) { MultiLeafOp(layers,opLeaf,[](){},[](){}); };
+
 
     // end operator templates
     // ---------------------------------------------------------------------

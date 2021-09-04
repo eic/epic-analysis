@@ -25,6 +25,7 @@ void Node::Print() {
     case NT::control: nodeTypeStr="Control"; break;
     case NT::root: nodeTypeStr="Root"; break;
     case NT::leaf: nodeTypeStr="Leaf"; break;
+    case NT::multi: nodeTypeStr="MultiControl"; break;
     default: nodeTypeStr="Unknown";
   };
   cout << "NODE ::: " << id << " ::: " << nodeTypeStr << endl;
@@ -38,6 +39,7 @@ void Node::Print() {
 // add inputs and outputs to nodes 
 // - inputs: nodes that connect to this node via incoming arrows
 // - outputs: nodes that connect to this node via outgoing arrows
+// - attempts to add a duplicate input or output will only print a warning, unless `silence` is true
 void Node::AddInput(Node *N, Bool_t silence) { AddIO(N,inputList,"input",silence); };
 void Node::AddOutput(Node *N, Bool_t silence) { AddIO(N,outputList,"output",silence); };
 void Node::AddIO(Node *N, std::vector<Node*> &list, TString listName, Bool_t silence) {
