@@ -29,6 +29,10 @@ void analysis_yRatio(
   A->BinScheme("y")->BuildBin("Min",0.05);
   A->BinScheme("y")->BuildBin("Min",0.10);
 
+  // final states
+  A->AddFinalState("pipTrack");
+  A->AddFinalState("pimTrack");
+
 
   // perform the analysis ==================================
   A->Execute();

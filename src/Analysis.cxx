@@ -35,18 +35,19 @@ Analysis::Analysis(
   availableBinSchemes.insert(std::pair<TString,TString>("finalState","finalState"));
   availableBinSchemes.insert(std::pair<TString,TString>("recMethod","recMethod"));
 
-  //
-  //
-  // TODO: make these Nodes on HistosDAG?
-  //
-  //
-  PIDtoEnum.insert(std::pair<int,int>(211,0)); // hack, for now
-  // define final state bins (e.g., tracks or jets)
-  /*
+  // available final states
   AddBinScheme("finalState");
-  AddFinalState("pipTrack","#pi^{+} tracks", 211);
-  //AddFinalState("pimTrack","#pi^{-} tracks",-211);
+  // - finalState name (ID) -> title
+  finalStateToTitle.insert(std::pair<TString,TString>("pipTrack","#pi^{+} track"));
+  finalStateToTitle.insert(std::pair<TString,TString>("pimTrack","#pi^{-} track"));
+  // TODO: add jets and kaons
+  // - PID -> finalState ID
+  PIDtoFinalState.insert(std::pair<int, TString>( 211,"pipTrack"));
+  PIDtoFinalState.insert(std::pair<int, TString>(-211,"pimTrack"));
 
+
+  // TODO: make these Nodes on HistosDAG?
+  /*
   // define reconstruction method bins
   AddBinScheme("recMethod");
   AddRecMethod("Ele", "electron method");
@@ -106,6 +107,13 @@ void Analysis::Execute() {
   TObjArrayIter itEFlowPhoton(tr->UseBranch("EFlowPhoton"));
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
   TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
+
+
+  // if there are no final states defined, default to definitions here:
+  if(BinScheme("finalState")->GetNumBins()==0) {
+    std::cout << "NOTE: adding pi+ tracks for final state, since you specified none" << std::endl;
+    AddFinalState("pipTrack");
+  };
 
 
   // HistosDAG: a Directed Acyclic Graph (DAG) storing Histos pointers
@@ -255,7 +263,8 @@ void Analysis::Execute() {
 
   // vars
   Double_t eleP,maxEleP;
-  int pid,bFinalState;
+  int pid;
+  TString finalStateID;
   Double_t elePtrue, maxElePtrue;
 
   // event loop =========================================================
@@ -317,11 +326,11 @@ void Analysis::Execute() {
 
       // final state cut
       // - check PID, to see if it's a final state we're interested in for
-      //   histograms; if not, proceed to next
+      //   histograms; if not, proceed to next track
       pid = trk->PID;
-      auto kv = PIDtoEnum.find(pid);
-      if(kv!=PIDtoEnum.end()) bFinalState = kv->second;
-      else continue;
+      auto kv = PIDtoFinalState.find(pid);
+      if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
+      if(finalStateList.find(finalStateID)==finalStateList.end()) continue;
 
       // get parent particle, to check if pion is from vector meson
       GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
@@ -364,10 +373,14 @@ void Analysis::Execute() {
 
         // check which bins the event falls in
         Bool_t activeEvent = false;
-        HD->TraverseBreadth([this,&activeEvent](Node *N){
+        HD->TraverseBreadth([this,&activeEvent,&finalStateID](Node *N){
           if(N->GetNodeType()==NT::bin) {
-            auto val = valueMap.at(N->GetVarName());
-            Bool_t active = N->GetCut()->CheckCut(val);
+            Bool_t active;
+            if(N->GetVarName()=="finalState") active = (N->GetCut()->GetCutID()==finalStateID);
+            else {
+              auto val = valueMap.at(N->GetVarName());
+              active = N->GetCut()->CheckCut(val);
+            };
             if(active) activeEvent=true;
             N->SetActiveState(active);
           };
@@ -556,8 +569,6 @@ void Analysis::Execute() {
 
 //=============================================
 
-
-
 // access bin scheme by name
 BinSet *Analysis::BinScheme(TString varname) {
   BinSet *ret;
@@ -579,21 +590,23 @@ void Analysis::AddBinScheme(TString varname) {
          << varname << " not available... skipping..." << endl;
     return;
   };
-  BinSet *B = new BinSet(varname,vartitle);
-  binSchemes.insert(std::pair<TString,BinSet*>(varname,B));
+  if(binSchemes.find(varname)==binSchemes.end()) { // (duplicate prevention)
+    BinSet *B = new BinSet(varname,vartitle);
+    binSchemes.insert(std::pair<TString,BinSet*>(varname,B));
+  };
 };
 
 // add a final state bin
-void Analysis::AddFinalState(TString finalStateN, TString finalStateT, Int_t pid_) {
-  // get bin number (we are adding a new bin, so new bin number = curent number of bins)
-  Int_t binNum = BinScheme("finalState")->GetNumBins();
-  // map : pid_ -> bin number
-  PIDtoEnum.insert(std::pair<int,int>( pid_, binNum ));
-  // map : bin number -> final state name (needed because this isn't stored in `CutDef`)
-  finalStateName.insert(std::pair<int,TString>( binNum, finalStateN ));
-  // build bin with custom `CutDef` ("custom" means that `CutDef` will not apply cuts,
-  // rather the cuts are applied here)
-  BinScheme("finalState")->BuildCustomBin(finalStateT);
+void Analysis::AddFinalState(TString finalStateN) {
+  TString finalStateT;
+  try { finalStateT = finalStateToTitle.at(finalStateN); }
+  catch(const std::out_of_range &ex) {
+    cerr << "ERROR: final state "
+         << finalStateN << " not available... skipping..." << endl;
+    return;
+  };
+  BinScheme("finalState")->BuildExternalBin(finalStateN,finalStateT);
+  finalStateList.insert(finalStateN);
 };
 
 // add reconstruction method bin
@@ -602,7 +615,7 @@ void Analysis::AddRecMethod(TString recMethodN, TString recMethodT){
   // for final states.
   Int_t binNum = BinScheme("recMethod")->GetNumBins();
   recMethodName.insert(std::pair<int,TString>(binNum, recMethodN));
-  BinScheme("recMethod")->BuildCustomBin(recMethodT);
+  //BinScheme("recMethod")->BuildCustomBin(recMethodT);
 };
 
 
@@ -634,7 +647,7 @@ void Analysis::CheckBins(BinSet *bs, std::vector<int> &v, Double_t var) {
 TString Analysis::GetHistosName(int cpt, int cx, int cz, int cq, int cy, int cfs) {
   TString retStr;
   retStr = "histos_";
-  retStr += finalStateName[cfs];
+  //retStr += finalStateName[cfs];
   retStr += Form("_pt%d",cpt);
   retStr += Form("_x%d",cx);
   retStr += Form("_z%d",cz);

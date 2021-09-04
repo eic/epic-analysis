@@ -26,8 +26,8 @@ void BinSet::BuildBin(TString cutType_, Double_t arg1_, Double_t arg2_) {
         ));
 };
 void BinSet::BuildBin(CutDef *cut_) { binList->AddLast(cut_); };
-void BinSet::BuildCustomBin(TString varTitle_) {
-  BuildBin(new CutDef(varName,varTitle_,"Custom"));
+void BinSet::BuildExternalBin(TString cutID_,TString cutTitle_) {
+  BuildBin(new CutDef(varName,varTitle,cutID_,cutTitle_));
 };
 
 // build list of bins

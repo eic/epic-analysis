@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sstream>
 #include <map>
+#include <set>
 #include <stdexcept>
 
 // root
@@ -54,7 +55,7 @@ class Analysis : public TNamed
     void AddBinScheme(TString varname);
 
     // add a new final state bin
-    void AddFinalState(TString finalStateN, TString finalStateT, Int_t pid_);
+    void AddFinalState(TString finalStateN);
 
     // add DIS reconstruction method bin
     void AddRecMethod(TString recMethodN, TString recMethodT);
@@ -114,9 +115,10 @@ class Analysis : public TNamed
     Weights const* weight;
     Weights const* weightJet;
 
-    std::map<int,int> PIDtoEnum;
-    std::map<int,TString> finalStateName;
+    std::map<TString, TString> finalStateToTitle;
+    std::map<int, TString> PIDtoFinalState;
     std::map<int, TString> recMethodName;
+    std::set<TString> finalStateList;
   ClassDef(Analysis,1);
 };
 

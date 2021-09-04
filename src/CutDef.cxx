@@ -11,13 +11,15 @@ CutDef::CutDef()
   : varName("unknown")
   , varTitle("unknown")
   , cutType("Full")
+  , cutTitle("")
   , min(-1)
   , max(-1)
   , center(-1)
   , delta(-1)
+  , cutID("")
 {};
 
-// constructor (for usage)
+// constructor (for standard usage)
 CutDef::CutDef(
     TString varName_, TString varTitle_, TString cutType_,
     Double_t arg1, Double_t arg2
@@ -25,10 +27,12 @@ CutDef::CutDef(
   : varName(varName_)
   , varTitle(varTitle_)
   , cutType(cutType_)
+  , cutTitle("")
   , min(-1)
   , max(-1)
   , center(-1)
   , delta(-1)
+  , cutID("")
 {
 
   // minimum cut
@@ -62,11 +66,6 @@ CutDef::CutDef(
     cutTitle = Form("full %s",varTitle.Data());
   }
 
-  // custom cut (cut applied externally)
-  else if(cutType.CompareTo("Custom",TString::kIgnoreCase)==0) {
-    cutTitle = varTitle;
-  }
-
   // default to no cut
   else {
     cerr << "ERROR: unknown cutType " << cutType << endl;
@@ -77,6 +76,23 @@ CutDef::CutDef(
   
 
 };
+
+
+// constructor (for external cut handling; each such cut must have a unique cutID)
+CutDef::CutDef(
+    TString varName_, TString varTitle_,
+    TString cutID_, TString cutTitle_
+    ) 
+  : varName(varName_)
+  , varTitle(varTitle_)
+  , cutType("External")
+  , cutID(cutID_)
+  , cutTitle(cutTitle_)
+  , min(-1)
+  , max(-1)
+  , center(-1)
+  , delta(-1)
+{};
 
 
 // apply cut
@@ -108,9 +124,9 @@ Bool_t CutDef::CheckCut(Double_t arg1) {
     return true;
   }
 
-  // custom cut (cut applied externally)
-  else if(cutType.CompareTo("Custom",TString::kIgnoreCase)==0) {
-    cerr << "WARNING: unnecessary call to CutDef::CheckCut for Custom cut" << endl;
+  // externally applied cut
+  else if(cutType.CompareTo("External",TString::kIgnoreCase)==0) {
+    cerr << "WARNING: unnecessary call to CutDef::CheckCut for External cut" << endl;
     return true;
   }
 
