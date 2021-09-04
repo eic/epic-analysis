@@ -48,6 +48,7 @@ class Node : public TObject
     TString GetID() { return id; };
     void SetID(TString id_) { id=id_; };
     CutDef *GetCut() { return cut; };
+    TString GetCutType();
     TString GetVarName();
     void Print(); // print info for this node
 

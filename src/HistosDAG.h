@@ -70,6 +70,12 @@ class HistosDAG : public DAG
     static std::function<void(Histos*,NodePath*)> FormatPayload(std::function<void(Histos*)> op) {
       return [op](Histos *H, NodePath *P){ op(H); };
     };
+    static std::function<void(Histos*,NodePath*)> FormatPayload(std::function<void(NodePath*)> op) {
+      return [op](Histos *H, NodePath *P){ op(P); };
+    };
+    static std::function<void(Histos*,NodePath*)> FormatPayload(std::function<void()> op) {
+      return [op](Histos *H, NodePath *P){ op(); };
+    };
 
     // return Histos* associated with the given NodePath
     Histos *GetHistos(NodePath *P);

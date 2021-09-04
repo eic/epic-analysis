@@ -40,6 +40,11 @@ this tutorial dirctory, e.g., `root -b -q tutorial/analysis_template.C`
     of averages of kinematics variables, where each row is for a Q2 bin;
     one table is produced for each pT bin
 
+4. Draw ratio of histograms for different y-minima
+  - `analysis_yRatio.C`: bins in 3 y-minima, along with a full-y bin
+  - `postprocess_yRatio.C`: produces ratios of all histograms, with
+    a y-minimum divided by no y-minimum
+
 More examples will be added eventually; for now you are encouraged to
 look at other existing analysis and postprocessor macros
 

@@ -324,14 +324,14 @@ void PostProcessor::DrawSingle(TString histSet, TString histName) {
  * - when done looping, call `FinishDrawRatios`
 */
 void PostProcessor::DrawRatios(
-    TString outName, TString numerSet, TString denomSet, Bool_t plotRatioOnly
+    TString outName, Histos *numerSet, Histos *denomSet, Bool_t plotRatioOnly
 ) {
 
   cout << "draw ratios " << outName << "..." << endl;
   enum HHenum {num,den};
   Histos *HH[2];
-  HH[num] = (Histos*) infile->Get(numerSet);
-  HH[den] = (Histos*) infile->Get(denomSet);
+  HH[num] = numerSet;
+  HH[den] = denomSet;
   TH1 *hist[2];
   TH1D *ratio;
   Double_t ny,ry,err;
@@ -350,6 +350,7 @@ void PostProcessor::DrawRatios(
       hist[den] = HH[den]->Hist(varName);
 
       // filter title
+      // TODO: there is a bug here now, ratio denominators aren't quite right
       for(int f=0; f<2; f++)  histT[f] = hist[f]->GetTitle();
       for(int f=0; f<2; f++) {
         tf = 0;
@@ -476,6 +477,7 @@ void PostProcessor::DrawRatios(
   nsum++;
 };
 void PostProcessor::FinishDrawRatios(TString summaryDir) {
+  std::cout << "CALL PostProcessor::FinishDrawRatios" << endl;
   // write summary canvas
   outfile->cd("/");
   outfile->mkdir(summaryDir);

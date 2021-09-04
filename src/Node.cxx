@@ -49,7 +49,7 @@ void Node::AddIO(Node *N, std::vector<Node*> &list, TString listName, Bool_t sil
   for(Node *M : list) {
     if( M->GetID() == N->GetID() ) {
       if(!silence) cerr << "WARNING: tried to add duplicate node "
-                        << M->GetID() << "to " << listName << " list" << endl;
+                        << M->GetID() << " to " << listName << " list" << endl;
       return;
     };
   };
@@ -69,7 +69,19 @@ void Node::UnstageOps() {
 };
 
 // other
-TString Node::GetVarName() { if(cut) return cut->GetVarName(); else return ""; };
+TString Node::GetCutType() { return cut->GetCutType(); };
+TString Node::GetVarName() { 
+  switch(GetNodeType()) {
+    case NT::bin:
+      if(cut) return cut->GetVarName(); else return "";
+      break;
+    case NT::control: 
+    case NT::multi:
+      return outputList.at(0)->GetVarName(); // return VarName of the bins this node controls
+      break;
+    default: return "";
+  };
+};
 
 Node::~Node() {
 };

@@ -63,7 +63,7 @@ class PostProcessor : public TNamed
     void DrawSingle(Histos *H, TString histName, TString drawFormat="");
     void DrawSingle(TString histSet, TString histName);
     void DrawRatios(
-        TString outName, TString numerSet, TString denomSet, Bool_t plotRatioOnly=false
+        TString outName, Histos *numerSet, Histos *denomSet, Bool_t plotRatioOnly=false
         );
 
     // algorithm finish methods; to be called after loops

@@ -18,8 +18,10 @@ void postprocess_testDAG(
     cout << "CONTROL " << vars << endl;
     cout << "  NODE = " << controlNode->GetID() << endl;
     cout << "  PATH = " << bins->PathString() << endl;
-    cout << "  PREVIOUS = " << bins->GetPreviousNode(controlNode)->GetID()
-         << endl;
+    cout << "  CUTS = " << bins->CutListString() << endl;
+    cout << "  PREVIOUS = " << bins->GetPreviousNode(controlNode)->GetID() << endl;
+    cout << "  FIRST = " << bins->GetFirstNode()->GetID() << endl;
+    cout << "  LAST = " << bins->GetLastNode()->GetID() << endl;
   };
 
   // examples of useful subloop operators ///////////////
@@ -103,14 +105,27 @@ void postprocess_testDAG(
   // - if you define one `MultiPayload`, it will completely override any `Payload`
   // - do not define `MultiPayload` for more than one subloop; only one subloop will run the
   //   multiple payloads
-  // - you can also include `Before` and `After` operators
-  /*
+  // - you can also include `Before` and `After` operators (note the differences between the 
+  //   three examples here, since default before/after operators are no-ops
+  ///*
   P->Op()->MultiPayload( {"x","q2"}, [](Histos *H){ cout << "MULTI-PAYLOAD 1: " << H->GetSetName() << endl; });
-  P->Op()->MultiPayload( {"x","q2"}, [](Histos *H){ cout << "MULTI-PAYLOAD 2: " << H->GetSetName() << endl; });
-  P->Op()->MultiPayload( {"x","q2"}, [](Histos *H){ cout << "MULTI-PAYLOAD 3: " << H->GetSetName() << endl; },
-      [](){ cout < "BEFORE MULTI-PAYLOAD 3" << endl; },
-      [](){ cout < "AFTER MULTI-PAYLOAD 3" << endl; }
+  P->Op()->MultiPayload( {"x","q2"}, [](Histos *H){ cout << "MULTI-PAYLOAD 2: " << H->GetSetName() << endl; },
+      [](){ cout << "BEFORE MULTI-PAYLOAD 2" << endl; }
       );
+  P->Op()->MultiPayload( {"x","q2"}, [](Histos *H){ cout << "MULTI-PAYLOAD 3: " << H->GetSetName() << endl; },
+      [](){ cout << "BEFORE MULTI-PAYLOAD 3" << endl; },
+      [](){ cout << "AFTER MULTI-PAYLOAD 3" << endl; }
+      );
+  //*/
+
+
+  // remove all control nodes from the DAG; all BinSets (layers) will be fully connected
+  // - basically the DAG returns to the initial state, with all bin nodes connected
+  // - this is useful to do if you want to run another loop after calling `Execute()`
+  // - the payload operator will remain, but you can overwrite it
+  // - see `DAG.h` for more DAG-level operations
+  /*
+  P->Op()->RepatchAllToFull();
   */
 
 
@@ -120,8 +135,10 @@ void postprocess_testDAG(
     //P->DrawSingle(H,"Q2vsX","COLZ");
   });
 
+
   P->Op()->PrintBreadth("DAG breadth traversal:");
   P->Op()->PrintDepth("DAG depth traversal:");
+  //return;
 
   // execution ====================================================
   P->Execute();

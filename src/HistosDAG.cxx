@@ -27,7 +27,7 @@ void HistosDAG::Build(std::map<TString,BinSet*> binSchemes) {
     TString histosT = "";
     if(debug) std::cout << "At path " << P->PathString() << ": ";
     // set name and title
-    for(Node *N : P->GetBinNodes()) { // TODO: improve names and titles, sort them
+    for(Node *N : P->GetSortedBins()) {
       histosN += "__" + N->GetID();
       histosT += N->GetCut()->GetCutTitle() + ", ";
     };

@@ -42,7 +42,7 @@ class DAG : public TObject
      * - higher order functions to stage operators (lambdas) on the DAG
      * - some functions will rearrange the DAG layers; use the Print methods
      *   to help verify it is behaving how you want
-     * - lambdas arguments can be `Node*` or `NodePath`, or both, or neither
+     * - lambdas arguments can be `Node*` or `NodePath*`, or both, or neither
      * - execute the lambdas by calling `ExecuteOps`
      */
 
@@ -141,18 +141,18 @@ class DAG : public TObject
       // if this is not the first multi-control node, add a new multi-control node by
       // copying a previous multi-control node's connections
       else {
-        multiID = Form("%s_multi_%d",controlVar.Data(),nMulti+1);
-        TString oldMultiID = Form("%s_multi_%d",controlVar.Data(),nMulti);
+        multiID = Form("%s_multi_%d",controlVar.Data(),nMulti);
+        TString oldMultiID = Form("%s_multi_%d",controlVar.Data(),nMulti-1);
         AddNode(NT::multi,multiID);
         Node *newMultiNode = GetNode(multiID);
         Node *oldMultiNode = GetNode(oldMultiID);
-        for(auto N : oldMultiNode->GetInputs())  AddEdge(N,newMultiNode);
-        for(auto N : oldMultiNode->GetOutputs()) AddEdge(newMultiNode,N);
+        for(auto N : oldMultiNode->GetInputs())  AddEdge(N,newMultiNode,true);
+        for(auto N : oldMultiNode->GetOutputs()) AddEdge(newMultiNode,N,true);
       };
       // stage lambdas: setting the leaf lambda is combined with the inbound lambda
       Node *multiNode = GetNode(multiID);
       auto opBeforeFormatted = Node::FormatOp(opBefore);
-      auto opBeforeModded = [this,&opBeforeFormatted,&opLeaf](Node* N,NodePath *P){
+      auto opBeforeModded = [this,opBeforeFormatted,opLeaf](Node* N,NodePath *P){
         opBeforeFormatted(N,P);
         LeafOp(opLeaf);
       };

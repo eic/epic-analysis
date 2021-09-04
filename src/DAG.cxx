@@ -221,7 +221,7 @@ void DAG::RepatchToFull(Node *N) {
   if(N->GetNodeType()!=NT::control && N->GetNodeType()!=NT::multi) return;
   // connect each input to each output
   for(auto inN : N->GetInputs()) {
-    for(auto outN : N->GetOutputs()) AddEdge(inN,outN);
+    for(auto outN : N->GetOutputs()) AddEdge(inN,outN,true);
   };
   // remove control node and its connections
   RemoveNode(N);
