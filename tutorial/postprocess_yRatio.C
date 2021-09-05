@@ -29,7 +29,7 @@ void postprocess_yRatio(
     // PostProcessor::DrawRatios will take the ratio of each 1D
     // histogram in the specified Histos objects
     P->DrawRatios(
-        "ratio_" + bins->GetBinNode("y")->GetID(), // output name
+        "ratio_" + Hfull->GetSetName(), // output name
         H, // numerator Histos
         Hfull // denominator Histos
         );

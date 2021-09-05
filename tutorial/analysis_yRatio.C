@@ -31,7 +31,13 @@ void analysis_yRatio(
 
   // final states
   A->AddFinalState("pipTrack");
-  A->AddFinalState("pimTrack");
+  //A->AddFinalState("pimTrack");
+  //A->AddFinalState("KpTrack");
+  //A->AddFinalState("KmTrack");
+  A->AddFinalState("jet");
+
+  // set reconstruction method
+  A->SetReconMethod("Ele");
 
 
   // perform the analysis ==================================

@@ -45,45 +45,25 @@ class Analysis : public TNamed
         );
     ~Analysis();
 
-    // number of bins
+    // number of bins for histograms
     const Int_t NBINS = 50;
 
-    // access bin scheme by name
-    BinSet *BinScheme(TString varname);
-
-    // add a new bin scheme
-    void AddBinScheme(TString varname);
+    // bin schemes
+    void AddBinScheme(TString varname); // add a new bin scheme
+    BinSet *BinScheme(TString varname); // access bin scheme by name
+    std::map<TString,BinSet*> GetBinSchemes() { return binSchemes; }; // get full set of bin schemes
 
     // add a new final state bin
     void AddFinalState(TString finalStateN);
-
-    // add DIS reconstruction method bin
-    void AddRecMethod(TString recMethodN, TString recMethodT);
-
-  
-    // get Histos object name and title, and binning
-    TString GetHistosName(int cpt, int cx, int cz, int cq, int cy, int cfs);
-    TString GetHistosTitle(int cpt, int cx, int cz, int cq, int cy, int cfs);
-    TString GetHistosNameJets(int cpt, int cz, int cx, int cq, int cy);
-    TString GetHistosTitleJets(int cpt, int cz, int cx, int cq, int cy);
-    TString GetHistosNameBreitJets(int cpt, int cz, int cx, int cq, int cy, int crec);
-    TString GetHistosTitleBreitJets(int cpt, int cz, int cx, int cq, int cy, int crec);
-    std::map<TString,BinSet*> GetBinSchemes() { return binSchemes; };
-
-    // if these are true, only take 'diagonal' elements of the multi
-    // dimensional array of possible bins; this is useful
-    // if you want to check specific bins
-    // TODO: generalize
-    /*
-    Bool_t diagonalPtXZ;
-    Bool_t diagonalXZQ;
-    */
 
     // additional settings
     Bool_t writeSimpleTree; // if true, write SimpleTree (not binned)
     Long64_t maxEvents; /* default=0, which runs all events;
                          * if > 0, run a maximum number of `maxEvents` events (useful for quick tests)
                          */
+    Bool_t useBreitJets; // if true, use Breit jets, if using finalState `jets` (requires centauro)
+    // set kinematics reconstruction method; see constructor for available methods
+    void SetReconMethod(TString reconMethod_) { reconMethod=reconMethod_; }; 
 
     // perform the analysis
     void Execute();
@@ -92,33 +72,41 @@ class Analysis : public TNamed
     void SetWeights(Weights const* w) { weight = w; }
     void SetWeightsJet(Weights const* w) { weightJet = w; }
 
-    // tools
-    Bool_t CheckDiagonal(int cpt, int cx, int cz, int cq);
-
   protected:
     void CheckBins(BinSet *bs, std::vector<int> &v, Double_t var);
 
   private:
+
     Histos *HS;
     SimpleTree *ST;
     Kinematics *kin, *kinTrue;
     HistosDAG *HD;
+
     TString infileName,outfileName,outfilePrefix;
     TFile *outFile;
     Double_t eleBeamEn = 5; // GeV
     Double_t ionBeamEn = 41; // GeV
     Double_t crossingAngle = 0; // mrad
+
+    TString reconMethod;
+    Double_t eleP,maxEleP;
+    Double_t elePtrue, maxElePtrue;
+    int pid;
+
     std::map<TString,BinSet*> binSchemes;
     std::map<TString,TString> availableBinSchemes;
+    std::map<TString,TString> reconMethodToTitle;
+
     std::map<TString,Double_t> valueMap;
+    TString finalStateID;
+    Bool_t activeEvent;
 
     Weights const* weight;
     Weights const* weightJet;
 
     std::map<TString, TString> finalStateToTitle;
     std::map<int, TString> PIDtoFinalState;
-    std::map<int, TString> recMethodName;
-    std::set<TString> finalStateList;
+    std::set<TString> activeFinalStates;
   ClassDef(Analysis,1);
 };
 

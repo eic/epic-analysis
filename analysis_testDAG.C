@@ -21,6 +21,8 @@ void analysis_testDAG(
 
   //A->maxEvents = 100;
 
+  // set reconstruction method ====================================
+  A->SetReconMethod("Ele");
 
   // set binning scheme ====================================
 
