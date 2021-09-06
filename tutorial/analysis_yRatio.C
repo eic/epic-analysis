@@ -19,6 +19,7 @@ void analysis_yRatio(
       );
 
   //A->maxEvents = 30000; // use this to limit the number of events
+  A->writeSimpleTree = true; // write SimpleTree (for one bin)
 
   // set binning scheme ====================================
 
