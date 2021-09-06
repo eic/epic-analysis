@@ -341,10 +341,10 @@ void Kinematics::GetJets(
   double R = 0.8;
   JetDefinition jet_def(antikt_algorithm, R);
 
-  csRec = new ClusterSequence(particles, jet_def);
-  csTrue = new ClusterSequence(particlesTrue, jet_def);
-  jetsRec = sorted_by_pt(csRec->inclusive_jets());
-  jetsTrue = sorted_by_pt(csTrue->inclusive_jets());
+  csRec = ClusterSequence(particles, jet_def);
+  csTrue = ClusterSequence(particlesTrue, jet_def);
+  jetsRec = sorted_by_pt(csRec.inclusive_jets());
+  jetsTrue = sorted_by_pt(csTrue.inclusive_jets());
 
 };
 
@@ -446,10 +446,10 @@ void Kinematics::GetBreitFrameJets(
   contrib::CentauroPlugin centauroPlugin(R);
   JetDefinition jet_def(&centauroPlugin);
 
-  csRec = new ClusterSequence(particles, jet_def);
-  csTrue = new ClusterSequence(particlesTrue, jet_def);
-  breitJetsRec = sorted_by_pt(csRec->inclusive_jets());
-  breitJetsTrue = sorted_by_pt(csTrue->inclusive_jets());
+  csRec = ClusterSequence(particles, jet_def);
+  csTrue = ClusterSequence(particlesTrue, jet_def);
+  breitJetsRec = sorted_by_pt(csRec.inclusive_jets());
+  breitJetsTrue = sorted_by_pt(csTrue.inclusive_jets());
 };
 
 

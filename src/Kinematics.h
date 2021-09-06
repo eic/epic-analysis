@@ -87,8 +87,8 @@ class Kinematics : public TObject
     std::vector<PseudoJet> jetsRec, jetsTrue;
     std::vector<PseudoJet> breitJetsRec, breitJetsTrue;
     std::map<double, int> jetConstituents;
-    ClusterSequence* csRec;
-    ClusterSequence* csTrue;
+    ClusterSequence csRec;
+    ClusterSequence csTrue;
     Double_t zjet, pTjet, qTjet;
     std::vector<double> jperp;
     std::vector<double> zhad_jet;
