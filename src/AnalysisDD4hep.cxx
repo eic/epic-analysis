@@ -24,6 +24,11 @@ AnalysisDD4hep::AnalysisDD4hep(
   , outfilePrefix(outfilePrefix_)  
 {
 
+  // initialize scatt. electron cuts
+  fEThreshold = eleBeamEn_*0.1; // min energy cut
+  fIsoR = 1.0;                  // Isolation cone R
+  fIsoCut = 0.1;                // 10%
+
   AN = new Analysis();
   AN->AddFinalState("pimTrack","#pi^{-} tracks", -211);
   AN->AddFinalState("kipTrack","#k^{+} tracks", 321);
@@ -327,6 +332,7 @@ void AnalysisDD4hep::process_event()
   int nevt = 0;
   while(tr.Next())
     {
+      if(nevt%100000==0) cout << nevt << " events..." << endl;
       nevt++;      
       double maxP = 0;
       for(int imc=0; imc<mcparticles2_pdgID.GetSize(); imc++)
@@ -429,12 +435,16 @@ void AnalysisDD4hep::process_event()
 	  v_ecal_clusters.push_back(clus);
 	}
 
+      // calculate true DIS kinematics
+      kinTrue->CalculateDISbyElectron(); // generated (truth)
+
       // find scattered electron
-      // FIXME: hard-coded e_threshold
-      int electron_index = find_electron(v_ecal_clusters, v_hcal_clusters, 3.0);
+      int electron_index = find_electron(v_ecal_clusters, v_hcal_clusters, fEThreshold);
       if(electron_index < 0)
 	{
 	  //cout << nevt << " No scattered electron found.. skip this event" << electron_index << endl;
+	  //	  cout << kinTrue->x << " " << kinTrue->Q2 << " " << kinTrue->y << endl;
+
 	  noele++;
 	  continue;
 	}
@@ -455,7 +465,6 @@ void AnalysisDD4hep::process_event()
 
       // calculate DIS kinematics
       kin->CalculateDISbyElectron(); // reconstructed
-      kinTrue->CalculateDISbyElectron(); // generated (truth)
 
       TLorentzVector v_had;
       double hpx=0; 
@@ -569,9 +578,10 @@ void AnalysisDD4hep::process_event()
 
   cout << "Total no scattered electron found: " << noele << endl;
   cout << "end event loop" << endl;
-  // event loop end =========================================================                        
-  // calculate integrated luminosity                                                                 
-  Double_t lumi = wTotal/xsecTot; // [nb^-1]                                                         
+  // event loop end =========================================================                 
+  // calculate integrated luminosity  
+  Double_t lumi = wTotal/xsecTot; // [nb^-1]                                                      
+
   cout << "Integrated Luminosity:       " << lumi << "/nb" << endl;
   cout << sep << endl;
 
@@ -607,6 +617,7 @@ void AnalysisDD4hep::process_event()
   outFile->Close();
   cout << outfileName << " written." << endl;
   
+
 }//execute
 
 double AnalysisDD4hep::isolation(double cone_theta, double cone_phi, std::vector<Clusters*> cluster_container, double E_threshold)
@@ -629,8 +640,7 @@ double AnalysisDD4hep::isolation(double cone_theta, double cone_phi, std::vector
       double dr = sqrt( pow(dphi,2) + pow((clus_eta - cone_eta), 2) );
 
       // get E_cone
-      // FIXME: using hard-coded cone radius
-      if(dr < 1.0)
+      if(dr < fIsoR)
 	{
 	  cone_iso += clus_e;
 	}
@@ -663,13 +673,12 @@ int AnalysisDD4hep::find_electron(std::vector<Clusters*> ecal_cluster, std::vect
       if(icluster.theta * 180./TMath::Pi() < 2)
 	continue;
 
-      // FIXME hard-coded threshold 
+      // FIXME hard-coded threshold (currently not used)
       double clus_ecal_iso = isolation(clus_theta, clus_phi, ecal_cluster, 0.1);
       double clus_hcal_iso = isolation(clus_theta, clus_phi, hcal_cluster, 0.1);
       double clus_iso = clus_ecal_iso + clus_hcal_iso - clus_E; // subtract the electron energy
 
-      // FIXME: using hard-coded isolation criteria; 10%
-      if(clus_iso > clus_E*0.1)
+      if(clus_iso > clus_E*fIsoCut)
 	continue;
 
       if(clus_pt > ptmax)

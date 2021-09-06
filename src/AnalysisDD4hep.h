@@ -42,6 +42,10 @@ class AnalysisDD4hep
     // perform the analysis
     void process_event();
 
+    void SetEleEnergyThreshold(double e_threshold_) { fEThreshold = e_threshold_; }
+    void SetIsoConeRadius(double r_ ) { fIsoR = r_; }
+    void SetIsoCut(double isocut_ ) { fIsoCut = isocut_; }
+
     Analysis *AN;
 
   protected:
@@ -51,7 +55,6 @@ class AnalysisDD4hep
 
   private:
     const int NBINS = 50;
-
 
     Histos *HS;
     SimpleTree *ST;
@@ -68,6 +71,10 @@ class AnalysisDD4hep
 
     std::map<int,int> PIDtoEnum_;
     std::vector<TString> infiles;
+
+    double fEThreshold;
+    double fIsoR;
+    double fIsoCut;
 
  public:
     // Add files to TChain
