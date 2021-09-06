@@ -3,7 +3,7 @@ R__LOAD_LIBRARY(Largex)
 
 // test new SimpleTree class
 void analysis_test_SimpleTree(
-    TString infiles="datarec/arc/crossCheck_5x41.run8.root", /* delphes tree(s) */
+    TString infiles="datarec/example_5x41.root", /* delphes tree(s) */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=0, /* crossing angle [mrad] */
@@ -19,7 +19,7 @@ void analysis_test_SimpleTree(
       outfilePrefix
       );
 
-  A->maxEvents = 10000;
+  //A->maxEvents = 10000;
   A->writeSimpleTree = true;
 
   // set binning scheme ====================================

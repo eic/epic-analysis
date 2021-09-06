@@ -371,6 +371,9 @@ void Analysis::Execute() {
 
       kin->CalculateHadronKinematics();
       kinTrue->CalculateHadronKinematics();
+      
+      // asymmetry injection
+      kin->InjectFakeAsymmetry();
 
 	  Double_t w = weight->GetWeight(*kin);
 	  wTotal += w;

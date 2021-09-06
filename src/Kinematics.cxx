@@ -38,6 +38,9 @@ Kinematics::Kinematics(
   // default proton polarization
   pol = 0.80;
 
+  // random number generator (for asymmetry injection
+  RNG = new TRandomMixMax(91874); // (TODO: fixed seed?)
+
 };
 
 
@@ -176,6 +179,7 @@ void Kinematics::CalculateHadronKinematics() {
       IvecQ.Vect(), IvecHadron.Vect()
       );
   // phiS
+  tSpin = 1; // assume spin up, for calculation of phiS
   vecSpin.SetXYZT(0,tSpin,0,0); // Pauli-Lubanski pseudovector
   //this->BoostToBreitFrame(vecSpin,IvecSpin); // TODO: check if other frames matter
   phiS = PlaneAngle(
@@ -536,6 +540,27 @@ void Kinematics::CalculateJetKinematics(PseudoJet jet){
       }
     }
   }
+};
+
+
+// test a fake asymmetry, for fit code validation
+// - assigns `tSpin` based on desired fake asymmetry
+void Kinematics::InjectFakeAsymmetry() {
+  // modulations
+  moduVal[0] = TMath::Sin(phiH-phiS); // sivers
+  moduVal[1] = TMath::Sin(phiH+phiS); // transversity*collins
+  // fake amplitudes
+  ampVal[0] = 0.05;
+  ampVal[1] = 0.05;
+  // fake dependence on SIDIS kinematics
+  asymInject[0] = ( 2*ampVal[0]*x - ampVal[0]) * moduVal[0];
+  asymInject[1] = (-2*ampVal[0]*x + ampVal[0]) * moduVal[0];
+  // generate random number in [0,1]
+  RN = RNG->Uniform();
+  for(int inj=0; inj<asymInjectN; inj++) {
+    asymInject[inj] *= pol; // TODO: include depol. factor
+    tSpin = (RN<0.5*(1+asymInject[inj])) ? 1 : -1;
+  };
 };
 
 
