@@ -24,10 +24,6 @@ void analysis_fullsim(
 
   ana->AN->writeSimpleTree = true;
 
-  ana->AN->BinScheme("y")->BuildBin("Min",0.03);
-  ana->AN->BinScheme("y")->BuildBin("Min",0.05);
-  ana->AN->BinScheme("y")->BuildBin("Min",0.10);
-
   ana->process_event();
 
 }
