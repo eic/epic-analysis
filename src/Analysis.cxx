@@ -159,6 +159,11 @@ void Analysis::Execute() {
               HS->DefineHist1D("mX","m_{X}","GeV",NBINS,0,20);
               HS->DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
               HS->DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
+              HS->DefineHist2D("etaVsP","p","#eta","GeV","",
+                  NBINS,0.1,100,
+                  NBINS,-5,5,
+                  true,false
+                  );
               // -- cross sections
               //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
               HS->DefineHist1D("Q_xsec","Q","GeV",10,1.0,10.0,true,true); // log
@@ -282,7 +287,7 @@ void Analysis::Execute() {
   if(maxEvents>0) ENT = maxEvents; // limiter
   cout << "begin event loop..." << endl;
   for(Long64_t e=0; e<ENT; e++) {
-    if(e>0&&e%100000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
+    if(e>0&&e%10000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
     tr->ReadEntry(e);
 
     // electron loop
@@ -421,6 +426,7 @@ void Analysis::Execute() {
           H->Hist("mX")->Fill(kin->mX,w);
           H->Hist("phiH")->Fill(kin->phiH,w);
           H->Hist("phiS")->Fill(kin->phiS,w);
+          dynamic_cast<TH2*>(H->Hist("etaVsP"))->Fill(kin->pLab,kin->etaLab,w); // TODO: lab-frame p, or some other frame?
           // cross sections (divide by lumi after all events processed)
           H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),w);
           // DIS kinematics resolution
