@@ -23,22 +23,36 @@ Analysis::Analysis(
   , outfilePrefix(outfilePrefix_)
   , reconMethod("")
 {
-  // build list of variables available for binning (paired with titles)
+  // available variables for binning
   // - availableBinSchemes is a map from variable name to variable title
-  // - try to avoid using underscores in the variable name (they are okay in the title)
-  availableBinSchemes.insert(std::pair<TString,TString>("pt","p_{T}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("p","p"));
-  availableBinSchemes.insert(std::pair<TString,TString>("z","z"));
+  // - try to avoid using underscores in the variable name (they are okay in the title);
+  //   convention is camel case, starting lowercase 
+  /* DIS */
   availableBinSchemes.insert(std::pair<TString,TString>("x","x"));
   availableBinSchemes.insert(std::pair<TString,TString>("q2","Q^{2}"));
+  availableBinSchemes.insert(std::pair<TString,TString>("w","W"));
   availableBinSchemes.insert(std::pair<TString,TString>("y","y"));
+  /* single hadron */
+  availableBinSchemes.insert(std::pair<TString,TString>("p","p"));
   availableBinSchemes.insert(std::pair<TString,TString>("eta","#eta"));
+  availableBinSchemes.insert(std::pair<TString,TString>("pt","p_{T}"));
+  availableBinSchemes.insert(std::pair<TString,TString>("z","z"));
+  availableBinSchemes.insert(std::pair<TString,TString>("qT","q_{T}"));
+  availableBinSchemes.insert(std::pair<TString,TString>("qTq","q_{T}/Q"));
+  availableBinSchemes.insert(std::pair<TString,TString>("mX","M_{X}"));
+  availableBinSchemes.insert(std::pair<TString,TString>("xF","x_{F}"));
+  availableBinSchemes.insert(std::pair<TString,TString>("phiH","#phi_{h}"));
+  availableBinSchemes.insert(std::pair<TString,TString>("phiS","#phi_{S}"));
+  availableBinSchemes.insert(std::pair<TString,TString>("tSpin","spin"));
+  /* jets */
   availableBinSchemes.insert(std::pair<TString,TString>("ptJet", "jet p_{T}"));
   availableBinSchemes.insert(std::pair<TString,TString>("zJet", "jet z"));
-  availableBinSchemes.insert(std::pair<TString,TString>("finalState","finalState"));
-  availableBinSchemes.insert(std::pair<TString,TString>("recMethod","recMethod"));
+
 
   // available final states
+  // - specify which final states you want to include using `AddFinalState(TString name)`
+  // - if you specify none, default final state(s) will be chosen for you
+  availableBinSchemes.insert(std::pair<TString,TString>("finalState","finalState"));
   AddBinScheme("finalState");
   // - finalState name (ID) -> title
   finalStateToTitle.insert(std::pair<TString,TString>("pipTrack","#pi^{+} tracks"));
@@ -53,13 +67,18 @@ Analysis::Analysis(
   PIDtoFinalState.insert(std::pair<int, TString>( 321,"KpTrack"));
   PIDtoFinalState.insert(std::pair<int, TString>(-321,"KmTrack"));
 
+
   // kinematics reconstruction methods
+  // - choose one of these methods using `SetReconMethod(TString name)`
+  // - if you specify none, a default method will be chosen
   reconMethodToTitle.insert(std::pair<TString,TString>("Ele","Electron method"));
   reconMethodToTitle.insert(std::pair<TString,TString>("DA","Double Angle method"));
   reconMethodToTitle.insert(std::pair<TString,TString>("JB","Jacquet-Blondel method"));
   reconMethodToTitle.insert(std::pair<TString,TString>("Mixed","Mixed method"));
 
-  // initializations
+
+  // settings
+  // - these settings can be set at the macro level; default values are set here
   writeSimpleTree = false;
   maxEvents = 0;
   useBreitJets = false;
@@ -311,11 +330,24 @@ void Analysis::Execute() {
 
         // map varNames to values
         valueMap.clear();
-        valueMap.insert(std::pair<TString,Double_t>(  "pt",  kin->pT  ));
-        valueMap.insert(std::pair<TString,Double_t>(  "x",   kin->x   ));
-        valueMap.insert(std::pair<TString,Double_t>(  "z",   kin->z   ));
-        valueMap.insert(std::pair<TString,Double_t>(  "q2",  kin->Q2  ));
-        valueMap.insert(std::pair<TString,Double_t>(  "y",   kin->y   ));
+        /* DIS */
+        valueMap.insert(std::pair<TString,Double_t>( "x", kin->x ));
+        valueMap.insert(std::pair<TString,Double_t>( "q2", kin->Q2 ));
+        valueMap.insert(std::pair<TString,Double_t>( "w", kin->W ));
+        valueMap.insert(std::pair<TString,Double_t>( "y", kin->y ));
+        /* single hadron */
+        valueMap.insert(std::pair<TString,Double_t>( "p", kin->pLab ));
+        valueMap.insert(std::pair<TString,Double_t>( "eta", kin->etaLab ));
+        valueMap.insert(std::pair<TString,Double_t>( "pt", kin->pT ));
+        valueMap.insert(std::pair<TString,Double_t>( "z", kin->z ));
+        valueMap.insert(std::pair<TString,Double_t>( "qT", kin->qT ));
+        valueMap.insert(std::pair<TString,Double_t>( "qTq", kin->qT/TMath::Sqrt(kin->Q2) ));
+        valueMap.insert(std::pair<TString,Double_t>( "mX", kin->mX ));
+        valueMap.insert(std::pair<TString,Double_t>( "xF", kin->xF ));
+        valueMap.insert(std::pair<TString,Double_t>( "phiH", kin->phiH ));
+        valueMap.insert(std::pair<TString,Double_t>( "phiS", kin->phiS ));
+        valueMap.insert(std::pair<TString,Double_t>( "tSpin", (Double_t)kin->tSpin ));
+
 
         // check which bins the event falls in
         activeEvent = false;
