@@ -173,6 +173,13 @@ respective macros for the stages.
 - see `src/PostProcessor.h` and `src/PostProcessor.cxx` for available
   post-processing routines; you are welcome to add your own
 
+### Asymmetry Fitting
+- the `SimpleTree` output is compatible with [asymmetry
+  code](https://github.com/c-dilks/largex-eic-asym), included here as a
+  submodule in `asym/`
+  - clone this `largex-eic` repository with `--recurse-submodules`, to get
+    `largex-eic-asym` and its main dependency `brufit`
+  - follow `asym/README.md`
 
 # Contributions
 
