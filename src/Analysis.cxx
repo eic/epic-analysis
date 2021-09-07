@@ -153,8 +153,6 @@ void Analysis::Execute() {
     HS->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
     HS->DefineHist1D("y","y","",NBINS,1e-5,1,true);
     HS->DefineHist1D("W","W","GeV",NBINS,0,15);
-    // -- DIS kinematics resolution
-    HS->DefineHist1D("xRes","x - x_{true}","", NBINS, -1, 1);
     // -- hadron 4-momentum
     HS->DefineHist1D("pLab","p_{lab}","GeV",NBINS,0,10);
     HS->DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
@@ -185,6 +183,22 @@ void Analysis::Execute() {
     HS->DefineHist1D("qT_jet","jet q_{T}", "GeV", NBINS, 0, 10.0);
     HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
     HS->DefineHist1D("qTQ_jet","jet q_{T}/Q","", NBINS, 0, 3.0);
+    // -- resolutions
+    HS->DefineHist1D("xRes","x - x_{true}","", NBINS, -1, 1);
+    // -- reconstructed vs. generated
+    HS->DefineHist2D("x_RvG","generated x","reconstructed x","","",
+        NBINS,1e-3,1,
+        NBINS,1e-3,1,
+        true,true
+        );
+    HS->DefineHist2D("phiH_RvG","generated #phi_{h}","reconstructed #phi_{h}","","",
+        NBINS,-TMath::Pi(),TMath::Pi(),
+        NBINS,-TMath::Pi(),TMath::Pi()
+        );
+    HS->DefineHist2D("phiS_RvG","generated #phi_{S}","reconstructed #phi_{S}","","",
+        NBINS,-TMath::Pi(),TMath::Pi(),
+        NBINS,-TMath::Pi(),TMath::Pi()
+        );
   });
   HD->ExecuteAndClearOps();
 
@@ -253,10 +267,11 @@ void Analysis::Execute() {
     };
     if(maxEleP<0.001) continue; // no scattered electron found
     // - repeat for truth electron
+    itParticle.Reset();
     maxElePtrue = 0;
     while(GenParticle *part = (GenParticle*) itParticle()){
       if(part->PID == 11 && part->Status == 1){
-        elePtrue = part->PT;
+        elePtrue = part->PT * TMath::CosH(part->Eta);
         if(elePtrue > maxElePtrue){
           maxElePtrue = elePtrue;
           kinTrue->vecElectron.SetPtEtaPhiM(
@@ -377,8 +392,12 @@ void Analysis::Execute() {
           dynamic_cast<TH2*>(H->Hist("etaVsP"))->Fill(kin->pLab,kin->etaLab,w); // TODO: lab-frame p, or some other frame?
           // cross sections (divide by lumi after all events processed)
           H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),w);
-          // DIS kinematics resolution
+          // resolutions
           H->Hist("xRes")->Fill(kin->x - kinTrue->x,w);
+          // -- reconstructed vs. generated
+          dynamic_cast<TH2*>(H->Hist("x_RvG"))->Fill(kinTrue->x,kin->x,w);
+          dynamic_cast<TH2*>(H->Hist("phiH_RvG"))->Fill(kinTrue->phiH,kin->phiH,w);
+          dynamic_cast<TH2*>(H->Hist("phiS_RvG"))->Fill(kinTrue->phiS,kin->phiS,w);
         });
         HD->ExecuteOps(true); // save time and don't ClearOps (next loop will overwrite lambda)
 

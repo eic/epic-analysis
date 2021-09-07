@@ -20,13 +20,25 @@ void analysis_template(
       crossingAngle,
       outfilePrefix
       );
-
   //A->maxEvents = 10000; // use this to limit the number of events
+  //A->writeSimpleTree = true; // write SimpleTree (for one bin)
 
+  // set reconstruction method =============================
+  // - see `Analysis` constructor for methods
+  A->SetReconMethod("Ele");
 
   // set binning scheme ====================================
+  // - see `Analysis` constructor for available bin variables
   /* do nothing -> single bin */
 
+  // final states =========================================
+  // - define final states; if you define none, default sets will
+  //   be defined
+  //A->AddFinalState("pipTrack");
+  //A->AddFinalState("pimTrack");
+  //A->AddFinalState("KpTrack");
+  //A->AddFinalState("KmTrack");
+  //A->AddFinalState("jet");
 
   // perform the analysis ==================================
   A->Execute();
