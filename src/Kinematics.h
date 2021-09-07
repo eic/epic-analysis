@@ -228,9 +228,9 @@ class Kinematics : public TObject
 
   private:
     static const Int_t asymInjectN = 2;
-    Double_t asymInject[asymInjectN];
     Double_t moduVal[asymInjectN];
     Double_t ampVal[asymInjectN];
+    Double_t asymInject;
     TRandom *RNG;
     Float_t RN;
 

@@ -374,6 +374,7 @@ void Analysis::Execute() {
       kinTrue->CalculateHadronKinematics();
       
       // asymmetry injection
+      //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
       kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
       kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
