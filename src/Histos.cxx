@@ -78,11 +78,93 @@ void Histos::DefineHist2D(
 };
 
 
+// define a 3D histogram
+void Histos::DefineHist3D(
+    TString varname,
+    TString vartitlex, TString vartitley, TString vartitlez,
+    TString unitsx, TString unitsy, TString unitsz,
+    Int_t numBinsx, Double_t lowerBoundx, Double_t upperBoundx,
+    Int_t numBinsy, Double_t lowerBoundy, Double_t upperBoundy,
+    Int_t numBinsz, Double_t lowerBoundz, Double_t upperBoundz,
+    Bool_t logx, Bool_t logy, Bool_t logz
+    ) {
+  if(unitsx!="") unitsx=" ["+unitsx+"]";
+  if(unitsy!="") unitsy=" ["+unitsy+"]";
+  if(unitsz!="") unitsz=" ["+unitsz+"]";
+  TString histT;
+  if(varname.Contains("_xsec")) histT = "d^{3}#sigma/d"+vartitlex+vartitley+vartitlez;
+  else if(varname.Contains("_fuu")) histT = "F_{UU} vs. "+vartitlez+" vs. "+vartitley+" vs. "+vartitlex;
+  else if(varname.Contains("_fut")) histT = "F_{UT} vs. "+vartitlez+" vs. "+vartitley+" vs. "+vartitlez;
+  else histT = vartitlez+" vs. "+vartitley+" vs. "+vartitlex+" distribution";
+  TH3D *hist = new TH3D(
+      setname+"_hist_"+varname,
+      histT+", "+settitle+";"+vartitlex+unitsx+";"+vartitley+unitsy+";"+vartitlez+unitsz,
+      numBinsx,lowerBoundx,upperBoundx,
+      numBinsy,lowerBoundy,upperBoundy,
+      numBinsz,lowerBoundz,upperBoundz
+      );
+  if(logx) BinSet::BinLog(hist->GetXaxis());
+  if(logy) BinSet::BinLog(hist->GetYaxis());
+  if(logz) BinSet::BinLog(hist->GetZaxis());
+  HistConfig *config = new HistConfig();
+  config->logx = logx;
+  config->logy = logy;
+  config->logz = logz;
+  this->RegisterHist(varname,hist,config);
+};
+
+
+// define a 4D histogram
+void Histos::DefineHist4D(
+    TString varname,
+    TString vartitlew, TString vartitlex, TString vartitley, TString vartitlez,
+    TString unitsw, TString unitsx, TString unitsy, TString unitsz,
+    Int_t numBinsw, Double_t lowerBoundw, Double_t upperBoundw,
+    Int_t numBinsx, Double_t lowerBoundx, Double_t upperBoundx,
+    Int_t numBinsy, Double_t lowerBoundy, Double_t upperBoundy,
+    Int_t numBinsz, Double_t lowerBoundz, Double_t upperBoundz,
+    Bool_t logw, Bool_t logx, Bool_t logy, Bool_t logz
+    ) {
+  if(unitsw!="") unitsw=" ["+unitsw+"]";
+  if(unitsx!="") unitsx=" ["+unitsx+"]";
+  if(unitsy!="") unitsy=" ["+unitsy+"]";
+  if(unitsz!="") unitsz=" ["+unitsz+"]";
+  TString histT;
+  if(varname.Contains("_xsec")) histT = "d^{4}#sigma/d"+vartitlew+vartitlex+vartitley+vartitlez;
+  else if(varname.Contains("_fuu")) histT = "F_{UU} vs. "+vartitlez+" vs. "+vartitley+" vs. "+vartitlex+" vs. "+vartitlew;
+  else if(varname.Contains("_fut")) histT = "F_{UT} vs. "+vartitlez+" vs. "+vartitley+" vs. "+vartitlez+" vs. "+vartitlew;
+  else histT = vartitlez+" vs. "+vartitley+" vs. "+vartitlex+" vs. "+vartitlew+" distribution";
+  Hist4D *hist = new Hist4D(
+      setname+"_hist_"+varname,
+      histT+", "+settitle+";"+vartitlew+unitsw+";"+vartitlex+unitsx+";"+vartitley+unitsy+";"+vartitlez+unitsz,
+      numBinsw,lowerBoundw,upperBoundw,
+      numBinsx,lowerBoundx,upperBoundx,
+      numBinsy,lowerBoundy,upperBoundy,
+      numBinsz,lowerBoundz,upperBoundz
+      );
+  if(logw) BinSet::BinLog(hist->GetWaxis());
+  if(logx) BinSet::BinLog(hist->GetXaxis());
+  if(logy) BinSet::BinLog(hist->GetYaxis());
+  if(logz) BinSet::BinLog(hist->GetZaxis());
+  HistConfig *config = new HistConfig();
+  config->logx = logw;
+  config->logy = logx;
+  config->logz = false;
+  this->RegisterHist4(varname,hist,config);
+};
+
+
 // add histogram to containers
 void Histos::RegisterHist(TString varname_, TH1 *hist_, HistConfig *config_) {
   VarNameList.push_back(varname_);
   histConfigMap.insert(std::pair<TString,HistConfig*>(varname_,config_));
   histMap.insert(std::pair<TString,TH1*>(varname_,hist_));
+};
+
+void Histos::RegisterHist4(TString varname_, Hist4D *hist_, HistConfig *config_) {
+  VarNameList.push_back(varname_);
+  hist4ConfigMap.insert(std::pair<TString,HistConfig*>(varname_,config_));
+  hist4Map.insert(std::pair<TString,Hist4D*>(varname_,hist_));
 };
 
 
@@ -97,12 +179,35 @@ TH1 *Histos::Hist(TString histName) {
   };
   return retHist;
 };
+
+Hist4D *Histos::Hist4(TString histName) {
+  Hist4D *retHist;
+  try { retHist = hist4Map.at(histName); }
+  catch(const std::out_of_range &ex) {
+    cerr << "ERROR: hist4Map does not have " 
+         << histName << "histogram" << endl;
+    return nullptr;
+  };
+  return retHist;
+};
+
 // access histogram config by name
 HistConfig *Histos::GetHistConfig(TString histName) {
   HistConfig *retConfig;
   try { retConfig = histConfigMap.at(histName); }
   catch(const std::out_of_range &ex) {
     cerr << "ERROR: histConfigMap does not have " 
+         << histName << "histogram" << endl;
+    return nullptr;
+  };
+  return retConfig;
+};
+
+HistConfig *Histos::GetHist4Config(TString histName) {
+  HistConfig *retConfig;
+  try { retConfig = hist4ConfigMap.at(histName); }
+  catch(const std::out_of_range &ex) {
+    cerr << "ERROR: hist4ConfigMap does not have " 
          << histName << "histogram" << endl;
     return nullptr;
   };

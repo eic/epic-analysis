@@ -23,6 +23,7 @@
 // largex-eic
 #include "BinSet.h"
 #include "CutDef.h"
+#include "Hist4D.h"
 
 // container for histogram settings
 class HistConfig : public TNamed {
@@ -48,7 +49,9 @@ class Histos : public TNamed
 
     // accessors
     TH1 *Hist(TString histName); // access histogram by name
+    Hist4D *Hist4(TString histName);
     HistConfig *GetHistConfig(TString histName); // settings for this histogram
+    HistConfig *GetHist4Config(TString histName);
     std::vector<TString> VarNameList; // list of histogram names (for external looping)
     std::vector<CutDef*> CutDefList; // list of associated cut definitions
     TString GetSetName() { return setname; };
@@ -76,6 +79,30 @@ class Histos : public TNamed
         Bool_t logy = false,
         Bool_t logz = false
         );
+    void DefineHist3D(
+        TString varname,
+        TString vartitlex, TString vartitley, TString vartitlez,
+        TString unitsx, TString unitsy, TString unitsz,
+        Int_t numBinsx, Double_t lowerBoundx, Double_t upperBoundx,
+        Int_t numBinsy, Double_t lowerBoundy, Double_t upperBoundy,
+        Int_t numBinsz, Double_t lowerBoundz, Double_t upperBoundz,
+        Bool_t logx = false,
+        Bool_t logy = false,
+        Bool_t logz = false
+        );
+    void DefineHist4D(
+        TString varname,
+        TString vartitlew, TString vartitlex, TString vartitley, TString vartitlez,
+        TString unitsw, TString unitsx, TString unitsy, TString unitsz,
+        Int_t numBinsw, Double_t lowerBoundw, Double_t upperBoundw,
+        Int_t numBinsx, Double_t lowerBoundx, Double_t upperBoundx,
+        Int_t numBinsy, Double_t lowerBoundy, Double_t upperBoundy,
+        Int_t numBinsz, Double_t lowerBoundz, Double_t upperBoundz,
+        Bool_t logw = false,
+        Bool_t logx = false,
+        Bool_t logy = false,
+        Bool_t logz = false
+        );
 
     // writers
     void WriteHists(TFile *ofile) {
@@ -83,6 +110,7 @@ class Histos : public TNamed
       ofile->mkdir("histArr_"+setname);
       ofile->cd("histArr_"+setname);
       for(auto const &kv : histMap) kv.second->Write();
+      for(auto const &kv : hist4Map) kv.second->Write();
       ofile->cd("/");
     };
 
@@ -90,8 +118,11 @@ class Histos : public TNamed
   private:
     TString setname,settitle;
     std::map<TString,TH1*> histMap;
+    std::map<TString,Hist4D*> hist4Map;
     std::map<TString,HistConfig*> histConfigMap;
+    std::map<TString,HistConfig*> hist4ConfigMap;
     void RegisterHist(TString varname_, TH1 *hist_, HistConfig *config_);
+    void RegisterHist4(TString varname_, Hist4D *hist_, HistConfig *config_);
 
   ClassDef(Histos,1);
 };
