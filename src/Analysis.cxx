@@ -79,6 +79,7 @@ void Analysis::Execute() {
   outfileName(TRegexp("\\*")) = ""; // remove asterisk wildcard
   if(outfilePrefix!="") outfilePrefix+=".";
   outfileName = "out/"+outfilePrefix+outfileName;
+  outfileName(TRegexp("\\.\\.")) = "."; // remove double dot
   cout << "-- output file: " << outfileName << endl;
   outFile = new TFile(outfileName,"RECREATE");
 
@@ -296,6 +297,11 @@ void Analysis::Execute() {
 
       kin->CalculateHadronKinematics();
       kinTrue->CalculateHadronKinematics();
+      
+      // asymmetry injection
+      //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
+      kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
+      kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
       Double_t w = weight->GetWeight(*kin);
       wTotal += w;

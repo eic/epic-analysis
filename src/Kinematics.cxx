@@ -38,6 +38,9 @@ Kinematics::Kinematics(
   // default proton polarization
   pol = 0.80;
 
+  // random number generator (for asymmetry injection
+  RNG = new TRandomMixMax(91874); // (TODO: fixed seed?)
+
 };
 
 
@@ -176,6 +179,7 @@ void Kinematics::CalculateHadronKinematics() {
       IvecQ.Vect(), IvecHadron.Vect()
       );
   // phiS
+  tSpin = 1; // assume spin up, for calculation of phiS
   vecSpin.SetXYZT(0,tSpin,0,0); // Pauli-Lubanski pseudovector
   //this->BoostToBreitFrame(vecSpin,IvecSpin); // TODO: check if other frames matter
   phiS = PlaneAngle(
@@ -337,10 +341,10 @@ void Kinematics::GetJets(
   double R = 0.8;
   JetDefinition jet_def(antikt_algorithm, R);
 
-  csRec = new ClusterSequence(particles, jet_def);
-  csTrue = new ClusterSequence(particlesTrue, jet_def);
-  jetsRec = sorted_by_pt(csRec->inclusive_jets());
-  jetsTrue = sorted_by_pt(csTrue->inclusive_jets());
+  csRec = ClusterSequence(particles, jet_def);
+  csTrue = ClusterSequence(particlesTrue, jet_def);
+  jetsRec = sorted_by_pt(csRec.inclusive_jets());
+  jetsTrue = sorted_by_pt(csTrue.inclusive_jets());
 
 };
 
@@ -442,10 +446,10 @@ void Kinematics::GetBreitFrameJets(
   contrib::CentauroPlugin centauroPlugin(R);
   JetDefinition jet_def(&centauroPlugin);
 
-  csRec = new ClusterSequence(particles, jet_def);
-  csTrue = new ClusterSequence(particlesTrue, jet_def);
-  breitJetsRec = sorted_by_pt(csRec->inclusive_jets());
-  breitJetsTrue = sorted_by_pt(csTrue->inclusive_jets());
+  csRec = ClusterSequence(particles, jet_def);
+  csTrue = ClusterSequence(particlesTrue, jet_def);
+  breitJetsRec = sorted_by_pt(csRec.inclusive_jets());
+  breitJetsTrue = sorted_by_pt(csTrue.inclusive_jets());
 };
 
 
@@ -536,6 +540,27 @@ void Kinematics::CalculateJetKinematics(PseudoJet jet){
       }
     }
   }
+};
+
+
+// test a fake asymmetry, for fit code validation
+// - assigns `tSpin` based on desired fake asymmetry
+void Kinematics::InjectFakeAsymmetry() {
+  // modulations
+  moduVal[0] = TMath::Sin(phiH-phiS); // sivers
+  moduVal[1] = TMath::Sin(phiH+phiS); // transversity*collins
+  // fake amplitudes
+  ampVal[0] = 0.1;
+  ampVal[1] = 0.1;
+  // fake dependence on SIDIS kinematics (linear in x)
+  asymInject = 0;
+  asymInject +=  ampVal[0]/0.2 * x * moduVal[0];
+  asymInject += -ampVal[1]/0.2 * x * moduVal[1];
+  // apply polarization and depolarization factors
+  asymInject *= pol; // TODO: include depol. factor
+  // generate random number in [0,1]
+  RN = RNG->Uniform();
+  tSpin = (RN<0.5*(1+asymInject)) ? 1 : -1;
 };
 
 
