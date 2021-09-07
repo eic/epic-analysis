@@ -60,6 +60,7 @@ void Analysis::Execute() {
   outfileName(TRegexp("\\*")) = ""; // remove asterisk wildcard
   if(outfilePrefix!="") outfilePrefix+=".";
   outfileName = "out/"+outfilePrefix+outfileName;
+  outfileName(TRegexp("\\.\\.")) = "."; // remove double dot
   cout << "-- output file: " << outfileName << endl;
   outFile = new TFile(outfileName,"RECREATE");
 
@@ -317,11 +318,11 @@ void Analysis::Execute() {
       };
     };
     if(maxEleP<0.001) continue; // no scattered electron found
-
+    itParticle.Reset();
     maxElePtrue = 0;
     while(GenParticle *part = (GenParticle*) itParticle()){
       if(part->PID == 11 && part->Status == 1){
-        elePtrue = part->PT;
+        elePtrue = part->PT * TMath::CosH(part->Eta);
         if(elePtrue > maxElePtrue){
           maxElePtrue = elePtrue;
           kinTrue->vecElectron.SetPtEtaPhiM(
@@ -382,6 +383,11 @@ void Analysis::Execute() {
 
       kin->CalculateHadronKinematics();
       kinTrue->CalculateHadronKinematics();
+      
+      // asymmetry injection
+      //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
+      kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
+      kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
 	  Double_t w = weight->GetWeight(*kin);
 	  wTotal += w;

@@ -15,6 +15,8 @@
 #include "TH1.h"
 #include "TMath.h"
 #include "TLorentzVector.h"
+#include "TRandom.h"
+#include "TRandomGen.h"
 
 // Delphes
 #include "classes/DelphesClasses.h"
@@ -85,8 +87,8 @@ class Kinematics : public TObject
     std::vector<PseudoJet> jetsRec, jetsTrue;
     std::vector<PseudoJet> breitJetsRec, breitJetsTrue;
     std::map<double, int> jetConstituents;
-    ClusterSequence* csRec;
-    ClusterSequence* csTrue;
+    ClusterSequence csRec;
+    ClusterSequence csTrue;
     Double_t zjet, pTjet, qTjet;
     std::vector<double> jperp;
     std::vector<double> zhad_jet;
@@ -198,6 +200,9 @@ class Kinematics : public TObject
       return massOut;
     };
 
+    // asymmetry injection
+    void InjectFakeAsymmetry(); // test your own asymmetry, for fit code validation
+
 
     // CUTS =====================================================
     const Double_t xMinGlobal = 0.05; // minimum x for "large-x"
@@ -222,6 +227,12 @@ class Kinematics : public TObject
 
 
   private:
+    static const Int_t asymInjectN = 2;
+    Double_t moduVal[asymInjectN];
+    Double_t ampVal[asymInjectN];
+    Double_t asymInject;
+    TRandom *RNG;
+    Float_t RN;
 
   ClassDef(Kinematics,1);
 };
