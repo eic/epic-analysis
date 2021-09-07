@@ -307,11 +307,11 @@ void Analysis::Execute() {
       };
     };
     if(maxEleP<0.001) continue; // no scattered electron found
-
+    itParticle.Reset();
     maxElePtrue = 0;
     while(GenParticle *part = (GenParticle*) itParticle()){
       if(part->PID == 11 && part->Status == 1){
-        elePtrue = part->PT;
+        elePtrue = part->PT * TMath::CosH(part->Eta);
         if(elePtrue > maxElePtrue){
           maxElePtrue = elePtrue;
           kinTrue->vecElectron.SetPtEtaPhiM(
