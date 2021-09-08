@@ -5,76 +5,59 @@ void postprocess_xqbins_draw(
     TString infile="out/tutorial.xqbins.example_5x41.root"
 ) {
 
-
-  // instantiate empty analysis object ================================
-  // - needed for some general information about binning
-  Analysis *A = new Analysis();
-
   // setup postprocessor ========================================
+  // - this will read in the Histos objects and your defined
+  //   binning, to construct a HistosDAG object
   PostProcessor *P = new PostProcessor(infile);
 
+  // print DAG ==================================================
+  // - here we print out the HistosDAG object, to show the structure
+  // - it lists each node, together with its inputs and outputs, which
+  //   indicate the connections between the nodes
+  // - observe how the structure changes for the different bins
+  //   you specified in the analysis macro
+  P->Op()->PrintBreadth("HistosDAG Initial Setup");
 
-  // loop over bins ==================================================
-  // TODO: when HistosDAG is implemented, loops like this will
-  // be significantly simpler; for now we unfortunately have to use
-  // these large, nested for loops
-  for(int bpt : P->GetBinNums("pt")) {
-  for(int bz  : P->GetBinNums("z")) {
-  for(int by  : P->GetBinNums("y")) {
-  for(int bfs : P->GetBinNums("finalState")) {
+  // lambdas =====================================================
+  // - we now define what operations we want to happen while
+  //   traversing through the DAG; this example shows how to define
+  //   a payload operator, which will act on every multidimensional
+  //   bin
 
+  // payload: draw a few plots, using PostProcessor::DrawSingle
+  // - this lambda expression will be executed on every multidimensional
+  //   bin's Histos object
+  // - capture the pointer to PostProcessor `P` by reference, so we
+  //   have access to it while the lambda executes
+  // - lambda arguments can include a Histos pointer, and optinally
+  //   a `NodePath` pointer, which gives binning information; here
+  //   we just need the Histos pointer
+  // - `PostProcessor::Op()` is just an interface (alias) for the
+  //   `HistosDAG` object; see classes `HistosDAG` and its parent `DAG`
+  //   for available methods
+  P->Op()->Payload(
+      [&P](Histos *H) {
+        P->DrawSingle(H,"Q2vsX","COLZ");
+        P->DrawSingle(H,"etaVsP","COLZ");
+        //P->DrawSingle(H,"x_Res","");
+        //P->DrawSingle(H,"x_RvG","COLZ");
+        //P->DrawSingle(H,"phiH_RvG","COLZ");
+        //P->DrawSingle(H,"phiS_RvG","COLZ");
+      }
+      );
 
-    /* if you have other bins, such as z-bins, you could print
-     * out some information here about which z-bin you are in
-     */
+  // print DAG ============================
+  // - we only added a payload, we did not restructure the DAG,
+  //   therefore this second printout should have the same structure
+  //   as the first
+  P->Op()->PrintBreadth("HistosDAG Final Setup");
 
-
-    // loop over (x,Q2) grid
-    for(int bx  : P->GetBinNums("x")) {
-    for(int bq  : P->GetBinNums("q2")) {
-
-
-      // skip the full-range bins
-      // TODO: with HistosDAG this won't be necessary anymore, since
-      // full-range bins won't be needed by default (you can still
-      // add them if you want)
-      if( P->SkipFull("x",bx) ) continue;
-      if( P->SkipFull("q2",bq) ) continue;
-      if( P->SkipFull("z",bz) ) continue;
-
-
-      /* PostProcessor::DrawSingle: draw a single plot for this (x,Q2) bin
-       * - png files will be generated 
-       * - the TCanvas will also be written to a root file
-       */
-
-      // Q2 vs. x (sanity check)
-      P->DrawSingle(
-          A->GetHistosName(bpt,bx,bz,bq,by,bfs),
-          "Q2vsX"
-          );
-
-      // eta vs. p
-      P->DrawSingle(
-          A->GetHistosName(bpt,bx,bz,bq,by,bfs),
-          "etaVsP"
-          );
-
-      /* - see `../src/Analysis.cxx` or the ROOT file for other histograms
-       *   that you can draw; you are welcome to add your own
-       * - see also `../src/PostProcessor.cxx` for other post-processing
-       *   methods; you are welcome to add your own
-       */
-      
-
-    }}; // end (x,Q2) loop
-
-  }}}}; // end outer binning loop
-
-
+  // execution ===================================================
+  // - after you have defined all your operators, run them:
+  P->Execute();
+  
   // finish ===================================================
-
-  // PostProcessor::Finish() is NECESSARY to close output streams
+  // - PostProcessor::Finish() is NECESSARY to close output streams
   // - output file names and directories will be printed to stdout
   P->Finish(); 
 

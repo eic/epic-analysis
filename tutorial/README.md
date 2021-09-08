@@ -45,6 +45,11 @@ this tutorial dirctory, e.g., `root -b -q tutorial/analysis_template.C`
   - `postprocess_yRatio.C`: produces ratios of all histograms, with
     a y-minimum divided by no y-minimum
 
+5. Test DAG lambda staging
+  - `analysis_testDAG.C`: define multi-dimensional binning
+  - `postprocess_testDAG.C`: contains various lambdas examples and
+    describes how to stage them
+
 More examples will be added eventually; for now you are encouraged to
 look at other existing analysis and postprocessor macros
 

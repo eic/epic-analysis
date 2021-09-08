@@ -115,10 +115,9 @@ void PostProcessor::DumpHist(TString datFile, TString histSet, TString varName) 
  *   bin boundaries
  * - when done looping, call `FinishDumpAve(datFile)`
  */
-void PostProcessor::DumpAve(TString datFile, TString histSet, TString cutName) {
-  cout << "dump averages from " << histSet
+void PostProcessor::DumpAve(TString datFile, Histos *H, TString cutName) {
+  cout << "dump averages from " << H->GetSetName()
        << " to " << datFile << endl;
-  Histos *H = (Histos*) infile->Get(histSet);
 
   // get associated cut, and print header info if it's the first time
   dumpCut = nullptr;
@@ -165,7 +164,10 @@ void PostProcessor::DumpAve(TString datFile, TString histSet, TString cutName) {
     // and print header for ave columns
     for(TString varName : H->VarNameList) {
       if(H->Hist(varName)->GetDimension()==1) {
-        if(varName.Contains("xsec")) continue;
+        if(varName.Contains("xsec",TString::kIgnoreCase)) continue;
+        if(varName.Contains("Res",TString::kIgnoreCase)) continue;
+        if(varName.Contains("RvG",TString::kIgnoreCase)) continue;
+        if(H->Hist(varName)->GetEntries()==0) continue;
         varList.push_back(varName);
         cout << " <" + varName + ">";
       };
@@ -189,7 +191,7 @@ void PostProcessor::DumpAve(TString datFile, TString histSet, TString cutName) {
       first=false;
     }
     else if(hist->GetEntries()!=counts) {
-      cerr << "WARNING: mismatch counts" << endl;
+      cerr << "WARNING: mismatch counts in " << varName << " histogram" << endl;
     };
     cout << " " << hist->GetMean();
   };

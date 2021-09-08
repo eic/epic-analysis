@@ -59,7 +59,7 @@ class PostProcessor : public TNamed
     //   from two different Histos objects (e.g., y>0.05 / y>0.00 sets)
     // - you are welcome to add your own algorithms
     void DumpHist(TString datFile, TString histSet, TString varName);
-    void DumpAve(TString datFile, TString histSet, TString cutName);
+    void DumpAve(TString datFile, Histos *H, TString cutName);
     void DrawSingle(Histos *H, TString histName, TString drawFormat="");
     void DrawSingle(TString histSet, TString histName);
     void DrawRatios(

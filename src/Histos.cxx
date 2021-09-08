@@ -92,7 +92,7 @@ TH1 *Histos::Hist(TString histName) {
   try { retHist = histMap.at(histName); }
   catch(const std::out_of_range &ex) {
     cerr << "ERROR: histMap does not have " 
-         << histName << "histogram" << endl;
+         << histName << " histogram" << endl;
     return nullptr;
   };
   return retHist;

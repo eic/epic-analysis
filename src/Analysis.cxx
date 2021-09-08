@@ -184,7 +184,7 @@ void Analysis::Execute() {
     HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
     HS->DefineHist1D("qTQ_jet","jet q_{T}/Q","", NBINS, 0, 3.0);
     // -- resolutions
-    HS->DefineHist1D("xRes","x - x_{true}","", NBINS, -1, 1);
+    HS->DefineHist1D("x_Res","(x-x_{true})/x_{true}","", NBINS, -1, 1);
     // -- reconstructed vs. generated
     HS->DefineHist2D("x_RvG","generated x","reconstructed x","","",
         NBINS,1e-3,1,
@@ -393,7 +393,7 @@ void Analysis::Execute() {
           // cross sections (divide by lumi after all events processed)
           H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),w);
           // resolutions
-          H->Hist("xRes")->Fill(kin->x - kinTrue->x,w);
+          if(kinTrue->x!=0) H->Hist("x_Res")->Fill((kin->x-kinTrue->x)/kinTrue->x,w);
           // -- reconstructed vs. generated
           dynamic_cast<TH2*>(H->Hist("x_RvG"))->Fill(kinTrue->x,kin->x,w);
           dynamic_cast<TH2*>(H->Hist("phiH_RvG"))->Fill(kinTrue->phiH,kin->phiH,w);
@@ -504,7 +504,9 @@ void Analysis::Execute() {
   HD->Payload([this](Histos *H){ H->Write(); }); HD->ExecuteAndClearOps();
 
   // write binning schemes
-  for(auto const &kv : binSchemes) kv.second->Write("binset__"+kv.first);
+  for(auto const &kv : binSchemes) {
+    if(kv.second->GetNumBins()>0) kv.second->Write("binset__"+kv.first);
+  };
 
   // close output
   outFile->Close();
@@ -556,6 +558,9 @@ void Analysis::AddFinalState(TString finalStateN) {
   BinScheme("finalState")->BuildExternalBin(finalStateN,finalStateT);
   activeFinalStates.insert(finalStateN);
 };
+
+// access HistosDAG
+HistosDAG *Analysis::GetHistosDAG() { return HD; };
 
 
 // destructor

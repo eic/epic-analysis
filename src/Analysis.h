@@ -68,6 +68,9 @@ class Analysis : public TNamed
     // perform the analysis
     void Execute();
 
+    // access HistosDAG
+    HistosDAG *GetHistosDAG();
+
     // set weights
     void SetWeights(Weights const* w) { weight = w; }
     void SetWeightsJet(Weights const* w) { weightJet = w; }

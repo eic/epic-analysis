@@ -1,18 +1,21 @@
 R__LOAD_LIBRARY(Largex)
-#include "PostProcessor.h"
 
 // test DAG implementation
 void postprocess_testDAG(
-    TString infile="out/yRatioDAG.dire_5x41.brian.hiDiv.root"
+    TString infile="out/testDAG.example_5x41.root"
 ) {
   // setup postprocessor ========================================
   PostProcessor *P = new PostProcessor(infile);
 
-  // operators ====================================================
+  // print DAG ==================================================
+  P->Op()->PrintBreadth("HistosDAG Initial Setup");
+
+  // lambdas ====================================================
 
   // `controlOp` is a lambda which prints some information about the 
   // subloop control node; it is meant to demonstrate some actions
   // you can take at that point in the bin loop
+  // - this lambda will be embedded in another lambda, with `vars` set (see below)
   auto controlOp = [](NodePath *bins, Node *controlNode, TString vars){
     cout << endl;
     cout << "CONTROL " << vars << endl;
@@ -24,7 +27,8 @@ void postprocess_testDAG(
     cout << "  LAST = " << bins->GetLastNode()->GetID() << endl;
   };
 
-  // examples of useful subloop operators ///////////////
+  // another example of a subloop operator, which prints the cuts
+  // for the current outer-loop bin
   auto testOp = [](NodePath *P){
     cout << endl;
     cout << "BIN DATA:" << endl;
@@ -37,7 +41,12 @@ void postprocess_testDAG(
 
 
   // stage operators on DAG ========================================
+  // each commented out section below gives an example of how
+  // to stage lambdas in various ways
 
+  // `SubloopBefore/After` //////////////////////////////////////
+  // - instead of using `Subloop`, you can use `BeforeSubloop` and `AfterSubloop`
+  // - you can also try out the different layers and operators
   /*
   P->Op()->BeforeSubloop(
     //{"x"},
@@ -45,31 +54,31 @@ void postprocess_testDAG(
     //{"x","q2"},
     //{"q2","x"},
     //{"x","q2","y"},
-    //{"Q2"}, // typo
-    //{"x,q2"}, // typo
-    //[](NodePath *bins){cout << "NODES: " << bins->PathString() << endl; }
-    //[](NodePath *bins){cout << "BINS: " << bins->BinListString() << endl; }
-    //[](NodePath *bins){cout << "Cuts: " << bins->CutListString() << endl; }
-    testOp
+    //{"Q2"}, // typo, will fail
+    //{"x,q2"}, // typo, will fail
+    [](NodePath *bins){cout << "BEFORE: Nodes: " << bins->PathString() << endl; }
+    //[](NodePath *bins){cout << "BEFORE: Bins: " << bins->BinListString() << endl; }
+    //[](NodePath *bins){cout << "BEFORE: Cuts: " << bins->CutListString() << endl; }
+    //testOp
   );
   P->Op()->AfterSubloop({"q2"},[](NodePath *bins){
-    cout << "BINLIST: " << bins->BinListString() << endl << endl;
+    cout << "AFTER: Bins: " << bins->BinListString() << endl << endl;
   });
   */
 
-  // subloops in series /////////////////////////
+  // subloops in series //////////////////////////////////////////
   // - both include the same kinematics, causing a control node to appear
   //   before the `x` layer
   // - the second `Subloop` operator will overwrite the first, which may
   //   not be useful to do; control nodes in series are not allowed,
-  //   since it is possible to just combine the lambdas
+  //   since it is possible to just combine the two lambdas
   // - consider instead using `MultiPayload` if you want separate subloops
   /*
   P->Op()->Subloop({"x","q2"},[](NodePath *bins){ cout << "\nPATH one: " << bins->PathString() << endl; });
   P->Op()->Subloop({"x","q2"},[](NodePath *bins){ cout << "\nPATH two: " << bins->PathString() << endl; });
   */
 
-  // nested subloops //////////////////////////////
+  // nested subloops //////////////////////////////////////////////
   // - the first listed bin variable becomes the "control" node; all other
   //   listed variables will be included in the subloop, in order listed
   // - you can declare smaller subloops after bigger subloops, similarly
@@ -107,7 +116,7 @@ void postprocess_testDAG(
   //   multiple payloads
   // - you can also include `Before` and `After` operators (note the differences between the 
   //   three examples here, since default before/after operators are no-ops
-  ///*
+  /*
   P->Op()->MultiPayload( {"x","q2"}, [](Histos *H){ cout << "MULTI-PAYLOAD 1: " << H->GetSetName() << endl; });
   P->Op()->MultiPayload( {"x","q2"}, [](Histos *H){ cout << "MULTI-PAYLOAD 2: " << H->GetSetName() << endl; },
       [](){ cout << "BEFORE MULTI-PAYLOAD 2" << endl; }
@@ -116,7 +125,7 @@ void postprocess_testDAG(
       [](){ cout << "BEFORE MULTI-PAYLOAD 3" << endl; },
       [](){ cout << "AFTER MULTI-PAYLOAD 3" << endl; }
       );
-  //*/
+  */
 
 
   // remove all control nodes from the DAG; all BinSets (layers) will be fully connected
@@ -136,9 +145,8 @@ void postprocess_testDAG(
   });
 
 
-  P->Op()->PrintBreadth("DAG breadth traversal:");
+  P->Op()->PrintBreadth("DAG Final Setup:");
   P->Op()->PrintDepth("DAG depth traversal:");
-  //return;
 
   // execution ====================================================
   P->Execute();

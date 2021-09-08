@@ -20,26 +20,23 @@ void analysis_yRatio(
 
   //A->maxEvents = 30000; // use this to limit the number of events
   A->writeSimpleTree = true; // write SimpleTree (for one bin)
+  A->SetReconMethod("Ele"); // set reconstruction method
+  A->AddFinalState("pipTrack"); // pion final state
+  //A->AddFinalState("KpTrack"); // kaon final state
+  //A->AddFinalState("jet"); // jets
 
   // set binning scheme ====================================
+  // z ranges
+  A->AddBinScheme("z");
+  A->BinScheme("z")->BuildBin("Range", 0.2, 0.5 );
+  A->BinScheme("z")->BuildBin("Range", 0.5, 0.8 );
 
   // y minima
   A->AddBinScheme("y");
-  A->BinScheme("y")->BuildBin("Full");
+  A->BinScheme("y")->BuildBin("Full"); // a bin with no y-cut
   A->BinScheme("y")->BuildBin("Min",0.03);
   A->BinScheme("y")->BuildBin("Min",0.05);
   A->BinScheme("y")->BuildBin("Min",0.10);
-
-  // final states =========================================
-  A->AddFinalState("pipTrack");
-  //A->AddFinalState("pimTrack");
-  //A->AddFinalState("KpTrack");
-  //A->AddFinalState("KmTrack");
-  A->AddFinalState("jet");
-
-  // set reconstruction method
-  A->SetReconMethod("Ele");
-
 
   // perform the analysis ==================================
   A->Execute();

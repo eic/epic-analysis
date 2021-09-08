@@ -58,7 +58,8 @@ void HistosDAG::Build(TFile *rootFile) {
     keyname = TString(key->GetName());
     if(keyname.Contains(TRegexp("^binset__"))) {
       if(debug) std::cout << "READ LAYER " << keyname << std::endl;
-      AddLayer((BinSet*)key->ReadObj());
+      BinSet *B = (BinSet*)key->ReadObj();
+      if(B->GetNumBins()>0) AddLayer(B);
     };
   };
   nextKey.Reset();
