@@ -453,6 +453,7 @@ void Analysis::Execute() {
 
           // fill histograms
           HD->Payload([this,&wJet,&jet](Histos *H){
+            dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,wJet);
             // jet kinematics
             H->Hist("pT_jet")->Fill(kin->pTjet,wJet);
             H->Hist("mT_jet")->Fill(jet.mt(),wJet);
