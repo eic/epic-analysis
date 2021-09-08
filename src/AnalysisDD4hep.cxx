@@ -334,25 +334,40 @@ void AnalysisDD4hep::process_event()
     {
       if(nevt%100000==0) cout << nevt << " events..." << endl;
       nevt++;      
+
+      std::vector<Particles> mcpart;
       double maxP = 0;
       for(int imc=0; imc<mcparticles2_pdgID.GetSize(); imc++)
 	{
+	  int pid_ = mcparticles2_pdgID[imc];
+	  double px_ = mcparticles2_psx[imc];
+	  double py_ = mcparticles2_psy[imc];
+	  double pz_ = mcparticles2_psz[imc];
+	  double mass_ = mcparticles2_mass[imc]; // in GeV
+	  double p_ = sqrt(pow(mcparticles2_psx[imc],2) + pow(mcparticles2_psy[imc],2) + pow(mcparticles2_psz[imc],2));
+
 	  // genStatus 4: beam particle 1: final state 
-	  if(mcparticles2_pdgID[imc] == 11 && mcparticles2_genStatus[imc] == 1)
+	  if(mcparticles2_genStatus[imc] == 1)
 	    {
-	      double p_ = sqrt(pow(mcparticles2_psx[imc],2) + pow(mcparticles2_psy[imc],2) + pow(mcparticles2_psz[imc],2));
-	      double mass_ = mcparticles2_mass[imc]; // in GeV
-	      if(p_ > maxP)
+	      Particles part;
+	      part.pid = pid_;
+	      part.vecPart.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
+	      mcpart.push_back(part);
+
+	      if(mcparticles2_pdgID[imc] == 11)
 		{
-		  maxP = p_;
-		  kinTrue->vecElectron.SetPxPyPzE(mcparticles2_psx[imc],
-						  mcparticles2_psy[imc],
-						  mcparticles2_psz[imc],
-						  sqrt(p_*p_ + mass_*mass_));
-		}
-	    }// if electron
+		  if(p_ > maxP)
+		    {
+		      maxP = p_;
+		      kinTrue->vecElectron.SetPxPyPzE(mcparticles2_psx[imc],
+						      mcparticles2_psy[imc],
+						      mcparticles2_psz[imc],
+						      sqrt(p_*p_ + mass_*mass_));
+		    }
+		}// if electron
+	    }//
 	}//mcparticles loop
-      
+
       // Loop over calorimeters
       // fill cluster container
       vector<Clusters*> v_ecal_clusters;
@@ -443,8 +458,7 @@ void AnalysisDD4hep::process_event()
       if(electron_index < 0)
 	{
 	  //cout << nevt << " No scattered electron found.. skip this event" << electron_index << endl;
-	  //	  cout << kinTrue->x << " " << kinTrue->Q2 << " " << kinTrue->y << endl;
-
+	  //	  cout << kinTrue->x << " " << kinTrue->Q2 << " " << kinTrue->y << " " << kinTrue->vecElectron.Pt() << " " << kinTrue->vecElectron.P() << " " << kinTrue->vecElectron.Eta() << endl;
 	  noele++;
 	  continue;
 	}
@@ -473,12 +487,12 @@ void AnalysisDD4hep::process_event()
 	{
 	  // FIXME: pid is using the true information
 	  // Add PID smearing
-	  int pid = ReconstructedParticles_pid[itrk];
+	  int pid_ = ReconstructedParticles_pid[itrk];
 
 	  // pid==0: reconstructed tracks with no matching truth pid
-	  if(pid == 0) continue;
+	  if(pid_ == 0) continue;
 
-	  auto kv = PIDtoEnum_.find(pid);
+	  auto kv = PIDtoEnum_.find(pid_);
 	  if(kv!=PIDtoEnum_.end()) bFinalState = kv->second;
 	  else continue;
 
@@ -496,7 +510,23 @@ void AnalysisDD4hep::process_event()
 				    reco_E);
 				      
 	  kin->CalculateHadronKinematics();
-	  //FIXME: add true information for all hadrons
+
+	  // find the true info
+	  double mineta = 4.0;
+	  for(int imc=0; imc<(int)mcpart.size(); imc++)
+	    {
+	      if(pid_ == mcpart[imc].pid)
+		{
+		  double deta = abs(kin->vecHadron.Eta() - mcpart[imc].vecPart.Eta());
+		  if( deta < mineta )
+		    {
+		      mineta = deta;
+		      kinTrue->vecHadron = mcpart[imc].vecPart;
+		    }
+		}
+	    }
+
+	  kinTrue->CalculateHadronKinematics();
 
 	  Double_t w = weight->GetWeight(*kin);
 	  wTotal += w;

@@ -28,6 +28,13 @@ public:
 
 };
 
+class Particles
+{
+ public:
+  int pid;
+  TLorentzVector vecPart;
+};
+
 class AnalysisDD4hep
 {
   public:
