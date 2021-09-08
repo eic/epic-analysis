@@ -88,8 +88,8 @@ class Kinematics : public TObject
     std::vector<fastjet::PseudoJet> breitJetsRec, breitJetsTrue;
     std::map<double, int> jetConstituents;
 
-    fastjet::ClusterSequence* csRec;
-    fastjet::ClusterSequence* csTrue;
+    fastjet::ClusterSequence csRec;
+    fastjet::ClusterSequence csTrue;
 
     Double_t zjet, pTjet, qTjet;
     std::vector<double> jperp;

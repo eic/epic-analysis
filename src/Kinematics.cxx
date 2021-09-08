@@ -341,10 +341,10 @@ void Kinematics::GetJets(
   double R = 0.8;
   fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, R);
 
-  csRec = new fastjet::ClusterSequence(particles, jet_def);
-  csTrue = new fastjet::ClusterSequence(particlesTrue, jet_def);
-  jetsRec = sorted_by_pt(csRec->inclusive_jets());
-  jetsTrue = sorted_by_pt(csTrue->inclusive_jets());
+  csRec = fastjet::ClusterSequence(particles, jet_def);
+  csTrue = fastjet::ClusterSequence(particlesTrue, jet_def);
+  jetsRec = sorted_by_pt(csRec.inclusive_jets());
+  jetsTrue = sorted_by_pt(csTrue.inclusive_jets());
 
 };
 
@@ -436,7 +436,7 @@ void Kinematics::GetBreitFrameJets(
           GenParticle *nhadPart = (GenParticle*)towerNeutralHadron->Particles.At(i);
           TLorentzVector nhadp4 = nhadPart->P4();
           nhadp4.Boost(breitBoostTrue);
-          particlesTrue.push_back(fasetjet::PseudoJet(nhadp4.Px(),nhadp4.Py(),nhadp4.Pz(),nhadp4.E()));
+          particlesTrue.push_back(fastjet::PseudoJet(nhadp4.Px(),nhadp4.Py(),nhadp4.Pz(),nhadp4.E()));
         }
       }
     }
@@ -446,14 +446,14 @@ void Kinematics::GetBreitFrameJets(
   contrib::CentauroPlugin centauroPlugin(R);
   fastjet::JetDefinition jet_def(&centauroPlugin);
 
-  csRec = new fastjet::ClusterSequence(particles, jet_def);
-  csTrue = new fastjet::ClusterSequence(particlesTrue, jet_def);
-  breitJetsRec = sorted_by_pt(csRec->inclusive_jets());
-  breitJetsTrue = sorted_by_pt(csTrue->inclusive_jets());
+  csRec = fastjet::ClusterSequence(particles, jet_def);
+  csTrue = fastjet::ClusterSequence(particlesTrue, jet_def);
+  breitJetsRec = sorted_by_pt(csRec.inclusive_jets());
+  breitJetsTrue = sorted_by_pt(csTrue.inclusive_jets());
 };
 
 
-void Kinematics::CalculateBreitJetKinematics(fasetjet::PseudoJet jet){
+void Kinematics::CalculateBreitJetKinematics(fastjet::PseudoJet jet){
   TLorentzVector pjet(jet.px(), jet.py(), jet.pz(), jet.E());
   TLorentzVector pjetLab = pjet;
 
