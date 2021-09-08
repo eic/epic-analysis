@@ -60,7 +60,6 @@ Analysis::Analysis(
   finalStateToTitle.insert(std::pair<TString,TString>("KpTrack","K^{+} tracks"));
   finalStateToTitle.insert(std::pair<TString,TString>("KmTrack","K^{-} tracks"));
   finalStateToTitle.insert(std::pair<TString,TString>("jet","jets"));
-  finalStateToTitle.insert(std::pair<TString,TString>("jetBreit","Breit jets"));
   // - PID -> finalState ID
   PIDtoFinalState.insert(std::pair<int, TString>( 211,"pipTrack"));
   PIDtoFinalState.insert(std::pair<int, TString>(-211,"pimTrack"));
@@ -266,6 +265,7 @@ void Analysis::Execute() {
       };
     };
     if(maxEleP<0.001) continue; // no scattered electron found
+
     // - repeat for truth electron
     itParticle.Reset();
     maxElePtrue = 0;
@@ -337,7 +337,7 @@ void Analysis::Execute() {
       kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
       kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
-      Double_t w = weight->GetWeight(*kin);
+      Double_t w = weight->GetWeight(*kinTrue);
       wTotal += w;
 
       // APPLY MAIN CUTS
@@ -418,7 +418,7 @@ void Analysis::Execute() {
 
       if(kin->CutDIS()){
 
-        Double_t wJet = weightJet->GetWeight(*kin); // TODO: should we separate weights for breit and non-breit jets?
+        Double_t wJet = weightJet->GetWeight(*kinTrue); // TODO: should we separate weights for breit and non-breit jets?
         wJetTotal += wJet;
 
         Int_t nJets;

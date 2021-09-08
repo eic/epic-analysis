@@ -1,13 +1,13 @@
 R__LOAD_LIBRARY(Largex)
 #include "Analysis.h"
 
-// test new SimpleTree class
-void analysis_test_SimpleTree(
-    TString infiles="datarec/example_5x41.root", /* delphes tree(s) */
+// ratios of histograms with y-cut enabled to those with y-cut disabled
+void analysis_yRatio(
+    TString infiles="datarec/dire_5x41.brian.hiDiv.root", /* delphes tree(s) */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=0, /* crossing angle [mrad] */
-    TString outfilePrefix="test.simple.tree" /* output filename prefix*/
+    TString outfilePrefix="yRatio" /* output filename prefix*/
 ) {
 
   // setup analysis ========================================
@@ -19,11 +19,13 @@ void analysis_test_SimpleTree(
       outfilePrefix
       );
 
-  //A->maxEvents = 10000;
-  A->writeSimpleTree = true;
 
   // set binning scheme ====================================
-  /* do nothing -> single bin */
+
+  // y minima
+  A->BinScheme("y")->BuildBin("Min",0.03);
+  A->BinScheme("y")->BuildBin("Min",0.05);
+  A->BinScheme("y")->BuildBin("Min",0.10);
 
 
   // perform the analysis ==================================

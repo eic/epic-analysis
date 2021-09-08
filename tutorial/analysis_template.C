@@ -29,7 +29,7 @@ void analysis_template(
 
   // set binning scheme ====================================
   // - see `Analysis` constructor for available bin variables
-  /* do nothing -> single bin */
+  /* do nothing -> single bin histograms */
 
   // final states =========================================
   // - define final states; if you define none, default sets will
