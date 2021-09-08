@@ -453,7 +453,7 @@ void Analysis::Execute() {
 	  wJetTotal += wJet;
 
       for(int i = 0; i < kin->jetsRec.size(); i++){
-	fastjet::PseudoJet jet = kin->jetsRec[i];
+        fastjet::PseudoJet jet = kin->jetsRec[i];
         kin->CalculateJetKinematics(jet);
 
         // following same procedure as in track loop	
@@ -499,7 +499,7 @@ void Analysis::Execute() {
 
       if(kin->CutDIS()){
         for(int i = 0; i < kin->breitJetsRec.size(); i++){
-          PseudoJet jet = kin->breitJetsRec[i];
+          fastjet::PseudoJet jet = kin->breitJetsRec[i];
           kin->CalculateBreitJetKinematics(jet);
 
           CheckBins( BinScheme("pt_jet"), v_pt, kin->pTjet );
