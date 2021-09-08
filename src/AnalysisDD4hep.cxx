@@ -192,7 +192,9 @@ void AnalysisDD4hep::process_event()
               HS->DefineHist1D("y","y","",NBINS,1e-5,1,true);
               HS->DefineHist1D("W","W","GeV",NBINS,0,15);
               // -- DIS kinematics resolution
-              HS->DefineHist1D("xRes","x - x_{true}","", NBINS, -1, 1);
+              HS->DefineHist1D("xRes","x - x_{true}","", NBINS, -2, 2);
+              HS->DefineHist1D("yRes","y - y_{true}","", NBINS, -2, 2);
+              HS->DefineHist1D("Q2Res","Q2 - Q2_{true}","", NBINS, -2, 2);
               // -- hadron 4-momentum
               HS->DefineHist1D("pLab","p_{lab}","GeV",NBINS,0,10);
               HS->DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
@@ -589,8 +591,11 @@ void AnalysisDD4hep::process_event()
 	      // cross sections (divide by lumi after all events processed)
 	      H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),w);
 	      // DIS kinematics resolution
-	      //	      H->Hist("xRes")->Fill(kin->x - kinTrue->x,w);
+	      H->Hist("xRes")->Fill(kin->x - kinTrue->x,w);
+	      H->Hist("yRes")->Fill(kin->y - kinTrue->y,w);
+	      H->Hist("Q2Res")->Fill(kin->Q2 - kinTrue->Q2,w);
 	    };
+
 
 	    // fill simple tree (not binned)
 	    // TODO: consider adding a `finalState` cut

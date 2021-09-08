@@ -24,6 +24,11 @@ void analysis_fullsim(
 
   ana->AN->writeSimpleTree = true;
 
+  // Set scatt. electron cuts
+  ana->SetEleEnergyThreshold(eleBeamEn * 0.1);  // default is 10% of beamE
+  ana->SetIsoCut(0.1);        // default is 10%
+  ana->SetIsoConeRadius(1.0); // default is 1.0
+
   ana->process_event();
 
 }
