@@ -1,60 +1,70 @@
 R__LOAD_LIBRARY(Largex)
-#include "PostProcessor.h"
 
 // plot ratios of distributions for various y minima
 void postprocess_yRatio(
-    TString infile="out/yRatio.dire_5x41.brian.hiDiv.root"
+    TString infile="out/yRatio.example_5x41.root"
 ) {
-
-  // instantiate empty analysis object ================================
-  // - needed for some general information about binning
-  // - specify settings such as diagonalized binnings
-  Analysis *A = new Analysis();
 
   // setup postprocessor ========================================
   PostProcessor *P = new PostProcessor(infile);
 
-  // find which bin has full-y range ============================
-  Int_t byFull = -1;
-  for(int by : P->GetBinNums("y")) {
-    if(P->GetBinCut("y",by)->GetCutType()=="Full") {
-      byFull = by;
-      break;
-    };
+  // print DAG ==================================================
+  P->Op()->PrintBreadth("HistosDAG Initial Setup");
+
+
+  // lambdas =====================================================
+
+  // payload 1: find the full-y bin; set Hfull to that Histos pointer
+  Histos *Hfull = nullptr;
+  auto findFullBin = [&Hfull](Histos *H, NodePath *bins) {
+    if(bins->GetBinNode("y")->GetCutType() == "Full") Hfull = H;
   };
-  if(byFull<0) {
-    cerr << "ERROR: no full y-cut bin found" << endl;
-    return;
+
+  // payload 2: draw ratio of each plot with a set y-minimum to that with
+  // no y-minimum (full-y bin)
+  auto drawRatios = [&Hfull,&P](Histos *H) {
+    // make sure we have a denominator (full-y bin)
+    if(Hfull==nullptr) {
+      cerr << "ERROR: no full-y bin found" << endl;
+      return;
+    };
+    // skip the full-y bin (don't bother making ratio full / full )
+    if(H==Hfull) return;
+    // PostProcessor::DrawRatios will take the ratio of each 1D
+    // histogram in the specified Histos objects
+    P->DrawRatios(
+        "ratio_" + Hfull->GetSetName(), // output name
+        H, // numerator Histos
+        Hfull // denominator Histos
+        );
+  };
+
+  // after subloop over y bins
+  // - finish ratio drawing, for saving canvases etc.
+  auto drawRatiosFinish = [&Hfull,&P]() {
+    P->FinishDrawRatios("yRatio_"+Hfull->GetSetName());
   };
 
 
-  // loop over bins ==================================================
-  // TODO: when Analysis::histSet is generalized, loops like this will
-  // be significantly simpler
-  for(int bpt : P->GetBinNums("pt")) {
-  for(int bx  : P->GetBinNums("x")) {
-  for(int bz  : P->GetBinNums("z")) {
-  for(int bq  : P->GetBinNums("q2")) {
-  for(int bfs : P->GetBinNums("finalState")) {
+  // lambda staging ==========================================
+  // run MultiPayload on a subloop over y-bins, for the two lambdas
+  P->Op()->MultiPayload(
+      {"y"}, // list of bin layers in subloop (std::vector<TString>)
+      findFullBin // payload operator
+      ); 
+  P->Op()->MultiPayload(
+      {"y"}, // list of bin layers
+      drawRatios, // payload operator
+      [](){}, // empty before operator
+      drawRatiosFinish // after operator
+      );
+  
+  P->Op()->PrintBreadth("HistosDAG Final Setup");
+  //P->Op()->PrintDepth(); // print depth-first node paths
 
-    // loop over other y bins, drawing ratios of each of them to the full-y bin
-    for(int by : P->GetBinNums("y")) {
-      if(by==byFull) continue;
+  // execution ====================================================
+  P->Execute();
 
-      // ALGORITHM: draw ratios of two Histos
-      P->DrawRatios(
-          Form("yRatio%d",by),
-          A->GetHistosName(bpt,bx,bz,bq,by,bfs),
-          A->GetHistosName(bpt,bx,bz,bq,byFull,bfs)
-          );
-    };
-
-    // finish ALGORITHM - called after the loop to save canvases
-    P->FinishDrawRatios("yRatio_"+A->GetHistosName(bpt,bx,bz,bq,byFull,bfs));
-
-  }}}}};
-
-  // finish
-  cout << P->GetOutfileName() << " written" << endl;
+  // finish =====================================================
   P->Finish();
 };
