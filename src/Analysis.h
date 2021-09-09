@@ -44,6 +44,7 @@ class Analysis : public TNamed
 
     // number of bins
     const Int_t NBINS = 50;
+    const Int_t NBINS_FULL = 10;
 
     // access bin scheme by name
     BinSet *BinScheme(TString varname);

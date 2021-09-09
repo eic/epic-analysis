@@ -22,10 +22,11 @@ void analysis_template(
       );
 
   //A->maxEvents = 10000; // use this to limit the number of events
+  //A->writeSimpleTree = true; // enable output of simple tree
 
 
   // set binning scheme ====================================
-  /* do nothing -> single bin */
+  /* do nothing -> single bin histograms */
 
 
   // perform the analysis ==================================
