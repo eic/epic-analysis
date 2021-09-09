@@ -24,10 +24,17 @@ void analysis_coverage(
   //A->maxEvents = 30000; // use this to limit the number of events
   A->SetReconMethod("Ele"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
-  //A->AddFinalState("KpTrack"); // kaon final state
+  A->AddFinalState("KpTrack"); // kaon final state
   //A->AddFinalState("jet"); // jets
 
   // set binning scheme ====================================
+
+  /* TODO
+   * - finer binning
+   * - different sqrt(s) values
+   * - eta vs. p in bins of (x,Q2)
+   * - Q2 vs. x in bins of (eta,p)
+   */
 
   A->AddBinScheme("q2");
   A->AddBinScheme("x");
