@@ -1,5 +1,5 @@
-#ifndef AnalysisDelphes_
-#define AnalysisDelphes_
+#ifndef Analysis_
+#define Analysis_
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -8,6 +8,7 @@
 #include <map>
 #include <set>
 #include <stdexcept>
+#include <functional>
 
 // root
 #include "TChain.h"
@@ -16,15 +17,7 @@
 #include "TFile.h"
 #include "TRegexp.h"
 
-// delphes
-#include "classes/DelphesClasses.h"
-#include "external/ExRootAnalysis/ExRootTreeReader.h"
-
-//#include "fastjet/contrib/Centauro.hh"
-//#include "fastjet/plugins/Centauro/Centauro.hh"
-
 // largex-eic
-#include "Analysis.h"
 #include "Histos.h"
 #include "HistosDAG.h"
 #include "Kinematics.h"
@@ -34,17 +27,17 @@
 #include "Weights.h"
 
 
-class AnalysisDelphes : public Analysis
+class Analysis : public TNamed
 {
   public:
-    AnalysisDelphes(
+    Analysis(
         TString infileName_="",
         Double_t eleBeamEn_=5,
         Double_t ionBeamEn_=41,
         Double_t crossingAngle_=0,
         TString outfilePrefix_=""
         );
-    ~AnalysisDelphes();
+    ~Analysis();
 
     // number of bins for histograms
     const Int_t NBINS = 50;
@@ -57,7 +50,7 @@ class AnalysisDelphes : public Analysis
     // add a new final state bin
     void AddFinalState(TString finalStateN);
 
-    // additional settings
+    // common settings
     Bool_t writeSimpleTree; // if true, write SimpleTree (not binned)
     Long64_t maxEvents; /* default=0, which runs all events;
                          * if > 0, run a maximum number of `maxEvents` events (useful for quick tests)
@@ -66,8 +59,10 @@ class AnalysisDelphes : public Analysis
     // set kinematics reconstruction method; see constructor for available methods
     void SetReconMethod(TString reconMethod_) { reconMethod=reconMethod_; }; 
 
-    // perform the analysis
-    void Execute();
+    // add files to the TChain; this is called by `Prepare()`, but you can use these public
+    // methods to add more files if you want
+    void AddFile(TString fileName); // add single file `fileName`
+    void AddFiles(TString fileList); // add files listed in `fileList`
 
     // access HistosDAG
     HistosDAG *GetHistosDAG();
@@ -78,13 +73,25 @@ class AnalysisDelphes : public Analysis
 
   protected:
 
-  private:
+    // prepare to perform the analysis; in derived classes, define a method `Execute()`, which
+    // will run the event loop; the first line of `Execute()` should call `Analysis::Prepare()`,
+    // which set up common things like output files, `HistosDAG`, etc.
+    void Prepare();
+
+    // finish the analysis; call `Analysis::Finish()` at the end of derived `Execute()` methods
+    void Finish();
+
+    // lambda to check which bins an observable is in, during DAG breadth
+    // traversal; it requires `finalStateID`, `valueMap`, and will
+    // activate/deactivate bin nodes accoding to values in `valuMap`
+    std::function<void(Node*)> CheckBins();
 
     Histos *HS;
     SimpleTree *ST;
     Kinematics *kin, *kinTrue;
     HistosDAG *HD;
 
+    std::vector<TString> infiles;
     TString infileName,outfileName,outfilePrefix;
     TFile *outFile;
     Double_t eleBeamEn = 5; // GeV
@@ -96,8 +103,8 @@ class AnalysisDelphes : public Analysis
     Double_t elePtrue, maxElePtrue;
     int pid;
 
-    std::map<TString,BinSet*> binSchemes;
     std::map<TString,TString> availableBinSchemes;
+    std::map<TString,BinSet*> binSchemes;
     std::map<TString,TString> reconMethodToTitle;
 
     std::map<TString,Double_t> valueMap;
@@ -110,7 +117,8 @@ class AnalysisDelphes : public Analysis
     std::map<TString, TString> finalStateToTitle;
     std::map<int, TString> PIDtoFinalState;
     std::set<TString> activeFinalStates;
-  ClassDefOverride(AnalysisDelphes,1);
+
+  ClassDef(Analysis,1);
 };
 
 #endif

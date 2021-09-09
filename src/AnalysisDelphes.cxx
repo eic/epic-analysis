@@ -15,72 +15,16 @@ AnalysisDelphes::AnalysisDelphes(
   Double_t ionBeamEn_,
   Double_t crossingAngle_,
   TString outfilePrefix_
+) : Analysis(
+  infileName_,
+  eleBeamEn_,
+  ionBeamEn_,
+  crossingAngle_,
+  outfilePrefix_
 )
-  : infileName(infileName_)
-  , eleBeamEn(eleBeamEn_)
-  , ionBeamEn(ionBeamEn_)
-  , crossingAngle(crossingAngle_)
-  , outfilePrefix(outfilePrefix_)
-  , reconMethod("")
 {
-  // available variables for binning
-  // - availableBinSchemes is a map from variable name to variable title
-  // - try to avoid using underscores in the variable name (they are okay in the title);
-  //   convention is camel case, starting lowercase 
-  /* DIS */
-  availableBinSchemes.insert(std::pair<TString,TString>("x","x"));
-  availableBinSchemes.insert(std::pair<TString,TString>("q2","Q^{2}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("w","W"));
-  availableBinSchemes.insert(std::pair<TString,TString>("y","y"));
-  /* single hadron */
-  availableBinSchemes.insert(std::pair<TString,TString>("p","p"));
-  availableBinSchemes.insert(std::pair<TString,TString>("eta","#eta"));
-  availableBinSchemes.insert(std::pair<TString,TString>("pt","p_{T}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("z","z"));
-  availableBinSchemes.insert(std::pair<TString,TString>("qT","q_{T}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("qTq","q_{T}/Q"));
-  availableBinSchemes.insert(std::pair<TString,TString>("mX","M_{X}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("xF","x_{F}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("phiH","#phi_{h}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("phiS","#phi_{S}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("tSpin","spin"));
-  /* jets */
-  availableBinSchemes.insert(std::pair<TString,TString>("ptJet", "jet p_{T}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("zJet", "jet z"));
-
-
-  // available final states
-  // - specify which final states you want to include using `AddFinalState(TString name)`
-  // - if you specify none, default final state(s) will be chosen for you
-  availableBinSchemes.insert(std::pair<TString,TString>("finalState","finalState"));
-  AddBinScheme("finalState");
-  // - finalState name (ID) -> title
-  finalStateToTitle.insert(std::pair<TString,TString>("pipTrack","#pi^{+} tracks"));
-  finalStateToTitle.insert(std::pair<TString,TString>("pimTrack","#pi^{-} tracks"));
-  finalStateToTitle.insert(std::pair<TString,TString>("KpTrack","K^{+} tracks"));
-  finalStateToTitle.insert(std::pair<TString,TString>("KmTrack","K^{-} tracks"));
-  finalStateToTitle.insert(std::pair<TString,TString>("jet","jets"));
-  // - PID -> finalState ID
-  PIDtoFinalState.insert(std::pair<int, TString>( 211,"pipTrack"));
-  PIDtoFinalState.insert(std::pair<int, TString>(-211,"pimTrack"));
-  PIDtoFinalState.insert(std::pair<int, TString>( 321,"KpTrack"));
-  PIDtoFinalState.insert(std::pair<int, TString>(-321,"KmTrack"));
-
-
-  // kinematics reconstruction methods
-  // - choose one of these methods using `SetReconMethod(TString name)`
-  // - if you specify none, a default method will be chosen
-  reconMethodToTitle.insert(std::pair<TString,TString>("Ele","Electron method"));
-  reconMethodToTitle.insert(std::pair<TString,TString>("DA","Double Angle method"));
-  reconMethodToTitle.insert(std::pair<TString,TString>("JB","Jacquet-Blondel method"));
-  reconMethodToTitle.insert(std::pair<TString,TString>("Mixed","Mixed method"));
-
-
-  // settings
-  // - these settings can be set at the macro level; default values are set here
-  writeSimpleTree = false;
-  maxEvents = 0;
-  useBreitJets = false;
+  // delphes-specific settings defaults
+  /* ... none defined yet ... */
 };
 
 //=============================================

@@ -4,7 +4,7 @@
 #include <vector>
 #include <fstream>
 
-#include "AnalysisDelphes.h"
+#include "Analysis.h"
 
 class Histos;
 class SimpleTree;
@@ -35,10 +35,11 @@ class Particles
   TLorentzVector vecPart;
 };
 
-class AnalysisDD4hep
+class AnalysisDD4hep : public Analysis
 {
   public:
     AnalysisDD4hep(
+        TString infileName_="",
         Double_t eleBeamEn_=5,
         Double_t ionBeamEn_=41,
         Double_t crossingAngle_=0,
@@ -52,8 +53,6 @@ class AnalysisDD4hep
     void SetEleEnergyThreshold(double e_threshold_) { fEThreshold = e_threshold_; }
     void SetIsoConeRadius(double r_ ) { fIsoR = r_; }
     void SetIsoCut(double isocut_ ) { fIsoCut = isocut_; }
-
-    AnalysisDelphes *AN;
 
   protected:
     void CheckBins(BinSet *bs, std::vector<int> &v, Double_t var);
@@ -77,30 +76,15 @@ class AnalysisDD4hep
     Weights const* weightJet;
 
     std::map<int,int> PIDtoEnum_;
-    std::vector<TString> infiles;
 
     double fEThreshold;
     double fIsoR;
     double fIsoCut;
 
  public:
-    // Add files to TChain
-    void AddFiles(TString infilename)
-    {
-      infiles.clear();
-      std::ifstream ifstr(infilename);
-      TString fname;
-      while(ifstr >> fname)
-	infiles.push_back(fname);
-    }
-
-    void AddFile(TString infilename)
-    {
-      infiles.clear();
-      infiles.push_back(infilename);
-    }
 
 
+  ClassDefOverride(AnalysisDD4hep,1);
 };
 
 #endif /* __AnalysisDD4hep_H__ */

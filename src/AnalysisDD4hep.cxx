@@ -13,26 +13,23 @@ using std::cerr;
 using std::endl;
 
 AnalysisDD4hep::AnalysisDD4hep(
+  TString infileName_,
   Double_t eleBeamEn_,
   Double_t ionBeamEn_,
   Double_t crossingAngle_,
   TString outfilePrefix_
-)
-  : eleBeamEn(eleBeamEn_)
-  , ionBeamEn(ionBeamEn_)
-  , crossingAngle(crossingAngle_)
-  , outfilePrefix(outfilePrefix_)  
-{
-
+) : Analysis(
+  infileName_,
+  eleBeamEn_,
+  ionBeamEn_,
+  crossingAngle_,
+  outfilePrefix_
+) {
+  // dd4hep-specific settings defaults
   // initialize scatt. electron cuts
   fEThreshold = eleBeamEn_*0.1; // min energy cut
   fIsoR = 1.0;                  // Isolation cone R
   fIsoCut = 0.1;                // 10%
-
-  AN = new AnalysisDelphes();
-  AN->AddFinalState("pimTrack","#pi^{-} tracks", -211);
-  AN->AddFinalState("kipTrack","#k^{+} tracks", 321);
-  AN->AddFinalState("kimTrack","#k^{-} tracks", -321);
 };
 
 // destructor
