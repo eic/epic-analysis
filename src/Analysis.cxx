@@ -22,6 +22,7 @@ Analysis::Analysis(
   , crossingAngle(crossingAngle_)
   , outfilePrefix(outfilePrefix_)
 {
+
   // set bin schemes
   AddBinScheme("pt","p_{T}");
   AddBinScheme("z","z");
@@ -44,8 +45,8 @@ Analysis::Analysis(
   diagonalXZQ = false;
   writeSimpleTree = false;
   maxEvents = 0;
-};
 
+};
 
 //=============================================
 // perform the analysis
@@ -405,7 +406,6 @@ void Analysis::Execute() {
         CheckBins( BinScheme("q2"), v_q,  kin->Q2 );
         CheckBins( BinScheme("y"),  v_y,  kin->y );
 
-
         // build list of histogram sets to fill
         histSetFillList.clear();
         for(int bpt : v_pt) {
@@ -466,7 +466,7 @@ void Analysis::Execute() {
 	  wJetTotal += wJet;
 
       for(int i = 0; i < kin->jetsRec.size(); i++){
-        PseudoJet jet = kin->jetsRec[i];
+        fastjet::PseudoJet jet = kin->jetsRec[i];
         kin->CalculateJetKinematics(jet);
 
         // following same procedure as in track loop	
@@ -512,7 +512,7 @@ void Analysis::Execute() {
 
       if(kin->CutDIS()){
         for(int i = 0; i < kin->breitJetsRec.size(); i++){
-          PseudoJet jet = kin->breitJetsRec[i];
+          fastjet::PseudoJet jet = kin->breitJetsRec[i];
           kin->CalculateBreitJetKinematics(jet);
 
           CheckBins( BinScheme("pt_jet"), v_pt, kin->pTjet );
