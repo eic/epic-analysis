@@ -33,19 +33,26 @@ this tutorial dirctory, e.g., `root -b -q tutorial/analysis_template.C`
   - `postprocess_xqbins_draw.C`: draws a couple sample histograms for
     the given binning scheme
 
-3. Average kinematics table
+3. Full Simulations (all other tutorials are for fast simulations)
+  - `analysis_dd4hep.C`: basically a copy of `analysis_xqbins.C`,
+    but shows how to analyze full simulation data; the main difference
+    is using `AnalysisDD4hep` instead of `AnalysisDelphes`
+  - `postprocess_dd4hep_draw.C`: clone of `postprocess_xqbins_draw.C`,
+    specific for this example
+
+4. Average kinematics table
   - `analysis_qbins.C`: bin the analysis in several Q2 bins, for a couple
     pT bins
   - `postprocess_qbins_tables.C`: produce a text file containing tables
     of averages of kinematics variables, where each row is for a Q2 bin;
     one table is produced for each pT bin
 
-4. Draw ratio of histograms for different y-minima
+5. Draw ratio of histograms for different y-minima
   - `analysis_yRatio.C`: bins in 3 y-minima, along with a full-y bin
   - `postprocess_yRatio.C`: produces ratios of all histograms, with
     a y-minimum divided by no y-minimum
 
-5. Test DAG lambda staging
+6. Test DAG lambda staging
   - `analysis_testDAG.C`: define multi-dimensional binning
   - `postprocess_testDAG.C`: contains various lambdas examples and
     describes how to stage them

@@ -44,11 +44,7 @@ void AnalysisDD4hep::process_event()
 
   // read dd4hep tree
   TChain *chain = new TChain("events");
-  for(int i=0; i<(int)infiles.size(); i++)
-    {
-      cout << infiles[i].Data() << endl;
-      chain->Add(infiles[i].Data());
-    }
+  for(TString in : infiles) chain->Add(in);
 
   // FIXME: replace it with ExRootTreeReader::UseBranch()?
   TTreeReader tr(chain);
@@ -127,11 +123,12 @@ void AnalysisDD4hep::process_event()
   int noele = 0;
   // event loop =========================================================
   cout << "begin event loop..." << endl;
-  int nevt = 0;
+  Long64_t nevt = 0;
   while(tr.Next())
     {
-      if(nevt%100000==0) cout << nevt << " events..." << endl;
+      if(nevt%10000==0) cout << nevt << " events..." << endl;
       nevt++;      
+      if(nevt>maxEvents) break;
 
       std::vector<Particles> mcpart;
       double maxP = 0;
@@ -351,7 +348,7 @@ void AnalysisDD4hep::process_event()
       // fill simple tree
       // - not binned
       // - `activeEvent` is only true if at least one bin gets filled for this track
-      // - TODO [critical]: add a `finalState` cut
+      // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDelphes)
       if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
 
 	  }//if cut

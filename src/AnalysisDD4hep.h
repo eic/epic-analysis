@@ -64,9 +64,6 @@ class AnalysisDD4hep : public Analysis
     double fIsoR;
     double fIsoCut;
 
- public:
-
-
   ClassDefOverride(AnalysisDD4hep,1);
 };
 

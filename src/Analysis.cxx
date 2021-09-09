@@ -90,11 +90,13 @@ Analysis::Analysis(
 //------------------------------------
 // add a single file
 void Analysis::AddFile(TString fileName) {
+  if(fileName=="") return;
   cout << "-- running analysis of " << fileName << endl;
   infiles.push_back(fileName);
 }
 // Add files to TChain
 void Analysis::AddFiles(TString fileList) {
+  if(fileList=="") return;
   std::ifstream ifstr(fileList);
   TString fname;
   cout << "-- running analysis of files in " << fileList << ":" << endl;
@@ -127,6 +129,10 @@ void Analysis::Prepare() {
     AddFiles(infileName);
     // base outfileName on outfilePrefix only
     outfileName = "out/"+outfilePrefix+".root";
+  };
+  if(infiles.size()==0) {
+    cerr << "ERROR: no input files have been specified" << endl;
+    return;
   };
 
   // open output file

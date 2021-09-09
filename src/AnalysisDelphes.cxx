@@ -162,7 +162,7 @@ void AnalysisDelphes::Execute() {
         // fill simple tree
         // - not binned
         // - `activeEvent` is only true if at least one bin gets filled for this track
-        // - TODO [critical]: add a `finalState` cut
+        // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDD4hep)
         if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
 
       };
