@@ -389,7 +389,7 @@ void Analysis::Execute() {
       kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
       kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
-	  Double_t w = weight->GetWeight(*kin);
+	  Double_t w = weight->GetWeight(*kinTrue);
 	  wTotal += w;
 
       // apply cuts
@@ -462,7 +462,7 @@ void Analysis::Execute() {
     // jet loop
     if(kin->CutDIS()){
 
-	  Double_t wJet = weightJet->GetWeight(*kin);
+	  Double_t wJet = weightJet->GetWeight(*kinTrue);
 	  wJetTotal += wJet;
 
       for(int i = 0; i < kin->jetsRec.size(); i++){
