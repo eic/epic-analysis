@@ -83,7 +83,6 @@ Analysis::Analysis(
   useBreitJets = false;
 };
 
-
 //=============================================
 // perform the analysis
 //=============================================
@@ -427,7 +426,7 @@ void Analysis::Execute() {
 
         for(int i = 0; i < kin->jetsRec.size(); i++){
 
-          PseudoJet jet;
+          fastjet::PseudoJet jet;
           if(useBreitJets) {
             #if INCCENTAURO == 1
             jet = kin->breitJetsRec[i];

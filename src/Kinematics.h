@@ -26,7 +26,7 @@
 #if INCCENTAURO == 1
 #include "fastjet/plugins/Centauro/Centauro.hh"
 #endif
-using namespace fastjet;
+//using namespace fastjet;
 
 using std::map;
 using std::cout;
@@ -55,14 +55,14 @@ class Kinematics : public TObject
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
         );
-    void CalculateJetKinematics(PseudoJet jet);
+    void CalculateJetKinematics(fastjet::PseudoJet jet);
 
     #if INCCENTAURO == 1
     void GetBreitFrameJets(
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
         );
-    void CalculateBreitJetKinematics(PseudoJet jet);
+    void CalculateBreitJetKinematics(fastjet::PseudoJet jet);
     #endif
 
     // kinematics (should be Double_t, if going in SimpleTree)
@@ -84,11 +84,13 @@ class Kinematics : public TObject
     TLorentzVector vecElectron, vecW, vecQ;
     TLorentzVector vecHadron;
     // jets
-    std::vector<PseudoJet> jetsRec, jetsTrue;
-    std::vector<PseudoJet> breitJetsRec, breitJetsTrue;
+    std::vector<fastjet::PseudoJet> jetsRec, jetsTrue;
+    std::vector<fastjet::PseudoJet> breitJetsRec, breitJetsTrue;
     std::map<double, int> jetConstituents;
-    ClusterSequence csRec;
-    ClusterSequence csTrue;
+
+    fastjet::ClusterSequence csRec;
+    fastjet::ClusterSequence csTrue;
+
     Double_t zjet, pTjet, qTjet;
     std::vector<double> jperp;
     std::vector<double> zhad_jet;
