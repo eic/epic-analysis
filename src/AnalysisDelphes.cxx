@@ -40,6 +40,9 @@ void AnalysisDelphes::Execute() {
   ExRootTreeReader *tr = new ExRootTreeReader(chain);
   ENT = tr->GetEntries();
 
+  // calculate cross section
+  CalculateCrossSection(ENT);
+
   // branch iterators
   TObjArrayIter itTrack(tr->UseBranch("Track"));
   TObjArrayIter itElectron(tr->UseBranch("Electron"));
@@ -148,7 +151,7 @@ void AnalysisDelphes::Execute() {
       kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
       wTrack = weight->GetWeight(*kinTrue);
-      wTotal += wTrack;
+      wTrackTotal += wTrack;
 
       // APPLY MAIN CUTS
       if(kin->CutFull()) {

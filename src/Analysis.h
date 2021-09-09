@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <map>
 #include <set>
 #include <stdexcept>
@@ -76,6 +77,10 @@ class Analysis : public TNamed
     void SetWeights(Weights const* w) { weight = w; }
     void SetWeightsJet(Weights const* w) { weightJet = w; }
 
+    // calculate cross section (nb): sets `xsecTot` and `numGen`
+    void CalculateCrossSection(Long64_t numGen_);
+
+
     // run the analysis
     virtual void Execute() = 0;
 
@@ -99,13 +104,17 @@ class Analysis : public TNamed
     std::function<void(Node*)> CheckBin();
 
 
-    // shared object pointers
+    // shared objects
     Histos *HS;
     SimpleTree *ST;
     Kinematics *kin, *kinTrue;
     HistosDAG *HD;
     Weights const* weight;
     Weights const* weightJet;
+    Double_t wTrackTotal, wJetTotal;
+    Double_t xsecTot;
+    Long64_t numGen;
+    const TString sep = "--------------------------------------------";
 
     // setup / common settings
     std::vector<TString> infiles;

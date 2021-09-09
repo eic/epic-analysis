@@ -16,7 +16,7 @@
 #pragma link C++ class SimpleTree+;
 #pragma link C++ class Analysis+;
 #pragma link C++ class AnalysisDelphes+;
-#pragma link C++ class AnalysisDD4hep+;
+//#pragma link C++ class AnalysisDD4hep+;
 #pragma link C++ class PostProcessor+;
 #pragma link C++ class Weights+;
 #pragma link C++ class WeightsUniform+;

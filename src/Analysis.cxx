@@ -224,26 +224,30 @@ void Analysis::Prepare() {
   HD->ExecuteAndClearOps();
 
 
-  // get cross section and number of events
-  // - cross sections are hard-coded, coped from pythia output
+  // initialize total weights
+  wTrackTotal = 0.;
+  wJetTotal = 0.;
+};
+
+
+// calculate cross section (nb): sets `xsecTot` and `numGen` // TODO: improve this implementation
+// ---------------------------------------
+void Analysis::CalculateCrossSection(Long64_t numGen_) {
+  // UNITS: GeV, nb
+  // - cross sections are hard-coded, coped from pythia output // TODO: only 5x41 is here
   Int_t eleBeamEnInt = (Int_t) eleBeamEn;
   Int_t ionBeamEnInt = (Int_t) ionBeamEn;
-  Double_t xsecTot; // [nb]
   if     (eleBeamEnInt==5  && ionBeamEnInt==41 ) xsecTot=297.9259;
-  else if(eleBeamEnInt==18 && ionBeamEnInt==275) xsecTot=700.0; // TODO; this is approximate
+  else if(eleBeamEnInt==18 && ionBeamEnInt==275) xsecTot=700.0; // TODO: this is approximate
   else {
     cerr << "WARNING: unknown cross section; integrated lumi will be wrong" << endl;
     xsecTot=1;
   };
-  Long64_t numGen = tr->GetEntries();
-  TString sep = "--------------------------------------------";
+  numGen = numGen_;
   cout << sep << endl;
   cout << "assumed total cross section: " << xsecTot << " nb" << endl;
   cout << "number of generated events:  " << numGen << endl;
-
-  // initialize total weights
-  Double_t wTotal = 0.;
-  Double_t wJetTotal = 0.;
+  cout << sep << endl;
 };
 
 
@@ -257,13 +261,13 @@ void Analysis::Finish() {
   HD->ClearOps();
 
   // calculate integrated luminosity
-  Double_t lumi = wTotal/xsecTot; // [nb^-1]
+  Double_t lumi = wTrackTotal/xsecTot; // [nb^-1]
   cout << "Integrated Luminosity:       " << lumi << "/nb" << endl;
   cout << sep << endl;
 
   // calculate cross sections, and print yields
-  HD->Initial([&sep](){ cout << sep << endl << "Histogram Entries:" << endl; });
-  HD->Final([&sep](){ cout << sep << endl; });
+  HD->Initial([this](){ cout << sep << endl << "Histogram Entries:" << endl; });
+  HD->Final([this](){ cout << sep << endl; });
   HD->Payload([&lumi](Histos *H){
     cout << H->GetSetTitle() << " ::: "
          << H->Hist("Q2vsX")->GetEntries()
@@ -397,7 +401,7 @@ void Analysis::FillHistosTracks() {
   if(!activeEvent) return;
   
   // fill histograms, for activated bins only
-  HD->Payload([this,&wTrack](Histos *H){
+  HD->Payload([this](Histos *H){
     // DIS kinematics
     dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,wTrack);
     H->Hist("Q")->Fill(TMath::Sqrt(kin->Q2),wTrack);
@@ -455,7 +459,7 @@ void Analysis::FillHistosJets() {
   if(!activeEvent) return;
 
   // fill histograms, for activated bins only
-  HD->Payload([this,&wJet,&jet](Histos *H){
+  HD->Payload([this](Histos *H){
     dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,wJet);
     // jet kinematics
     H->Hist("pT_jet")->Fill(kin->pTjet,wJet);
