@@ -370,6 +370,9 @@ void AnalysisDD4hep::process_event()
 	    }//
 	}//mcparticles loop
 
+      // calculate true DIS kinematics
+      kinTrue->CalculateDISbyElectron(); // generated (truth)
+
       // Loop over calorimeters
       // fill cluster container
       vector<Clusters*> v_ecal_clusters;
@@ -452,19 +455,15 @@ void AnalysisDD4hep::process_event()
 	  v_ecal_clusters.push_back(clus);
 	}
 
-      // calculate true DIS kinematics
-      kinTrue->CalculateDISbyElectron(); // generated (truth)
-
       // find scattered electron
       int electron_index = find_electron(v_ecal_clusters, v_hcal_clusters, fEThreshold);
       if(electron_index < 0)
 	{
-	  //cout << nevt << " No scattered electron found.. skip this event" << electron_index << endl;
-	  //	  cout << kinTrue->x << " " << kinTrue->Q2 << " " << kinTrue->y << " " << kinTrue->vecElectron.Pt() << " " << kinTrue->vecElectron.P() << " " << kinTrue->vecElectron.Eta() << endl;
 	  noele++;
 	  continue;
 	}
 
+      // Set electron kinematics
       double electron_E     = v_ecal_clusters[electron_index]->E;
       double electron_theta = v_ecal_clusters[electron_index]->theta;
       double electron_phi = v_ecal_clusters[electron_index]->phi;
@@ -479,10 +478,8 @@ void AnalysisDD4hep::process_event()
 				    Kinematics::ElectronMass()
 				    );
 
-      // calculate DIS kinematics
-      kin->CalculateDISbyElectron(); // reconstructed
-
-      TLorentzVector v_had;
+      // track loop
+      std::vector<Particles> recopart;
       double hpx=0; 
       double hpy=0;
       for(int itrk=0; itrk<(int)ReconstructedParticles_pid.GetSize(); itrk++)
@@ -494,9 +491,8 @@ void AnalysisDD4hep::process_event()
 	  // pid==0: reconstructed tracks with no matching truth pid
 	  if(pid_ == 0) continue;
 
-	  auto kv = PIDtoEnum_.find(pid_);
-	  if(kv!=PIDtoEnum_.end()) bFinalState = kv->second;
-	  else continue;
+	  Particles part;
+	  part.pid = pid_;
 
 	  TLorentzVector v_temp;
 	  double reco_E = ReconstructedParticles_energy[itrk];
@@ -504,13 +500,37 @@ void AnalysisDD4hep::process_event()
 	  double reco_py = ReconstructedParticles_p_y[itrk];
 	  double reco_pz = ReconstructedParticles_p_z[itrk];
 	  double reco_mass = ReconstructedParticles_mass[itrk];
+	  double reco_p = sqrt(reco_px*reco_px + reco_py*reco_py + reco_pz*reco_pz);
 	  v_temp.SetPxPyPzE(reco_px, reco_py, reco_pz, reco_E);
-	  kin->vecHadron.SetPxPyPzE(
-				    reco_px,
-				    reco_py,
-				    reco_pz,
-				    reco_E);
-				      
+
+	  part.vecPart.SetPxPyPzE(reco_px, 
+				  reco_py, 
+				  reco_pz, 
+				  sqrt(reco_p*reco_p + reco_mass*reco_mass));
+
+	  recopart.push_back(part);
+	  hpx += reco_px;
+	  hpy += reco_py;
+	}
+
+      //Hadronic reconstruction 
+      kin->sigmah = (kin->vecElectron.E() - kin->vecElectron.Pz());
+      kin->Pxh = hpx - kin->vecElectron.Px();
+      kin->Pyh = hpy - kin->vecElectron.Py();
+
+      // calculate DIS kinematics
+      kin->CalculateDISbyElectron(); // reconstructed
+
+      for(auto trk : recopart)
+	{
+	  int pid_ = trk.pid;
+
+	  auto kv = PIDtoEnum_.find(pid_);
+	  if(kv!=PIDtoEnum_.end()) bFinalState = kv->second;
+	  else continue;
+
+	  kin->vecHadron = trk.vecPart;
+
 	  kin->CalculateHadronKinematics();
 
 	  // find the true info
@@ -532,10 +552,6 @@ void AnalysisDD4hep::process_event()
 
 	  Double_t w = weight->GetWeight(*kin);
 	  wTotal += w;
-
-	  hpx += reco_px;
-	  hpy += reco_py;
-	  v_had += v_temp;
 
 	  // apply cuts
 	  if(kin->CutFull()) {
@@ -603,11 +619,6 @@ void AnalysisDD4hep::process_event()
 	
 	  }//if cut
 	}//trk loop
-
-      //Hadronic reconstruction method
-      kin->sigmah = (kin->vecElectron.E() - kin->vecElectron.Pz());
-      kin->Pxh = hpx - kin->vecElectron.Px();
-      kin->Pyh = hpy - kin->vecElectron.Py();
 
     }// tree reader loop
 
