@@ -212,8 +212,8 @@ void PostProcessor::FinishDumpAve(TString datFile) {
 void PostProcessor::DrawSingle(TString histSet, TString histName) {
 
   Histos *H = (Histos*) infile->Get(histSet);
-  TH1 *hist = H->Hist(histName);
-  Hist4D *hist4 = H->Hist4(histName);
+  TH1 *hist = H->Hist(histName,true);
+  Hist4D *hist4 = H->Hist4(histName,true);
 
   if (hist != nullptr) {
     TString canvN = "canv_"+histName+"_"+H->GetSetName();

@@ -425,7 +425,7 @@ void Analysis::Execute() {
         // loop through list of histogram sets, and fill them
         for(Histos *H : histSetFillList) {
           // Full phase space.
-          H->Hist4("full_xsec")->Fill(kin->x,kin->Q2,kin->pT,kin->z);
+          H->Hist4("full_xsec")->Fill(kin->x,kin->Q2,kin->pT,kin->z,w);
           // DIS kinematics
           dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,w);
           H->Hist("Q")->Fill(TMath::Sqrt(kin->Q2),w);

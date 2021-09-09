@@ -41,7 +41,6 @@ void Histos::DefineHist1D(
   HistConfig *config = new HistConfig();
   config->logx = logx;
   config->logy = logy;
-  config->logz = false;
   this->RegisterHist(varname,hist,config);
 };
 
@@ -147,9 +146,10 @@ void Histos::DefineHist4D(
   if(logy) BinSet::BinLog(hist->GetYaxis());
   if(logz) BinSet::BinLog(hist->GetZaxis());
   HistConfig *config = new HistConfig();
-  config->logx = logw;
-  config->logy = logx;
-  config->logz = false;
+  config->logw = logw;
+  config->logx = logx;
+  config->logy = logy;
+  config->logz = logz;
   this->RegisterHist4(varname,hist,config);
 };
 
@@ -169,23 +169,25 @@ void Histos::RegisterHist4(TString varname_, Hist4D *hist_, HistConfig *config_)
 
 
 // access histogram by name
-TH1 *Histos::Hist(TString histName) {
+TH1 *Histos::Hist(TString histName, Bool_t silence) {
   TH1 *retHist;
   try { retHist = histMap.at(histName); }
   catch(const std::out_of_range &ex) {
-    cerr << "ERROR: histMap does not have " 
-         << histName << "histogram" << endl;
+    if(!silence)
+      cerr << "ERROR: histMap does not have " 
+           << histName << "histogram" << endl;
     return nullptr;
   };
   return retHist;
 };
 
-Hist4D *Histos::Hist4(TString histName) {
+Hist4D *Histos::Hist4(TString histName, Bool_t silence) {
   Hist4D *retHist;
   try { retHist = hist4Map.at(histName); }
   catch(const std::out_of_range &ex) {
-    cerr << "ERROR: hist4Map does not have " 
-         << histName << "histogram" << endl;
+    if(!silence)
+      cerr << "ERROR: hist4Map does not have " 
+           << histName << "histogram" << endl;
     return nullptr;
   };
   return retHist;

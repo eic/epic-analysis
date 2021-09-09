@@ -31,10 +31,12 @@ class HistConfig : public TNamed {
     Bool_t logx;
     Bool_t logy;
     Bool_t logz;
+    Bool_t logw;
     HistConfig() {
       logx=false;
       logy=false;
       logz=false;
+      logw=false;
     };
     ~HistConfig() {};
   ClassDef(HistConfig,1);
@@ -48,8 +50,8 @@ class Histos : public TNamed
     ~Histos();
 
     // accessors
-    TH1 *Hist(TString histName); // access histogram by name
-    Hist4D *Hist4(TString histName);
+    TH1 *Hist(TString histName, Bool_t silence=false); // access histogram by name
+    Hist4D *Hist4(TString histName, Bool_t silence=false);
     HistConfig *GetHistConfig(TString histName); // settings for this histogram
     HistConfig *GetHist4Config(TString histName);
     std::vector<TString> VarNameList; // list of histogram names (for external looping)
