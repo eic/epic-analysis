@@ -9,7 +9,6 @@
 class Histos;
 class SimpleTree;
 class Kinematics;
-class AnalysisDelphes;
 class BinSet;
 
 class Clusters
@@ -48,34 +47,18 @@ class AnalysisDD4hep : public Analysis
     ~AnalysisDD4hep();
 
     // perform the analysis
-    void process_event();
+    void process_event(); // TODO: rename process_event to Execute?
+    void Execute() override { process_event(); };
 
     void SetEleEnergyThreshold(double e_threshold_) { fEThreshold = e_threshold_; }
     void SetIsoConeRadius(double r_ ) { fIsoR = r_; }
     void SetIsoCut(double isocut_ ) { fIsoCut = isocut_; }
 
   protected:
-    void CheckBins(BinSet *bs, std::vector<int> &v, Double_t var);
     int find_electron(std::vector<Clusters*> ecal_cluster, std::vector<Clusters*> hcal_cluster, double e_threshold);
     double isolation(double cone_theta, double cone_phi, std::vector<Clusters*> cluster_container, double E_threshold);
 
   private:
-    const int NBINS = 50;
-
-    Histos *HS;
-    SimpleTree *ST;
-    Kinematics *kin, *kinTrue;
-    TString outfileName,outfilePrefix;
-    TFile *outFile;
-    Double_t eleBeamEn = 5; // GeV
-    Double_t ionBeamEn = 41; // GeV
-    Double_t crossingAngle = 0; // mrad
-    std::map<TString,BinSet*> binSchemes_;
-
-    Weights const* weight;
-    Weights const* weightJet;
-
-    std::map<int,int> PIDtoEnum_;
 
     double fEThreshold;
     double fIsoR;

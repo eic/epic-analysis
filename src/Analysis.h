@@ -105,7 +105,6 @@ class Analysis : public TNamed
 
 
     // shared objects
-    Histos *HS;
     SimpleTree *ST;
     Kinematics *kin, *kinTrue;
     HistosDAG *HD;
