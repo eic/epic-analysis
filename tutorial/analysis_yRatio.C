@@ -27,9 +27,11 @@ void analysis_yRatio(
 
   // set binning scheme ====================================
   // z ranges
+  /*
   A->AddBinScheme("z");
   A->BinScheme("z")->BuildBin("Range", 0.2, 0.5 );
   A->BinScheme("z")->BuildBin("Range", 0.5, 0.8 );
+  */
 
   // y minima
   A->AddBinScheme("y");

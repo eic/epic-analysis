@@ -34,11 +34,11 @@ void analysis_template(
   // final states =========================================
   // - define final states; if you define none, default sets will
   //   be defined
-  //A->AddFinalState("pipTrack");
+  A->AddFinalState("pipTrack");
   //A->AddFinalState("pimTrack");
   //A->AddFinalState("KpTrack");
   //A->AddFinalState("KmTrack");
-  //A->AddFinalState("jet");
+  A->AddFinalState("jet");
 
   // perform the analysis ==================================
   A->Execute();
