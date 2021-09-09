@@ -288,7 +288,6 @@ void Analysis::Finish() {
   // close output
   outFile->Close();
   cout << outfileName << " written." << endl;
-
 };
 
 
@@ -337,6 +336,7 @@ void Analysis::AddFinalState(TString finalStateN) {
   activeFinalStates.insert(finalStateN);
 };
 
+
 // access HistosDAG
 //------------------------------------
 HistosDAG *Analysis::GetHistosDAG() { return HD; };
@@ -346,7 +346,7 @@ HistosDAG *Analysis::GetHistosDAG() { return HD; };
 // traversal; it requires `finalStateID`, `valueMap`, and will
 // activate/deactivate bin nodes accoding to values in `valuMap`
 //--------------------------------------------------------------------
-std::function<void(Node*)> Analysis::CheckBins() {
+std::function<void(Node*)> Analysis::CheckBin() {
   return [this](Node *N){
     if(N->GetNodeType()==NT::bin) {
       Bool_t active;
@@ -360,6 +360,122 @@ std::function<void(Node*)> Analysis::CheckBins() {
     };
   };
 };
+
+
+// FillHistos methods: check bins and fill associated histograms
+// - checks which bins the track/jet/etc. falls in
+// - fills the histograms in the associated Histos objects
+//--------------------------------------------------------------------------
+// tracks (single particles)
+void Analysis::FillHistosTracks() {
+
+  // add kinematic values to `valueMap`
+  valueMap.clear();
+  activeEvent = false;
+  /* DIS */
+  valueMap.insert(std::pair<TString,Double_t>( "x", kin->x ));
+  valueMap.insert(std::pair<TString,Double_t>( "q2", kin->Q2 ));
+  valueMap.insert(std::pair<TString,Double_t>( "w", kin->W ));
+  valueMap.insert(std::pair<TString,Double_t>( "y", kin->y ));
+  /* single hadron */
+  valueMap.insert(std::pair<TString,Double_t>( "p", kin->pLab ));
+  valueMap.insert(std::pair<TString,Double_t>( "eta", kin->etaLab ));
+  valueMap.insert(std::pair<TString,Double_t>( "pt", kin->pT ));
+  valueMap.insert(std::pair<TString,Double_t>( "z", kin->z ));
+  valueMap.insert(std::pair<TString,Double_t>( "qT", kin->qT ));
+  valueMap.insert(std::pair<TString,Double_t>( "qTq", kin->qT/TMath::Sqrt(kin->Q2) ));
+  valueMap.insert(std::pair<TString,Double_t>( "mX", kin->mX ));
+  valueMap.insert(std::pair<TString,Double_t>( "xF", kin->xF ));
+  valueMap.insert(std::pair<TString,Double_t>( "phiH", kin->phiH ));
+  valueMap.insert(std::pair<TString,Double_t>( "phiS", kin->phiS ));
+  valueMap.insert(std::pair<TString,Double_t>( "tSpin", (Double_t)kin->tSpin ));
+
+  // check bins
+  // - activates HistosDAG bin nodes which contain this track
+  // - sets `activeEvent` if there is at least one multidimensional bin to fill
+  HD->TraverseBreadth(CheckBin());
+  if(!activeEvent) return;
+  
+  // fill histograms, for activated bins only
+  HD->Payload([this,&wTrack](Histos *H){
+    // DIS kinematics
+    dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,wTrack);
+    H->Hist("Q")->Fill(TMath::Sqrt(kin->Q2),wTrack);
+    H->Hist("x")->Fill(kin->x,wTrack);
+    H->Hist("W")->Fill(kin->W,wTrack);
+    H->Hist("y")->Fill(kin->y,wTrack);
+    // hadron 4-momentum
+    H->Hist("pLab")->Fill(kin->pLab,wTrack);
+    H->Hist("pTlab")->Fill(kin->pTlab,wTrack);
+    H->Hist("etaLab")->Fill(kin->etaLab,wTrack);
+    H->Hist("phiLab")->Fill(kin->phiLab,wTrack);
+    // hadron kinematics
+    H->Hist("z")->Fill(kin->z,wTrack);
+    H->Hist("pT")->Fill(kin->pT,wTrack);
+    H->Hist("qT")->Fill(kin->qT,wTrack);
+    H->Hist("qTq")->Fill(kin->qT/TMath::Sqrt(kin->Q2),wTrack);
+    H->Hist("mX")->Fill(kin->mX,wTrack);
+    H->Hist("phiH")->Fill(kin->phiH,wTrack);
+    H->Hist("phiS")->Fill(kin->phiS,wTrack);
+    dynamic_cast<TH2*>(H->Hist("etaVsP"))->Fill(kin->pLab,kin->etaLab,wTrack); // TODO: lab-frame p, or some other frame?
+    // cross sections (divide by lumi after all events processed)
+    H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),wTrack);
+    // resolutions
+    if(kinTrue->x!=0) H->Hist("x_Res")->Fill((kin->x-kinTrue->x)/kinTrue->x,wTrack);
+    // -- reconstructed vs. generated
+    dynamic_cast<TH2*>(H->Hist("x_RvG"))->Fill(kinTrue->x,kin->x,wTrack);
+    dynamic_cast<TH2*>(H->Hist("phiH_RvG"))->Fill(kinTrue->phiH,kin->phiH,wTrack);
+    dynamic_cast<TH2*>(H->Hist("phiS_RvG"))->Fill(kinTrue->phiS,kin->phiS,wTrack);
+  });
+  // execute the payload
+  // - save time and don't call `ClearOps` (next loop will overwrite lambda)
+  // - called with `activeNodesOnly==true` since we only want to fill bins associated
+  //   with this track
+  HD->ExecuteOps(true);
+};
+
+// jets
+void Analysis::FillHistosJets() {
+
+  // add kinematic values to `valueMap`
+  valueMap.clear();
+  activeEvent = false;
+  /* DIS */
+  valueMap.insert(std::pair<TString,Double_t>(  "x",      kin->x      ));
+  valueMap.insert(std::pair<TString,Double_t>(  "q2",     kin->Q2     ));
+  valueMap.insert(std::pair<TString,Double_t>(  "y",      kin->y      ));
+  /* jets */
+  valueMap.insert(std::pair<TString,Double_t>(  "ptJet",  kin->pTjet  ));
+  valueMap.insert(std::pair<TString,Double_t>(  "zJet",   kin->zjet   ));
+
+  // check bins
+  // - activates HistosDAG bin nodes which contain this track
+  // - sets `activeEvent` if there is at least one multidimensional bin to fill
+  HD->TraverseBreadth(CheckBin());
+  if(!activeEvent) return;
+
+  // fill histograms, for activated bins only
+  HD->Payload([this,&wJet,&jet](Histos *H){
+    dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,wJet);
+    // jet kinematics
+    H->Hist("pT_jet")->Fill(kin->pTjet,wJet);
+    H->Hist("mT_jet")->Fill(jet.mt(),wJet);
+    H->Hist("z_jet")->Fill(kin->zjet,wJet);
+    H->Hist("eta_jet")->Fill(jet.eta(),wJet);
+    H->Hist("qT_jet")->Fill(kin->qTjet,wJet);
+    H->Hist("qTQ_jet")->Fill(kin->qTjet/sqrt(kin->Q2),wJet);
+    for(int j = 0; j < kin->jperp.size(); j++) {
+      H->Hist("jperp")->Fill(kin->jperp[j],wJet);
+    };
+  });
+  // execute the payload
+  // - save time and don't call `ClearOps` (next loop will overwrite lambda)
+  // - called with `activeNodesOnly==true` since we only want to fill bins associated
+  //   with this jet
+  HD->ExecuteOps(true);
+};
+
+
 
 
 // destructor
