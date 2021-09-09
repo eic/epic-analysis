@@ -1,5 +1,5 @@
 R__LOAD_LIBRARY(Largex)
-#include "Analysis.h"
+#include "AnalysisDelphes.h"
 
 // cross section in Q2 bins
 void analysis_xsecQ(
@@ -11,7 +11,7 @@ void analysis_xsecQ(
 ) {
 
   // setup analysis ========================================
-  Analysis *A = new Analysis(
+  AnalysisDelphes *A = new AnalysisDelphes(
       infiles,
       eleBeamEn,
       ionBeamEn,

@@ -10,7 +10,7 @@ void analysis_yRatio(
 ) {
 
   // setup analysis ========================================
-  Analysis *A = new Analysis(
+  AnalysisDelphes *A = new AnalysisDelphes(
       infiles,
       eleBeamEn,
       ionBeamEn,

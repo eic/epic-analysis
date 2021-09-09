@@ -1,5 +1,5 @@
-#ifndef Analysis_
-#define Analysis_
+#ifndef AnalysisDelphes_
+#define AnalysisDelphes_
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -33,17 +33,17 @@
 #include "Weights.h"
 
 
-class Analysis : public TNamed
+class AnalysisDelphes : public TNamed
 {
   public:
-    Analysis(
+    AnalysisDelphes(
         TString infileName_="",
         Double_t eleBeamEn_=5,
         Double_t ionBeamEn_=41,
         Double_t crossingAngle_=0,
         TString outfilePrefix_=""
         );
-    ~Analysis();
+    ~AnalysisDelphes();
 
     // number of bins for histograms
     const Int_t NBINS = 50;
@@ -110,7 +110,7 @@ class Analysis : public TNamed
     std::map<TString, TString> finalStateToTitle;
     std::map<int, TString> PIDtoFinalState;
     std::set<TString> activeFinalStates;
-  ClassDef(Analysis,1);
+  ClassDef(AnalysisDelphes,1);
 };
 
 #endif

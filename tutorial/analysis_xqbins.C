@@ -13,7 +13,7 @@ void analysis_xqbins(
 ) {
 
   // setup analysis ========================================
-  Analysis *A = new Analysis(
+  AnalysisDelphes *A = new AnalysisDelphes(
       infiles,
       eleBeamEn,
       ionBeamEn,

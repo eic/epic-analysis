@@ -1,6 +1,6 @@
-#include "Analysis.h"
+#include "AnalysisDelphes.h"
 
-ClassImp(Analysis)
+ClassImp(AnalysisDelphes)
 
 using std::map;
 using std::vector;
@@ -9,7 +9,7 @@ using std::cerr;
 using std::endl;
 
 // constructor
-Analysis::Analysis(
+AnalysisDelphes::AnalysisDelphes(
   TString infileName_,
   Double_t eleBeamEn_,
   Double_t ionBeamEn_,
@@ -86,7 +86,7 @@ Analysis::Analysis(
 //=============================================
 // perform the analysis
 //=============================================
-void Analysis::Execute() {
+void AnalysisDelphes::Execute() {
 
   cout << "-- running analysis of " << infileName << endl;
 
@@ -519,7 +519,7 @@ void Analysis::Execute() {
 //=============================================
 
 // access bin scheme by name
-BinSet *Analysis::BinScheme(TString varname) {
+BinSet *AnalysisDelphes::BinScheme(TString varname) {
   BinSet *ret;
   try { ret = binSchemes.at(varname); }
   catch(const std::out_of_range &ex) {
@@ -531,7 +531,7 @@ BinSet *Analysis::BinScheme(TString varname) {
 };
 
 // add a new bin scheme
-void Analysis::AddBinScheme(TString varname) {
+void AnalysisDelphes::AddBinScheme(TString varname) {
   TString vartitle;
   try { vartitle = availableBinSchemes.at(varname); }
   catch(const std::out_of_range &ex) {
@@ -547,7 +547,7 @@ void Analysis::AddBinScheme(TString varname) {
 
 
 // add a final state bin
-void Analysis::AddFinalState(TString finalStateN) {
+void AnalysisDelphes::AddFinalState(TString finalStateN) {
   TString finalStateT;
   try { finalStateT = finalStateToTitle.at(finalStateN); }
   catch(const std::out_of_range &ex) {
@@ -560,10 +560,10 @@ void Analysis::AddFinalState(TString finalStateN) {
 };
 
 // access HistosDAG
-HistosDAG *Analysis::GetHistosDAG() { return HD; };
+HistosDAG *AnalysisDelphes::GetHistosDAG() { return HD; };
 
 
 // destructor
-Analysis::~Analysis() {
+AnalysisDelphes::~AnalysisDelphes() {
 };
 
