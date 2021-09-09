@@ -212,53 +212,80 @@ void PostProcessor::FinishDumpAve(TString datFile) {
 void PostProcessor::DrawSingle(TString histSet, TString histName) {
 
   Histos *H = (Histos*) infile->Get(histSet);
-  TH1 *hist = H->Hist(histName);
+  TH1 *hist = H->Hist(histName,true);
+  Hist4D *hist4 = H->Hist4(histName,true);
 
-  TString canvN = "canv_"+histName+"_"+H->GetSetName();
-  TCanvas *canv = new TCanvas(canvN,canvN, dimx, dimy);
+  if (hist != nullptr) {
+    TString canvN = "canv_"+histName+"_"+H->GetSetName();
+    TCanvas *canv = new TCanvas(canvN,canvN, dimx, dimy);
 
-  hist->SetLineColor(kBlack);
-  hist->SetMarkerColor(kBlack);
-  hist->SetMarkerStyle(kFullCircle);
-  hist->SetMarkerSize(1.0);
-  hist->SetLineWidth(2);
-  hist->GetXaxis()->SetLabelSize(0.06);
-  hist->GetYaxis()->SetLabelSize(0.06);
-  hist->GetXaxis()->SetTitleSize(0.06);
-  hist->GetYaxis()->SetTitleSize(0.06);
-  hist->GetXaxis()->SetTitleOffset(1.2);
-  
-  // determine draw type (TODO: probably could be generalized somehow)
-  TString drawStr = "";
-  switch(hist->GetDimension()) {
-    case 1:
-      drawStr = "EX0 P";
-      if(histName=="Q_xsec") {
-        hist->GetXaxis()->SetRangeUser(1,10);
-        hist->GetYaxis()->SetRangeUser(1e-6,1);
-        drawStr = "E P";
-      };
-      break;
-    case 2:
-      drawStr = "COLZ";
-      break;
-    case 3:
-      drawStr = "BOX";
-      break;
-  };
+    hist->SetLineColor(kBlack);
+    hist->SetMarkerColor(kBlack);
+    hist->SetMarkerStyle(kFullCircle);
+    hist->SetMarkerSize(1.0);
+    hist->SetLineWidth(2);
+    hist->GetXaxis()->SetLabelSize(0.06);
+    hist->GetYaxis()->SetLabelSize(0.06);
+    hist->GetXaxis()->SetTitleSize(0.06);
+    hist->GetYaxis()->SetTitleSize(0.06);
+    hist->GetXaxis()->SetTitleOffset(1.2);
+    
+    // determine draw type (TODO: probably could be generalized somehow)
+    TString drawStr = "";
+    switch(hist->GetDimension()) {
+      case 1:
+        drawStr = "EX0 P";
+        if(histName=="Q_xsec") {
+          hist->GetXaxis()->SetRangeUser(1,10);
+          hist->GetYaxis()->SetRangeUser(1e-6,1);
+          drawStr = "E P";
+        };
+        break;
+      case 2:
+        drawStr = "COLZ";
+        break;
+      case 3:
+        drawStr = "BOX";
+        break;
+    };
 
-  hist->Draw(drawStr);
+    hist->Draw(drawStr);
 
-  canv->SetGrid(1,1);
-  canv->SetLogx(H->GetHistConfig(histName)->logx);
-  canv->SetLogy(H->GetHistConfig(histName)->logy);
-  canv->SetLogz(H->GetHistConfig(histName)->logz);
-  canv->SetBottomMargin(0.15);
-  canv->SetLeftMargin(0.15);
-  canv->Print(pngDir+"/"+canvN+".png");
-  outfile->cd("/");
-  canv->Write();
-  outfile->cd("/");
+    canv->SetGrid(1,1);
+    canv->SetLogx(H->GetHistConfig(histName)->logx);
+    canv->SetLogy(H->GetHistConfig(histName)->logy);
+    canv->SetLogz(H->GetHistConfig(histName)->logz);
+    canv->SetBottomMargin(0.15);
+    canv->SetLeftMargin(0.15);
+    canv->Print(pngDir+"/"+canvN+".png");
+    outfile->cd("/");
+    canv->Write();
+    outfile->cd("/");
+  } else if (hist4 != nullptr) {
+    TString canvN = "canv_"+histName+"_"+H->GetSetName();
+    TCanvas *canv = new TCanvas(canvN,canvN, dimx, dimy);
+
+    hist4->GetWaxis()->SetLabelSize(0.06);
+    hist4->GetXaxis()->SetLabelSize(0.06);
+    hist4->GetWaxis()->SetTitleSize(0.06);
+    hist4->GetXaxis()->SetTitleSize(0.06);
+    hist4->GetWaxis()->SetTitleOffset(1.2);
+    
+    //canv->SetGrid(1,1);
+    canv->SetLogx(H->GetHist4Config(histName)->logx);
+    canv->SetLogy(H->GetHist4Config(histName)->logy);
+    canv->SetLogz(H->GetHist4Config(histName)->logz);
+    canv->SetBottomMargin(0.15);
+    canv->SetLeftMargin(0.15);
+    hist4->Draw();
+
+    canv->Print(pngDir+"/"+canvN+".png");
+    outfile->cd("/");
+    canv->Write();
+    outfile->cd("/");
+  } else {
+    cerr << "Couldn't find histogram " << histName << std::endl;
+  }
 
   /* // deprecated, for combining single plots; TODO if needed, make a separate method
   TH1 *histClone = (TH1*) hist->Clone();
@@ -322,7 +349,7 @@ void PostProcessor::DrawRatios(
   // loop over 1D histograms
   for(TString varName : HH[num]->VarNameList) {
     hist[num] = HH[num]->Hist(varName);
-    if(hist[num]->GetDimension()==1) {
+    if(hist[num] != nullptr && hist[num]->GetDimension()==1) {
       hist[den] = HH[den]->Hist(varName);
 
       // filter title

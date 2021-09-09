@@ -134,6 +134,17 @@ void Analysis::Execute() {
               HS = histSet[bpt][bx][bz][bq][by][bfs]; // shorthand pointer
 
               // HISTOGRAMS ================================================
+              // -- Full phase space histogram
+              HS->DefineHist4D(
+                "full_xsec",
+                "x","Q^{2}","z","p_{T}",
+                "","GeV^{2}","","GeV",
+                NBINS_FULL,1e-3,1,
+                NBINS_FULL,1,100,
+                NBINS_FULL,0,1,
+                NBINS_FULL,0,2,
+                true,true
+                );
               // -- DIS kinematics
               HS->DefineHist2D("Q2vsX","x","Q^{2}","","GeV^{2}",
                   NBINS,1e-3,1,
@@ -413,6 +424,8 @@ void Analysis::Execute() {
 
         // loop through list of histogram sets, and fill them
         for(Histos *H : histSetFillList) {
+          // Full phase space.
+          H->Hist4("full_xsec")->Fill(kin->x,kin->Q2,kin->pT,kin->z,w);
           // DIS kinematics
           dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,w);
           H->Hist("Q")->Fill(TMath::Sqrt(kin->Q2),w);
