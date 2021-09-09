@@ -4,12 +4,12 @@
 #include <vector>
 #include <fstream>
 
-#include "Analysis.h"
+#include "AnalysisDelphes.h"
 
 class Histos;
 class SimpleTree;
 class Kinematics;
-class Analysis;
+class AnalysisDelphes;
 class BinSet;
 
 class Clusters
@@ -53,7 +53,7 @@ class AnalysisDD4hep
     void SetIsoConeRadius(double r_ ) { fIsoR = r_; }
     void SetIsoCut(double isocut_ ) { fIsoCut = isocut_; }
 
-    Analysis *AN;
+    AnalysisDelphes *AN;
 
   protected:
     void CheckBins(BinSet *bs, std::vector<int> &v, Double_t var);

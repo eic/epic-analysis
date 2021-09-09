@@ -1,6 +1,6 @@
 R__LOAD_LIBRARY(Largex)
 
-#include "Analysis.h"
+#include "AnalysisDelphes.h"
 #include "AnalysisDD4hep.h"
 
 void analysis_fullsim(

@@ -2,7 +2,7 @@ R__LOAD_LIBRARY(Largex)
 
 void test_DAG() {
 
-  Analysis *A = new Analysis();
+  AnalysisDelphes *A = new AnalysisDelphes();
   A->AddBinScheme("x"); A->BinScheme("x")->BuildBins(2,0,2);
   A->AddBinScheme("y"); A->BinScheme("y")->BuildBins(2,0,2);
   A->AddBinScheme("z"); A->BinScheme("z")->BuildBins(2,0,2);

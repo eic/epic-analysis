@@ -29,7 +29,7 @@ AnalysisDD4hep::AnalysisDD4hep(
   fIsoR = 1.0;                  // Isolation cone R
   fIsoCut = 0.1;                // 10%
 
-  AN = new Analysis();
+  AN = new AnalysisDelphes();
   AN->AddFinalState("pimTrack","#pi^{-} tracks", -211);
   AN->AddFinalState("kipTrack","#k^{+} tracks", 321);
   AN->AddFinalState("kimTrack","#k^{-} tracks", -321);
