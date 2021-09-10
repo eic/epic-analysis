@@ -168,6 +168,17 @@ void Analysis::Prepare() {
 
   // DEFINE HISTOGRAMS ------------------------------------
   HD->Payload([this](Histos *HS){
+    // -- Full phase space histogram
+    HS->DefineHist4D(
+        "full_xsec",
+        "x","Q^{2}","z","p_{T}",
+        "","GeV^{2}","","GeV",
+        NBINS_FULL,1e-3,1,
+        NBINS_FULL,1,100,
+        NBINS_FULL,0,1,
+        NBINS_FULL,0,2,
+        true,true
+        );
     // -- DIS kinematics
     HS->DefineHist2D("Q2vsX","x","Q^{2}","","GeV^{2}",
         NBINS,1e-3,1,
@@ -408,6 +419,8 @@ void Analysis::FillHistosTracks() {
   
   // fill histograms, for activated bins only
   HD->Payload([this](Histos *H){
+    // Full phase space.
+    H->Hist4("full_xsec")->Fill(kin->x,kin->Q2,kin->pT,kin->z,wTrack);
     // DIS kinematics
     dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,wTrack);
     H->Hist("Q")->Fill(TMath::Sqrt(kin->Q2),wTrack);

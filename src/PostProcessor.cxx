@@ -238,53 +238,80 @@ void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat) 
 void PostProcessor::DrawSingle(TString histSet, TString histName) {
 
   Histos *H = (Histos*) infile->Get(histSet);
-  TH1 *hist = H->Hist(histName);
+  TH1 *hist = H->Hist(histName,true);
+  Hist4D *hist4 = H->Hist4(histName,true);
 
-  TString canvN = "canv_"+histName+"_"+H->GetSetName();
-  TCanvas *canv = new TCanvas(canvN,canvN, dimx, dimy);
+  if (hist != nullptr) {
+    TString canvN = "canv_"+histName+"_"+H->GetSetName();
+    TCanvas *canv = new TCanvas(canvN,canvN, dimx, dimy);
 
-  hist->SetLineColor(kBlack);
-  hist->SetMarkerColor(kBlack);
-  hist->SetMarkerStyle(kFullCircle);
-  hist->SetMarkerSize(1.0);
-  hist->SetLineWidth(2);
-  hist->GetXaxis()->SetLabelSize(0.06);
-  hist->GetYaxis()->SetLabelSize(0.06);
-  hist->GetXaxis()->SetTitleSize(0.06);
-  hist->GetYaxis()->SetTitleSize(0.06);
-  hist->GetXaxis()->SetTitleOffset(1.2);
-  
-  // determine draw type (TODO: probably could be generalized somehow)
-  TString drawStr = "";
-  switch(hist->GetDimension()) {
-    case 1:
-      drawStr = "EX0 P";
-      if(histName=="Q_xsec") {
-        hist->GetXaxis()->SetRangeUser(1,10);
-        hist->GetYaxis()->SetRangeUser(1e-6,1);
-        drawStr = "E P";
-      };
-      break;
-    case 2:
-      drawStr = "COLZ";
-      break;
-    case 3:
-      drawStr = "BOX";
-      break;
-  };
+    hist->SetLineColor(kBlack);
+    hist->SetMarkerColor(kBlack);
+    hist->SetMarkerStyle(kFullCircle);
+    hist->SetMarkerSize(1.0);
+    hist->SetLineWidth(2);
+    hist->GetXaxis()->SetLabelSize(0.06);
+    hist->GetYaxis()->SetLabelSize(0.06);
+    hist->GetXaxis()->SetTitleSize(0.06);
+    hist->GetYaxis()->SetTitleSize(0.06);
+    hist->GetXaxis()->SetTitleOffset(1.2);
+    
+    // determine draw type (TODO: probably could be generalized somehow)
+    TString drawStr = "";
+    switch(hist->GetDimension()) {
+      case 1:
+        drawStr = "EX0 P";
+        if(histName=="Q_xsec") {
+          hist->GetXaxis()->SetRangeUser(1,10);
+          hist->GetYaxis()->SetRangeUser(1e-6,1);
+          drawStr = "E P";
+        };
+        break;
+      case 2:
+        drawStr = "COLZ";
+        break;
+      case 3:
+        drawStr = "BOX";
+        break;
+    };
 
-  hist->Draw(drawStr);
+    hist->Draw(drawStr);
 
-  canv->SetGrid(1,1);
-  canv->SetLogx(H->GetHistConfig(histName)->logx);
-  canv->SetLogy(H->GetHistConfig(histName)->logy);
-  canv->SetLogz(H->GetHistConfig(histName)->logz);
-  canv->SetBottomMargin(0.15);
-  canv->SetLeftMargin(0.15);
-  canv->Print(pngDir+"/"+canvN+".png");
-  outfile->cd("/");
-  canv->Write();
-  outfile->cd("/");
+    canv->SetGrid(1,1);
+    canv->SetLogx(H->GetHistConfig(histName)->logx);
+    canv->SetLogy(H->GetHistConfig(histName)->logy);
+    canv->SetLogz(H->GetHistConfig(histName)->logz);
+    canv->SetBottomMargin(0.15);
+    canv->SetLeftMargin(0.15);
+    canv->Print(pngDir+"/"+canvN+".png");
+    outfile->cd("/");
+    canv->Write();
+    outfile->cd("/");
+  } else if (hist4 != nullptr) {
+    TString canvN = "canv_"+histName+"_"+H->GetSetName();
+    TCanvas *canv = new TCanvas(canvN,canvN, dimx, dimy);
+
+    hist4->GetWaxis()->SetLabelSize(0.06);
+    hist4->GetXaxis()->SetLabelSize(0.06);
+    hist4->GetWaxis()->SetTitleSize(0.06);
+    hist4->GetXaxis()->SetTitleSize(0.06);
+    hist4->GetWaxis()->SetTitleOffset(1.2);
+    
+    //canv->SetGrid(1,1);
+    canv->SetLogx(H->GetHist4Config(histName)->logx);
+    canv->SetLogy(H->GetHist4Config(histName)->logy);
+    canv->SetLogz(H->GetHist4Config(histName)->logz);
+    canv->SetBottomMargin(0.15);
+    canv->SetLeftMargin(0.15);
+    hist4->Draw();
+
+    canv->Print(pngDir+"/"+canvN+".png");
+    outfile->cd("/");
+    canv->Write();
+    outfile->cd("/");
+  } else {
+    cerr << "Couldn't find histogram " << histName << std::endl;
+  }
 
   /* // deprecated, for combining single plots; TODO if needed, make a separate method
   TH1 *histClone = (TH1*) hist->Clone();
@@ -311,6 +338,115 @@ void PostProcessor::DrawSingle(TString histSet, TString histName) {
   */
 };
 
+//=========================================================================
+/* ALGORITHM: draw histograms from different bins in their respective bins
+on axis of bin variables, e.g. Q2 vs x.
+*/
+// not sure what to name function
+void PostProcessor::DrawInBins(
+    TString outName,    
+    std::vector<std::vector<TString>>& histList,
+    TString histName,
+    TString var1name, int nvar1, double var1low, double var1high, bool var1log,
+    TString var2name, int nvar2, double var2low, double var2high, bool var2log
+){
+  // default values set for nvar1==nvar2
+  int canvx = 700;
+  int canvy = 600;
+  double botmargin = 0.2;
+  double leftmargin = 0.2;
+  double xaxisy = 0.04;
+  double xaxisx1 = 0.08;
+  double xaxisx2 = 0.97;
+  double yaxisx = 0.04;
+  double yaxisy1 = 0.085;
+  double yaxisy2 = 0.97;
+  
+  if(nvar1 > nvar2){
+    // different canvas sizing/axis position for unequal binning
+    canvx = 1100;
+    canvy = 700;
+    xaxisx1 = 0.075;
+    xaxisx2 = 0.975;
+    yaxisy1 = 0.08;
+  };
+  
+  TString canvN = "canv_"+outName+"_"+histName;
+  TCanvas *canv = new TCanvas(canvN,canvN, canvx, canvy);
+  TPad *mainpad = new TPad("mainpad", "mainpad", 0.07, 0.07, 0.98, 0.98);
+  mainpad->SetFillStyle(4000);
+  mainpad->Divide(nvar1,nvar2,0,0);
+  mainpad->Draw();
+
+  // get histograms from Hitos name 2D vector
+  for(int i = 0; i < nvar1; i++){
+    for(int j = 0; j < nvar2; j++){
+      Histos *H = (Histos*) infile->Get(histList[i][j]);
+      TH1 *hist = H->Hist(histName);
+      hist->SetTitle("");
+      hist->GetXaxis()->SetTitle("");
+      hist->GetYaxis()->SetTitle("");
+      hist->GetXaxis()->SetLabelSize(0);
+      hist->GetYaxis()->SetLabelSize(0);
+     
+      mainpad->cd((nvar2-j-1)*nvar1 + i + 1);
+      TString drawStr = "";
+      switch(hist->GetDimension()) {
+      case 1:
+	drawStr = "EX0 P";       
+	break;
+      case 2:
+	drawStr = "COLZ";
+	break;
+      case 3:
+	drawStr = "BOX";
+	break;
+      };      
+      if( hist->GetEntries() > 0 ) hist->Draw(drawStr);
+    };    
+  };
+  canv->cd();
+
+  TPad *newpad1 = new TPad("newpad1","full pad",0,0,1,1);
+  TPad *newpad2 = new TPad("newpad2","full pad",0,0,1,1);
+  newpad1->SetFillStyle(4000);
+  newpad1->Draw();
+  newpad2->SetFillStyle(4000);
+  newpad2->Draw();
+
+  TString xopt, yopt;
+  if(var1log) xopt = "GS";
+  else xopt = "S";
+  if(var2log) yopt = "GS";
+  else yopt = "S";
+
+  TGaxis *xaxis = new TGaxis(xaxisx1,xaxisy,xaxisx2,xaxisy,var1low,var1high,510,xopt);
+  TGaxis *yaxis = new TGaxis(yaxisx,yaxisy1,yaxisx,yaxisy2,var2low,var2high,510,yopt);
+  xaxis->SetTitle(var1name);
+  xaxis->SetName("xaxis");
+  xaxis->SetTitleSize(0.02);
+  xaxis->SetTextFont(40);
+  xaxis->SetLabelSize(0.02);
+  xaxis->SetTickSize(0.02);
+  
+  yaxis->SetTitle(var2name);
+  yaxis->SetTitleSize(0.02);
+  yaxis->SetName("yaxis");
+  yaxis->SetTextFont(40);
+  yaxis->SetLabelSize(0.02);
+  yaxis->SetTickSize(0.02);
+  
+  newpad1->cd();
+  yaxis->Draw();
+  newpad2->cd();
+  xaxis->Draw();
+  
+  
+  //  canv->Write();
+  canv->Print(pngDir+"/"+canvN+".png");
+  outfile->cd("/");
+  canv->Write();  
+};
 
 //=========================================================================
 
@@ -348,7 +484,7 @@ void PostProcessor::DrawRatios(
   // loop over 1D histograms
   for(TString varName : HH[num]->VarNameList) {
     hist[num] = HH[num]->Hist(varName);
-    if(hist[num]->GetDimension()==1) {
+    if(hist[num] != nullptr && hist[num]->GetDimension()==1) {
       hist[den] = HH[den]->Hist(varName);
 
       // filter title

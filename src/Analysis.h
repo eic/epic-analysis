@@ -47,6 +47,7 @@ class Analysis : public TNamed
 
     // number of bins for histograms
     const Int_t NBINS = 50;
+    const Int_t NBINS_FULL = 10;
 
     // bin schemes
     void AddBinScheme(TString varname); // add a new bin scheme

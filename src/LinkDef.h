@@ -12,6 +12,7 @@
 #pragma link C++ class HistosDAG+;
 #pragma link C++ class HistConfig+;
 #pragma link C++ class Histos+;
+#pragma link C++ class Hist4D+;
 #pragma link C++ class Kinematics+;
 #pragma link C++ class SimpleTree+;
 #pragma link C++ class Analysis+;
