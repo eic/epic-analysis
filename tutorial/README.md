@@ -40,6 +40,15 @@ this tutorial dirctory, e.g., `root -b -q tutorial/analysis_template.C`
     of averages of kinematics variables, where each row is for a Q2 bin;
     one table is produced for each pT bin
 
+4. Full Simulations
+  - `analysis_dd4hep_v0.C` and `postprocess_dd4hep_v0.C`
+  - all other tutorials are fast simulation; this one shows how to run
+    full simulations on some sample files on `S3`
+    - note you need to set your `S3` access credentials via environment
+      variables `S3_ACCESS_KEY` and `S3_SECRET_KEY`
+    - primary difference is the usage of `AnalysisDD4hep` instead of
+      `Analysis`
+
 More examples will be added eventually; for now you are encouraged to
 look at other existing analysis and postprocessor macros
 
