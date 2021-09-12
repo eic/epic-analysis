@@ -33,6 +33,8 @@ void Node::Print() {
   for(Node *N : inputList) cout << "    - " << N->GetID() << endl;
   cout << "  Outputs:" << endl;
   for(Node *N : outputList) cout << "    - " << N->GetID() << endl;
+  //cout << "  Temps:" << endl;
+  //for(Node *N : tempList) cout << "    - " << N->GetID() << endl;
 };
 
 
@@ -82,6 +84,24 @@ TString Node::GetVarName() {
     default: return "";
   };
 };
+
+// conditional controls
+// - control for inbound lambda:
+void Node::ConditionalControl(bool B) {
+  if(B) return; // do nothing if B==true
+  if(GetNodeType()!=NT::control && GetNodeType()!=NT::multi) return;
+  // disconnect all outputs, and store them in `tempList`
+  tempList.clear();
+  for(Node *N : outputList) tempList.push_back(N);
+  outputList.clear();
+};
+// - control for outbound lambda
+void Node::EndConditionalControl() {
+  // reconnect all outputs, from `tempList`
+  for(Node *N : tempList) AddOutput(N,true);
+  tempList.clear();
+};
+
 
 Node::~Node() {
 };

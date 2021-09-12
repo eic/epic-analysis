@@ -57,6 +57,14 @@ this tutorial dirctory, e.g., `root -b -q tutorial/analysis_template.C`
   - `postprocess_testDAG.C`: contains various lambdas examples and
     describes how to stage them
 
+7. Conditional Subloops
+  - `analysis_coverage.C`: define 4-D binning scheme, including
+    extra "full-range" bins
+  - `postprocess_coverage.C`: draw certain plots, while restricting
+    certain bins to be "full-range", i.e., "integrated over"; in order
+    to restrict the execution of certain subloops, conditional control
+    functions are used
+
 More examples will be added eventually; for now you are encouraged to
 look at other existing analysis and postprocessor macros
 

@@ -296,6 +296,7 @@ void Analysis::Finish() {
 
   // write histograms
   cout << sep << endl;
+  cout << "writing ROOT file..." << endl;
   outFile->cd();
   if(writeSimpleTree) ST->WriteTree();
   HD->Payload([this](Histos *H){ H->WriteHists(outFile); }); HD->ExecuteAndClearOps();

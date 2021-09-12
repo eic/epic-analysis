@@ -21,6 +21,7 @@ void postprocess_testDAG(
     cout << "CONTROL " << vars << endl;
     cout << "  NODE = " << controlNode->GetID() << endl;
     cout << "  PATH = " << bins->PathString() << endl;
+    cout << "  BINS = " << bins->BinListString() << endl;
     cout << "  CUTS = " << bins->CutListString() << endl;
     cout << "  PREVIOUS = " << bins->GetPreviousNode(controlNode)->GetID() << endl;
     cout << "  FIRST = " << bins->GetFirstNode()->GetID() << endl;

@@ -68,6 +68,36 @@ class Node : public TObject
     void SetActiveState(Bool_t active_) { active=active_; };
     Bool_t IsActive() { return active; };
 
+    // conditional controls: allow/disallow DAG depth-first traversal to pass
+    // through a control node
+    // - first call `ConditionalControl(bool B)` anywhere in the inbound
+    //   lambda; if `B==true` then nothing happens, but if `B==false`, all of
+    //   this control node's outputs will be removed and stored in `tempList`,
+    //   which forces the depth-first traversal to call the outbound lambda
+    //   immediately after the inbound lambda (see `DAG::ExecuteOps`); thus 
+    //   we replicate the following behavior:
+    //   ```
+    //       for(Outerloop) {
+    //         InboundOperator()
+    //         if(B) {
+    //           for(Subloop) ...
+    //         }
+    //         OutboundOperator()
+    //       }
+    //       ```
+    // - If `B==false`, the disconnected edges will not be automatically
+    //   reconnected; therefore you likely want to call `EndConditionalControl()`
+    //   in the outbound lambda, if `ConditionalControl` was called in the
+    //   inbound lambda; `EndConditionalControl()` will re-connect the disconnected
+    //   nodes
+    // - if you choose not to call `EndConditionalControl()`, any disconnection
+    //   remains until you do (which could be useful in some cases)
+    // - it may not be useful to call `ConditionalControl()` in the outbound
+    //   lambda, since its effect will only occur the next time the traversal
+    //   tries to descend through the node
+    void ConditionalControl(bool B);
+    void EndConditionalControl();
+
 
     // lambda operators: attach lamdas to a node (usu. control nodes),
     // and provide the ability to execute them
@@ -112,8 +142,10 @@ class Node : public TObject
     Bool_t active;
     std::vector<Node*> inputList;
     std::vector<Node*> outputList;
+    std::vector<Node*> tempList;
     std::function<void(Node*,NodePath*)> inboundOp;
     std::function<void(Node*,NodePath*)> outboundOp;
+
 
   ClassDef(Node,1);
 };
