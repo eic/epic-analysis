@@ -116,7 +116,7 @@ void postprocess_testDAG(
   // - do not define `MultiPayload` for more than one subloop; only one subloop will run the
   //   multiple payloads
   // - you can also include `Before` and `After` operators (note the differences between the 
-  //   three examples here, since default before/after operators are no-ops
+  //   three examples here, since default before/after operators are no-ops)
   /*
   P->Op()->MultiPayload( {"x","q2"}, [](Histos *H){ cout << "MULTI-PAYLOAD 1: " << H->GetSetName() << endl; });
   P->Op()->MultiPayload( {"x","q2"}, [](Histos *H){ cout << "MULTI-PAYLOAD 2: " << H->GetSetName() << endl; },
@@ -131,7 +131,8 @@ void postprocess_testDAG(
 
   // remove all control nodes from the DAG; all BinSets (layers) will be fully connected
   // - basically the DAG returns to the initial state, with all bin nodes connected
-  // - this is useful to do if you want to run another loop after calling `Execute()`
+  // - this is useful to do if you want to run another loop after calling `Execute(false)`
+  //   - note: by default `Execute()` calls `Execute(true)`, which clears staged lambdas
   // - the payload operator will remain, but you can overwrite it
   // - see `DAG.h` for more DAG-level operations
   /*
