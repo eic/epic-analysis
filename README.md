@@ -48,6 +48,11 @@ repository (pull requests are also welcome).
   - it requires a `root` build as well as `delphes`
   - all classes are found in the `src/` directory
 
+## Quick Start
+
+- If you're ready to try the software hands-on, follow the [tutorials](tutorial/README.md) in 
+  the `tutorial/` directory
+
 
 # Simulation
 
@@ -137,10 +142,8 @@ respective macros for the stages.
             an event with `y=0.1` will appear in all three bins
 - Multi-dimensional binning
   - Binning in multi-dimensions is allowed, e.g., 3D binning in `x`,`Q2`,`z`
-  - TODO: the current implementation is a prototype and there is a limit on the
-    number of dimensions and the variables you are allowed to bin in are
-    restricted (e.g., for tracks you are limited to `pT`,`x`,`z`,`Q`,`y`); an
-    update to internal data structures aims to remove these restrictions
+  - See [Adage documentation](doc/adage.md) for more information on how multi-dimensional
+    binning is handled
   - Be careful of the curse of dimensionality
     - You can restrict the binning in certain dimensions by taking only diagonal
       elements of a matrix of bins (see `diagonal` settings in `src/Analysis.h`)
