@@ -68,7 +68,7 @@ class PostProcessor : public TNamed
         );
     void DrawInBins(
         TString outName,
-        std::vector<std::vector<TString>>& histList, TString histName,
+        std::vector<std::vector<Histos*>>& histList, TString histName,
         TString var1name, int nvar1, double var1low, double var1high, bool var1log,
         TString var2name, int nvar2, double var2low, double var2high, bool var2log
         );
