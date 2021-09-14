@@ -15,7 +15,7 @@ Kinematics::Kinematics(
   // set ion mass
   IonMass = ProtonMass();
 
-  // set beam 4-momenta // TODO: get proper beams from Brian
+  // set beam 4-momenta
   Double_t momEleBeam = EMtoP(enEleBeam,ElectronMass());
   Double_t momIonBeam = EMtoP(enIonBeam,IonMass);
   vecEleBeam.SetPxPyPzE(
@@ -25,7 +25,7 @@ Kinematics::Kinematics(
       enEleBeam
       );
   vecIonBeam.SetPxPyPzE(
-      momIonBeam * TMath::Sin(crossAng),
+      -momIonBeam * TMath::Sin(crossAng),
       0,
       momIonBeam * TMath::Cos(crossAng),
       enIonBeam
