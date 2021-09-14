@@ -19,15 +19,15 @@ Kinematics::Kinematics(
   Double_t momEleBeam = EMtoP(enEleBeam,ElectronMass());
   Double_t momIonBeam = EMtoP(enIonBeam,IonMass);
   vecEleBeam.SetPxPyPzE(
-      momEleBeam * TMath::Sin(crossAng),
       0,
-      -momEleBeam * TMath::Cos(crossAng),
+      0,
+      -momEleBeam,
       enEleBeam
       );
   vecIonBeam.SetPxPyPzE(
+      -momIonBeam * TMath::Sin(crossAng),
       0,
-      0,
-      momIonBeam,
+      momIonBeam * TMath::Cos(crossAng),
       enIonBeam
       );
   s = (vecEleBeam+vecIonBeam).M2();
