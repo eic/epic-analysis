@@ -61,6 +61,7 @@ An inbound lambda staged on the root node is executed before the traversal, whil
 Initial_Operator();
 for(z in z-bins) {
   for(y in y-bins) {
+  
     Inbound_Operator_Before_Subloop_Q_x();
     for(Q in Q-bins) {
       for(x in x-bins) {
@@ -68,6 +69,7 @@ for(z in z-bins) {
       }
     }
     Outbound_Operator_After_Subloop_Q_x();
+  
   }
 }
 Final_Operator();
@@ -100,7 +102,7 @@ Technical details: explains how subloops are created on the DAG. Whenever you cr
 It is possible to run a subloop as many times as desired, each with a different payload. In this case,
 use a `MultiPayload` to specify each payload operator, as well as the inbound and outbound lambdas for each
 new control node; such control nodes are called multi-control nodes. Important: any multi-control node will
-overwrite the payload operator, with what you specify with `MultiPayload`; therefore you should have no more than
+overwrite the payload operator with what you specify with `MultiPayload`; therefore you should have no more than
 one layer of multi-control nodes, otherwise the payloads will be overwritten. A practical technique is to use
 the lambda captures of one payload to capture information from the previous payload, which allows you to "chain"
 together subloops. The following figure shows two payloads in the (Q,x) subloop, controlled by two multi-control
@@ -199,7 +201,7 @@ HD->Payload( Payload_Operator );
 HD->ExecuteOps();
 ```
 
-Technical details: the `ConditionalControl(bool B)` function will remove all outputs of the control node if `B` is false, otherwise it will do nothing if `B` is true. If these outputs are removed, the DAG traversal is forced to backtrack, and the outbound lambda is immediately executed after the inbound lambda. Calling `EndConditionalControl()` in the outbound lambda will revert any disconnections that occurred in the inbound lambda, restoring the fully-connected structure of the DAG.
+Technical details: the `ConditionalControl(bool B)` function will remove all outputs of the control node if `B` is false, otherwise it will do nothing if `B` is true. If these outputs are removed, the DAG traversal is forced to backtrack, traversal into the subloop is prevented, and the outbound lambda is immediately executed after the inbound lambda. Calling `EndConditionalControl()` in the outbound lambda will revert any disconnections that occurred in the inbound lambda, restoring the fully-connected structure of the DAG.
 
 
 ## Adage Syntax
