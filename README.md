@@ -143,7 +143,7 @@ respective macros for the stages.
 - Multi-dimensional binning
   - Binning in multi-dimensions is allowed, e.g., 3D binning in `x`,`Q2`,`z`
   - See [Adage documentation](doc/adage.md) for more information on how multi-dimensional
-    binning is handled
+    binning is handled, as well as the [Adage syntax reference](doc/syntax.md)
   - Be careful of the curse of dimensionality
     - You can restrict the binning in certain dimensions by taking only diagonal
       elements of a matrix of bins (see `diagonal` settings in `src/Analysis.h`)
