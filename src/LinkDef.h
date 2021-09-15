@@ -26,13 +26,4 @@
 #pragma link C++ class WeightsProduct+;
 #pragma link C++ class WeightsSum+;
 
-// links for DAG streaming: (this clears warnings, but not errors...)
-/*
-#pragma link C++ class function<void(Node*,NodePath)>+;
-#pragma link C++ class _Maybe_unary_or_binary_function<void,Node*,set<Node*>>+;
-#pragma link C++ class binary_function<Node*,set<Node*>,void>+;
-#pragma link C++ class _Function_base+;
-*/
-
-
 #endif
