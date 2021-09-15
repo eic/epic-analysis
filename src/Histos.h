@@ -58,6 +58,7 @@ class Histos : public TNamed
     std::vector<CutDef*> CutDefList; // list of associated cut definitions
     TString GetSetName() { return setname; };
     TString GetSetTitle() { return settitle; };
+    CutDef *GetCutDef(TString varName); // get a specific CutDef
 
     // store associated cut definitions
     void AddCutDef(CutDef *cut) { CutDefList.push_back(cut); };

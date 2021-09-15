@@ -9,7 +9,7 @@ void postprocess_xsecPT(
   // instantiate empty analysis object ================================
   // - needed for some general information about binning
   // - specify settings such as diagonalized binnings
-  Analysis *A = new Analysis();
+  AnalysisDelphes *A = new AnalysisDelphes();
   A->diagonalXZQ = true;
 
   // setup postprocessor ========================================
@@ -20,7 +20,7 @@ void postprocess_xsecPT(
   P->StartTextFile(tableFile,"Counts and averages in bins of pT");
 
   // loop over (pt,x,z) bins, diagonalized
-  // TODO: when Analysis::histSet is generalized, loops like this will
+  // TODO: when AnalysisDelphes::histSet is generalized, loops like this will
   // be significantly simpler
   for(int bx  : P->GetBinNums("x")) {
   for(int bz  : P->GetBinNums("z")) {

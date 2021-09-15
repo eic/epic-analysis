@@ -14,7 +14,15 @@ void postprocess_yRatio(
 
   // lambdas =====================================================
 
+  // we will need to define two payloads; this will be handled
+  // by the `MultiPayload` staging function below
+
   // payload 1: find the full-y bin; set Hfull to that Histos pointer
+  // - `Hfull` is captured by reference, since this lambda sets it
+  // - Histos pointer `H` is included as an argument, since this
+  //   is a payload operator
+  // - the NodePath must also be included as an argument, so we 
+  //   can check if the cut type of the 1D y-bin is "Full"
   Histos *Hfull = nullptr;
   auto findFullBin = [&Hfull](Histos *H, NodePath *bins) {
     if(bins->GetBinNode("y")->GetCutType() == "Full") Hfull = H;
@@ -22,6 +30,10 @@ void postprocess_yRatio(
 
   // payload 2: draw ratio of each plot with a set y-minimum to that with
   // no y-minimum (full-y bin)
+  // - `Hfull` is captured by reference, since the previous lambda
+  //   determined it
+  // - PostProcessor pointer `P` is also captured
+  // - we only need the Histos pointer in the argument
   auto drawRatios = [&Hfull,&P](Histos *H) {
     // make sure we have a denominator (full-y bin)
     if(Hfull==nullptr) {
@@ -59,6 +71,17 @@ void postprocess_yRatio(
       drawRatiosFinish // after operator
       );
   
+  // note: do not define `MultiPayload` for different subloops; the 
+  // reason is because `MultiPayload` creates a control node which
+  // has an inbound lambda that overwrites the current payload. 
+  // `MutliPayload` will also overwrite any payload operator you
+  // have staged with `Payload`. You can either define one `Payload`
+  // or several `MultiPayloads` on a particular subloop.
+
+
+  // print DAG ============================
+  // - compare the configured DAG with the initial DAG; notice
+  //   the new multi-control nodes before the y bins
   P->Op()->PrintBreadth("HistosDAG Final Setup");
   //P->Op()->PrintDepth(); // print depth-first node paths
 

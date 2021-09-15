@@ -18,6 +18,7 @@
 #include "Kinematics.h"
 #include "CutDef.h"
 #include "BinSet.h"
+#include "HistosDAG.h"
 
 class PostProcessor : public TNamed
 {
@@ -32,6 +33,16 @@ class PostProcessor : public TNamed
     const Int_t dimx=800;
     const Int_t dimy=700;
     static const int nsumMax=3; // number of summary plots with formatting
+
+
+    // DAG interfaces:
+    HistosDAG *GetHistosDAG() { return HD; };
+    HistosDAG *Op() { return GetHistosDAG(); }; // syntactic sugar
+    // execute lambdas (if `clear`==false, lambda operators will not be removed after execution)
+    void Execute(Bool_t clear=true) {
+      if(clear) HD->ExecuteAndClearOps();
+      else HD->ExecuteOps();
+    };
 
 
     // cleanup and close open files and streams
@@ -49,10 +60,11 @@ class PostProcessor : public TNamed
     //   from two different Histos objects (e.g., y>0.05 / y>0.00 sets)
     // - you are welcome to add your own algorithms
     void DumpHist(TString datFile, TString histSet, TString varName);
-    void DumpAve(TString datFile, TString histSet, TString cutName);
+    void DumpAve(TString datFile, Histos *H, TString cutName);
+    void DrawSingle(Histos *H, TString histName, TString drawFormat="");
     void DrawSingle(TString histSet, TString histName);
     void DrawRatios(
-        TString outName, TString numerSet, TString denomSet, Bool_t plotRatioOnly=false
+        TString outName, Histos *numerSet, Histos *denomSet, Bool_t plotRatioOnly=false
         );
     void DrawInBins(
         TString outName,
@@ -90,6 +102,9 @@ class PostProcessor : public TNamed
     // files and names
     TString infileN, outfileN, pngDir;
     TFile *infile, *outfile;
+
+    // DAGs
+    HistosDAG *HD;
 
     // algorithm-specific variables
     std::map<TString,TCanvas*> summaryCanvMap;

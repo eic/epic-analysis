@@ -1,0 +1,62 @@
+R__LOAD_LIBRARY(Largex)
+
+/* run in a grid of (x,Q2,eta,p) 4D bins
+ */
+void analysis_coverage(
+    TString infiles="datarec/example_5x41.root", /* delphes tree(s) */
+    Double_t eleBeamEn=5, /* electron beam energy [GeV] */
+    Double_t ionBeamEn=41, /* ion beam energy [GeV] */
+    Double_t crossingAngle=0, /* crossing angle [mrad] */
+    TString outfilePrefix="coverage" /* output filename prefix*/
+) {
+
+  // setup analysis ========================================
+  AnalysisDelphes *A = new AnalysisDelphes(
+      infiles,
+      eleBeamEn,
+      ionBeamEn,
+      crossingAngle,
+      outfilePrefix
+      );
+
+  //A->maxEvents = 30000; // use this to limit the number of events
+  A->SetReconMethod("Ele"); // set reconstruction method
+  A->AddFinalState("pipTrack"); // pion final state
+  //A->AddFinalState("KpTrack"); // kaon final state
+  //A->AddFinalState("jet"); // jets
+
+  // set binning scheme ====================================
+  /* - we define 4-D bins in (Q2,x,eta,p)
+   * - `BuildBins` is used for each variable, 2 bins each
+   * - a "Full" bin is added for each variable, where "Full"
+   *   means no bin cut is applied; this will allow us to 
+   *   "integrate" over variables we don't care about
+   * - for example, make "eta vs. p" plots in bins of
+   *   (x,Q2): since eta and p bins are also defined, we would
+   *   only want to make this plot when in the "Full" eta
+   *   and "Full" p bins, with a subloop through all (x,Q2) bins
+   * - to achieve this behavior, we will use "ConditionalControl"
+   *   in the postprocessor macro
+   * - there are 3x3x3x3=81 bins
+   */
+  A->AddBinScheme("q2");
+  A->BinScheme("q2")->BuildBin("Full");
+  A->BinScheme("q2")->BuildBins( 2, 1, 100, true );
+
+  A->AddBinScheme("x");
+  A->BinScheme("x")->BuildBin("Full");
+  A->BinScheme("x")->BuildBins( 2, 0.01, 1, true );
+
+  A->AddBinScheme("eta");
+  A->BinScheme("eta")->BuildBin("Full");
+  A->BinScheme("eta")->BuildBins( 2, -0.5, 4.0 );
+
+  A->AddBinScheme("p");
+  A->BinScheme("p")->BuildBin("Full");
+  A->BinScheme("p")->BuildBins( 2, 0.01, 10, true );
+
+  // perform the analysis ==================================
+  A->Execute();
+
+  //A->GetHistosDAG()->PrintBreadth("HistosDAG Nodes");
+};

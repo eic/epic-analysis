@@ -33,6 +33,10 @@ PostProcessor::PostProcessor(
   infile = new TFile(infileN,"READ");
   gROOT->ProcessLine(".! mkdir -p "+pngDir);
 
+  // rebuild DAGs
+  HD = new HistosDAG();
+  HD->Build(infile);
+
   // initialize algorithm-specific vars
   this->ResetVars();
 
@@ -111,10 +115,9 @@ void PostProcessor::DumpHist(TString datFile, TString histSet, TString varName) 
  *   bin boundaries
  * - when done looping, call `FinishDumpAve(datFile)`
  */
-void PostProcessor::DumpAve(TString datFile, TString histSet, TString cutName) {
-  cout << "dump averages from " << histSet
+void PostProcessor::DumpAve(TString datFile, Histos *H, TString cutName) {
+  cout << "dump averages from " << H->GetSetName()
        << " to " << datFile << endl;
-  Histos *H = (Histos*) infile->Get(histSet);
 
   // get associated cut, and print header info if it's the first time
   dumpCut = nullptr;
@@ -161,7 +164,10 @@ void PostProcessor::DumpAve(TString datFile, TString histSet, TString cutName) {
     // and print header for ave columns
     for(TString varName : H->VarNameList) {
       if(H->Hist(varName)->GetDimension()==1) {
-        if(varName.Contains("xsec")) continue;
+        if(varName.Contains("xsec",TString::kIgnoreCase)) continue;
+        if(varName.Contains("Res",TString::kIgnoreCase)) continue;
+        if(varName.Contains("RvG",TString::kIgnoreCase)) continue;
+        if(H->Hist(varName)->GetEntries()==0) continue;
         varList.push_back(varName);
         cout << " <" + varName + ">";
       };
@@ -185,7 +191,7 @@ void PostProcessor::DumpAve(TString datFile, TString histSet, TString cutName) {
       first=false;
     }
     else if(hist->GetEntries()!=counts) {
-      cerr << "WARNING: mismatch counts" << endl;
+      cerr << "WARNING: mismatch counts in " << varName << " histogram" << endl;
     };
     cout << " " << hist->GetMean();
   };
@@ -203,12 +209,32 @@ void PostProcessor::FinishDumpAve(TString datFile) {
   this->ResetVars();
 };
 
-//=========================================================================
 
+//=========================================================================
 /* ALGORITHM: draw a single histogram to a canvas, and write it
- * - since `histSet` names can be hard to read, you can use `outName` to give a
- *   "nickname" to `histSet`, which the canvas name will include
+ * - `histName` is the name of the histogram given in Histos
+ * - `drawFormat` is the formatting string passed to TH1::Draw()
  */
+void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat) {
+  cout << "draw single plot " << histName << "..." << endl;
+  TH1 *hist = H->Hist(histName);
+  if(hist==nullptr) {
+    cerr << "ERROR: cannot find histogram " << histName << endl;
+    return;
+  };
+  TString canvN = "canv_"+histName+"___"+H->GetSetName();
+  TCanvas *canv = new TCanvas(canvN,canvN,dimx,dimy);
+  hist->Draw(drawFormat);
+  canv->SetGrid(1,1);
+  canv->SetLogx(H->GetHistConfig(histName)->logx);
+  canv->SetLogy(H->GetHistConfig(histName)->logy);
+  canv->SetLogz(H->GetHistConfig(histName)->logz);
+  canv->SetBottomMargin(0.15);
+  canv->SetLeftMargin(0.15);
+  canv->Print(pngDir+"/"+canvN+".png");
+};
+
+// OLD VERSION: 
 void PostProcessor::DrawSingle(TString histSet, TString histName) {
 
   Histos *H = (Histos*) infile->Get(histSet);
@@ -436,14 +462,14 @@ void PostProcessor::DrawInBins(
  * - when done looping, call `FinishDrawRatios`
 */
 void PostProcessor::DrawRatios(
-    TString outName, TString numerSet, TString denomSet, Bool_t plotRatioOnly
+    TString outName, Histos *numerSet, Histos *denomSet, Bool_t plotRatioOnly
 ) {
 
   cout << "draw ratios " << outName << "..." << endl;
   enum HHenum {num,den};
   Histos *HH[2];
-  HH[num] = (Histos*) infile->Get(numerSet);
-  HH[den] = (Histos*) infile->Get(denomSet);
+  HH[num] = numerSet;
+  HH[den] = denomSet;
   TH1 *hist[2];
   TH1D *ratio;
   Double_t ny,ry,err;
@@ -462,6 +488,7 @@ void PostProcessor::DrawRatios(
       hist[den] = HH[den]->Hist(varName);
 
       // filter title
+      // TODO: there is a bug here now, ratio denominators aren't quite right
       for(int f=0; f<2; f++)  histT[f] = hist[f]->GetTitle();
       for(int f=0; f<2; f++) {
         tf = 0;
@@ -588,6 +615,7 @@ void PostProcessor::DrawRatios(
   nsum++;
 };
 void PostProcessor::FinishDrawRatios(TString summaryDir) {
+  std::cout << "CALL PostProcessor::FinishDrawRatios" << endl;
   // write summary canvas
   outfile->cd("/");
   outfile->mkdir(summaryDir);
@@ -644,7 +672,7 @@ std::vector<int> PostProcessor::GetBinNums(TString varName) {
   if(B==nullptr) {
     cerr << "ERROR: unknown variable " << varName << " in PostProcessor::GetBinNums" << endl;
   } else {
-    for(int n=0; n<B->GetBinList()->GetEntries(); n++) retVec.push_back(n);
+    for(int n=0; n<B->GetNumBins(); n++) retVec.push_back(n);
   };
   return retVec;
 };

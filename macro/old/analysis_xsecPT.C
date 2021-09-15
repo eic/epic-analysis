@@ -1,5 +1,5 @@
 R__LOAD_LIBRARY(Largex)
-#include "Analysis.h"
+#include "AnalysisDelphes.h"
 
 // cross section in pT bins
 void analysis_xsecPT(
@@ -11,7 +11,7 @@ void analysis_xsecPT(
 ) {
 
   // setup analysis ========================================
-  Analysis *A = new Analysis(
+  AnalysisDelphes *A = new AnalysisDelphes(
       infiles,
       eleBeamEn,
       ionBeamEn,

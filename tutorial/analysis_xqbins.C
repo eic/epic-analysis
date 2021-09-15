@@ -13,7 +13,7 @@ void analysis_xqbins(
 ) {
 
   // setup analysis ========================================
-  Analysis *A = new Analysis(
+  AnalysisDelphes *A = new AnalysisDelphes(
       infiles,
       eleBeamEn,
       ionBeamEn,
@@ -21,12 +21,24 @@ void analysis_xqbins(
       outfilePrefix
       );
 
-  A->maxEvents = 30000; // use this to limit the number of events
+  //A->maxEvents = 30000; // use this to limit the number of events
+  A->SetReconMethod("Ele"); // set reconstruction method
+  A->AddFinalState("pipTrack"); // pion final state
+  //A->AddFinalState("KpTrack"); // kaon final state
+  //A->AddFinalState("jet"); // jets
 
   // set binning scheme ====================================
 
-  // tutorial switch statement: change tutorial number to try out
-  // the different binning implementations
+  // first add what bin schemes you want; you don't have to define
+  // bins for all of them, but you need to add at least the ones
+  // you plan to use below
+  A->AddBinScheme("q2");
+  A->AddBinScheme("x");
+  A->AddBinScheme("z");
+
+  // then add the bins that you want
+  // - tutorial switch statement: change tutorial number to try out
+  //   the different binning implementations
   int tutorialNum = 0;
   switch(tutorialNum) {
 
@@ -41,13 +53,13 @@ void analysis_xqbins(
     case 1:
       // 3x3 grid of (x,Q2) bins, equal width in logarithmic scale
       A->BinScheme("q2")->BuildBins( 3, 1,    100,  true );
-      A->BinScheme("x")->BuildBins(  3, 0.05, 1,    true );
+      A->BinScheme("x")->BuildBins(  3, 0.01, 1,    true );
       break;
 
     case 2:
       // alternatively: equal width in linear scale
       A->BinScheme("q2")->BuildBins( 3, 1,    100 );
-      A->BinScheme("x")->BuildBins(  3, 0.05, 1   );
+      A->BinScheme("x")->BuildBins(  3, 0.01, 1   );
       break;
 
     case 3:
@@ -75,7 +87,7 @@ void analysis_xqbins(
       // - you can add more dimensions, but be careful of the curse
       //   of dimensionality
       A->BinScheme("q2")->BuildBins( 2, 1,    100,  true );
-      A->BinScheme("x")->BuildBins(  2, 0.05, 1,    true );
+      A->BinScheme("x")->BuildBins(  2, 0.01, 1,    true );
       A->BinScheme("z")->BuildBin("Range", 0.2, 0.5 );
       A->BinScheme("z")->BuildBin("Range", 0.5, 0.8 );
       break;
@@ -85,4 +97,9 @@ void analysis_xqbins(
 
   // perform the analysis ==================================
   A->Execute();
+
+  // for reference, here is a print out of HistosDAG
+  // - it lists each node, together with its inputs and outputs, which
+  //   indicate the connections between the nodes
+  //A->GetHistosDAG()->PrintBreadth("HistosDAG Nodes");
 };

@@ -193,6 +193,7 @@ Hist4D *Histos::Hist4(TString histName, Bool_t silence) {
   return retHist;
 };
 
+
 // access histogram config by name
 HistConfig *Histos::GetHistConfig(TString histName) {
   HistConfig *retConfig;
@@ -214,6 +215,16 @@ HistConfig *Histos::GetHist4Config(TString histName) {
     return nullptr;
   };
   return retConfig;
+};
+
+
+// get a specific CutDef
+CutDef *Histos::GetCutDef(TString varName) {
+  for(auto cut : CutDefList) {
+    if(cut->GetVarName() == varName) return cut;
+  };
+  cerr << "ERROR: cannot find cut " << varName << " in Histos" << endl;
+  return nullptr;
 };
 
 

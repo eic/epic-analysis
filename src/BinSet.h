@@ -42,8 +42,6 @@ class BinSet : public TObject
      */
     void BuildBin(TString cutType_, Double_t arg1_=-1, Double_t arg2_=-1);
     void BuildBin(CutDef *cut_);
-    // build custom bin (`CutDef` only stores title, and does not apply cuts)
-    void BuildCustomBin(TString varTitle_);
     /* build list of bins
      * - define the number of bins `nbins`, in the * range `min` to `max`
      * - default is equal width bins in linear scale
@@ -53,6 +51,8 @@ class BinSet : public TObject
      */
     void BuildBins(Int_t nbins_, Double_t min_, Double_t max_, Bool_t log_=false);
     void BuildBins(TAxis *ax, Bool_t log_=false);
+    // build "external" bin, where CutDef only stores an ID (you must check cuts externally)
+    void BuildExternalBin(TString cutID_,TString cutTitle_);
 
     // access a bin's cut (by bin number)
     CutDef *Cut(Int_t binNum) { return (CutDef*)binList->At(binNum); };

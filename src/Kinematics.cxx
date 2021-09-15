@@ -174,18 +174,18 @@ void Kinematics::CalculateHadronKinematics() {
   xF = 2 * CvecHadron.Vect().Dot(CvecQ.Vect()) /
       (W * CvecQ.Vect().Mag());
   // phiH
-  phiH = PlaneAngle(
+  phiH = AdjAngle(PlaneAngle(
       IvecQ.Vect(), IvecElectron.Vect(),
       IvecQ.Vect(), IvecHadron.Vect()
-      );
+      ));
   // phiS
   tSpin = 1; // assume spin up, for calculation of phiS
   vecSpin.SetXYZT(0,tSpin,0,0); // Pauli-Lubanski pseudovector
   //this->BoostToBreitFrame(vecSpin,IvecSpin); // TODO: check if other frames matter
-  phiS = PlaneAngle(
+  phiS = AdjAngle(PlaneAngle(
       IvecQ.Vect(), IvecElectron.Vect(),
       IvecQ.Vect(), vecSpin.Vect()
-      );
+      ));
   // pT, in perp frame (transverse to q), in ion rest frame
   pT = Reject(
       IvecHadron.Vect(),

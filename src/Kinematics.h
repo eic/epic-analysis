@@ -178,6 +178,12 @@ class Kinematics : public TObject
       };
       return sgn * TMath::ACos(numer/denom);
     };
+    // - shift angle to the range [-PI,+PI]
+    static Double_t AdjAngle(Double_t ang) {
+      while(ang>TMath::Pi()) ang-=2*TMath::Pi();
+      while(ang<-TMath::Pi()) ang+=2*TMath::Pi();
+      return ang;
+    };
 
     // misc. functions for hadronic final state
     float correctMass(int pid){

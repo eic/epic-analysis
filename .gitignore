@@ -5,7 +5,7 @@ sandbox
 *.pcm
 *.so
 *.exe
-*.png
+out/*/*.png
 *Dict.cxx
 out/*/*.txt
 external
