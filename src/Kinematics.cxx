@@ -78,12 +78,13 @@ void Kinematics::getqWQuadratic(){
     vecW = vecIonBeam - vecQ;
     W = vecW.M();
     Nu = vecIonBeam.Dot(vecQ)/IonMass;
-    this->SetBoostVecs();                                                                                                                                                                                                        
   }
 };
 
 // function to call different reconstruction methods
 void Kinematics::CalculateDIS(TString recmethod){
+
+  // calculate primary DIS variables, including Q2,x,y,W,nu
   if( recmethod.CompareTo("Ele", TString::kIgnoreCase) == 0 ){
     this->CalculateDISbyElectron();
   }
@@ -100,7 +101,36 @@ void Kinematics::CalculateDIS(TString recmethod){
     cerr << "ERROR: unknown reconstruction method" << endl;
     return;
   };
+
+  // calculate SIDIS boost vectors
+  // - c.o.m. frame of virtual photon and ion
+  CvecBoost = vecQ + vecIonBeam;
+  Cboost = -1*CvecBoost.BoostVector();
+  // - ion rest frame
+  IvecBoost = vecIonBeam;
+  Iboost = -1*IvecBoost.BoostVector();
+
+  // calculate depolarization
+  // - calculate epsilon, the ratio of longitudinal and transverse photon flux [hep-ph/0611265]
+  gamma = 2*ProtonMass()*x / TMath::Sqrt(Q2);
+  epsilon = ( 1 - y - TMath::Power(gamma*y,2)/4 ) /
+    ( 1 - y + y*y/2 + TMath::Power(gamma*y,2)/4 );
+  // - factors A,B,C,V,W (see [hep-ph/0611265] using notation from [1408.5721])
+  depolA = y*y / (2 - 2*epsilon);
+  depolB = depolA * epsilon;
+  depolC = depolA * TMath::Sqrt(1-epsilon*epsilon);
+  depolV = depolA * TMath::Sqrt(2*epsilon*(1+epsilon));
+  depolW = depolA * TMath::Sqrt(2*epsilon*(1-epsilon));
+  // - factor ratios (see [1807.10606] eq. 2.3)
+  if(depolA==0) depolP1=depolP2=depolP3=depolP4=0;
+  else {
+    depolP1 = depolB / depolA;
+    depolP2 = depolC / depolA;
+    depolP3 = depolV / depolA;
+    depolP4 = depolW / depolA;
+  };
 };
+
 
 // calculate DIS kinematics using scattered electron
 // - needs `vecElectron` set
@@ -112,7 +142,6 @@ void Kinematics::CalculateDISbyElectron() {
   Nu = vecIonBeam.Dot(vecQ) / IonMass;
   x = Q2 / ( 2 * vecQ.Dot(vecIonBeam) );
   y = vecIonBeam.Dot(vecQ) / vecIonBeam.Dot(vecEleBeam);
-  this->SetBoostVecs();
 };
 
 // calculate DIS kinematics using JB method
@@ -147,7 +176,6 @@ void Kinematics::CalculateDISbyMixed(){
   vecW = vecEleBeam + vecIonBeam - vecElectron;
   W = vecW.M();
   Nu = vecIonBeam.Dot(vecQ)/IonMass;
-  this->SetBoostVecs();
 };
 
 

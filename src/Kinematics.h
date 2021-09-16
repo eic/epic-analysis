@@ -78,6 +78,16 @@ class Kinematics : public TObject
     // polarization
     Double_t pol;
 
+    // depolarization
+    Double_t gamma,epsilon;
+    // - factors A,B,C,V,W from [hep-ph/0611265] using notation from [1408.5721]
+    Double_t depolA, depolB, depolC, depolV, depolW;
+    // - ratios of factors, following notation of [1807.10606] eq. 2.3 (cf. eqs. 2.2a,b)
+    Double_t depolP1; // for A_UT*sin(phiH+phiS) (collins), A_UT*sin(3phiH-phiS) (pretzelosity)
+    Double_t depolP2; // for A_LL*const
+    Double_t depolP3; // for twist-3 A_UT
+    Double_t depolP4; // for A_LL*cos(phiH)
+
     // 4-vectors
     // - lab frame
     TLorentzVector vecEleBeam, vecIonBeam;
@@ -122,15 +132,6 @@ class Kinematics : public TObject
 
 
     // boost calculations
-    // - calculate boost vectors
-    void SetBoostVecs() {
-      // c.o.m. frame of virtual photon and ion
-      CvecBoost = vecQ + vecIonBeam;
-      Cboost = -1*CvecBoost.BoostVector();
-      // ion rest frame
-      IvecBoost = vecIonBeam;
-      Iboost = -1*IvecBoost.BoostVector();
-    };
     // - boost from Lab frame to photon+ion C.o.m. frame
     void BoostToComFrame(TLorentzVector Lvec, TLorentzVector &Cvec) {
       Cvec=Lvec; Cvec.Boost(Cboost); };
