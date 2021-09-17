@@ -96,6 +96,12 @@ void Kinematics::CalculateDIS(TString recmethod){
   else if( recmethod.CompareTo("Mixed", TString::kIgnoreCase) == 0){
     this->CalculateDISbyMixed();
   }
+  else if( recmethod.CompareTo("Sigma", TString::kIgnoreCase) == 0){
+    this->CalculateDISbySigma();
+  }
+  else if( recmethod.CompareTo("eSigma", TString::kIgnoreCase) == 0){
+    this->CalculateDISbyeSigma();
+  }
   else {
     cerr << "ERROR: unknown reconstruction method" << endl;
     return;

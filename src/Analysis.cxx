@@ -74,6 +74,8 @@ Analysis::Analysis(
   reconMethodToTitle.insert(std::pair<TString,TString>("DA","Double Angle method"));
   reconMethodToTitle.insert(std::pair<TString,TString>("JB","Jacquet-Blondel method"));
   reconMethodToTitle.insert(std::pair<TString,TString>("Mixed","Mixed method"));
+  reconMethodToTitle.insert(std::pair<TString,TString>("Sigma","Sigma method"));
+  reconMethodToTitle.insert(std::pair<TString,TString>("eSigma","eSigma method"));
 
   // common settings defaults
   // - these settings can be set at the macro level
