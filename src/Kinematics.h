@@ -45,6 +45,8 @@ class Kinematics : public TObject
     void CalculateDISbyJB();
     void CalculateDISbyDA();
     void CalculateDISbyMixed();
+    void CalculateDISbySigma();
+    void CalculateDISbyeSigma();
     void getqWQuadratic();
     void CalculateHadronKinematics();
     void GetHadronicFinalState(
