@@ -574,9 +574,9 @@ void Kinematics::CalculateJetKinematics(fastjet::PseudoJet jet){
 // test a fake asymmetry, for fit code validation
 // - assigns `tSpin` based on desired fake asymmetry
 void Kinematics::InjectFakeAsymmetry() {
-  // modulations
+  // modulations, including depolarization factors [1807.10606 eq. 2.2-3]
   moduVal[0] = TMath::Sin(phiH-phiS); // sivers
-  moduVal[1] = TMath::Sin(phiH+phiS); // transversity*collins
+  moduVal[1] = TMath::Sin(phiH+phiS) * depolP1; // transversity*collins
   // fake amplitudes
   ampVal[0] = 0.1;
   ampVal[1] = 0.1;
@@ -584,8 +584,8 @@ void Kinematics::InjectFakeAsymmetry() {
   asymInject = 0;
   asymInject +=  ampVal[0]/0.2 * x * moduVal[0];
   asymInject += -ampVal[1]/0.2 * x * moduVal[1];
-  // apply polarization and depolarization factors
-  asymInject *= pol; // TODO: include depol. factor
+  // apply polarization
+  asymInject *= pol;
   // generate random number in [0,1]
   RN = RNG->Uniform();
   tSpin = (RN<0.5*(1+asymInject)) ? 1 : -1;
