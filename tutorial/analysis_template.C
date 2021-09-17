@@ -21,7 +21,7 @@ void analysis_template(
       outfilePrefix
       );
   //A->maxEvents = 10000; // use this to limit the number of events
-  //A->writeSimpleTree = true; // write SimpleTree (for one bin)
+  A->writeSimpleTree = true; // write SimpleTree (for one bin)
 
   // set reconstruction method =============================
   // - see `Analysis` constructor for methods
