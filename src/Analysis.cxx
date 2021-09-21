@@ -44,6 +44,8 @@ Analysis::Analysis(
   diagonalXZQ = false;
   writeSimpleTree = false;
   maxEvents = 0;
+  weight = new WeightsUniform();
+  weightJet = new WeightsUniform();
 };
 
 
@@ -68,8 +70,6 @@ void Analysis::Execute() {
   kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
   kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
   ST = new SimpleTree("tree",kin);
-  weight = new WeightsUniform();
-  weightJet = new WeightsUniform();
 
   // read delphes tree
   TChain *chain = new TChain("Delphes");
@@ -375,8 +375,8 @@ void Analysis::Execute() {
       
       // asymmetry injection
       //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
-      kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
-      kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
+      //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
+      //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
 	  Double_t w = weight->GetWeight(*kinTrue);
 	  wTotal += w;

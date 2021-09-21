@@ -1,5 +1,8 @@
 #!/bin/bash
 
+export MSTWPDF_HOME=$(pwd)/mstwpdf
+echo "MSTWPDF at $MSTWPDF_HOME"
+
 # run `source env.sh /path/to/delphes/repo`, otherwise pass no
 # argument to use the default location; it may be useful to
 # set your own default location

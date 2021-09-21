@@ -20,6 +20,10 @@ LIBS = $(shell root-config --glibs)
 DEPS += -I${DELPHES_HOME} -I${DELPHES_HOME}/external
 LIBS += -L${DELPHES_HOME} -lDelphes 
 
+# MSTWPDF
+DEPS += -I${MSTWPDF_HOME}
+LIBS += -L${MSTWPDF_HOME} -lmstwpdf
+
 # Fastjet Centauro
 INCCENTAURO = 0
 ifeq ($(INCCENTAURO),1)
