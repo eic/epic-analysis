@@ -228,6 +228,31 @@ void Analysis::Prepare() {
     HS->DefineHist1D("x_Res","(x-x_{true})/x_{true}","", NBINS, -1, 1);
     //HS->DefineHist1D("yRes","y - y_{true}","", NBINS, -2, 2); // TODO: defined in fullsim branch, but not yet here
     //HS->DefineHist1D("Q2Res","Q2 - Q2_{true}","", NBINS, -2, 2); // TODO: defined in fullsim branch, but not yet here
+    HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
+	20,1e-4,1,
+        10,1,1e4,
+        true,true
+	);
+    HS->DefineHist2D("Q2vsXpurity","x","Q^{2}","","GeV^{2}",
+        20,1e-4,1,
+        10,1,1e4,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_zres","x","Q^{2}","","GeV^{2}",
+        20,1e-4,1,
+        10,1,1e4,
+        true,true
+	);
+    HS->DefineHist2D("Q2vsX_pTres","x","Q^{2}","","GeV^{2}",
+        20,1e-4,1,
+        10,1,1e4,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_phiHres","x","Q^{2}","","GeV^{2}",
+        20,1e-4,1,
+        10,1,1e4,
+        true,true
+        );
     // -- reconstructed vs. generated
     HS->DefineHist2D("x_RvG","generated x","reconstructed x","","",
         NBINS,1e-3,1,
@@ -296,6 +321,11 @@ void Analysis::Finish() {
          << endl;
     // calculate cross sections
     H->Hist("Q_xsec")->Scale(1./lumi); // TODO: generalize (`if (name contains "xsec") ...`)
+    // divide resolution plots by true counts per x-Q2 bin
+    H->Hist("Q2vsXpurity")->Divide(H->Hist("Q2vsXtrue"));
+    H->Hist("Q2vsX_zres")->Divide(H->Hist("Q2vsXtrue"));
+    H->Hist("Q2vsX_pTres")->Divide(H->Hist("Q2vsXtrue"));
+    H->Hist("Q2vsX_phiHres")->Divide(H->Hist("Q2vsXtrue"));        
   });
   HD->ExecuteAndClearOps();
 
@@ -453,6 +483,13 @@ void Analysis::FillHistosTracks() {
     H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),wTrack);
     // resolutions
     if(kinTrue->x!=0) H->Hist("x_Res")->Fill((kin->x-kinTrue->x)/kinTrue->x,wTrack);
+    dynamic_cast<TH2*>(H->Hist("Q2vsXtrue"))->Fill(kinTrue->x,kinTrue->Q2,wTrack);
+    dynamic_cast<TH2*>(H->Hist("Q2vsX_zres"))->Fill(kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->z - kin->z)/(kinTrue->z) ) );
+    dynamic_cast<TH2*>(H->Hist("Q2vsX_pTres"))->Fill(kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->pT - kin->pT)/(kinTrue->pT) ) );
+    dynamic_cast<TH2*>(H->Hist("Q2vsX_phiHres"))->Fill(kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->phiH - kin->phiH) ) );
+    
+    if( (H->Hist("Q2vsXtrue"))->FindBin(kinTrue->x,kinTrue->Q2) == (H->Hist("Q2vsXtrue"))->FindBin(kin->x,kin->Q2) ) dynamic_cast<TH2*>(H->Hist("Q2vsXpurity"))->Fill(kin->x,kin->Q2,wTrack);
+    
     // -- reconstructed vs. generated
     dynamic_cast<TH2*>(H->Hist("x_RvG"))->Fill(kinTrue->x,kin->x,wTrack);
     dynamic_cast<TH2*>(H->Hist("phiH_RvG"))->Fill(kinTrue->phiH,kin->phiH,wTrack);
