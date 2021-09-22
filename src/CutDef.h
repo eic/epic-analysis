@@ -18,9 +18,15 @@ class CutDef : public TObject
 {
   public:
     CutDef();
+    // primary constructor (see CutDef.cpp)
     CutDef(
         TString varName_, TString varTitle_, TString cutType_,
         Double_t arg1=-1, Double_t arg2=-1
+        );
+    // constructor for just storing a cut ID (for externally applied cuts)
+    CutDef(
+        TString varName_, TString varTitle_,
+        TString cutID_, TString cutTitle_
         );
     ~CutDef();
 
@@ -34,11 +40,13 @@ class CutDef : public TObject
     TString GetCutType() { return cutType; };
     Double_t GetMin() { return min; };
     Double_t GetMax() { return max; };
+    TString GetCutID() { return cutID; };
 
 
   private:
     TString varName,varTitle,cutType;
     TString cutTitle;
+    TString cutID;
     Double_t min,max;
     Double_t center,delta;
 

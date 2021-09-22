@@ -15,7 +15,7 @@ Kinematics::Kinematics(
   // set ion mass
   IonMass = ProtonMass();
 
-  // set beam 4-momenta // TODO: get proper beams from Brian
+  // set beam 4-momenta
   Double_t momEleBeam = EMtoP(enEleBeam,ElectronMass());
   Double_t momIonBeam = EMtoP(enIonBeam,IonMass);
   vecEleBeam.SetPxPyPzE(
@@ -25,7 +25,7 @@ Kinematics::Kinematics(
       enEleBeam
       );
   vecIonBeam.SetPxPyPzE(
-      momIonBeam * TMath::Sin(crossAng),
+      -momIonBeam * TMath::Sin(crossAng),
       0,
       momIonBeam * TMath::Cos(crossAng),
       enIonBeam
@@ -78,12 +78,13 @@ void Kinematics::getqWQuadratic(){
     vecW = vecIonBeam - vecQ;
     W = vecW.M();
     Nu = vecIonBeam.Dot(vecQ)/IonMass;
-    this->SetBoostVecs();                                                                                                                                                                                                        
   }
 };
 
 // function to call different reconstruction methods
 void Kinematics::CalculateDIS(TString recmethod){
+
+  // calculate primary DIS variables, including Q2,x,y,W,nu
   if( recmethod.CompareTo("Ele", TString::kIgnoreCase) == 0 ){
     this->CalculateDISbyElectron();
   }
@@ -96,11 +97,46 @@ void Kinematics::CalculateDIS(TString recmethod){
   else if( recmethod.CompareTo("Mixed", TString::kIgnoreCase) == 0){
     this->CalculateDISbyMixed();
   }
+  else if( recmethod.CompareTo("Sigma", TString::kIgnoreCase) == 0){
+    this->CalculateDISbySigma();
+  }
+  else if( recmethod.CompareTo("eSigma", TString::kIgnoreCase) == 0){
+    this->CalculateDISbyeSigma();
+  }
   else {
     cerr << "ERROR: unknown reconstruction method" << endl;
     return;
   };
+
+  // calculate SIDIS boost vectors
+  // - c.o.m. frame of virtual photon and ion
+  CvecBoost = vecQ + vecIonBeam;
+  Cboost = -1*CvecBoost.BoostVector();
+  // - ion rest frame
+  IvecBoost = vecIonBeam;
+  Iboost = -1*IvecBoost.BoostVector();
+
+  // calculate depolarization
+  // - calculate epsilon, the ratio of longitudinal and transverse photon flux [hep-ph/0611265]
+  gamma = 2*ProtonMass()*x / TMath::Sqrt(Q2);
+  epsilon = ( 1 - y - TMath::Power(gamma*y,2)/4 ) /
+    ( 1 - y + y*y/2 + TMath::Power(gamma*y,2)/4 );
+  // - factors A,B,C,V,W (see [hep-ph/0611265] using notation from [1408.5721])
+  depolA = y*y / (2 - 2*epsilon);
+  depolB = depolA * epsilon;
+  depolC = depolA * TMath::Sqrt(1-epsilon*epsilon);
+  depolV = depolA * TMath::Sqrt(2*epsilon*(1+epsilon));
+  depolW = depolA * TMath::Sqrt(2*epsilon*(1-epsilon));
+  // - factor ratios (see [1807.10606] eq. 2.3)
+  if(depolA==0) depolP1=depolP2=depolP3=depolP4=0;
+  else {
+    depolP1 = depolB / depolA;
+    depolP2 = depolC / depolA;
+    depolP3 = depolV / depolA;
+    depolP4 = depolW / depolA;
+  };
 };
+
 
 // calculate DIS kinematics using scattered electron
 // - needs `vecElectron` set
@@ -112,7 +148,6 @@ void Kinematics::CalculateDISbyElectron() {
   Nu = vecIonBeam.Dot(vecQ) / IonMass;
   x = Q2 / ( 2 * vecQ.Dot(vecIonBeam) );
   y = vecIonBeam.Dot(vecQ) / vecIonBeam.Dot(vecEleBeam);
-  this->SetBoostVecs();
 };
 
 // calculate DIS kinematics using JB method
@@ -147,9 +182,29 @@ void Kinematics::CalculateDISbyMixed(){
   vecW = vecEleBeam + vecIonBeam - vecElectron;
   W = vecW.M();
   Nu = vecIonBeam.Dot(vecQ)/IonMass;
-  this->SetBoostVecs();
 };
-
+// calculate DIS kinematics using Sigma method
+// requires 'vecElectron' set
+void Kinematics::CalculateDISbySigma(){
+    y = sigmah/(sigmah + vecElectron.E()*(1-cos(vecElectron.Theta())));
+    Q2 = (vecElectron.Px()*vecElectron.Px() + vecElectron.Py()*vecElectron.Py())/(1-y);
+    x = Q2/(s*y);
+    Kinematics::getqWQuadratic();
+};
+// calculate DIS kinematics using eSigma method                                                                                                                       
+// requires 'vecElectron' set                                                                                                                                      
+void Kinematics::CalculateDISbyeSigma(){
+    vecQ = vecEleBeam - vecElectron;
+    vecW = vecEleBeam + vecIonBeam - vecElectron;
+    W = vecW.M();
+    Q2 = -1*vecQ.M2();
+    double ysigma = sigmah/(sigmah + vecElectron.E()*(1-cos(vecElectron.Theta())));
+    double Q2sigma = (vecElectron.Px()*vecElectron.Px() + vecElectron.Py()*vecElectron.Py())/(1-y);
+    double xsigma = Q2sigma/(s*ysigma);    
+    y = Q2/(s*xsigma);
+    x = xsigma;
+    Kinematics::getqWQuadratic();
+};
 
 // calculate hadron kinematics
 // - calculate DIS kinematics first, so we have `vecQ`, etc.
@@ -174,18 +229,18 @@ void Kinematics::CalculateHadronKinematics() {
   xF = 2 * CvecHadron.Vect().Dot(CvecQ.Vect()) /
       (W * CvecQ.Vect().Mag());
   // phiH
-  phiH = PlaneAngle(
+  phiH = AdjAngle(PlaneAngle(
       IvecQ.Vect(), IvecElectron.Vect(),
       IvecQ.Vect(), IvecHadron.Vect()
-      );
+      ));
   // phiS
   tSpin = 1; // assume spin up, for calculation of phiS
   vecSpin.SetXYZT(0,tSpin,0,0); // Pauli-Lubanski pseudovector
   //this->BoostToBreitFrame(vecSpin,IvecSpin); // TODO: check if other frames matter
-  phiS = PlaneAngle(
+  phiS = AdjAngle(PlaneAngle(
       IvecQ.Vect(), IvecElectron.Vect(),
       IvecQ.Vect(), vecSpin.Vect()
-      );
+      ));
   // pT, in perp frame (transverse to q), in ion rest frame
   pT = Reject(
       IvecHadron.Vect(),
@@ -219,8 +274,11 @@ void Kinematics::GetHadronicFinalState(
   itEFlowTrack.Reset();
   itEFlowPhoton.Reset();
   itEFlowNeutralHadron.Reset();
-
   itParticle.Reset();
+
+  sigmah = 0;
+  Pxh = 0;
+  Pyh = 0;
   while(Track *track = (Track*)itTrack() ){
     TLorentzVector  trackp4 = track->P4();
     if(!isnan(trackp4.E())){
@@ -287,19 +345,19 @@ void Kinematics::GetJets(
     }
   }
 
-  std::vector<PseudoJet> particles;
-  std::vector<PseudoJet> particlesTrue;
+  std::vector<fastjet::PseudoJet> particles;
+  std::vector<fastjet::PseudoJet> particlesTrue;
   jetConstituents.clear();
   // looping over final state particles, adding to particles vector
   while(Track *eflowTrack = (Track*)itEFlowTrack() ){
     TLorentzVector eflowTrackp4 = eflowTrack->P4();
     if(!isnan(eflowTrackp4.E())){
       if(std::abs(eflowTrack->Eta) < 4.0 && eflowTrack->PT > 0.1){
-        particles.push_back(PseudoJet(eflowTrackp4.Px(),eflowTrackp4.Py(),eflowTrackp4.Pz(),eflowTrackp4.E()));
+        particles.push_back(fastjet::PseudoJet(eflowTrackp4.Px(),eflowTrackp4.Py(),eflowTrackp4.Pz(),eflowTrackp4.E()));
 
         GenParticle *trackParticle = (GenParticle*)eflowTrack->Particle.GetObject();
         TLorentzVector partp4 = trackParticle->P4();	
-        particlesTrue.push_back(PseudoJet(partp4.Px(),partp4.Py(),partp4.Pz(),partp4.E()));
+        particlesTrue.push_back(fastjet::PseudoJet(partp4.Px(),partp4.Py(),partp4.Pz(),partp4.E()));
 
         jetConstituents.insert(std::pair<double,int>(eflowTrackp4.Px(), eflowTrack->PID) );
       }
@@ -309,12 +367,12 @@ void Kinematics::GetJets(
     TLorentzVector  towerPhotonp4 = towerPhoton->P4();
     if(!isnan(towerPhotonp4.E())){
       if( std::abs(towerPhoton->Eta) < 4.0){
-        particles.push_back(PseudoJet(towerPhotonp4.Px(),towerPhotonp4.Py(),towerPhotonp4.Pz(),towerPhotonp4.E()));
+        particles.push_back(fastjet::PseudoJet(towerPhotonp4.Px(),towerPhotonp4.Py(),towerPhotonp4.Pz(),towerPhotonp4.E()));
 
         for(int i = 0; i < towerPhoton->Particles.GetEntries(); i++){
           GenParticle *photonPart = (GenParticle*)towerPhoton->Particles.At(i);
           TLorentzVector photonp4 = photonPart->P4();
-          particlesTrue.push_back(PseudoJet(photonp4.Px(),photonp4.Py(),photonp4.Pz(),photonp4.E()));
+          particlesTrue.push_back(fastjet::PseudoJet(photonp4.Px(),photonp4.Py(),photonp4.Pz(),photonp4.E()));
         }
       }
     }
@@ -325,13 +383,13 @@ void Kinematics::GetJets(
     if(!isnan(towerNeutralHadronp4.E())){
       if( std::abs(towerNeutralHadron->Eta) < 4.0){
         particles.push_back(
-          PseudoJet(towerNeutralHadronp4.Px(),towerNeutralHadronp4.Py(),towerNeutralHadronp4.Pz(),towerNeutralHadronp4.E())
+          fastjet::PseudoJet(towerNeutralHadronp4.Px(),towerNeutralHadronp4.Py(),towerNeutralHadronp4.Pz(),towerNeutralHadronp4.E())
           );
 
         for(int i = 0; i < towerNeutralHadron->Particles.GetEntries(); i++){
           GenParticle *nhadPart = (GenParticle*)towerNeutralHadron->Particles.At(i);
           TLorentzVector nhadp4 = nhadPart->P4();
-          particlesTrue.push_back(PseudoJet(nhadp4.Px(),nhadp4.Py(),nhadp4.Pz(),nhadp4.E()));
+          particlesTrue.push_back(fastjet::PseudoJet(nhadp4.Px(),nhadp4.Py(),nhadp4.Pz(),nhadp4.E()));
         }	
       }
     }
@@ -339,10 +397,10 @@ void Kinematics::GetJets(
 
   //double R = 0.8*(M_PI/2.0);
   double R = 0.8;
-  JetDefinition jet_def(antikt_algorithm, R);
+  fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, R);
 
-  csRec = ClusterSequence(particles, jet_def);
-  csTrue = ClusterSequence(particlesTrue, jet_def);
+  csRec = fastjet::ClusterSequence(particles, jet_def);
+  csTrue = fastjet::ClusterSequence(particlesTrue, jet_def);
   jetsRec = sorted_by_pt(csRec.inclusive_jets());
   jetsTrue = sorted_by_pt(csTrue.inclusive_jets());
 
@@ -359,8 +417,8 @@ void Kinematics::GetBreitFrameJets(
   itEFlowPhoton.Reset();
   itEFlowNeutralHadron.Reset();
   itParticle.Reset();
-  std::vector<PseudoJet> particles;
-  std::vector<PseudoJet> particlesTrue;
+  std::vector<fastjet::PseudoJet> particles;
+  std::vector<fastjet::PseudoJet> particlesTrue;
 
   jetConstituents.clear();
 
@@ -389,12 +447,12 @@ void Kinematics::GetBreitFrameJets(
     if(!isnan(eflowTrackp4.E()) && eflowTrackp4 != vecElectron){
       if(std::abs(eflowTrack->Eta) < 4.0 && eflowTrack->PT > 0.2){
         eflowTrackp4.Boost(breitBoost);
-        particles.push_back(PseudoJet(eflowTrackp4.Px(),eflowTrackp4.Py(),eflowTrackp4.Pz(),eflowTrackp4.E()));
+        particles.push_back(fastjet::PseudoJet(eflowTrackp4.Px(),eflowTrackp4.Py(),eflowTrackp4.Pz(),eflowTrackp4.E()));
 
         GenParticle *trackParticle = (GenParticle*)eflowTrack->Particle.GetObject();
         TLorentzVector partp4 = trackParticle->P4();
         partp4.Boost(breitBoostTrue);
-        particlesTrue.push_back(PseudoJet(partp4.Px(),partp4.Py(),partp4.Pz(),partp4.E()));
+        particlesTrue.push_back(fastjet::PseudoJet(partp4.Px(),partp4.Py(),partp4.Pz(),partp4.E()));
 
         jetConstituents.insert(std::pair<double,int>(eflowTrackp4.Px(), eflowTrack->PID) );
 
@@ -409,13 +467,13 @@ void Kinematics::GetBreitFrameJets(
           )
       {
         towerPhotonp4.Boost(breitBoost);
-        particles.push_back(PseudoJet(towerPhotonp4.Px(),towerPhotonp4.Py(),towerPhotonp4.Pz(),towerPhotonp4.E()));
+        particles.push_back(fastjet::PseudoJet(towerPhotonp4.Px(),towerPhotonp4.Py(),towerPhotonp4.Pz(),towerPhotonp4.E()));
 
         for(int i = 0; i < towerPhoton->Particles.GetEntries(); i++){
           GenParticle *photonPart = (GenParticle*)towerPhoton->Particles.At(i);
           TLorentzVector photonp4 = photonPart->P4();
           photonp4.Boost(breitBoostTrue);
-          particlesTrue.push_back(PseudoJet(photonp4.Px(),photonp4.Py(),photonp4.Pz(),photonp4.E()));
+          particlesTrue.push_back(fastjet::PseudoJet(photonp4.Px(),photonp4.Py(),photonp4.Pz(),photonp4.E()));
         }
       }
     }
@@ -429,14 +487,14 @@ void Kinematics::GetBreitFrameJets(
       if( std::abs(towerNeutralHadron->Eta) < 4.0 ){
         towerNeutralHadronp4.Boost(breitBoost);
         particles.push_back(
-          PseudoJet(towerNeutralHadronp4.Px(),towerNeutralHadronp4.Py(),towerNeutralHadronp4.Pz(),towerNeutralHadronp4.E())
+			    fastjet::PseudoJet(towerNeutralHadronp4.Px(),towerNeutralHadronp4.Py(),towerNeutralHadronp4.Pz(),towerNeutralHadronp4.E())
           );
 
         for(int i = 0; i < towerNeutralHadron->Particles.GetEntries(); i++){
           GenParticle *nhadPart = (GenParticle*)towerNeutralHadron->Particles.At(i);
           TLorentzVector nhadp4 = nhadPart->P4();
           nhadp4.Boost(breitBoostTrue);
-          particlesTrue.push_back(PseudoJet(nhadp4.Px(),nhadp4.Py(),nhadp4.Pz(),nhadp4.E()));
+          particlesTrue.push_back(fastjet::PseudoJet(nhadp4.Px(),nhadp4.Py(),nhadp4.Pz(),nhadp4.E()));
         }
       }
     }
@@ -444,16 +502,16 @@ void Kinematics::GetBreitFrameJets(
 
   double R = 0.8;
   contrib::CentauroPlugin centauroPlugin(R);
-  JetDefinition jet_def(&centauroPlugin);
+  fastjet::JetDefinition jet_def(&centauroPlugin);
 
-  csRec = ClusterSequence(particles, jet_def);
-  csTrue = ClusterSequence(particlesTrue, jet_def);
+  csRec = fastjet::ClusterSequence(particles, jet_def);
+  csTrue = fastjet::ClusterSequence(particlesTrue, jet_def);
   breitJetsRec = sorted_by_pt(csRec.inclusive_jets());
   breitJetsTrue = sorted_by_pt(csTrue.inclusive_jets());
 };
 
 
-void Kinematics::CalculateBreitJetKinematics(PseudoJet jet){
+void Kinematics::CalculateBreitJetKinematics(fastjet::PseudoJet jet){
   TLorentzVector pjet(jet.px(), jet.py(), jet.pz(), jet.E());
   TLorentzVector pjetLab = pjet;
 
@@ -473,7 +531,7 @@ void Kinematics::CalculateBreitJetKinematics(PseudoJet jet){
 
   jperp.clear();
   zhad_jet.clear();
-  std::vector<PseudoJet> constituents = jet.constituents();
+  std::vector<fastjet::PseudoJet> constituents = jet.constituents();
   int constituentPID = 0; // if we only want zh/jperp for pi+, other tracks
 
   if(constituentPID == 0){
@@ -504,7 +562,7 @@ void Kinematics::CalculateBreitJetKinematics(PseudoJet jet){
 #endif
 
 
-void Kinematics::CalculateJetKinematics(PseudoJet jet){
+void Kinematics::CalculateJetKinematics(fastjet::PseudoJet jet){
   TLorentzVector pjet(jet.px(), jet.py(), jet.pz(), jet.E());
   TVector3 qT( vecElectron.Px()+pjet.Px(), vecElectron.Py()+pjet.Py(), 0);
   qTjet = qT.Mag();
@@ -514,7 +572,7 @@ void Kinematics::CalculateJetKinematics(PseudoJet jet){
 
   jperp.clear();
   zhad_jet.clear();
-  std::vector<PseudoJet> constituents = jet.constituents();
+  std::vector<fastjet::PseudoJet> constituents = jet.constituents();
   int constituentPID = 0; // if we only want zh/jperp for pi+, other tracks
 
   if(constituentPID == 0){
@@ -546,9 +604,9 @@ void Kinematics::CalculateJetKinematics(PseudoJet jet){
 // test a fake asymmetry, for fit code validation
 // - assigns `tSpin` based on desired fake asymmetry
 void Kinematics::InjectFakeAsymmetry() {
-  // modulations
+  // modulations, including depolarization factors [1807.10606 eq. 2.2-3]
   moduVal[0] = TMath::Sin(phiH-phiS); // sivers
-  moduVal[1] = TMath::Sin(phiH+phiS); // transversity*collins
+  moduVal[1] = TMath::Sin(phiH+phiS) * depolP1; // transversity*collins
   // fake amplitudes
   ampVal[0] = 0.1;
   ampVal[1] = 0.1;
@@ -556,8 +614,8 @@ void Kinematics::InjectFakeAsymmetry() {
   asymInject = 0;
   asymInject +=  ampVal[0]/0.2 * x * moduVal[0];
   asymInject += -ampVal[1]/0.2 * x * moduVal[1];
-  // apply polarization and depolarization factors
-  asymInject *= pol; // TODO: include depol. factor
+  // apply polarization
+  asymInject *= pol;
   // generate random number in [0,1]
   RN = RNG->Uniform();
   tSpin = (RN<0.5*(1+asymInject)) ? 1 : -1;

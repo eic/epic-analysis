@@ -6,8 +6,9 @@ sandbox
 *.so
 *.o
 *.exe
-*.png
+out/*/*.png
 *Dict.cxx
+out/*/*.txt
 external
 datagen/escalate
 tmp

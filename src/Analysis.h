@@ -5,8 +5,11 @@
 #include <stdio.h>
 #include <iostream>
 #include <sstream>
+#include <fstream>
 #include <map>
+#include <set>
 #include <stdexcept>
+#include <functional>
 
 // root
 #include "TChain.h"
@@ -15,20 +18,19 @@
 #include "TFile.h"
 #include "TRegexp.h"
 
-// delphes
-#include "classes/DelphesClasses.h"
-#include "external/ExRootAnalysis/ExRootTreeReader.h"
-
-//#include "fastjet/contrib/Centauro.hh"
-//#include "fastjet/plugins/Centauro/Centauro.hh"
-
 // largex-eic
 #include "Histos.h"
+#include "HistosDAG.h"
 #include "Kinematics.h"
 #include "CutDef.h"
 #include "BinSet.h"
 #include "SimpleTree.h"
 #include "Weights.h"
+
+// delphes (TODO: does fastjet need this?)
+//#include "classes/DelphesClasses.h"
+//#include "external/ExRootAnalysis/ExRootTreeReader.h"
+
 
 
 class Analysis : public TNamed
@@ -43,73 +45,105 @@ class Analysis : public TNamed
         );
     ~Analysis();
 
-    // number of bins
+    // number of bins for histograms
     const Int_t NBINS = 50;
+    const Int_t NBINS_FULL = 10;
 
-    // access bin scheme by name
-    BinSet *BinScheme(TString varname);
-
-    // add a new bin scheme
-    void AddBinScheme(TString varname, TString vartitle);
+    // bin schemes
+    void AddBinScheme(TString varname); // add a new bin scheme
+    BinSet *BinScheme(TString varname); // access bin scheme by name
+    std::map<TString,BinSet*> GetBinSchemes() { return binSchemes; }; // get full set of bin schemes
 
     // add a new final state bin
-    void AddFinalState(TString finalStateN, TString finalStateT, Int_t pid_);
+    void AddFinalState(TString finalStateN);
 
-    // add DIS reconstruction method bin
-    void AddRecMethod(TString recMethodN, TString recMethodT);
-
-  
-    // get Histos object name and title
-    TString GetHistosName(int cpt, int cx, int cz, int cq, int cy, int cfs);
-    TString GetHistosTitle(int cpt, int cx, int cz, int cq, int cy, int cfs);
-    TString GetHistosNameJets(int cpt, int cz, int cx, int cq, int cy);
-    TString GetHistosTitleJets(int cpt, int cz, int cx, int cq, int cy);
-    TString GetHistosNameBreitJets(int cpt, int cz, int cx, int cq, int cy, int crec);
-    TString GetHistosTitleBreitJets(int cpt, int cz, int cx, int cq, int cy, int crec);
-
-    // if these are true, only take 'diagonal' elements of the multi
-    // dimensional array of possible bins; this is useful
-    // if you want to check specific bins
-    // TODO: generalize
-    Bool_t diagonalPtXZ;
-    Bool_t diagonalXZQ;
-
-    // additional settings
+    // common settings
     Bool_t writeSimpleTree; // if true, write SimpleTree (not binned)
     Long64_t maxEvents; /* default=0, which runs all events;
                          * if > 0, run a maximum number of `maxEvents` events (useful for quick tests)
                          */
+    Bool_t useBreitJets; // if true, use Breit jets, if using finalState `jets` (requires centauro)
+    // set kinematics reconstruction method; see constructor for available methods
+    void SetReconMethod(TString reconMethod_) { reconMethod=reconMethod_; }; 
 
-    // perform the analysis
-    void Execute();
+    // add files to the TChain; this is called by `Prepare()`, but you can use these public
+    // methods to add more files if you want
+    void AddFile(TString fileName); // add single file `fileName`
+    void AddFiles(TString fileList); // add files listed in `fileList`
 
-    // set weights
+    // access HistosDAG
+    HistosDAG *GetHistosDAG();
+
+    // set weights // TODO: are these used yet?
     void SetWeights(Weights const* w) { weight = w; }
     void SetWeightsJet(Weights const* w) { weightJet = w; }
 
-    // tools
-    Bool_t CheckDiagonal(int cpt, int cx, int cz, int cq);
+    // calculate cross section (nb): sets `xsecTot` and `numGen`
+    void CalculateCrossSection(Long64_t numGen_);
+
+
+    // run the analysis
+    virtual void Execute() = 0;
 
   protected:
-    void CheckBins(BinSet *bs, std::vector<int> &v, Double_t var);
 
-  private:
-    Histos *HS;
+    // prepare to perform the analysis; in derived classes, define a method `Execute()`, which
+    // will run the event loop; the first line of `Execute()` should call `Analysis::Prepare()`,
+    // which set up common things like output files, `HistosDAG`, etc.
+    void Prepare();
+
+    // finish the analysis; call `Analysis::Finish()` at the end of derived `Execute()` methods
+    void Finish();
+
+    // FillHistos methods: fill histograms
+    void FillHistosTracks();
+    void FillHistosJets();
+
+    // lambda to check which bins an observable is in, during DAG breadth
+    // traversal; it requires `finalStateID`, `valueMap`, and will
+    // activate/deactivate bin nodes accoding to values in `valuMap`
+    std::function<void(Node*)> CheckBin();
+
+
+    // shared objects
     SimpleTree *ST;
     Kinematics *kin, *kinTrue;
+    HistosDAG *HD;
+    Weights const* weight;
+    Weights const* weightJet;
+    Double_t wTrackTotal, wJetTotal;
+    Double_t xsecTot;
+    Long64_t numGen;
+    const TString sep = "--------------------------------------------";
+
+    // setup / common settings
+    std::vector<TString> infiles;
     TString infileName,outfileName,outfilePrefix;
     TFile *outFile;
     Double_t eleBeamEn = 5; // GeV
     Double_t ionBeamEn = 41; // GeV
     Double_t crossingAngle = 0; // mrad
+    TString reconMethod;
+
+    // event loop objects
+    Long64_t ENT;
+    Double_t eleP,maxEleP;
+    Double_t elePtrue, maxElePtrue;
+    int pid;
+    fastjet::PseudoJet jet;
+    std::map<TString,Double_t> valueMap;
+    TString finalStateID;
+    Bool_t activeEvent;
+    Double_t wTrack,wJet;
+
+    // binning names / titles / etc.
+    std::map<TString,TString> availableBinSchemes;
     std::map<TString,BinSet*> binSchemes;
+    std::map<TString,TString> reconMethodToTitle;
+    std::map<TString, TString> finalStateToTitle;
+    std::map<int, TString> PIDtoFinalState;
+    std::set<TString> activeFinalStates;
 
-    Weights const* weight;
-    Weights const* weightJet;
-
-    std::map<int,int> PIDtoEnum;
-    std::map<int,TString> finalStateName;
-    std::map<int, TString> recMethodName;
   ClassDef(Analysis,1);
 };
 

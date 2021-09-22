@@ -26,7 +26,7 @@
 #if INCCENTAURO == 1
 #include "fastjet/plugins/Centauro/Centauro.hh"
 #endif
-using namespace fastjet;
+//using namespace fastjet;
 
 using std::map;
 using std::cout;
@@ -45,6 +45,8 @@ class Kinematics : public TObject
     void CalculateDISbyJB();
     void CalculateDISbyDA();
     void CalculateDISbyMixed();
+    void CalculateDISbySigma();
+    void CalculateDISbyeSigma();
     void getqWQuadratic();
     void CalculateHadronKinematics();
     void GetHadronicFinalState(
@@ -55,14 +57,14 @@ class Kinematics : public TObject
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
         );
-    void CalculateJetKinematics(PseudoJet jet);
+    void CalculateJetKinematics(fastjet::PseudoJet jet);
 
     #if INCCENTAURO == 1
     void GetBreitFrameJets(
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
         );
-    void CalculateBreitJetKinematics(PseudoJet jet);
+    void CalculateBreitJetKinematics(fastjet::PseudoJet jet);
     #endif
 
     // kinematics (should be Double_t, if going in SimpleTree)
@@ -78,17 +80,29 @@ class Kinematics : public TObject
     // polarization
     Double_t pol;
 
+    // depolarization
+    Double_t gamma,epsilon;
+    // - factors A,B,C,V,W from [hep-ph/0611265] using notation from [1408.5721]
+    Double_t depolA, depolB, depolC, depolV, depolW;
+    // - ratios of factors, following notation of [1807.10606] eq. 2.3 (cf. eqs. 2.2a,b)
+    Double_t depolP1; // for A_UT*sin(phiH+phiS) (collins), A_UT*sin(3phiH-phiS) (pretzelosity)
+    Double_t depolP2; // for A_LL*const
+    Double_t depolP3; // for twist-3 A_UT
+    Double_t depolP4; // for A_LL*cos(phiH)
+
     // 4-vectors
     // - lab frame
     TLorentzVector vecEleBeam, vecIonBeam;
     TLorentzVector vecElectron, vecW, vecQ;
     TLorentzVector vecHadron;
     // jets
-    std::vector<PseudoJet> jetsRec, jetsTrue;
-    std::vector<PseudoJet> breitJetsRec, breitJetsTrue;
+    std::vector<fastjet::PseudoJet> jetsRec, jetsTrue;
+    std::vector<fastjet::PseudoJet> breitJetsRec, breitJetsTrue;
     std::map<double, int> jetConstituents;
-    ClusterSequence csRec;
-    ClusterSequence csTrue;
+
+    fastjet::ClusterSequence csRec;
+    fastjet::ClusterSequence csTrue;
+
     Double_t zjet, pTjet, qTjet;
     std::vector<double> jperp;
     std::vector<double> zhad_jet;
@@ -120,15 +134,6 @@ class Kinematics : public TObject
 
 
     // boost calculations
-    // - calculate boost vectors
-    void SetBoostVecs() {
-      // c.o.m. frame of virtual photon and ion
-      CvecBoost = vecQ + vecIonBeam;
-      Cboost = -1*CvecBoost.BoostVector();
-      // ion rest frame
-      IvecBoost = vecIonBeam;
-      Iboost = -1*IvecBoost.BoostVector();
-    };
     // - boost from Lab frame to photon+ion C.o.m. frame
     void BoostToComFrame(TLorentzVector Lvec, TLorentzVector &Cvec) {
       Cvec=Lvec; Cvec.Boost(Cboost); };
@@ -176,6 +181,12 @@ class Kinematics : public TObject
       };
       return sgn * TMath::ACos(numer/denom);
     };
+    // - shift angle to the range [-PI,+PI]
+    static Double_t AdjAngle(Double_t ang) {
+      while(ang>TMath::Pi()) ang-=2*TMath::Pi();
+      while(ang<-TMath::Pi()) ang+=2*TMath::Pi();
+      return ang;
+    };
 
     // misc. functions for hadronic final state
     float correctMass(int pid){
@@ -205,10 +216,8 @@ class Kinematics : public TObject
 
 
     // CUTS =====================================================
-    const Double_t xMinGlobal = 0.05; // minimum x for "large-x"
     Bool_t CutDIS() {
-      return x>xMinGlobal /* large x region */
-          && W>3.0 /* inelastic region */
+      return W>3.0 /* inelastic region */
           && y>0.00 && y<0.95 /* ymin cut applied elsewhere */
           ;
     };
