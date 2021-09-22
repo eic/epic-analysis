@@ -147,8 +147,8 @@ void AnalysisDelphes::Execute() {
       
       // asymmetry injection
       //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
-      kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
-      kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
+      //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
+      //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
       wTrack = weight->GetWeight(*kinTrue);
       wTrackTotal += wTrack;
