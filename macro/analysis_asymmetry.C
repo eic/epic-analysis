@@ -1,8 +1,4 @@
 R__LOAD_LIBRARY(Largex)
-#include "Analysis.h"
-#include "Weights.h"
-#include "sfset/Prokudin.h"
-#include "sfset/Pavia.h"
 
 struct WeightsProkudin : public WeightsSivers {
   ProkudinSfSet sf_set;
@@ -47,7 +43,7 @@ void analysis_asymmetry(
 ) {
 
   // setup analysis ========================================
-  Analysis *A = new Analysis(
+  AnalysisDelphes *A = new AnalysisDelphes(
       infiles,
       eleBeamEn,
       ionBeamEn,
@@ -59,6 +55,11 @@ void analysis_asymmetry(
     new WeightsPavia()
   });
   A->SetWeights(weights);
+
+  A->writeSimpleTree = true; // write SimpleTree (for one bin)
+  //A->maxEvents = 10000; // use this to limit the number of events
+  //A->SetReconMethod("Ele"); // recon method (default is "Ele")
+  //A->AddFinalState("pipTrack"); // final states (default is "pipTrack" only)
 
   // perform the analysis ==================================
   A->Execute();
