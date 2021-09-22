@@ -31,3 +31,4 @@ fi
 
 export MSTWPDF_HOME=$(pwd)/mstwpdf
 echo "MSTWPDF at $MSTWPDF_HOME"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$MSTWPDF_HOME"
