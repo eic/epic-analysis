@@ -34,6 +34,12 @@ struct WeightsPavia : public WeightsSivers {
   }
 };
 
+struct WeightsTest : public WeightsSivers {
+  Double_t Asymmetry(Double_t x, Double_t z, Double_t Q2, Double_t pt) const override {
+    return 0.5;
+  }
+};
+
 void analysis_asymmetry(
     TString infiles="datarec/dire_5x41.brian.hiDiv.root", /* delphes tree(s) */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */

@@ -8,7 +8,12 @@ void postprocess_asymmetry(
   PostProcessor *P = new PostProcessor(infile);
 
   // payload operator: execute PostProcessor::DrawSingle for each bin defined in analysis_asymmetry.C
-  P->Op()->Payload( [&P](Histos *H) { P->DrawSingle(H,"phiS",""); });
+  P->Op()->Payload( [&P](Histos *H) {
+    P->DrawSingle(H,"phiH","");
+    P->DrawSingle(H,"phiS","");
+    P->DrawSingle(H,"phiSivers","");
+    P->DrawSingle(H,"phiCollins","");
+  });
 
   // execution and cleanup
   P->Execute();

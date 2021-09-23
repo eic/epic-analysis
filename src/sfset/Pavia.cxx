@@ -106,25 +106,69 @@ PaviaSfSet::~PaviaSfSet() {
 
 double PaviaSfSet::F_UUT(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
 	double Q = std::sqrt(Q_sq);
-	double qT = std::sqrt(ph_t_sq) / (z * Q);
+	double qTtoQ = std::sqrt(ph_t_sq) / (z * Q);
+	bool interp_x = false;
+	bool interp_z = false;
+	double old_x;
+	double old_z;
+	if (x < 0.02) {
+		interp_x = true;
+		old_x = x;
+		x = 0.02;
+	}
+	if (z < 0.1) {
+		interp_z = true;
+		old_z = z;
+		z = 0.1;
+	}
+	double result;
 	if (h == Hadron::PI_P) {
-		return _impl->interp_pip_uu({ Q, x, z, qT });
+		result = _impl->interp_pip_uu({ Q, x, z, qTtoQ });
 	} else if (h == Hadron::PI_M) {
-		return _impl->interp_pim_uu({ Q, x, z, qT });
+		result = _impl->interp_pim_uu({ Q, x, z, qTtoQ });
 	} else {
 		return std::numeric_limits<double>::quiet_NaN();
 	}
+	if (interp_x) {
+		result *= old_x / 0.02;
+	}
+	if (interp_z) {
+		result *= old_z / 0.1;
+	}
+	return result;
 }
 
 double PaviaSfSet::F_UTT_sin_phih_m_phis(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
 	double Q = std::sqrt(Q_sq);
-	double qT = std::sqrt(ph_t_sq) / (z * Q);
+	double qTtoQ = std::sqrt(ph_t_sq) / (z * Q);
+	bool interp_x = false;
+	bool interp_z = false;
+	double old_x;
+	double old_z;
+	if (x < 0.02) {
+		interp_x = true;
+		old_x = x;
+		x = 0.02;
+	}
+	if (z < 0.1) {
+		interp_z = true;
+		old_z = z;
+		z = 0.1;
+	}
+	double result;
 	if (h == Hadron::PI_P) {
-		return _impl->interp_pip_ut_sivers({ Q, x, z, qT });
+		result = _impl->interp_pip_ut_sivers({ Q, x, z, qTtoQ });
 	} else if (h == Hadron::PI_M) {
-		return _impl->interp_pim_ut_sivers({ Q, x, z, qT });
+		result = _impl->interp_pim_ut_sivers({ Q, x, z, qTtoQ });
 	} else {
 		return std::numeric_limits<double>::quiet_NaN();
 	}
+	if (interp_x) {
+		result *= old_x / 0.02;
+	}
+	if (interp_z) {
+		result *= old_z / 0.1;
+	}
+	return result;
 }
 
