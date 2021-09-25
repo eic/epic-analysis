@@ -90,6 +90,11 @@ The two stages are driven by macros. Example macros will eventually be added;
 for now you can assume any macro named `analysis_*.C` or `postprocess_*.C` are
 respective macros for the stages.
 
+- **Note**: most macros stored in this repository must be executed from the
+  `largex-eic` top directory, not from within their subdirectory, e.g., run
+  `root -b -q tutorial/analysis_template.C`; this is because certain library
+  and data directory paths are given as relative paths
+
 ## Analysis
 
 ### Analysis Macro and Class
