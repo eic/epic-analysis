@@ -19,5 +19,7 @@ jobs:
 
       - name: Build Test
         run: |
-          . env.sh
+          pwd
+          ls
+          . ./env.sh
           make
