@@ -19,5 +19,5 @@ jobs:
 
       - name: Build Test
         run: |
-          source env.sh
+          . env.sh
           make
