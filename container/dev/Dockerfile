@@ -10,6 +10,7 @@ apt-get install -yq \
     cmake \
     curl \
     dpkg-dev \
+    emacs \
     g++ \
     gcc \
     gfortran \
@@ -44,6 +45,8 @@ apt-get install -yq \
     python-dev \
     rsync \
     tcl \
+    wget \
+    vim \
     xlibmesa-glu-dev
 
 # general environment

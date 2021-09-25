@@ -2,5 +2,7 @@ version: '3'
 services:
   ci:
     build: ./container/ci
-    #volumes:
-     #- .:/opt/largex-eic
+    container_name: largex-eic-ci
+  dev:
+    build: ./container/dev
+    container_name: largex-eic-dev

@@ -1,13 +1,21 @@
+# devscripts
 development scripts for image maintenance
 
 # notes
 
-pushing to dockerhub
+### building docker images
+- user must be in `docker` group, `pwd` must contain `docker-compose.yml`
+```
+docker-compose build ci
+docker-compose build dev
+```
 
+### pushing to dockerhub
+example for CI image: give it the dockerhub repo name, with the tag `ci`
 ```
 docker login
 docker images
-docker tag largexeic_ci:latest cjdilks/largex_eic_ci:1.0
-docker push cjdilks/largex_eic_ci:1.0
+docker tag largexeic-ci:latest cjdilks/largex-eic:ci
+docker push !$
 docker logout
 ```
