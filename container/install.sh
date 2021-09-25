@@ -64,5 +64,6 @@ echo ""
 
 
 # pull image from dockerhub
-singularity pull $imgFile docker://cjdilks/largex_eic_ci:1.0
+singularity pull $imgFile docker://cjdilks/largex_eic_ci:1.0 && \
+echo "SUCCESS!"
 

@@ -1,12 +1,14 @@
 #!/bin/bash
 # start an interactive shell in the singularity container
 
-# set image directory to definitely be ./img
-if [ -z "${BASH_SOURCE[0]}" ]; then imgDirDflt=$(dirname $(realpath $0))/img
-else imgDirDflt=$(dirname $(realpath ${BASH_SOURCE[0]}))/img; fi
+# determine top-level directory
+if [ -z "${BASH_SOURCE[0]}" ]; then topDir=$(dirname $(realpath $0))/..
+else topDir=$(dirname $(realpath ${BASH_SOURCE[0]}))/..; fi
 
 # set image file
-imgFile=$imgDirDflt/largex-eic.sif
+imgDir=$topDir/container/img
+imgFile=$imgDir/largex-eic.sif
 
 # start shell
-singularity shell $imgFile
+args=$@
+singularity exec $imgFile bash -c "cd $topDir && source env.sh && bash $args"
