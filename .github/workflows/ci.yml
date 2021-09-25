@@ -11,6 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: cjdilks/largex-eic:ci
+      options: --user root
 
     steps:
       - name: Checkout code
