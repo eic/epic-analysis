@@ -2,6 +2,10 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# TODO
+# - add common stuff, like vim and emacs
+# - make sure other env vars in env.sh get set, viz. from asymmetry-injection branch
+
 # dependencies
 RUN \
 apt-get update && \

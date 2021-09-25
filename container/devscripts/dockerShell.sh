@@ -12,4 +12,4 @@ docker run \
   -v $(pwd):$swdir \
   -w $swdir \
   largexeic_ci:latest bash \
-  -c "cat $swdir/docker/.shellrc >> $homedir/.bashrc && exec bash"
+  -c "cat $swdir/container/dev/.shellrc >> $homedir/.bashrc && exec bash"
