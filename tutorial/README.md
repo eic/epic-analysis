@@ -4,7 +4,7 @@ Here is a collection of tutoial macros. If you are learning this software,
 it is recommended to go through these tutorials in order given below.
 
 - **Note**: execute macros from the `largex-eic` top directory, not from
-this tutorial dirctory, e.g., `root -b -q tutorial/analysis_template.C`
+this tutorial directory, e.g., `root -b -q tutorial/analysis_template.C`
 
 - you need to generate or obtain ROOT files in the `datarec/` directory
 
