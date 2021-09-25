@@ -10,6 +10,7 @@ else imgDirDflt=$(dirname $(realpath ${BASH_SOURCE[0]}))/img; fi
 # usage
 if [ $# -lt 1 ]; then 
   echo """
+  download and build the singularity image
 
   USAGE: $0 [image directory] [(optional) temp directory]
     
@@ -23,7 +24,6 @@ if [ $# -lt 1 ]; then
       - used while building the SIF file, may need a few GB for a few minutes
       - your default directory is probably $([[ -z "$TMPDIR" ]] && echo "/tmp" || echo "$TMPDIR")
         specify a different directory, if there is not enough space there
-
   """
   exit 1
 fi
@@ -56,14 +56,14 @@ if [ $# -ge 2 ]; then export TMPDIR=$2; fi
 
 # print settings
 imgFile=$imgDir/largex-eic.sif
-echo ""
-echo "image directory = $imgDir"
-echo "image file = $imgFile"
-echo "temp directory = $([[ -z "$TMPDIR" ]] && echo "/tmp" || echo "$TMPDIR")"
-echo ""
+echo """
+image directory = $imgDir
+image file = $imgFile
+temp directory = $([[ -z "$TMPDIR" ]] && echo "/tmp" || echo "$TMPDIR")
+"""
 
 
 # pull image from dockerhub
-singularity pull $imgFile docker://cjdilks/largex_eic_ci:1.0 && \
+singularity pull $imgFile docker://cjdilks/largex-eic:dev && \
 echo "SUCCESS!"
 

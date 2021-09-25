@@ -81,6 +81,9 @@ ENV LD_LIBRARY_PATH=$DELPHES_HOME:$LD_LIBRARY_PATH
 ENV PYTHONPATH=$DELPHES_HOME/python:$PYTHONPATH
 ENV LIBRARY_PATH=$DELPHES_HOME:$LIBRARY_PATH
 
+# copy sample root file for tests (source path is w.r.t. Dockerfile)
+COPY datarec/ciTest_5x41.root /data/
+
 # non-privelaged user
 RUN \
 mkdir -p /tmp/.X11-unix && \

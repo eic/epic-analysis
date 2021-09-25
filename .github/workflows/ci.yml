@@ -7,18 +7,31 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
     container:
       image: cjdilks/largex-eic:ci
       options: --user root
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v2
 
       - name: Build Test
         shell: bash
         run: |
-          source ./env.sh
+          source env.sh
           make
+
+      - name: Macro Test
+        shell: bash
+        run: |
+          root -b -q container/ci/macro/analysis_xqbins.C
+          root -b -q container/ci/macro/postprocess_xqbins_draw.C
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: macro-test-images
+          path: |
+            out/macro.test.ciTest_5x41.images
