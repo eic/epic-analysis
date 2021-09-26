@@ -37,7 +37,9 @@ repository (pull requests are also welcome).
     - Images are hosted on [Docker Hub](https://hub.docker.com/r/cjdilks/largex-eic)
       - (the Docker image is hosted, but Singularity can pull it too)
   - Then run `container/shell.sh` to start a shell in the container
-  - Proceed with the **Building** section below (`source env.sh; make`)
+    - This will automatically call `source env.sh` upon shell startup, which
+      sets environment variables
+  - Proceed with the **Building** section below (just type `make`)
 
 ## Option 2: Setup your own environment
 
