@@ -25,28 +25,50 @@ repository (pull requests are also welcome).
 
 # Setup and Dependencies
 
-## Delphes
+## Option 1: Use the Singularity image
 
-- the analysis is capable of reading `delphes` fast simulation output, and also
-  provides a simple wrapper for `delphes` to help keep input `hepmc` and output
-  `root` files organized
-  - it is not required to use the `delphes` wrapper, but `delphes` libraries are
-    needed for the analysis of fast simulation data
-- first, make sure you have a build of `delphes` somewhere, preferably in a
-  separate directory
-- set environment variables before doing anything, so this repository knows where your
-  `delphes` build is: `source env.sh /path/to/delphes/repository`
-  - if you do not specify a path to `delphes` repository, it will use a default
-    path given in `env.sh`; it is useful to edit this default path for your own
-    convenience
-  - it will also symlink `delphes` external code, so analysis macros
-    will not complain
+- To minimize setup effort, and provide a consistent development environment, 
+  a Singularity (Docker) image is available, which contains all the dependencies
+  pre-built
+  - First run `container/install.sh` to download and build the Singularity image
+    - With no arguments, a usage guide will be printed
+    - Default image file location is `container/img/`
+    - Note that the image size is about 2 GB
+    - Images are hosted on [Docker Hub](https://hub.docker.com/repository/docker/cjdilks/largex-eic)
+  - Then run `container/shell.sh` to start a shell in the container
+  - Proceed with the **Building** section below (`source env.sh; make`)
+
+## Option 2: Setup your own environment
+
+- The other option is to manually set up your environment, by downloading and/or
+  building all of the necessary dependencies
+- Once you have all the dependencies, proceed with the **Building** section
+  below
+
+### Dependencies
+
+- **ROOT**: prefer v6.24.02 or later
+- **Delphes**:
+  - the analysis is capable of reading `delphes` fast simulation output, and also
+    provides a simple wrapper for `delphes` to help keep input `hepmc` and output
+    `root` files organized
+    - it is not required to use the `delphes` wrapper, but `delphes` libraries are
+      needed for the analysis of fast simulation data
+  - first, make sure you have a build of `delphes` somewhere, preferably in a
+    separate directory
+  - set environment variables before doing anything, so this repository knows where your
+    `delphes` build is: `source env.sh /path/to/delphes/repository`
+    - if you do not specify a path to `delphes` repository, it will use a default
+      path given in `env.sh`; it is useful to edit this default path for your own
+      convenience
+    - it will also symlink `delphes` external code, so analysis macros
+      will not complain
 
 ## Building
 
-- build analysis code with `make` (environment variables must be set first, see above)
-  - it requires a `root` build as well as `delphes`
-  - all classes are found in the `src/` directory
+- Build analysis code with `make` (environment variables must be set first, see above)
+  - It requires a `root` build as well as `delphes`
+  - All classes are found in the `src/` directory
 
 ## Quick Start
 
@@ -192,6 +214,8 @@ respective macros for the stages.
   find it useful to fork the repository for your own purposes, so that you do
   not have to feel limited by existing code (you can still send pull requests
   from a fork)
+- Continuous Integration (CI) will trigger on pull requests, which will build
+  and test your contribution; see `Actions` tab for workflows for details
 - It is recommended to keep up-to-date with developments by browsing the pull
   requests, issues, and viewing the latest commits by going to the `Insights`
-  tab, and clicking `Netwok` to show the branch topology
+  tab, and clicking `Network` to show the branch topology
