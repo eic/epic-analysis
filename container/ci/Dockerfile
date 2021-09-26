@@ -5,6 +5,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 # dependencies
 RUN \
 apt-get update && \
+apt-get upgrade -yq && \
 apt-get install -yq \
     binutils \
     cmake \
@@ -84,7 +85,7 @@ ENV LIBRARY_PATH=$DELPHES_HOME:$LIBRARY_PATH
 # copy sample root file for tests (source path is w.r.t. Dockerfile)
 COPY datarec/ciTest_5x41.root /data/
 
-# non-privelaged user
+# non-privileged user
 RUN \
 mkdir -p /tmp/.X11-unix && \
 useradd -u 1000 --create-home athena && \

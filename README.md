@@ -28,13 +28,14 @@ repository (pull requests are also welcome).
 ## Option 1: Use the Singularity image
 
 - To minimize setup effort, and provide a consistent development environment, 
-  a Singularity (Docker) image is available, which contains all the dependencies
-  pre-built
+  a Singularity image is available, which contains all the dependencies
+  pre-built, as well as sample ROOT files
   - First run `container/install.sh` to download and build the Singularity image
     - With no arguments, a usage guide will be printed
     - Default image file location is `container/img/`
     - Note that the image size is about 2 GB
     - Images are hosted on [Docker Hub](https://hub.docker.com/repository/docker/cjdilks/largex-eic)
+      - (the Docker image is hosted, but Singularity can pull it too)
   - Then run `container/shell.sh` to start a shell in the container
   - Proceed with the **Building** section below (`source env.sh; make`)
 
@@ -66,8 +67,9 @@ repository (pull requests are also welcome).
 
 ## Building
 
-- Build analysis code with `make` (environment variables must be set first, see above)
-  - It requires a `root` build as well as `delphes`
+- First make sure environment variables are set by calling `source env.sh`
+- Build analysis code with `make`
+  - It requires a `root` build as well as `delphes` (see above)
   - All classes are found in the `src/` directory
 
 ## Quick Start

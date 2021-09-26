@@ -1,7 +1,8 @@
 #!/bin/bash
 # start docker shell, for testing image builds
 
-image=largexeic_ci:latest
+#image=largexeic_ci:latest
+image=largexeic_dev:latest
 
 homedir=/home/athena
 swdir=$homedir/largex-eic
