@@ -30,4 +30,4 @@ exe: $(EXES)
 
 clean:
 	@cd src; make clean
-	$(RM) $(EXES)
+#$(RM) $(EXES)
