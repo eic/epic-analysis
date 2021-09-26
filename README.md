@@ -34,7 +34,7 @@ repository (pull requests are also welcome).
     - With no arguments, a usage guide will be printed
     - Default image file location is `container/img/`
     - Note that the image size is about 2 GB
-    - Images are hosted on [Docker Hub](https://hub.docker.com/repository/docker/cjdilks/largex-eic)
+    - Images are hosted on [Docker Hub](https://hub.docker.com/r/cjdilks/largex-eic)
       - (the Docker image is hosted, but Singularity can pull it too)
   - Then run `container/shell.sh` to start a shell in the container
   - Proceed with the **Building** section below (`source env.sh; make`)
