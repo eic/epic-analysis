@@ -4,18 +4,37 @@ Here is a collection of tutoial macros. If you are learning this software,
 it is recommended to go through these tutorials in order given below.
 
 - **Note**: execute macros from the `largex-eic` top directory, not from
-this tutorial dirctory, e.g., `root -b -q tutorial/analysis_template.C`
+this tutorial directory, e.g., `root -b -q tutorial/analysis_template.C`
 
-- you need to generate or obtain ROOT files in the `datarec/` directory
+- you need to generate or obtain ROOT files, from fast or full simulation
+  - the `datarec/` directory is provided for storage of these files,
+    but is not required to use
+  - if you are running in the Singularity container, there are sample
+    Delphes output files in `/data`
+    - the easiest way to run the tutorial macros is to make symbolic
+      links with `ln -sv /data/*.root datarec/`
+    - alternatively, pass the file names as parameters when running
+      the macros
+    - sample files are not up-to-date, and serve as examples only
+  - if you want to generate your own, run Pythia8 to produce a `hepmc`
+    file, then run Delphes
 
-- currently all of these examples focus on fast simulations
+- many of these examples focus on fast simulations
+  - to switch between fast and full simulations, change the Analysis
+    class in the macro
+    - `AnalysisDelphes` is used for fast simulation
+    - `AnalysisDD4hep` is used for full simulation
+    - some extra settings and features differ between the two
 
-- in general it is recommended to use two macros:
+- all tutorial examples have two macros:
   - analysis macro, to run an `Analysis` class, which will analyze 
     simulated data in an event loop, and generate a variety of output
     data structures
   - postprocessor macro, to process the output from the analysis macro,
     such as drawing plots
+  - the analysis macro will take some time to run, since it runs
+    the event loop; the postprocessor macro is typically fast, since
+    it analyzes the resulting data structures
 
 ## Examples:
 

@@ -12,3 +12,5 @@ out/*/*.txt
 external
 datagen/escalate
 tmp
+*.sif
+container/img
