@@ -26,6 +26,7 @@ jobs:
       - name: Macro Test
         shell: bash
         run: |
+          source env.sh
           root -b -q container/ci/macro/analysis_xqbins.C
           root -b -q container/ci/macro/postprocess_xqbins_draw.C
 
