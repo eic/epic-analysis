@@ -62,15 +62,23 @@ TString NodePath::CutListString() {
 Node *NodePath::GetPreviousNode(Node *N, bool silence) {
   for(auto inN : N->GetInputs()) { if(nodes.find(inN)!=nodes.end()) return inN; };
   if(!silence) std::cerr << "ERROR: node " << N->GetID() << " has no previous node in this path" << std::endl;
+  return nullptr;
 };
 // return the node that `N` points to
 Node *NodePath::GetNextNode(Node *N, bool silence) {
   for(auto outN : N->GetOutputs()) { if(nodes.find(outN)!=nodes.end()) return outN; };
   if(!silence) std::cerr << "ERROR: node " << N->GetID() << " has no next node in this path" << std::endl;
+  return nullptr;
 };
 // return the first or last node in the path
-Node *NodePath::GetFirstNode() { for(auto N : nodes) { if(GetPreviousNode(N,true)==nullptr) return N; }; };
-Node *NodePath::GetLastNode()  { for(auto N : nodes) { if(GetNextNode(N,true)==nullptr)     return N; }; };
+Node *NodePath::GetFirstNode() {
+  for(auto N : nodes) { if(GetPreviousNode(N,true)==nullptr) return N; };
+  return nullptr;
+};
+Node *NodePath::GetLastNode() {
+  for(auto N : nodes) { if(GetNextNode(N,true)==nullptr) return N; };
+  return nullptr;
+};
 
 
 // returns path in DAG order (NodePath encapsulates an unordered set of nodes)

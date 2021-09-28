@@ -32,4 +32,4 @@ exe: $(EXES)
 clean:
 	@cd mstwpdf; make clean
 	@cd src; make clean
-	$(RM) $(EXES)
+#$(RM) $(EXES)
