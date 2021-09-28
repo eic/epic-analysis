@@ -34,3 +34,6 @@ else
   echo "ERROR: DelphesEnv.sh not found, is the repo really at ${delphesDir}?"
 fi
 
+export MSTWPDF_HOME=$(pwd)/mstwpdf
+echo "MSTWPDF at $MSTWPDF_HOME"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$MSTWPDF_HOME"

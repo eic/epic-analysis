@@ -4,6 +4,7 @@ sandbox
 *.root
 *.pcm
 *.so
+*.o
 *.exe
 out/*/*.png
 *Dict.cxx
