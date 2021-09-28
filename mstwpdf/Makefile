@@ -26,7 +26,7 @@ mstwpdf.o : mstwpdf.f
 	$(FC) -c $(FFLAGS) $< -o $@
 
 alphaS.o : alphaS.f
-	$(FC) -c $(FFLAGS) $< -o $@
+	$(FC) -Wno-compare-reals -c $(FFLAGS) $< -o $@
 
 #####################################
 # C++ version:
