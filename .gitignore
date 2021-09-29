@@ -1,5 +1,5 @@
+# main ignores
 .*.sw*
-sandbox
 *.hepmc*
 *.root
 *.pcm
@@ -10,7 +10,10 @@ out/*/*.png
 *Dict.cxx
 out/*/*.txt
 external
-datagen/escalate
-tmp
 *.sif
 container/img
+
+# users' custom ignores
+datagen/escalate
+datagen/arc
+datarec/arc
