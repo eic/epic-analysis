@@ -75,7 +75,7 @@ void Kinematics::getqWQuadratic(){
     }
 
     vecQ.SetPxPyPzE(Pxh, Pyh, qz, qE);
-    vecW = vecIonBeam - vecQ;
+    vecW = vecIonBeam + vecQ;
     W = vecW.M();
     Nu = vecIonBeam.Dot(vecQ)/IonMass;
   }
