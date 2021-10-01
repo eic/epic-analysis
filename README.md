@@ -25,28 +25,59 @@ repository (pull requests are also welcome).
 
 # Setup and Dependencies
 
-## Delphes
+## Option 1: Use the Singularity image
 
-- the analysis is capable of reading `delphes` fast simulation output, and also
-  provides a simple wrapper for `delphes` to help keep input `hepmc` and output
-  `root` files organized
-  - it is not required to use the `delphes` wrapper, but `delphes` libraries are
-    needed for the analysis of fast simulation data
-- first, make sure you have a build of `delphes` somewhere, preferably in a
-  separate directory
-- set environment variables before doing anything, so this repository knows where your
-  `delphes` build is: `source env.sh /path/to/delphes/repository`
-  - if you do not specify a path to `delphes` repository, it will use a default
-    path given in `env.sh`; it is useful to edit this default path for your own
-    convenience
-  - it will also symlink `delphes` external code, so analysis macros
-    will not complain
+- To minimize setup effort, and provide a consistent development environment, 
+  a Singularity image is available, which contains all the dependencies
+  pre-built, as well as sample ROOT files
+  - First run `container/install.sh` to download and build the Singularity image
+    - With no arguments, a usage guide will be printed
+    - Default image file location is `container/img/`
+    - Note that the image size is about 2 GB
+    - Images are hosted on [Docker Hub](https://hub.docker.com/r/cjdilks/largex-eic)
+      - (the Docker image is hosted, but Singularity can pull it too)
+  - Then run `container/shell.sh` to start a shell in the container
+    - This will automatically call `source env.sh` upon shell startup, which
+      sets environment variables
+  - Proceed with the **Building** section below (just type `make`)
+
+## Option 2: Setup your own environment
+
+- The other option is to manually set up your environment, by downloading and/or
+  building all of the necessary dependencies
+- Once you have all the dependencies, proceed with the **Building** section
+  below
+
+### Dependencies
+
+- **ROOT**: prefer v6.24.02 or later
+- **Delphes**:
+  - the analysis is capable of reading `delphes` fast simulation output, and also
+    provides a simple wrapper for `delphes` to help keep input `hepmc` and output
+    `root` files organized
+    - it is not required to use the `delphes` wrapper, but `delphes` libraries are
+      needed for the analysis of fast simulation data
+  - first, make sure you have a build of `delphes` somewhere, preferably in a
+    separate directory
+  - set environment variables before doing anything, so this repository knows where your
+    `delphes` build is: `source env.sh /path/to/delphes/repository`
+    - if you do not specify a path to `delphes` repository, it will use a default
+      path given in `env.sh`; it is useful to edit this default path for your own
+      convenience
+    - it will also symlink `delphes` external code, so analysis macros
+      will not complain
 
 ## Building
 
-- build analysis code with `make` (environment variables must be set first, see above)
-  - it requires a `root` build as well as `delphes`
-  - all classes are found in the `src/` directory
+- First make sure environment variables are set by calling `source env.sh`
+- Build analysis code with `make`
+  - It requires a `root` build as well as `delphes` (see above)
+  - All classes are found in the `src/` directory
+
+## Quick Start
+
+- If you're ready to try the software hands-on, follow the [tutorials](tutorial/README.md) in 
+  the `tutorial/` directory
 
 
 # Simulation
@@ -84,6 +115,11 @@ drawing, comparisons, table printouts, and any feature you would like to add
 The two stages are driven by macros. Example macros will eventually be added;
 for now you can assume any macro named `analysis_*.C` or `postprocess_*.C` are
 respective macros for the stages.
+
+- **Note**: most macros stored in this repository must be executed from the
+  `largex-eic` top directory, not from within their subdirectory, e.g., run
+  `root -b -q tutorial/analysis_template.C`; this is because certain library
+  and data directory paths are given as relative paths
 
 ## Analysis
 
@@ -137,10 +173,8 @@ respective macros for the stages.
             an event with `y=0.1` will appear in all three bins
 - Multi-dimensional binning
   - Binning in multi-dimensions is allowed, e.g., 3D binning in `x`,`Q2`,`z`
-  - TODO: the current implementation is a prototype and there is a limit on the
-    number of dimensions and the variables you are allowed to bin in are
-    restricted (e.g., for tracks you are limited to `pT`,`x`,`z`,`Q`,`y`); an
-    update to internal data structures aims to remove these restrictions
+  - See [Adage documentation](doc/adage.md) for more information on how multi-dimensional
+    binning is handled, as well as the [Adage syntax reference](doc/syntax.md)
   - Be careful of the curse of dimensionality
     - You can restrict the binning in certain dimensions by taking only diagonal
       elements of a matrix of bins (see `diagonal` settings in `src/Analysis.h`)
@@ -189,6 +223,8 @@ respective macros for the stages.
   find it useful to fork the repository for your own purposes, so that you do
   not have to feel limited by existing code (you can still send pull requests
   from a fork)
+- Continuous Integration (CI) will trigger on pull requests, which will build
+  and test your contribution; see `Actions` tab for workflows for details
 - It is recommended to keep up-to-date with developments by browsing the pull
   requests, issues, and viewing the latest commits by going to the `Insights`
-  tab, and clicking `Netwok` to show the branch topology
+  tab, and clicking `Network` to show the branch topology

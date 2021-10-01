@@ -7,8 +7,8 @@ LINKDEF = LinkDef.h
 
 
 # source code (with $(DICT) and $(LINKDEF) moved to end of lists for rootcling)
-SOURCES := $(filter-out $(DICT), $(wildcard *.cxx)) $(DICT)
-HEADERS := $(filter-out $(LINKDEF), $(wildcard *.h)) $(LINKDEF)
+SOURCES := $(filter-out $(DICT), $(wildcard *.cxx) $(wildcard sfset/*.cxx) $(wildcard interp/*.cxx)) $(DICT)
+HEADERS := $(filter-out $(LINKDEF), $(wildcard *.h) $(wildcard sfset/*.h) $(wildcard interp/*.h) $(wildcard interp/*.ipp)) $(LINKDEF)
 
 
 #-----------------------------------------------

@@ -1,13 +1,19 @@
+# main ignores
 .*.sw*
-sandbox
 *.hepmc*
 *.root
 *.pcm
 *.so
+*.o
 *.exe
-*.png
+out/*/*.png
 *Dict.cxx
 out/*/*.txt
 external
+*.sif
+container/img
+
+# users' custom ignores
 datagen/escalate
-tmp
+datagen/arc
+datarec/arc

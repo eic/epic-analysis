@@ -15,9 +15,17 @@ void HistosDAG::Build(std::map<TString,BinSet*> binSchemes) {
   // initialize DAG and histosMap
   InitializeDAG();
   histosMap.clear();
+  // add the finalState layer first, if it exists
+  try { 
+    BinSet *finalLayer = binSchemes.at("finalState");
+    if(finalLayer->GetNumBins()>0) AddLayer(finalLayer);
+  } catch(const std::out_of_range &ex) {
+    std::cerr << "WARNING: no finalState bins defined" << std::endl;
+  };
   // add one layer for each BinSet with nonzero bins defined
   for(auto kv : binSchemes) {
     if(debug) std::cout << "add BinSet " << kv.first << " to HistosDAG" << std::endl;
+    if(kv.first=="finalState") continue;
     BinSet *binScheme = kv.second;
     if(binScheme->GetNumBins()>0) AddLayer(binScheme);
   };

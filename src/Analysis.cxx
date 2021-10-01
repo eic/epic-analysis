@@ -74,12 +74,17 @@ Analysis::Analysis(
   reconMethodToTitle.insert(std::pair<TString,TString>("DA","Double Angle method"));
   reconMethodToTitle.insert(std::pair<TString,TString>("JB","Jacquet-Blondel method"));
   reconMethodToTitle.insert(std::pair<TString,TString>("Mixed","Mixed method"));
+  reconMethodToTitle.insert(std::pair<TString,TString>("Sigma","Sigma method"));
+  reconMethodToTitle.insert(std::pair<TString,TString>("eSigma","eSigma method"));
 
   // common settings defaults
   // - these settings can be set at the macro level
   writeSimpleTree = false;
   maxEvents = 0;
   useBreitJets = false;
+
+  weight = new WeightsUniform();
+  weightJet = new WeightsUniform();
 
   // miscellaneous
   infiles.clear();
@@ -143,8 +148,6 @@ void Analysis::Prepare() {
   kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
   kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
   ST = new SimpleTree("tree",kin);
-  weight = new WeightsUniform();
-  weightJet = new WeightsUniform();
 
 
   // if there are no final states defined, default to definitions here:
@@ -202,6 +205,8 @@ void Analysis::Prepare() {
     HS->DefineHist1D("mX","m_{X}","GeV",NBINS,0,20);
     HS->DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
+    HS->DefineHist1D("phiSivers","#phi_{Sivers}","",NBINS,-TMath::Pi(),TMath::Pi());
+    HS->DefineHist1D("phiCollins","#phi_{Collins}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist2D("etaVsP","p","#eta","GeV","",
 	NBINS,0.1,100,
         NBINS,-4,4,
@@ -296,6 +301,7 @@ void Analysis::Finish() {
 
   // write histograms
   cout << sep << endl;
+  cout << "writing ROOT file..." << endl;
   outFile->cd();
   if(writeSimpleTree) ST->WriteTree();
   HD->Payload([this](Histos *H){ H->WriteHists(outFile); }); HD->ExecuteAndClearOps();
@@ -440,6 +446,8 @@ void Analysis::FillHistosTracks() {
     H->Hist("mX")->Fill(kin->mX,wTrack);
     H->Hist("phiH")->Fill(kin->phiH,wTrack);
     H->Hist("phiS")->Fill(kin->phiS,wTrack);
+    H->Hist("phiSivers")->Fill(Kinematics::AdjAngle(kin->phiH - kin->phiS),wTrack);
+    H->Hist("phiCollins")->Fill(Kinematics::AdjAngle(kin->phiH + kin->phiS),wTrack);
     dynamic_cast<TH2*>(H->Hist("etaVsP"))->Fill(kin->pLab,kin->etaLab,wTrack); // TODO: lab-frame p, or some other frame?
     // cross sections (divide by lumi after all events processed)
     H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),wTrack);

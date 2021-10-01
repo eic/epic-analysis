@@ -15,7 +15,7 @@ Kinematics::Kinematics(
   // set ion mass
   IonMass = ProtonMass();
 
-  // set beam 4-momenta // TODO: get proper beams from Brian
+  // set beam 4-momenta
   Double_t momEleBeam = EMtoP(enEleBeam,ElectronMass());
   Double_t momIonBeam = EMtoP(enIonBeam,IonMass);
   vecEleBeam.SetPxPyPzE(
@@ -25,7 +25,7 @@ Kinematics::Kinematics(
       enEleBeam
       );
   vecIonBeam.SetPxPyPzE(
-      momIonBeam * TMath::Sin(crossAng),
+      -momIonBeam * TMath::Sin(crossAng),
       0,
       momIonBeam * TMath::Cos(crossAng),
       enIonBeam
@@ -78,12 +78,13 @@ void Kinematics::getqWQuadratic(){
     vecW = vecIonBeam - vecQ;
     W = vecW.M();
     Nu = vecIonBeam.Dot(vecQ)/IonMass;
-    this->SetBoostVecs();                                                                                                                                                                                                        
   }
 };
 
 // function to call different reconstruction methods
 void Kinematics::CalculateDIS(TString recmethod){
+
+  // calculate primary DIS variables, including Q2,x,y,W,nu
   if( recmethod.CompareTo("Ele", TString::kIgnoreCase) == 0 ){
     this->CalculateDISbyElectron();
   }
@@ -96,11 +97,46 @@ void Kinematics::CalculateDIS(TString recmethod){
   else if( recmethod.CompareTo("Mixed", TString::kIgnoreCase) == 0){
     this->CalculateDISbyMixed();
   }
+  else if( recmethod.CompareTo("Sigma", TString::kIgnoreCase) == 0){
+    this->CalculateDISbySigma();
+  }
+  else if( recmethod.CompareTo("eSigma", TString::kIgnoreCase) == 0){
+    this->CalculateDISbyeSigma();
+  }
   else {
     cerr << "ERROR: unknown reconstruction method" << endl;
     return;
   };
+
+  // calculate SIDIS boost vectors
+  // - c.o.m. frame of virtual photon and ion
+  CvecBoost = vecQ + vecIonBeam;
+  Cboost = -1*CvecBoost.BoostVector();
+  // - ion rest frame
+  IvecBoost = vecIonBeam;
+  Iboost = -1*IvecBoost.BoostVector();
+
+  // calculate depolarization
+  // - calculate epsilon, the ratio of longitudinal and transverse photon flux [hep-ph/0611265]
+  gamma = 2*ProtonMass()*x / TMath::Sqrt(Q2);
+  epsilon = ( 1 - y - TMath::Power(gamma*y,2)/4 ) /
+    ( 1 - y + y*y/2 + TMath::Power(gamma*y,2)/4 );
+  // - factors A,B,C,V,W (see [hep-ph/0611265] using notation from [1408.5721])
+  depolA = y*y / (2 - 2*epsilon);
+  depolB = depolA * epsilon;
+  depolC = depolA * TMath::Sqrt(1-epsilon*epsilon);
+  depolV = depolA * TMath::Sqrt(2*epsilon*(1+epsilon));
+  depolW = depolA * TMath::Sqrt(2*epsilon*(1-epsilon));
+  // - factor ratios (see [1807.10606] eq. 2.3)
+  if(depolA==0) depolP1=depolP2=depolP3=depolP4=0;
+  else {
+    depolP1 = depolB / depolA;
+    depolP2 = depolC / depolA;
+    depolP3 = depolV / depolA;
+    depolP4 = depolW / depolA;
+  };
 };
+
 
 // calculate DIS kinematics using scattered electron
 // - needs `vecElectron` set
@@ -112,7 +148,6 @@ void Kinematics::CalculateDISbyElectron() {
   Nu = vecIonBeam.Dot(vecQ) / IonMass;
   x = Q2 / ( 2 * vecQ.Dot(vecIonBeam) );
   y = vecIonBeam.Dot(vecQ) / vecIonBeam.Dot(vecEleBeam);
-  this->SetBoostVecs();
 };
 
 // calculate DIS kinematics using JB method
@@ -147,9 +182,29 @@ void Kinematics::CalculateDISbyMixed(){
   vecW = vecEleBeam + vecIonBeam - vecElectron;
   W = vecW.M();
   Nu = vecIonBeam.Dot(vecQ)/IonMass;
-  this->SetBoostVecs();
 };
-
+// calculate DIS kinematics using Sigma method
+// requires 'vecElectron' set
+void Kinematics::CalculateDISbySigma(){
+    y = sigmah/(sigmah + vecElectron.E()*(1-cos(vecElectron.Theta())));
+    Q2 = (vecElectron.Px()*vecElectron.Px() + vecElectron.Py()*vecElectron.Py())/(1-y);
+    x = Q2/(s*y);
+    Kinematics::getqWQuadratic();
+};
+// calculate DIS kinematics using eSigma method                                                                                                                       
+// requires 'vecElectron' set                                                                                                                                      
+void Kinematics::CalculateDISbyeSigma(){
+    vecQ = vecEleBeam - vecElectron;
+    vecW = vecEleBeam + vecIonBeam - vecElectron;
+    W = vecW.M();
+    Q2 = -1*vecQ.M2();
+    double ysigma = sigmah/(sigmah + vecElectron.E()*(1-cos(vecElectron.Theta())));
+    double Q2sigma = (vecElectron.Px()*vecElectron.Px() + vecElectron.Py()*vecElectron.Py())/(1-y);
+    double xsigma = Q2sigma/(s*ysigma);    
+    y = Q2/(s*xsigma);
+    x = xsigma;
+    Kinematics::getqWQuadratic();
+};
 
 // calculate hadron kinematics
 // - calculate DIS kinematics first, so we have `vecQ`, etc.
@@ -219,8 +274,11 @@ void Kinematics::GetHadronicFinalState(
   itEFlowTrack.Reset();
   itEFlowPhoton.Reset();
   itEFlowNeutralHadron.Reset();
-
   itParticle.Reset();
+
+  sigmah = 0;
+  Pxh = 0;
+  Pyh = 0;
   while(Track *track = (Track*)itTrack() ){
     TLorentzVector  trackp4 = track->P4();
     if(!isnan(trackp4.E())){
@@ -546,9 +604,9 @@ void Kinematics::CalculateJetKinematics(fastjet::PseudoJet jet){
 // test a fake asymmetry, for fit code validation
 // - assigns `tSpin` based on desired fake asymmetry
 void Kinematics::InjectFakeAsymmetry() {
-  // modulations
+  // modulations, including depolarization factors [1807.10606 eq. 2.2-3]
   moduVal[0] = TMath::Sin(phiH-phiS); // sivers
-  moduVal[1] = TMath::Sin(phiH+phiS); // transversity*collins
+  moduVal[1] = TMath::Sin(phiH+phiS) * depolP1; // transversity*collins
   // fake amplitudes
   ampVal[0] = 0.1;
   ampVal[1] = 0.1;
@@ -556,8 +614,8 @@ void Kinematics::InjectFakeAsymmetry() {
   asymInject = 0;
   asymInject +=  ampVal[0]/0.2 * x * moduVal[0];
   asymInject += -ampVal[1]/0.2 * x * moduVal[1];
-  // apply polarization and depolarization factors
-  asymInject *= pol; // TODO: include depol. factor
+  // apply polarization
+  asymInject *= pol;
   // generate random number in [0,1]
   RN = RNG->Uniform();
   tSpin = (RN<0.5*(1+asymInject)) ? 1 : -1;

@@ -17,6 +17,10 @@ SimpleTree::SimpleTree(TString treeName_, Kinematics *K_)
   T->Branch("PhiH",      &(K->phiH),   "PhiH/D");
   T->Branch("PhiS",      &(K->phiS),   "PhiS/D");
   T->Branch("Pol",       &(K->pol),    "Pol/D");
+  T->Branch("Depol1",    &(K->depolP1),"Depol1/D");
+  T->Branch("Depol2",    &(K->depolP2),"Depol2/D");
+  T->Branch("Depol3",    &(K->depolP3),"Depol3/D");
+  T->Branch("Depol4",    &(K->depolP4),"Depol4/D");
   T->Branch("Spin_idx",  &(K->tSpin),  "Spin_idx/I");
   T->Branch("Weight",    &(weight),    "Weight/D");
 };
