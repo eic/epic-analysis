@@ -181,6 +181,8 @@ class DAG : public TObject
     Node *GetRootNode();
     Node *GetLeafNode();
     Node *GetUniqueNode(Int_t type_,TString typeStr);
+    // layer accessors
+    BinSet *GetBinSet(TString varName); // return the BinSet (layer) associated with specified variable name
 
     // add nodes and edges, which are directional connectors between nodes
     // - nodes are only added if the ID is unique; if not unique,
@@ -251,6 +253,7 @@ class DAG : public TObject
   private:
     Bool_t debug;
     std::map<TString,Node*> nodeMap;
+    std::map<TString,BinSet*> layerMap;
     std::vector<TString> visitList;
 
   ClassDef(DAG,1);

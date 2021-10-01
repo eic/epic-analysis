@@ -39,7 +39,7 @@ void analysis_xqbins(
   // then add the bins that you want
   // - tutorial switch statement: change tutorial number to try out
   //   the different binning implementations
-  int tutorialNum = 0;
+  int tutorialNum = 1;
   switch(tutorialNum) {
 
     case 0:

@@ -27,11 +27,16 @@ class BinSet : public TObject
      * - `varName` and `varTitle` are passed to the `CutDef` objects
      */
     BinSet(TString varName_="unknown", TString varTitle_="unknown");
+    BinSet(const BinSet &BS);
     ~BinSet();
 
     // bin list container, of `CutDef` pointers, one for each bin
     TObjArray *GetBinList() { return binList; };
     Int_t GetNumBins() { return (Int_t) binList->GetEntries(); };
+
+    // accessors
+    TString GetVarName() { return varName; };
+    TString GetVarTitle() { return varTitle; };
 
     /* bin builders
      * - at construction, you will start with zero bins
@@ -67,9 +72,6 @@ class BinSet : public TObject
   private:
     TObjArray *binList;
     TString varName,varTitle;
-    Int_t nbins;
-    Double_t min,max;
-    Bool_t log;
 
   ClassDef(BinSet,1);
 };

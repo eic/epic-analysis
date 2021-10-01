@@ -17,6 +17,7 @@ DAG::DAG()
 // initialize DAG, with only the root node connected to the leaf node
 void DAG::InitializeDAG() {
   nodeMap.clear();
+  layerMap.clear();
   AddEdge(new Node(NT::root,"root_0"),new Node(NT::leaf,"leaf_0"));
 };
 
@@ -116,6 +117,7 @@ void DAG::AddLayer(BinSet *BS) {
     nodes.push_back(new Node( NT::bin, cut->GetVarName()+Form("_%d",cnt++), cut ));
   };
   AddLayer(nodes);
+  layerMap.insert(std::pair<TString,BinSet*>(BS->GetVarName(),new BinSet(*BS)));
 };
 // - add layer of nodes
 void DAG::AddLayer(std::vector<Node*> nodes) {
@@ -130,6 +132,18 @@ void DAG::AddLayer(std::vector<Node*> nodes) {
     AddEdge(N,GetNode("leaf_0"));
   };
   RepatchToFull(C);
+};
+
+// get the BinSet associated to a layer
+BinSet *DAG::GetBinSet(TString varName) {
+  BinSet *BS;
+  try {
+    BS = layerMap.at(varName);
+  } catch(const std::out_of_range &ex) {
+    std::cerr << "ERROR: layer \"" << varName << "\" not found in DAG" << std::endl;
+    return nullptr;
+  };
+  return BS;
 };
 
 

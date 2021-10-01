@@ -1,0 +1,62 @@
+R__LOAD_LIBRARY(Largex)
+
+/* run in a grid of (x,Q2) 2D bins
+ * - various ways to make a grid are demonstrated
+ * - observe how the resulting histograms differ in each (x,Q2) bin
+ */
+void analysis_PvsEta(
+    TString infiles="datarec/pythia8NCDISS3_10x100_Q21_cross-0.025.root", /* delphes tree(s) */
+    Double_t eleBeamEn=10, /* electron beam energy [GeV] */
+    Double_t ionBeamEn=100, /* ion beam energy [GeV] */
+    Double_t crossingAngle=-25, /* crossing angle [mrad] */
+    TString outfilePrefix="coverage_pVsEtabins" /* output filename prefix*/
+) {
+
+  // setup analysis ========================================
+  AnalysisDelphes *A = new AnalysisDelphes(
+      infiles,
+      eleBeamEn,
+      ionBeamEn,
+      crossingAngle,
+      outfilePrefix
+      );
+
+  //A->maxEvents = 30000; // use this to limit the number of events
+  A->SetReconMethod("Ele"); // set reconstruction method
+  A->AddFinalState("pipTrack"); // pion final state
+  A->AddFinalState("KpTrack"); // kaon final state
+  //A->AddFinalState("jet"); // jets
+
+  // set binning scheme ====================================
+
+  /* TODO
+   * - finer binning
+   * - different sqrt(s) values
+   * - eta vs. p in bins of (x,Q2)
+   * - Q2 vs. x in bins of (eta,p)
+   */
+
+  A->AddBinScheme("p");
+  A->AddBinScheme("eta");
+  A->AddBinScheme("z");
+
+  A->BinScheme("p")->BuildBin( "Range", 0, 2);
+  A->BinScheme("p")->BuildBin( "Range", 2, 4);
+  A->BinScheme("p")->BuildBin( "Range", 4, 10);
+  A->BinScheme("p")->BuildBin( "Min", 10);
+
+  A->BinScheme("eta")->BuildBin( "Range", 2.0, 3.5);
+  A->BinScheme("eta")->BuildBin( "Range", 1.0, 2.0);
+  A->BinScheme("eta")->BuildBin( "Range", -1.0, 1.0);
+  A->BinScheme("eta")->BuildBin( "Range", -1.0, -2.0);
+  A->BinScheme("eta")->BuildBin( "Range", -2.0, -3.5);
+
+  A->BinScheme("z")->BuildBin("Range", 0.2, 0.4 );
+  A->BinScheme("z")->BuildBin("Range", 0.4, 0.8 );
+  A->BinScheme("z")->BuildBin("Min",0.2);  
+
+  // perform the analysis ==================================
+  A->Execute();
+
+  //A->GetHistosDAG()->PrintBreadth("HistosDAG Nodes");
+};
