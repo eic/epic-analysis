@@ -15,8 +15,8 @@ void postprocess_pTvsEta(
   PostProcessor *P = new PostProcessor(infile);
   P->Op()->PrintBreadth("HistosDAG Initial Setup");
   // number of bins in x and Q2
-  int nx = 10;
-  int nq2 = 5;
+  int nx = P->Op()->GetBinSet("x")->GetNumBins();
+  int nq2 = P->Op()->GetBinSet("q2")->GetNumBins();
 
   // just counters for filling Histos vector
   int xbin = 0;

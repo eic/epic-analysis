@@ -388,6 +388,7 @@ void PostProcessor::DrawInBins(
   lDRICH->SetLineColor(kRed);
   TH1* histArray[nvar1][nvar2];
   int drawpid = 1;
+  outfile->cd("/");
   canv->Write();
   // get histograms from Histos 2D vector
   for(int i = 0; i < nvar1; i++){
