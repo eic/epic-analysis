@@ -472,7 +472,7 @@ void Analysis::FillHistosTracks() {
     H->Hist("z")->Fill(kin->z,wTrack);
     H->Hist("pT")->Fill(kin->pT,wTrack);
     H->Hist("qT")->Fill(kin->qT,wTrack);
-    H->Hist("qTq")->Fill(kin->qT/TMath::Sqrt(kin->Q2),wTrack);
+    if(kin->Q2!=0) H->Hist("qTq")->Fill(kin->qT/TMath::Sqrt(kin->Q2),wTrack);
     H->Hist("mX")->Fill(kin->mX,wTrack);
     H->Hist("phiH")->Fill(kin->phiH,wTrack);
     H->Hist("phiS")->Fill(kin->phiS,wTrack);
@@ -484,8 +484,10 @@ void Analysis::FillHistosTracks() {
     // resolutions
     if(kinTrue->x!=0) H->Hist("x_Res")->Fill((kin->x-kinTrue->x)/kinTrue->x,wTrack);
     dynamic_cast<TH2*>(H->Hist("Q2vsXtrue"))->Fill(kinTrue->x,kinTrue->Q2,wTrack);
-    dynamic_cast<TH2*>(H->Hist("Q2vsX_zres"))->Fill(kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->z - kin->z)/(kinTrue->z) ) );
-    dynamic_cast<TH2*>(H->Hist("Q2vsX_pTres"))->Fill(kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->pT - kin->pT)/(kinTrue->pT) ) );
+    if(kinTrue->z!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_zres"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->z - kin->z)/(kinTrue->z) ) );
+    if(kinTrue->pT!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_pTres"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->pT - kin->pT)/(kinTrue->pT) ) );
     dynamic_cast<TH2*>(H->Hist("Q2vsX_phiHres"))->Fill(kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->phiH - kin->phiH) ) );
     
     if( (H->Hist("Q2vsXtrue"))->FindBin(kinTrue->x,kinTrue->Q2) == (H->Hist("Q2vsXtrue"))->FindBin(kin->x,kin->Q2) ) dynamic_cast<TH2*>(H->Hist("Q2vsXpurity"))->Fill(kin->x,kin->Q2,wTrack);
@@ -531,7 +533,7 @@ void Analysis::FillHistosJets() {
     H->Hist("z_jet")->Fill(kin->zjet,wJet);
     H->Hist("eta_jet")->Fill(jet.eta(),wJet);
     H->Hist("qT_jet")->Fill(kin->qTjet,wJet);
-    H->Hist("qTQ_jet")->Fill(kin->qTjet/sqrt(kin->Q2),wJet);
+    if(kin->Q2!=0) H->Hist("qTQ_jet")->Fill(kin->qTjet/sqrt(kin->Q2),wJet);
     for(int j = 0; j < kin->jperp.size(); j++) {
       H->Hist("jperp")->Fill(kin->jperp[j],wJet);
     };
