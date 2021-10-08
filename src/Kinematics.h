@@ -39,15 +39,8 @@ class Kinematics : public TObject
     Kinematics(Double_t enEleBeam, Double_t enIonBeam, Double_t crossAng);
     ~Kinematics();
 
-    // calculators
+    // SIDIS calculators
     void CalculateDIS(TString recmethod);
-    void CalculateDISbyElectron();
-    void CalculateDISbyJB();
-    void CalculateDISbyDA();
-    void CalculateDISbyMixed();
-    void CalculateDISbySigma();
-    void CalculateDISbyeSigma();
-    void getqWQuadratic();
     void CalculateHadronKinematics();
     void GetHadronicFinalState(
         TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
@@ -57,8 +50,9 @@ class Kinematics : public TObject
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
         );
-    void CalculateJetKinematics(fastjet::PseudoJet jet);
 
+    // jet calculators
+    void CalculateJetKinematics(fastjet::PseudoJet jet);
     #if INCCENTAURO == 1
     void GetBreitFrameJets(
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
@@ -215,6 +209,17 @@ class Kinematics : public TObject
     void InjectFakeAsymmetry(); // test your own asymmetry, for fit code validation
 
 
+  protected:
+    // protected calculators (called by public calculators)
+    void CalculateDISbyElectron();
+    void CalculateDISbyJB();
+    void CalculateDISbyDA();
+    void CalculateDISbyMixed();
+    void CalculateDISbySigma();
+    void CalculateDISbyeSigma();
+    void getqWQuadratic();
+
+
   private:
     static const Int_t asymInjectN = 2;
     Double_t moduVal[asymInjectN];
@@ -222,6 +227,7 @@ class Kinematics : public TObject
     Double_t asymInject;
     TRandom *RNG;
     Float_t RN;
+
 
   ClassDef(Kinematics,1);
 };
