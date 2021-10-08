@@ -14,6 +14,14 @@ BinSet::BinSet(TString varName_, TString varTitle_)
 {
 };
 
+// copy constructor
+BinSet::BinSet(const BinSet &BS) {
+  varName = BS.varName;
+  varTitle = BS.varTitle;
+  binList = BS.binList;
+};
+
+
 // build single bin
 void BinSet::BuildBin(TString cutType_, Double_t arg1_, Double_t arg2_) {
   return BuildBin(

@@ -208,8 +208,8 @@ void Analysis::Prepare() {
     HS->DefineHist1D("phiSivers","#phi_{Sivers}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist1D("phiCollins","#phi_{Collins}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist2D("etaVsP","p","#eta","GeV","",
-        NBINS,0.1,100,
-        NBINS,-5,5,
+	NBINS,0.1,100,
+        NBINS,-4,4,
         true,false
         );
     // -- single-hadron cross sections
@@ -230,6 +230,31 @@ void Analysis::Prepare() {
     HS->DefineHist1D("Q2_Res","Q2-Q2_{true}","GeV", NBINS, -2, 2);
     HS->DefineHist1D("phiH_Res","#phi_{h}-#phi_{h}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
     HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
+    HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
+        20,1e-4,1,
+        10,1,1e4,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsXpurity","x","Q^{2}","","GeV^{2}",
+        20,1e-4,1,
+        10,1,1e4,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_zres","x","Q^{2}","","GeV^{2}",
+        20,1e-4,1,
+        10,1,1e4,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_pTres","x","Q^{2}","","GeV^{2}",
+        20,1e-4,1,
+        10,1,1e4,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_phiHres","x","Q^{2}","","GeV^{2}",
+        20,1e-4,1,
+        10,1,1e4,
+        true,true
+        );
     // -- reconstructed vs. generated
     HS->DefineHist2D("x_RvG","generated x","reconstructed x","","",
         NBINS,1e-3,1,
@@ -298,6 +323,11 @@ void Analysis::Finish() {
          << endl;
     // calculate cross sections
     H->Hist("Q_xsec")->Scale(1./lumi); // TODO: generalize (`if (name contains "xsec") ...`)
+    // divide resolution plots by true counts per x-Q2 bin
+    H->Hist("Q2vsXpurity")->Divide(H->Hist("Q2vsXtrue"));
+    H->Hist("Q2vsX_zres")->Divide(H->Hist("Q2vsXtrue"));
+    H->Hist("Q2vsX_pTres")->Divide(H->Hist("Q2vsXtrue"));
+    H->Hist("Q2vsX_phiHres")->Divide(H->Hist("Q2vsXtrue"));        
   });
   HD->ExecuteAndClearOps();
 
@@ -444,7 +474,7 @@ void Analysis::FillHistosTracks() {
     H->Hist("z")->Fill(kin->z,wTrack);
     H->Hist("pT")->Fill(kin->pT,wTrack);
     H->Hist("qT")->Fill(kin->qT,wTrack);
-    H->Hist("qTq")->Fill(kin->qT/TMath::Sqrt(kin->Q2),wTrack);
+    if(kin->Q2!=0) H->Hist("qTq")->Fill(kin->qT/TMath::Sqrt(kin->Q2),wTrack);
     H->Hist("mX")->Fill(kin->mX,wTrack);
     H->Hist("phiH")->Fill(kin->phiH,wTrack);
     H->Hist("phiS")->Fill(kin->phiS,wTrack);
@@ -459,6 +489,15 @@ void Analysis::FillHistosTracks() {
     H->Hist("Q2_Res")->Fill( kin->Q2 - kinTrue->Q2, wTrack );
     H->Hist("phiH_Res")->Fill( Kinematics::AdjAngle(kin->phiH - kinTrue->phiH), wTrack );
     H->Hist("phiS_Res")->Fill( Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wTrack );
+    dynamic_cast<TH2*>(H->Hist("Q2vsXtrue"))->Fill(kinTrue->x,kinTrue->Q2,wTrack);
+    if(kinTrue->z!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_zres"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->z - kin->z)/(kinTrue->z) ) );
+    if(kinTrue->pT!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_pTres"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->pT - kin->pT)/(kinTrue->pT) ) );
+    dynamic_cast<TH2*>(H->Hist("Q2vsX_phiHres"))->Fill(kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->phiH - kin->phiH) ) );
+    
+    if( (H->Hist("Q2vsXtrue"))->FindBin(kinTrue->x,kinTrue->Q2) == (H->Hist("Q2vsXtrue"))->FindBin(kin->x,kin->Q2) ) dynamic_cast<TH2*>(H->Hist("Q2vsXpurity"))->Fill(kin->x,kin->Q2,wTrack);
+    
     // -- reconstructed vs. generated
     dynamic_cast<TH2*>(H->Hist("x_RvG"))->Fill(kinTrue->x,kin->x,wTrack);
     dynamic_cast<TH2*>(H->Hist("phiH_RvG"))->Fill(kinTrue->phiH,kin->phiH,wTrack);
@@ -500,7 +539,7 @@ void Analysis::FillHistosJets() {
     H->Hist("z_jet")->Fill(kin->zjet,wJet);
     H->Hist("eta_jet")->Fill(jet.eta(),wJet);
     H->Hist("qT_jet")->Fill(kin->qTjet,wJet);
-    H->Hist("qTQ_jet")->Fill(kin->qTjet/sqrt(kin->Q2),wJet);
+    if(kin->Q2!=0) H->Hist("qTQ_jet")->Fill(kin->qTjet/sqrt(kin->Q2),wJet);
     for(int j = 0; j < kin->jperp.size(); j++) {
       H->Hist("jperp")->Fill(kin->jperp[j],wJet);
     };

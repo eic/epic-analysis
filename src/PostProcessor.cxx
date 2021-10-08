@@ -342,13 +342,14 @@ void PostProcessor::DrawSingle(TString histSet, TString histName) {
 /* ALGORITHM: draw histograms from different bins in their respective bins
 on axis of bin variables, e.g. Q2 vs x.
 */
-// not sure what to name function
 void PostProcessor::DrawInBins(
     TString outName,    
-    std::vector<std::vector<TString>>& histList,
+    std::vector<std::vector<Histos*>>& histList,
     TString histName,
     TString var1name, int nvar1, double var1low, double var1high, bool var1log,
-    TString var2name, int nvar2, double var2low, double var2high, bool var2log
+    TString var2name, int nvar2, double var2low, double var2high, bool var2log,
+    bool intlog1, bool intlog2, bool intgrid1, bool intgrid2 // log option for small plots
+    
 ){
   // default values set for nvar1==nvar2
   int canvx = 700;
@@ -361,7 +362,6 @@ void PostProcessor::DrawInBins(
   double yaxisx = 0.04;
   double yaxisy1 = 0.085;
   double yaxisy2 = 0.97;
-  
   if(nvar1 > nvar2){
     // different canvas sizing/axis position for unequal binning
     canvx = 1100;
@@ -374,22 +374,40 @@ void PostProcessor::DrawInBins(
   TString canvN = "canv_"+outName+"_"+histName;
   TCanvas *canv = new TCanvas(canvN,canvN, canvx, canvy);
   TPad *mainpad = new TPad("mainpad", "mainpad", 0.07, 0.07, 0.98, 0.98);
+
   mainpad->SetFillStyle(4000);
   mainpad->Divide(nvar1,nvar2,0,0);
   mainpad->Draw();
-
-  // get histograms from Hitos name 2D vector
+  TLine * lDIRC = new TLine(6,-1,6,1);
+  TLine * lDIRClow = new TLine(0.5,-1,0.5,1);
+  TLine * lmRICH = new TLine(2,-1,2,-4);
+  TLine * lDRICH = new TLine(2.5,1,2.5,4);
+  lDIRC->SetLineColor(kRed);
+  lDIRClow->SetLineColor(kRed);
+  lmRICH->SetLineColor(kRed);
+  lDRICH->SetLineColor(kRed);
+  TH1* histArray[nvar1][nvar2];
+  int drawpid = 1;
+  outfile->cd("/");
+  canv->Write();
+  // get histograms from Histos 2D vector
   for(int i = 0; i < nvar1; i++){
     for(int j = 0; j < nvar2; j++){
-      Histos *H = (Histos*) infile->Get(histList[i][j]);
+      //Histos *H = (Histos*) infile->Get(histList[i][j]);
+      Histos *H = histList[i][j];
       TH1 *hist = H->Hist(histName);
+      histArray[i][j] = hist;
       hist->SetTitle("");
-      hist->GetXaxis()->SetTitle("");
-      hist->GetYaxis()->SetTitle("");
-      hist->GetXaxis()->SetLabelSize(0);
-      hist->GetYaxis()->SetLabelSize(0);
-     
+      //hist->GetXaxis()->SetTitle("");
+      //hist->GetYaxis()->SetTitle("");
+      //hist->GetXaxis()->SetLabelSize(0);
+      //hist->GetYaxis()->SetLabelSize(0);
+
       mainpad->cd((nvar2-j-1)*nvar1 + i + 1);
+      gPad->SetLogx(intlog1);
+      gPad->SetLogy(intlog2);
+      gPad->SetGridy(intgrid2);
+      gPad->SetGridx(intgrid1);
       TString drawStr = "";
       switch(hist->GetDimension()) {
       case 1:
@@ -401,8 +419,17 @@ void PostProcessor::DrawInBins(
       case 3:
 	drawStr = "BOX";
 	break;
-      };      
-      if( hist->GetEntries() > 0 ) hist->Draw(drawStr);
+      };
+      //hist->Write();
+      if( hist->GetEntries() > 0 ) {	
+	hist->Draw(drawStr);
+	if(drawpid){
+	  lDIRClow->Draw();
+	  lDIRC->Draw();
+	  lmRICH->Draw();
+	  lDRICH->Draw();
+	}
+      }
     };    
   };
   canv->cd();
@@ -444,8 +471,14 @@ void PostProcessor::DrawInBins(
   
   //  canv->Write();
   canv->Print(pngDir+"/"+canvN+".png");
+  canv->Print(pngDir+"/"+canvN+".pdf");
   outfile->cd("/");
-  canv->Write();  
+  canv->Write();
+  for(int i = 0; i <nvar1; i++){
+    for(int j = 0; j < nvar2; j++){
+      histArray[i][j]->Write();
+    }
+  }
 };
 
 //=========================================================================

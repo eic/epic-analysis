@@ -1,6 +1,4 @@
 R__LOAD_LIBRARY(Largex)
-#include "PostProcessor.h"
-
 
 /*
 Script to plot histograms binned in two variables in their respective positions
@@ -11,50 +9,54 @@ using the BuildBins function.
 */
   
 void postprocess_pTvsEta(
-     TString infile = "out/coverage_20x10.cross_5x41_25_newcard.root"
+     TString infile = "out/coverage_dagtest.pythia8NCDISS3_10x100_Q21_cross-0.025.root"
 ){
-  Analysis *A = new Analysis();
+  
   PostProcessor *P = new PostProcessor(infile);
-
+  P->Op()->PrintBreadth("HistosDAG Initial Setup");
   // number of bins in x and Q2
-  int nx = 20;
-  int nq2 = 10;
+  int nx = P->Op()->GetBinSet("x")->GetNumBins();
+  int nq2 = P->Op()->GetBinSet("q2")->GetNumBins();
 
-  // just counters for filling Histos name vector
+  // just counters for filling Histos vector
   int xbin = 0;
   int q2bin = 0;
   
   // initialize this 2D vector to be some large size
-  std::vector<std::vector<TString>> histNames_xQ2(30,std::vector<TString>(30));
-
+  std::vector<std::vector<Histos*>> histos_xQ2(30,std::vector<Histos*>(30));
   
-  for(int by  : P->GetBinNums("y")) {
-  if(P->GetBinCut("y",by)->GetCutType()=="Full"){
-  for(int bpt : P->GetBinNums("pt")) {
-  if(P->GetBinCut("pt",bpt)->GetCutType()=="Full"){    
-  for(int bz  : P->GetBinNums("z")) {
-  if(P->GetBinCut("z",bz)->GetCutType()=="Full"){
-  for(int bfs : P->GetBinNums("finalState")) {
-    //    if(P->GetBinCut("finalState",bfs)->GetCutTitle() =="#pi^{+} tracks"){ // is there a better way to select a type of track?
-    if(P->GetBinCut("finalState",bfs)->GetCutTitle() =="#K^{+} tracks"){
-    for(int bx  : P->GetBinNums("x")) {
-      if(P->GetBinCut("x",bx)->GetCutType()=="Range"){  // not perfect, as there could be some case with another range outside of those we want	
-	for(int bq  : P->GetBinNums("q2")) {
-	  if(P->GetBinCut("q2",bq)->GetCutType()=="Range"){	
-	    histNames_xQ2[xbin][q2bin] = A->GetHistosName(bpt,bx,bz,bq,by,bfs);	
-	    q2bin++;
-	  };
-	};
-	xbin++;
-	q2bin=0;
-      }; 
-    };
+  auto findxQ2bins = [&histos_xQ2,&P,&xbin,&q2bin,nx,nq2](Histos *H ){
+    histos_xQ2[xbin][q2bin] = H;    
+    q2bin++;
+    if(q2bin == nq2){
+      q2bin=0; xbin++; 
+      if(xbin == nx) xbin = 0;
+    }
+  };
+  
+  auto drawinxQ2bins = [&histos_xQ2, &P, &nx, &nq2](NodePath *bins){    
+    TString canvname = "xQ2cov_"; //+ bins->GetVar
+    for(Node *bin: bins->GetBinNodes()){
+      if(bin->GetVarName() == "finalState"){
+	canvname+=bin->GetID();
+	canvname+="_";
+      }
+      if(bin->GetVarName() == "z"){
+	canvname+=bin->GetID();
+	canvname+="_";
+      }
+    }
+    P->DrawInBins(canvname, histos_xQ2, "etaVsP", "x", nx, 1e-4, 1, true, "Q^{2}", nq2, .99, 1000, true);
+  };
 
-    P->DrawInBins("xQ2_piplus", histNames_xQ2, "etaVsP", "x", nx, 1e-3, 1, true, "Q^{2}", nq2, 9.99, 1000, true);
-    xbin = 0;
-    q2bin = 0;
+  auto beforefunction = [](){
 
-    }}}}}}}};
+  };
+  P->Op()->Subloop({"x","q2"},beforefunction,drawinxQ2bins);
+  P->Op()->Payload(findxQ2bins);
+  P->Op()->PrintBreadth("HistosDAG Final Setup");
+
+  P->Execute();
   
   P->Finish();
 };
