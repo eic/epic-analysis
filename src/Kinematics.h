@@ -128,7 +128,7 @@ class Kinematics : public TObject
 
 
     // boost calculations
-    // - boost from Lab frame to photon+ion C.o.m. frame
+    // - boost from Lab frame to photon+ion c.o.m. frame
     void BoostToComFrame(TLorentzVector Lvec, TLorentzVector &Cvec) {
       Cvec=Lvec; Cvec.Boost(Cboost); };
     // - boost from Lab frame to Ion rest frame
