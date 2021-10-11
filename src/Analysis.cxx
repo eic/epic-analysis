@@ -7,6 +7,9 @@ using std::vector;
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::ifstream;
+using std::string;
+using std::istringstream;
 
 // constructor
 Analysis::Analysis(
@@ -116,9 +119,29 @@ void Analysis::AddFiles(TString fileList) {
 //------------------------------------
 void Analysis::Prepare() {
 
+
+  
   // detect whether infileName is a single file or a list of files
   bool singleFile = infileName.Contains(TRegexp("\\.root$"));
+  ifstream fListFile(infileName.Data());
+  string line;
 
+  while(getline(fListFile,line))
+    {
+      auto iss=istringstream(line);
+      auto str=std::string();
+      int _minQ2=0;
+      int _maxQ2=0;
+      double _weight=1.0;
+      double _polarization=0.7;
+      double _dilution=1.0;
+      iss>> str >> _minQ2>>_maxQ2 >>_weight>>_polarization>>_dilution;
+      minQ2.push_back(_minQ2);
+      maxQ2.push_back(_maxQ2);
+      fileWeight.push_back(_weight);
+      polarization=_polarization;
+      dilution=_dilution;
+    }
   // add file(s) to infiles list, and set outfileName
   if(singleFile) {
     AddFile(infileName);

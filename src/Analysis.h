@@ -10,6 +10,8 @@
 #include <set>
 #include <stdexcept>
 #include <functional>
+#include <string>
+#include <sstream>
 
 // root
 #include "TChain.h"
@@ -111,6 +113,7 @@ class Analysis : public TNamed
     HistosDAG *HD;
     Weights const* weight;
     Weights const* weightJet;
+  
     Double_t wTrackTotal, wJetTotal;
     Double_t xsecTot;
     Long64_t numGen;
@@ -119,6 +122,16 @@ class Analysis : public TNamed
     // setup / common settings
     std::vector<TString> infiles;
     TString infileName,outfileName,outfilePrefix;
+  
+  //min and max Q2 for the given file. Need to have disjoint Q2 ranges for weighting
+  std::vector<Double_t> minQ2;
+  std::vector<Double_t> maxQ2;
+  //relative weight for q2 weighting
+  std::vector<Double_t> fileWeight;
+  Double_t polarization=0.7;
+    Double_t dilution=1.0;
+
+  
     TFile *outFile;
     Double_t eleBeamEn = 5; // GeV
     Double_t ionBeamEn = 41; // GeV
