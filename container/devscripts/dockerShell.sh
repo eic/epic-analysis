@@ -2,7 +2,8 @@
 # start docker shell, for testing image builds
 
 #image=largexeic_ci:latest
-image=largexeic_dev:latest
+#image=largexeic_dev:latest
+image=cjdilks/largex-eic:dev
 
 homedir=/home/athena
 swdir=$homedir/largex-eic
