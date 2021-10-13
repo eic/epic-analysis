@@ -240,6 +240,7 @@ void Kinematics::CalculateHadronKinematics() {
       IvecQ.Vect(), IvecHadron.Vect()
       ));
   // phiS: calculated in ion rest frame
+  // FIXME: make sure vecSpin is boosted to the ion rest frame (may not have any effect)  //////////////////////////////////
   tSpin = RNG->Uniform() < 0.5 ? 1 : -1;
   vecSpin.SetXYZT(0,1,0,0); // Pauli-Lubanski pseudovector
   //this->BoostToBreitFrame(vecSpin,IvecSpin); // TODO: check if other frames matter
