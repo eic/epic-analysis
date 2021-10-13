@@ -1,12 +1,19 @@
 #include "Analysis.h"
 
+#include <fstream>
+#include <string>
+#include <sstream>
+
 ClassImp(Analysis)
 
 using std::map;
 using std::vector;
+using std::string;
+using std::stringstream;
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::ifstream;
 
 // constructor
 Analysis::Analysis(
@@ -94,51 +101,54 @@ Analysis::Analysis(
 // input files
 //------------------------------------
 // add a single file
-void Analysis::AddFile(TString fileName) {
-  if(fileName=="") return;
+bool Analysis::AddFile(TString fileName, Double_t xs, Double_t Q2min, Double_t Q2max) {
+  if(fileName=="") return false;
   cout << "-- running analysis of " << fileName << endl;
+  // check that there is no overlap
+  for (std::size_t idx = 0; idx < infiles.size(); ++idx) {
+    if (infiles[idx] == fileName) {
+      cerr << "File " << fileName << " appears twice in config file" << endl;
+      return false;
+    }
+    if (Q2min < inQ2maxs[idx] && Q2max > inQ2mins[idx]) {
+      cerr << "File " << fileName << " overlaps Q2 range with " << infiles[idx] << endl;
+      return false;
+    }
+  }
   infiles.push_back(fileName);
-}
-// Add files to TChain
-void Analysis::AddFiles(TString fileList) {
-  if(fileList=="") return;
-  std::ifstream ifstr(fileList);
-  TString fname;
-  cout << "-- running analysis of files in " << fileList << ":" << endl;
-  while(ifstr >> fname) {
-    cout << "   - " << fname << endl;
-    infiles.push_back(fname);
-  };
+  inXsecs.push_back(xs);
+  inQ2mins.push_back(Q2min);
+  inQ2maxs.push_back(Q2max);
+  return true;
 }
 
 
 // prepare for the analysis
 //------------------------------------
 void Analysis::Prepare() {
-
-  // detect whether infileName is a single file or a list of files
-  bool singleFile = infileName.Contains(TRegexp("\\.root$"));
-
-  // add file(s) to infiles list, and set outfileName
-  if(singleFile) {
-    AddFile(infileName);
-    // base outfileName on outfilePrefix + infileName parts
-    outfileName = infileName;
-    outfileName(TRegexp("^.*/")) = ""; // remove path
-    outfileName(TRegexp("\\*")) = ""; // remove asterisk wildcard
-    if(outfilePrefix!="") outfilePrefix+=".";
-    outfileName = "out/"+outfilePrefix+outfileName;
-    outfileName(TRegexp("\\.\\.")) = "."; // remove double dot
+  ifstream fin(infileName);
+  string line;
+  while (std::getline(fin, line)) {
+    stringstream ss(line);
+    string fileName;
+    Double_t xs, Q2min, Q2max;
+    ss >> fileName >> xs >> Q2min >> Q2max;
+    if (!AddFile(TString(fileName.c_str()), xs, Q2min, Q2max)) {
+      return;
+    }
   }
-  else {
-    AddFiles(infileName);
-    // base outfileName on outfilePrefix only
-    outfileName = "out/"+outfilePrefix+".root";
-  };
-  if(infiles.size()==0) {
+  if (infiles.empty()) {
     cerr << "ERROR: no input files have been specified" << endl;
     return;
-  };
+  }
+
+  // base outfileName on outfilePrefix + infileName parts
+  outfileName = infileName;
+  outfileName(TRegexp("^.*/")) = ""; // remove path
+  outfileName(TRegexp("\\*")) = ""; // remove asterisk wildcard
+  if(outfilePrefix!="") outfilePrefix+=".";
+  outfileName = "out/"+outfilePrefix+outfileName;
+  outfileName(TRegexp("\\.\\.")) = "."; // remove double dot
 
   // open output file
   cout << "-- output file: " << outfileName << endl;
@@ -208,7 +218,7 @@ void Analysis::Prepare() {
     HS->DefineHist1D("phiSivers","#phi_{Sivers}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist1D("phiCollins","#phi_{Collins}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist2D("etaVsP","p","#eta","GeV","",
-	NBINS,0.1,100,
+        NBINS,0.1,100,
         NBINS,-4,4,
         true,false
         );
@@ -229,10 +239,10 @@ void Analysis::Prepare() {
     //HS->DefineHist1D("yRes","y - y_{true}","", NBINS, -2, 2); // TODO: defined in fullsim branch, but not yet here
     //HS->DefineHist1D("Q2Res","Q2 - Q2_{true}","", NBINS, -2, 2); // TODO: defined in fullsim branch, but not yet here
     HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
-	20,1e-4,1,
+        20,1e-4,1,
         10,1,1e4,
         true,true
-	);
+    );
     HS->DefineHist2D("Q2vsXpurity","x","Q^{2}","","GeV^{2}",
         20,1e-4,1,
         10,1,1e4,
@@ -242,7 +252,7 @@ void Analysis::Prepare() {
         20,1e-4,1,
         10,1,1e4,
         true,true
-	);
+    );
     HS->DefineHist2D("Q2vsX_pTres","x","Q^{2}","","GeV^{2}",
         20,1e-4,1,
         10,1,1e4,
@@ -284,12 +294,10 @@ void Analysis::CalculateCrossSection(Long64_t numGen_) {
   // - cross sections are hard-coded, coped from pythia output // TODO: only 5x41 is here
   Int_t eleBeamEnInt = (Int_t) eleBeamEn;
   Int_t ionBeamEnInt = (Int_t) ionBeamEn;
-  if     (eleBeamEnInt==5  && ionBeamEnInt==41 ) xsecTot=297.9259;
-  else if(eleBeamEnInt==18 && ionBeamEnInt==275) xsecTot=700.0; // TODO: this is approximate
-  else {
-    cerr << "WARNING: unknown cross section; integrated lumi will be wrong" << endl;
-    xsecTot=1;
-  };
+  xsecTot = 0.;
+  for (Double_t xs : inXsecs) {
+      xsecTot += xs;
+  }
   numGen = numGen_;
   cout << sep << endl;
   cout << "assumed total cross section: " << xsecTot << " nb" << endl;

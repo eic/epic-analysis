@@ -68,8 +68,8 @@ class Analysis : public TNamed
 
     // add files to the TChain; this is called by `Prepare()`, but you can use these public
     // methods to add more files if you want
-    void AddFile(TString fileName); // add single file `fileName`
-    void AddFiles(TString fileList); // add files listed in `fileList`
+    // add single file `fileName` with given Q2 range and xs.
+    bool AddFile(TString fileName, Double_t xs, Double_t Q2min, Double_t Q2max);
 
     // access HistosDAG
     HistosDAG *GetHistosDAG();
@@ -118,6 +118,9 @@ class Analysis : public TNamed
 
     // setup / common settings
     std::vector<TString> infiles;
+    std::vector<Double_t> inXsecs;
+    std::vector<Double_t> inQ2mins;
+    std::vector<Double_t> inQ2maxs;
     TString infileName,outfileName,outfilePrefix;
     TFile *outFile;
     Double_t eleBeamEn = 5; // GeV
@@ -127,6 +130,7 @@ class Analysis : public TNamed
 
     // event loop objects
     Long64_t ENT;
+    std::vector<Long64_t> counts;
     Double_t eleP,maxEleP;
     Double_t elePtrue, maxElePtrue;
     int pid;
