@@ -134,7 +134,7 @@ void Analysis::Prepare() {
     Double_t xs, Q2min, Q2max;
     ss >> fileName >> xs >> Q2min >> Q2max;
     if (!ss) {
-      break;
+      continue;
     }
     if (!AddFile(TString(fileName.c_str()), xs, Q2min, Q2max)) {
       return;
