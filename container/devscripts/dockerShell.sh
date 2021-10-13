@@ -15,5 +15,5 @@ docker run \
   -e DISPLAY \
   -v $(pwd):$swdir \
   -w $swdir \
-  $image bash \
-  -c "cat $swdir/container/devscripts/.shellrc >> $homedir/.bashrc && exec bash"
+  -u $(id -u):$(id -g) \
+  $image bash

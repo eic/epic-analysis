@@ -25,7 +25,7 @@ repository (pull requests are also welcome).
 
 # Setup and Dependencies
 
-## Option 1: Use the Singularity image
+## Option 1: Use the Singularity or Docker image
 
 - To minimize setup effort, and provide a consistent development environment, 
   a Singularity image is available, which contains all the dependencies
@@ -40,6 +40,21 @@ repository (pull requests are also welcome).
     - This will automatically call `source env.sh` upon shell startup, which
       sets environment variables
   - Proceed with the **Building** section below (just type `make`)
+
+- **Alternatively** if you prefer to use Docker:
+  - obtain the image using `docker pull cjdilks/largex-eic:dev`
+  - start the container using a standard `docker run` command; you can also use
+    the script `container/devscripts/dockerShell.sh`, if you find it useful
+    - the Docker image was built assuming a default user ID (UID) of 1000; if your
+      UID is different (check with the `id` command), your user name in the container
+      may be `I have no name!`, but you should still have read/write permission for
+      the present working directory; we have not tested working in this condition,
+      due to our preference for Singularity, however suggestions how to improve
+      are welcome
+    - Docker files are also provided, you can follow `container/devscripts/README.md`
+      for instructions how to build your own image (which would allow you to change
+      the default UID, or anything else you want)
+  - once you are in the Docker container, proceed with the **Building** section below
 
 ## Option 2: Setup your own environment
 
