@@ -1,3 +1,6 @@
 [submodule "asym"]
 	path = asym
 	url = https://github.com/c-dilks/largex-eic-asym
+[submodule "cards"]
+	path = cards
+	url = https://github.com/eic/delphes_EIC.git
