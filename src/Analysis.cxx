@@ -42,7 +42,8 @@ Analysis::Analysis(
   /* single hadron */
   availableBinSchemes.insert(std::pair<TString,TString>("p","p"));
   availableBinSchemes.insert(std::pair<TString,TString>("eta","#eta"));
-  availableBinSchemes.insert(std::pair<TString,TString>("pt","p_{T}"));
+  availableBinSchemes.insert(std::pair<TString,TString>("pt","p_{T}")); // transverse to q, in ion rest frame
+  availableBinSchemes.insert(std::pair<TString,TString>("ptLab","p_{T}^{lab}")); // transverse to xy plane, in lab frame
   availableBinSchemes.insert(std::pair<TString,TString>("z","z"));
   availableBinSchemes.insert(std::pair<TString,TString>("qT","q_{T}"));
   availableBinSchemes.insert(std::pair<TString,TString>("qTq","q_{T}/Q"));
@@ -409,6 +410,7 @@ BinSet *Analysis::BinScheme(TString varname) {
 //------------------------------------
 void Analysis::AddBinScheme(TString varname) {
   TString vartitle;
+  // TODO [low priority]: would be nice to make this lookup case insensitive
   try { vartitle = availableBinSchemes.at(varname); }
   catch(const std::out_of_range &ex) {
     cerr << "ERROR: bin scheme "
@@ -481,6 +483,7 @@ void Analysis::FillHistosTracks() {
   valueMap.insert(std::pair<TString,Double_t>( "p", kin->pLab ));
   valueMap.insert(std::pair<TString,Double_t>( "eta", kin->etaLab ));
   valueMap.insert(std::pair<TString,Double_t>( "pt", kin->pT ));
+  valueMap.insert(std::pair<TString,Double_t>( "ptLab", kin->pTlab ));
   valueMap.insert(std::pair<TString,Double_t>( "z", kin->z ));
   valueMap.insert(std::pair<TString,Double_t>( "qT", kin->qT ));
   valueMap.insert(std::pair<TString,Double_t>( "qTq", kin->qT/TMath::Sqrt(kin->Q2) ));
