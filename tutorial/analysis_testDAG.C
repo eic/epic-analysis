@@ -23,6 +23,20 @@ void analysis_testDAG(
   // set reconstruction method ====================================
   A->SetReconMethod("Ele");
 
+
+  // define cuts ====================================
+  // - cuts are defined the same way as bins are defined; be mindful
+  //   of what bins you are defining vs. what cuts you are defining.
+  //   For example, if you define a Q2 minimum cut, and you also define
+  //   Q2 bins below, you may be creating more bins than you actually
+  //   need, since the Q2 minimum cut actually defines another bin;
+  //   in this case, your Q2 bins effectively define a Q2 minimum.
+  A->AddBinScheme("w");  A->BinScheme("w")->BuildBin("Min",3.0); // W > 3 GeV
+  A->AddBinScheme("z");  A->BinScheme("z")->BuildBin("Range",0.2,0.9); // 0.2 < z < 0.9
+  A->AddBinScheme("xF"); A->BinScheme("xF")->BuildBin("Min",0.0); // xF > 0
+  A->AddBinScheme("ptLab");  A->BinScheme("ptLab")->BuildBin("Min",0.1); // pT_lab > 0.1 GeV (tracking limit)
+
+
   // set binning scheme ====================================
 
   A->AddBinScheme("y");

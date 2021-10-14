@@ -60,6 +60,7 @@ this tutorial directory, e.g., `root -b -q tutorial/analysis_template.C`
   - `analysis_xqbins.C`: bin the analysis in a few 2D bins of x and Q2
     - there is a `switch` statement to allow the choice of various
       example binning schemes
+    - this example also describes how cuts are defined
   - `postprocess_xqbins_draw.C`: draws a couple sample histograms for
     the given binning scheme
 

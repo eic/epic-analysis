@@ -25,6 +25,13 @@ void analysis_yRatio(
   //A->AddFinalState("KpTrack"); // kaon final state
   //A->AddFinalState("jet"); // jets
 
+
+  // define cuts ====================================
+  A->AddBinScheme("w");  A->BinScheme("w")->BuildBin("Min",3.0); // W > 3 GeV
+  A->AddBinScheme("xF"); A->BinScheme("xF")->BuildBin("Min",0.0); // xF > 0
+  A->AddBinScheme("ptLab");  A->BinScheme("ptLab")->BuildBin("Min",0.1); // pT_lab > 0.1 GeV (tracking limit)
+
+
   // set binning scheme ====================================
   // z ranges
   A->AddBinScheme("z");
@@ -33,10 +40,10 @@ void analysis_yRatio(
 
   // y minima
   A->AddBinScheme("y");
-  A->BinScheme("y")->BuildBin("Full"); // a bin with no y-cut
-  A->BinScheme("y")->BuildBin("Min",0.03);
-  A->BinScheme("y")->BuildBin("Min",0.05);
-  A->BinScheme("y")->BuildBin("Min",0.10);
+  A->BinScheme("y")->BuildBin("Max",0.95); // a bin with no minimum y-cut
+  A->BinScheme("y")->BuildBin("Range",0.03,0.95);
+  A->BinScheme("y")->BuildBin("Range",0.05,0.95);
+  A->BinScheme("y")->BuildBin("Range",0.10,0.95);
 
   // perform the analysis ==================================
   A->Execute();

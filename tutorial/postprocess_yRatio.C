@@ -25,7 +25,7 @@ void postprocess_yRatio(
   //   can check if the cut type of the 1D y-bin is "Full"
   Histos *Hfull = nullptr;
   auto findFullBin = [&Hfull](Histos *H, NodePath *bins) {
-    if(bins->GetBinNode("y")->GetCutType() == "Full") Hfull = H;
+    if(bins->GetBinNode("y")->GetCutType() == "Max") Hfull = H;
   };
 
   // payload 2: draw ratio of each plot with a set y-minimum to that with
