@@ -452,10 +452,23 @@ std::function<void(Node*)> Analysis::CheckBin() {
   return [this](Node *N){
     if(N->GetNodeType()==NT::bin) {
       Bool_t active;
+      Double_t val;
       if(N->GetVarName()=="finalState") active = (N->GetCut()->GetCutID()==finalStateID);
       else {
-        auto val = valueMap.at(N->GetVarName());
-        active = N->GetCut()->CheckCut(val);
+        try {
+          // get value associated to this variable, and check cut
+          val = valueMap.at(N->GetVarName());
+          active = N->GetCut()->CheckCut(val);
+        } catch(const std::out_of_range &ex) {
+          /* if this variable is not found in `valueMap`, then just activate
+           * the node; this can happen if you are looking at jets AND tracks
+           * final states, and you defined a binning scheme only valid for
+           * tracks, but not for jets, e.g., `phiS`; if the current finalState
+           * you are checking is a jet, we don't need to check phiS, so just
+           * activate the node and ignore that cut
+           */
+          active = true;
+        };
       };
       if(active) activeEvent=true;
       N->SetActiveState(active);
