@@ -49,10 +49,6 @@ void AnalysisDD4hep::process_event()
   // FIXME: replace it with ExRootTreeReader::UseBranch()?
   TTreeReader tr(chain);
 
-  // calculate cross section
-  CalculateCrossSection(tr.GetEntries());
-
-
   // Truth
   TTreeReaderArray<Int_t>    mcparticles2_pdgID(tr,     "mcparticles2.pdgID");
   TTreeReaderArray<Double_t> mcparticles2_psx(tr,       "mcparticles2.ps.x");
@@ -313,23 +309,6 @@ void AnalysisDD4hep::process_event()
 
       // calculate DIS kinematics
       kin->CalculateDIS(reconMethod); // reconstructed
-      Double_t Q2 = kinTrue->Q2;
-      Int_t inIdx = -1;
-      for (Int_t idx = 0; idx < inQ2mins.size(); ++idx) {
-          if (Q2 >= inQ2mins[idx] && Q2 < inQ2maxs[idx]) {
-              inIdx = idx;
-              break;
-          }
-      }
-      Double_t Q2factor = (inIdx == -1 ? 0. : 1.);
-      Double_t xsecFactor = (inXsecs[inIdx] / xsecTot);
-      Double_t numFactor = static_cast<Double_t>(chain->GetTree()->GetEntries())
-        / chain->GetEntries();
-      // Note that there is a slight discrepency here, in that the `xsecFactor`
-      // is based on the Q2 range of the event, while `numFactor` is based on
-      // which file the event came from. This works so long as nearly all of the
-      // events in a given file respect the Q2 range associated with it.
-      Double_t weightFactor = Q2factor * xsecFactor / numFactor;
 
       for(auto trk : recopart)
 	{
@@ -368,7 +347,7 @@ void AnalysisDD4hep::process_event()
     //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
     //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
-	  wTrack = weightFactor * weight->GetWeight(*kinTrue);
+	  wTrack = weight->GetWeight(*kinTrue);
 	  wTrackTotal += wTrack;
 
 	  // apply cuts

@@ -95,30 +95,52 @@ Analysis::Analysis(
 
   // miscellaneous
   infiles.clear();
+  numGen = 0;
 };
 
 
 // input files
 //------------------------------------
 // add a single file
-bool Analysis::AddFile(TString fileName, Double_t xs, Double_t Q2min, Double_t Q2max) {
+bool Analysis::AddFile(TString fileName, Double_t xs, Double_t Q2min) {
   if(fileName=="") return false;
   cout << "-- running analysis of " << fileName << endl;
-  // check that there is no overlap
+  // insert in order of Q2min
+  std::size_t insertIdx = 0;
   for (std::size_t idx = 0; idx < infiles.size(); ++idx) {
     if (infiles[idx] == fileName) {
       cerr << "File " << fileName << " appears twice in config file" << endl;
       return false;
     }
-    if (Q2min < inQ2maxs[idx] && Q2max > inQ2mins[idx]) {
-      cerr << "File " << fileName << " overlaps Q2 range with " << infiles[idx] << endl;
+    if (Q2min == inQ2mins[idx]) {
+      cerr << "Q2min " << Q2min << "appears twice in config file" << endl;
+      return false;
+    } else if (Q2min < inQ2mins[idx]) {
+      break;
+    } else {
+      insertIdx += 1;
+    }
+  }
+  infiles.insert(infiles.begin() + insertIdx, fileName);
+  inXsecs.insert(inXsecs.begin() + insertIdx, xs);
+  inQ2mins.insert(inQ2mins.begin() + insertIdx, Q2min);
+  inEntries.insert(inEntries.begin() + insertIdx, 0);
+  if (insertIdx == 0) {
+    xsecTot = xs;
+  }
+  // adjust cross-sections to account for overlapping regions
+  for (std::size_t idx = infiles.size() - 1; idx > insertIdx; --idx) {
+    inXsecs[insertIdx] -= inXsecs[idx];
+  }
+  if (insertIdx > 0) {
+    inXsecs[insertIdx - 1] -= inXsecs[insertIdx];
+  }
+  for (std::size_t idx = 0; idx < inXsecs.size(); ++idx) {
+    if (inXsecs[idx] < 0.) {
+      cerr << "Cross-sections must strictly decrease with stricter Q2min cuts" << endl;
       return false;
     }
   }
-  infiles.push_back(fileName);
-  inXsecs.push_back(xs);
-  inQ2mins.push_back(Q2min);
-  inQ2maxs.push_back(Q2max);
   return true;
 }
 
@@ -131,12 +153,12 @@ void Analysis::Prepare() {
   while (std::getline(fin, line)) {
     stringstream ss(line);
     string fileName;
-    Double_t xs, Q2min, Q2max;
-    ss >> fileName >> xs >> Q2min >> Q2max;
+    Double_t xs, Q2min;
+    ss >> fileName >> xs >> Q2min;
     if (!ss) {
       continue;
     }
-    if (!AddFile(TString(fileName.c_str()), xs, Q2min, Q2max)) {
+    if (!AddFile(TString(fileName.c_str()), xs, Q2min)) {
       return;
     }
   }
@@ -289,25 +311,40 @@ void Analysis::Prepare() {
   wJetTotal = 0.;
 };
 
-
-// calculate cross section (nb): sets `xsecTot` and `numGen` // TODO: improve this implementation
-// ---------------------------------------
-void Analysis::CalculateCrossSection(Long64_t numGen_) {
-  // UNITS: GeV, nb
-  // - cross sections are hard-coded, coped from pythia output // TODO: only 5x41 is here
-  Int_t eleBeamEnInt = (Int_t) eleBeamEn;
-  Int_t ionBeamEnInt = (Int_t) ionBeamEn;
-  xsecTot = 0.;
-  for (Double_t xs : inXsecs) {
-      xsecTot += xs;
+void Analysis::CountEvent(Double_t Q2, Int_t guess) {
+  Int_t idx = GetEventQ2Idx(Q2, guess);
+  if (idx == -1) {
+  } else {
+    inEntries[idx] += 1;
+    numGen += 1;
   }
-  numGen = numGen_;
-  cout << sep << endl;
-  cout << "assumed total cross section: " << xsecTot << " nb" << endl;
-  cout << "number of generated events:  " << numGen << endl;
-  cout << sep << endl;
-};
+}
 
+Double_t Analysis::GetEventQ2Weight(Double_t Q2, Int_t guess) {
+  Int_t idx = GetEventQ2Idx(Q2, guess);
+  if (idx == -1) {
+    return 0.;
+  } else {
+    Double_t xsecFactor = inXsecs[idx] / xsecTot;
+    Double_t numFactor = (Double_t) inEntries[idx] / (Double_t) numGen;
+    return xsecFactor / numFactor;
+  }
+}
+
+Int_t Analysis::GetEventQ2Idx(Double_t Q2, Int_t guess) {
+  Int_t idx = guess;
+  if (Q2 < inQ2mins[idx]) {
+    do {
+      idx -= 1;
+    } while (idx >= 0 && Q2 < inQ2mins[idx]);
+    return idx;
+  } else {
+    while (idx + 1 < inQ2mins.size() && Q2 >= inQ2mins[idx + 1]) {
+      idx += 1;
+    }
+    return idx;
+  }
+}
 
 
 // finish the analysis

@@ -69,7 +69,7 @@ class Analysis : public TNamed
     // add files to the TChain; this is called by `Prepare()`, but you can use these public
     // methods to add more files if you want
     // add single file `fileName` with given Q2 range and xs.
-    bool AddFile(TString fileName, Double_t xs, Double_t Q2min, Double_t Q2max);
+    bool AddFile(TString fileName, Double_t xs, Double_t Q2min);
 
     // access HistosDAG
     HistosDAG *GetHistosDAG();
@@ -78,9 +78,9 @@ class Analysis : public TNamed
     void SetWeights(Weights const* w) { weight = w; }
     void SetWeightsJet(Weights const* w) { weightJet = w; }
 
-    // calculate cross section (nb): sets `xsecTot` and `numGen`
-    void CalculateCrossSection(Long64_t numGen_);
-
+    void CountEvent(Double_t Q2, Int_t guess=0);
+    Double_t GetEventQ2Weight(Double_t Q2, Int_t guess=0);
+    Int_t GetEventQ2Idx(Double_t Q2, Int_t guess=0);
 
     // run the analysis
     virtual void Execute() = 0;
@@ -120,7 +120,7 @@ class Analysis : public TNamed
     std::vector<TString> infiles;
     std::vector<Double_t> inXsecs;
     std::vector<Double_t> inQ2mins;
-    std::vector<Double_t> inQ2maxs;
+    std::vector<Long64_t> inEntries;
     TString infileName,outfileName,outfilePrefix;
     TFile *outFile;
     Double_t eleBeamEn = 5; // GeV
