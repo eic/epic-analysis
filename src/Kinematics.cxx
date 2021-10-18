@@ -234,8 +234,8 @@ void Kinematics::CalculateHadronKinematics() {
       IvecQ.Vect(), IvecHadron.Vect()
       ));
   // phiS
-  tSpin = 1; // assume spin up, for calculation of phiS
-  vecSpin.SetXYZT(0,tSpin,0,0); // Pauli-Lubanski pseudovector
+  tSpin = RNG->Uniform() < 0.5 ? 1 : -1;
+  vecSpin.SetXYZT(0,1,0,0); // Pauli-Lubanski pseudovector
   //this->BoostToBreitFrame(vecSpin,IvecSpin); // TODO: check if other frames matter
   phiS = AdjAngle(PlaneAngle(
       IvecQ.Vect(), IvecElectron.Vect(),
