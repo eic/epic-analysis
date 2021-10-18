@@ -103,11 +103,7 @@ void binning(char const* file_name, char const* output="") {
 			if (spin_idx == 1) {
 				angle_up_hists[bin]->Fill(phi_h, phi_s, weight);
 			} else if (spin_idx == -1) {
-				Double_t phi_s_complement = phi_s + PI;
-				if (phi_s_complement >= PI) {
-					phi_s_complement -= 2. * PI;
-				}
-				angle_down_hists[bin]->Fill(phi_h, phi_s_complement, weight);
+				angle_down_hists[bin]->Fill(phi_h, phi_s, weight);
 			} else {
 				// Shouldn't happen.
 			}
