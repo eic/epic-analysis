@@ -4,7 +4,7 @@ R__LOAD_LIBRARY(Largex)
 #include "AnalysisDD4hep.h"
 
 void analysis_fullsim(
-    TString infiles="file.list", /* single root file or file list */
+    TString infiles="datarec/in.config", /* single root file or file list */
     Double_t eleBeamEn=18, /* electron beam energy [GeV] */
     Double_t ionBeamEn=275, /* ion beam energy [GeV] */
     Double_t crossingAngle=0, /* crossing angle [mrad] */

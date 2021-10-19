@@ -2,7 +2,7 @@ R__LOAD_LIBRARY(Largex)
 
 // make kinematics coverage plots, such as eta vs. p in bins of (x,Q2)
 void postprocess_coverage(
-    TString infile="out/coverage.example_5x41.root"
+    TString infile="out/coverage.root"
 ) {
 
   // setup postprocessor ========================================

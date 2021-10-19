@@ -5,7 +5,7 @@ R__LOAD_LIBRARY(Largex)
  * - observe how the resulting histograms differ in each (x,Q2) bin
  */
 void analysis_PvsEta(
-    TString infiles="datarec/pythia8NCDISS3_10x100_Q21_cross-0.025.root", /* delphes tree(s) */
+    TString infiles="datarec/in.config", /* delphes tree(s) */
     Double_t eleBeamEn=10, /* electron beam energy [GeV] */
     Double_t ionBeamEn=100, /* ion beam energy [GeV] */
     Double_t crossingAngle=-25, /* crossing angle [mrad] */

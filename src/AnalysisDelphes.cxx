@@ -41,7 +41,7 @@ void AnalysisDelphes::Execute() {
   ENT = tr->GetEntries();
 
   // calculate cross section
-  CalculateCrossSection(ENT);
+  if(maxEvents>0) ENT = maxEvents; // limiter
 
   // branch iterators
   TObjArrayIter itTrack(tr->UseBranch("Track"));
@@ -52,9 +52,39 @@ void AnalysisDelphes::Execute() {
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
   TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
 
+  // get counts in different Q2 cuts
+  cout << "count events..." << endl;
+  for(Long64_t e=0; e<ENT; e++) {
+    if(e>0&&e%10000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
+    tr->ReadEntry(e);
+    itParticle.Reset();
+    maxElePtrue = 0;
+    while(GenParticle *part = (GenParticle*) itParticle()){
+      if(part->PID == 11 && part->Status == 1){
+        elePtrue = part->PT * TMath::CosH(part->Eta);
+        if(elePtrue > maxElePtrue){
+          maxElePtrue = elePtrue;
+          kinTrue->vecElectron.SetPtEtaPhiM(
+              part->PT,
+              part->Eta,
+              part->Phi,
+              Kinematics::ElectronMass()
+              );
+        };
+      };
+    };
+    kinTrue->CalculateDIS(reconMethod);
+    Double_t Q2 = kinTrue->Q2;
+    CountEvent(Q2, chain->GetTreeNumber());
+  }
+
+  cout << "count results:" << endl;
+  for(Int_t idx=0; idx<inXsecs.size(); ++idx) {
+    cout << "\tQ2 > " << inQ2mins[idx]
+      << ": xs=" << inXsecs[idx] << ", n=" << inEntries[idx] << endl;
+  }
 
   // event loop =========================================================
-  if(maxEvents>0) ENT = maxEvents; // limiter
   cout << "begin event loop..." << endl;
   for(Long64_t e=0; e<ENT; e++) {
     if(e>0&&e%10000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
@@ -102,10 +132,20 @@ void AnalysisDelphes::Execute() {
     // calculate DIS kinematics
     kin->CalculateDIS(reconMethod); // reconstructed
     kinTrue->CalculateDIS(reconMethod); // generated (truth)
+    Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
 
     // get vector of jets
     // TODO: should this have an option for clustering method?
     kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
+    
+    // asymmetry injection
+    //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
+    //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
+    //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
+
+    // Get index of file that the event comes from.
+    wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+    wTrackTotal += wTrack;
 
 
     // track loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -144,14 +184,6 @@ void AnalysisDelphes::Execute() {
 
       kin->CalculateHadronKinematics();
       kinTrue->CalculateHadronKinematics();
-      
-      // asymmetry injection
-      //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
-      //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
-      //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
-
-      wTrack = weight->GetWeight(*kinTrue);
-      wTrackTotal += wTrack;
 
       // APPLY MAIN CUTS
       if(kin->CutFull()) {
@@ -179,7 +211,7 @@ void AnalysisDelphes::Execute() {
 
       if(kin->CutDIS()){
 
-        wJet = weightJet->GetWeight(*kinTrue); // TODO: should we separate weights for breit and non-breit jets?
+        wJet = Q2weightFactor * weightJet->GetWeight(*kinTrue); // TODO: should we separate weights for breit and non-breit jets?
         wJetTotal += wJet;
 
         Int_t nJets;

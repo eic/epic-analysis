@@ -49,10 +49,6 @@ void AnalysisDD4hep::process_event()
   // FIXME: replace it with ExRootTreeReader::UseBranch()?
   TTreeReader tr(chain);
 
-  // calculate cross section
-  CalculateCrossSection(tr.GetEntries());
-
-
   // Truth
   TTreeReaderArray<Int_t>    mcparticles2_pdgID(tr,     "mcparticles2.pdgID");
   TTreeReaderArray<Double_t> mcparticles2_psx(tr,       "mcparticles2.ps.x");

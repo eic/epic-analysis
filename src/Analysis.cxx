@@ -1,12 +1,19 @@
 #include "Analysis.h"
 
+#include <fstream>
+#include <string>
+#include <sstream>
+
 ClassImp(Analysis)
 
 using std::map;
 using std::vector;
+using std::string;
+using std::stringstream;
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::ifstream;
 
 // constructor
 Analysis::Analysis(
@@ -88,57 +95,80 @@ Analysis::Analysis(
 
   // miscellaneous
   infiles.clear();
+  numGen = 0;
 };
 
 
 // input files
 //------------------------------------
 // add a single file
-void Analysis::AddFile(TString fileName) {
-  if(fileName=="") return;
+bool Analysis::AddFile(TString fileName, Double_t xs, Double_t Q2min) {
+  if(fileName=="") return false;
   cout << "-- running analysis of " << fileName << endl;
-  infiles.push_back(fileName);
-}
-// Add files to TChain
-void Analysis::AddFiles(TString fileList) {
-  if(fileList=="") return;
-  std::ifstream ifstr(fileList);
-  TString fname;
-  cout << "-- running analysis of files in " << fileList << ":" << endl;
-  while(ifstr >> fname) {
-    cout << "   - " << fname << endl;
-    infiles.push_back(fname);
-  };
+  // insert in order of Q2min
+  std::size_t insertIdx = 0;
+  for (std::size_t idx = 0; idx < infiles.size(); ++idx) {
+    if (infiles[idx] == fileName) {
+      cerr << "File " << fileName << " appears twice in config file" << endl;
+      return false;
+    }
+    if (Q2min == inQ2mins[idx]) {
+      cerr << "Q2min " << Q2min << "appears twice in config file" << endl;
+      return false;
+    } else if (Q2min < inQ2mins[idx]) {
+      break;
+    } else {
+      insertIdx += 1;
+    }
+  }
+  infiles.insert(infiles.begin() + insertIdx, fileName);
+  inXsecs.insert(inXsecs.begin() + insertIdx, xs);
+  inQ2mins.insert(inQ2mins.begin() + insertIdx, Q2min);
+  inEntries.insert(inEntries.begin() + insertIdx, 0);
+  if (insertIdx == 0) {
+    xsecTot = xs;
+  }
+  // adjust cross-sections to account for overlapping regions
+  for (std::size_t idx = infiles.size() - 1; idx > insertIdx; --idx) {
+    inXsecs[insertIdx] -= inXsecs[idx];
+  }
+  if (insertIdx > 0) {
+    inXsecs[insertIdx - 1] -= inXsecs[insertIdx];
+  }
+  for (std::size_t idx = 0; idx < inXsecs.size(); ++idx) {
+    if (inXsecs[idx] < 0.) {
+      cerr << "Cross-sections must strictly decrease with stricter Q2min cuts" << endl;
+      return false;
+    }
+  }
+  return true;
 }
 
 
 // prepare for the analysis
 //------------------------------------
 void Analysis::Prepare() {
-
-  // detect whether infileName is a single file or a list of files
-  bool singleFile = infileName.Contains(TRegexp("\\.root$"));
-
-  // add file(s) to infiles list, and set outfileName
-  if(singleFile) {
-    AddFile(infileName);
-    // base outfileName on outfilePrefix + infileName parts
-    outfileName = infileName;
-    outfileName(TRegexp("^.*/")) = ""; // remove path
-    outfileName(TRegexp("\\*")) = ""; // remove asterisk wildcard
-    if(outfilePrefix!="") outfilePrefix+=".";
-    outfileName = "out/"+outfilePrefix+outfileName;
-    outfileName(TRegexp("\\.\\.")) = "."; // remove double dot
+  ifstream fin(infileName);
+  string line;
+  while (std::getline(fin, line)) {
+    stringstream ss(line);
+    string fileName;
+    Double_t xs, Q2min;
+    ss >> fileName >> xs >> Q2min;
+    if (!ss) {
+      continue;
+    }
+    if (!AddFile(TString(fileName.c_str()), xs, Q2min)) {
+      return;
+    }
   }
-  else {
-    AddFiles(infileName);
-    // base outfileName on outfilePrefix only
-    outfileName = "out/"+outfilePrefix+".root";
-  };
-  if(infiles.size()==0) {
+  if (infiles.empty()) {
     cerr << "ERROR: no input files have been specified" << endl;
     return;
-  };
+  }
+
+  // set output file name
+  outfileName = "out/"+outfilePrefix+".root";
 
   // open output file
   cout << "-- output file: " << outfileName << endl;
@@ -208,7 +238,7 @@ void Analysis::Prepare() {
     HS->DefineHist1D("phiSivers","#phi_{Sivers}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist1D("phiCollins","#phi_{Collins}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist2D("etaVsP","p","#eta","GeV","",
-	NBINS,0.1,100,
+        NBINS,0.1,100,
         NBINS,-4,4,
         true,false
         );
@@ -229,10 +259,10 @@ void Analysis::Prepare() {
     //HS->DefineHist1D("yRes","y - y_{true}","", NBINS, -2, 2); // TODO: defined in fullsim branch, but not yet here
     //HS->DefineHist1D("Q2Res","Q2 - Q2_{true}","", NBINS, -2, 2); // TODO: defined in fullsim branch, but not yet here
     HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
-	20,1e-4,1,
+        20,1e-4,1,
         10,1,1e4,
         true,true
-	);
+    );
     HS->DefineHist2D("Q2vsXpurity","x","Q^{2}","","GeV^{2}",
         20,1e-4,1,
         10,1,1e4,
@@ -242,7 +272,7 @@ void Analysis::Prepare() {
         20,1e-4,1,
         10,1,1e4,
         true,true
-	);
+    );
     HS->DefineHist2D("Q2vsX_pTres","x","Q^{2}","","GeV^{2}",
         20,1e-4,1,
         10,1,1e4,
@@ -276,27 +306,40 @@ void Analysis::Prepare() {
   wJetTotal = 0.;
 };
 
+void Analysis::CountEvent(Double_t Q2, Int_t guess) {
+  Int_t idx = GetEventQ2Idx(Q2, guess);
+  if (idx == -1) {
+  } else {
+    inEntries[idx] += 1;
+    numGen += 1;
+  }
+}
 
-// calculate cross section (nb): sets `xsecTot` and `numGen` // TODO: improve this implementation
-// ---------------------------------------
-void Analysis::CalculateCrossSection(Long64_t numGen_) {
-  // UNITS: GeV, nb
-  // - cross sections are hard-coded, coped from pythia output // TODO: only 5x41 is here
-  Int_t eleBeamEnInt = (Int_t) eleBeamEn;
-  Int_t ionBeamEnInt = (Int_t) ionBeamEn;
-  if     (eleBeamEnInt==5  && ionBeamEnInt==41 ) xsecTot=297.9259;
-  else if(eleBeamEnInt==18 && ionBeamEnInt==275) xsecTot=700.0; // TODO: this is approximate
-  else {
-    cerr << "WARNING: unknown cross section; integrated lumi will be wrong" << endl;
-    xsecTot=1;
-  };
-  numGen = numGen_;
-  cout << sep << endl;
-  cout << "assumed total cross section: " << xsecTot << " nb" << endl;
-  cout << "number of generated events:  " << numGen << endl;
-  cout << sep << endl;
-};
+Double_t Analysis::GetEventQ2Weight(Double_t Q2, Int_t guess) {
+  Int_t idx = GetEventQ2Idx(Q2, guess);
+  if (idx == -1) {
+    return 0.;
+  } else {
+    Double_t xsecFactor = inXsecs[idx] / xsecTot;
+    Double_t numFactor = (Double_t) inEntries[idx] / (Double_t) numGen;
+    return xsecFactor / numFactor;
+  }
+}
 
+Int_t Analysis::GetEventQ2Idx(Double_t Q2, Int_t guess) {
+  Int_t idx = guess;
+  if (Q2 < inQ2mins[idx]) {
+    do {
+      idx -= 1;
+    } while (idx >= 0 && Q2 < inQ2mins[idx]);
+    return idx;
+  } else {
+    while (idx + 1 < inQ2mins.size() && Q2 >= inQ2mins[idx + 1]) {
+      idx += 1;
+    }
+    return idx;
+  }
+}
 
 
 // finish the analysis

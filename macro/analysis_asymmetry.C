@@ -41,7 +41,7 @@ struct WeightsTest : public WeightsSivers {
 };
 
 void analysis_asymmetry(
-    TString infiles="datarec/dire_5x41.brian.hiDiv.root", /* delphes tree(s) */
+    TString infiles="datarec/in.config", /* delphes tree(s) */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=0, /* crossing angle [mrad] */
@@ -60,7 +60,7 @@ void analysis_asymmetry(
     new WeightsUniform(),
     new WeightsPavia()
   });
-  A->SetWeights(weights);
+  //A->SetWeights(weights);
 
   A->writeSimpleTree = true; // write SimpleTree (for one bin)
   //A->maxEvents = 10000; // use this to limit the number of events
