@@ -103,21 +103,6 @@ class Kinematics : public TObject
     // struck quark information
     Double_t quarkpT;
 
-    // - c.o.m. frame of virtual photon and ion
-    TLorentzVector CvecBoost;
-    TVector3 Cboost;
-    TLorentzVector CvecEleBeam, CvecIonBeam;
-    TLorentzVector CvecElectron, CvecW, CvecQ;
-    TLorentzVector CvecHadron;
-    // - ion rest frame
-    TLorentzVector IvecBoost;
-    TVector3 Iboost;
-    TLorentzVector IvecEleBeam, IvecIonBeam;
-    TLorentzVector IvecElectron, IvecW, IvecQ;
-    TLorentzVector IvecHadron;
-    // other
-    TLorentzVector vecSpin, IvecSpin;
-
 
     // particle masses
     static Double_t ElectronMass() { return 0.000511; };
@@ -210,6 +195,7 @@ class Kinematics : public TObject
 
 
   protected:
+
     // protected calculators (called by public calculators)
     void CalculateDISbyElectron();
     void CalculateDISbyJB();
@@ -227,6 +213,21 @@ class Kinematics : public TObject
     Double_t asymInject;
     TRandom *RNG;
     Float_t RN;
+
+    // - c.o.m. frame of virtual photon and ion
+    TLorentzVector CvecBoost;
+    TVector3 Cboost;
+    TLorentzVector CvecEleBeam, CvecIonBeam;
+    TLorentzVector CvecElectron, CvecW, CvecQ;
+    TLorentzVector CvecHadron;
+    // - ion rest frame
+    TLorentzVector IvecBoost;
+    TVector3 Iboost;
+    TLorentzVector IvecEleBeam, IvecIonBeam;
+    TLorentzVector IvecElectron, IvecW, IvecQ;
+    TLorentzVector IvecHadron;
+    // other
+    TLorentzVector vecSpin, IvecSpin;
 
 
   ClassDef(Kinematics,1);
