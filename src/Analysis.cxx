@@ -42,7 +42,8 @@ Analysis::Analysis(
   /* single hadron */
   availableBinSchemes.insert(std::pair<TString,TString>("p","p"));
   availableBinSchemes.insert(std::pair<TString,TString>("eta","#eta"));
-  availableBinSchemes.insert(std::pair<TString,TString>("pt","p_{T}"));
+  availableBinSchemes.insert(std::pair<TString,TString>("pt","p_{T}")); // transverse to q, in ion rest frame
+  availableBinSchemes.insert(std::pair<TString,TString>("ptLab","p_{T}^{lab}")); // transverse to xy plane, in lab frame
   availableBinSchemes.insert(std::pair<TString,TString>("z","z"));
   availableBinSchemes.insert(std::pair<TString,TString>("qT","q_{T}"));
   availableBinSchemes.insert(std::pair<TString,TString>("qTq","q_{T}/Q"));
@@ -409,6 +410,7 @@ BinSet *Analysis::BinScheme(TString varname) {
 //------------------------------------
 void Analysis::AddBinScheme(TString varname) {
   TString vartitle;
+  // TODO [low priority]: would be nice to make this lookup case insensitive
   try { vartitle = availableBinSchemes.at(varname); }
   catch(const std::out_of_range &ex) {
     cerr << "ERROR: bin scheme "
@@ -450,10 +452,23 @@ std::function<void(Node*)> Analysis::CheckBin() {
   return [this](Node *N){
     if(N->GetNodeType()==NT::bin) {
       Bool_t active;
+      Double_t val;
       if(N->GetVarName()=="finalState") active = (N->GetCut()->GetCutID()==finalStateID);
       else {
-        auto val = valueMap.at(N->GetVarName());
-        active = N->GetCut()->CheckCut(val);
+        try {
+          // get value associated to this variable, and check cut
+          val = valueMap.at(N->GetVarName());
+          active = N->GetCut()->CheckCut(val);
+        } catch(const std::out_of_range &ex) {
+          /* if this variable is not found in `valueMap`, then just activate
+           * the node; this can happen if you are looking at jets AND tracks
+           * final states, and you defined a binning scheme only valid for
+           * tracks, but not for jets, e.g., `phiS`; if the current finalState
+           * you are checking is a jet, we don't need to check phiS, so just
+           * activate the node and ignore that cut
+           */
+          active = true;
+        };
       };
       if(active) activeEvent=true;
       N->SetActiveState(active);
@@ -481,6 +496,7 @@ void Analysis::FillHistosTracks() {
   valueMap.insert(std::pair<TString,Double_t>( "p", kin->pLab ));
   valueMap.insert(std::pair<TString,Double_t>( "eta", kin->etaLab ));
   valueMap.insert(std::pair<TString,Double_t>( "pt", kin->pT ));
+  valueMap.insert(std::pair<TString,Double_t>( "ptLab", kin->pTlab ));
   valueMap.insert(std::pair<TString,Double_t>( "z", kin->z ));
   valueMap.insert(std::pair<TString,Double_t>( "qT", kin->qT ));
   valueMap.insert(std::pair<TString,Double_t>( "qTq", kin->qT/TMath::Sqrt(kin->Q2) ));

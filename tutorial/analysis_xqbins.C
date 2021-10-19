@@ -27,6 +27,46 @@ void analysis_xqbins(
   //A->AddFinalState("KpTrack"); // kaon final state
   //A->AddFinalState("jet"); // jets
 
+
+  // define cuts ====================================
+  /* - cuts are defined the same way as bins are defined (see below for syntax details and examples);
+   *   the `CutDef` class handles bin definitions
+   *
+   * For example, if you want to apply the y<0.95 cut, do:
+   *   A->AddBinScheme("y");
+   *   A->BinScheme("y")->BuildBin("Max",0.95);
+   * This makes a single y bin, defined by a maximum of 0.95.
+   * 
+   * If instead you want to make a cut of 0.01<y<0.95, you must do
+   *   A->AddBinScheme("y");
+   *   A->BinScheme("y")->BuildBin("Range",0.01,0.95);
+   * to define a single y bin. If instead you try to do something like
+   *   A->AddBinScheme("y");
+   *   A->BinScheme("y")->BuildBin("Min",0.01);
+   *   A->BinScheme("y")->BuildBin("Max",0.95);
+   * you would actually be defining two y bins, one with the minimum and a
+   * second with the maximum, which may not be what you want.
+   * 
+   * You must also be mindful of what other bins you are defining. Suppose you
+   * want to apply a Q2>10 GeV2 cut, and then do an analysis in bins of Q2. If
+   * you do
+   *   A->AddBinScheme("q2");
+   *   A->BinScheme("q2")->BuildBin("Min",10); // your Q2>19 GeV2 cut
+   *   A->BinScheme("q2")->BuildBins( 5, 10,    100,  true ); // 5 bins in range 10-100 GeV, equal width log scale
+   * you are actually defining 6 Q2 bins: the 5 you specify with `BuildBins`
+   * plus the one you specified with `BuildBin("Min",10)`. In this case, only
+   * the third line is needed to apply the Q2>10 GeV2 cut, since your binning
+   * range starts at 10 GeV2.
+   */ 
+  // here are some common cuts we typically use for SIDIS:
+  A->AddBinScheme("w");  A->BinScheme("w")->BuildBin("Min",3.0); // W > 3 GeV
+  A->AddBinScheme("y");  A->BinScheme("y")->BuildBin("Range",0.01,0.95); // 0.01 < y < 0.95
+  A->AddBinScheme("z");  A->BinScheme("z")->BuildBin("Range",0.2,0.9); // 0.2 < z < 0.9
+  A->AddBinScheme("xF"); A->BinScheme("xF")->BuildBin("Min",0.0); // xF > 0
+  A->AddBinScheme("ptLab");  A->BinScheme("ptLab")->BuildBin("Min",0.1); // pT_lab > 0.1 GeV (tracking limit)
+
+
+
   // set binning scheme ====================================
 
   // first add what bin schemes you want; you don't have to define
@@ -34,7 +74,7 @@ void analysis_xqbins(
   // you plan to use below
   A->AddBinScheme("q2");
   A->AddBinScheme("x");
-  A->AddBinScheme("z");
+  A->AddBinScheme("pt");
 
   // then add the bins that you want
   // - tutorial switch statement: change tutorial number to try out
@@ -83,13 +123,13 @@ void analysis_xqbins(
       break;
 
     case 5:
-      // 3D binning: 2x2 grid of (x,Q2) bins, for two z bins
+      // 3D binning: 2x2 grid of (x,Q2) bins, for two pT bins
       // - you can add more dimensions, but be careful of the curse
       //   of dimensionality
       A->BinScheme("q2")->BuildBins( 2, 1,    100,  true );
       A->BinScheme("x")->BuildBins(  2, 0.01, 1,    true );
-      A->BinScheme("z")->BuildBin("Range", 0.2, 0.5 );
-      A->BinScheme("z")->BuildBin("Range", 0.5, 0.8 );
+      A->BinScheme("pt")->BuildBin("Range", 0.2, 0.5 );
+      A->BinScheme("pt")->BuildBin("Range", 0.5, 0.8 );
       break;
   };
 

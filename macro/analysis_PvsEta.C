@@ -27,6 +27,14 @@ void analysis_PvsEta(
   A->AddFinalState("KpTrack"); // kaon final state
   //A->AddFinalState("jet"); // jets
 
+
+  // define cuts ====================================
+  A->AddBinScheme("w");  A->BinScheme("w")->BuildBin("Min",3.0); // W > 3 GeV
+  A->AddBinScheme("y");  A->BinScheme("y")->BuildBin("Range",0.01,0.95); // 0.01 < y < 0.95
+  A->AddBinScheme("xF"); A->BinScheme("xF")->BuildBin("Min",0.0); // xF > 0
+  A->AddBinScheme("ptLab");  A->BinScheme("ptLab")->BuildBin("Min",0.1); // pT_lab > 0.1 GeV (tracking limit)
+
+
   // set binning scheme ====================================
 
   /* TODO
@@ -53,7 +61,6 @@ void analysis_PvsEta(
 
   A->BinScheme("z")->BuildBin("Range", 0.2, 0.4 );
   A->BinScheme("z")->BuildBin("Range", 0.4, 0.8 );
-  A->BinScheme("z")->BuildBin("Min",0.2);  
 
   // perform the analysis ==================================
   A->Execute();

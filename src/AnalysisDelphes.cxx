@@ -185,19 +185,15 @@ void AnalysisDelphes::Execute() {
       kin->CalculateHadronKinematics();
       kinTrue->CalculateHadronKinematics();
 
-      // APPLY MAIN CUTS
-      if(kin->CutFull()) {
+      // fill track histograms in activated bins
+      FillHistosTracks();
 
-        // fill track histograms in activated bins
-        FillHistosTracks();
+      // fill simple tree
+      // - not binned
+      // - `activeEvent` is only true if at least one bin gets filled for this track
+      // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDD4hep)
+      if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
 
-        // fill simple tree
-        // - not binned
-        // - `activeEvent` is only true if at least one bin gets filled for this track
-        // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDD4hep)
-        if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
-
-      };
     }; // end track loop
 
 
@@ -209,31 +205,28 @@ void AnalysisDelphes::Execute() {
       if(useBreitJets) kin->GetBreitFrameJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
       #endif
 
-      if(kin->CutDIS()){
+      wJet = Q2weightFactor * weightJet->GetWeight(*kinTrue); // TODO: should we separate weights for breit and non-breit jets?
+      wJetTotal += wJet;
 
-        wJet = Q2weightFactor * weightJet->GetWeight(*kinTrue); // TODO: should we separate weights for breit and non-breit jets?
-        wJetTotal += wJet;
+      Int_t nJets;
+      if(useBreitJets) nJets = kin->breitJetsRec.size();
+      else      nJets = kin->jetsRec.size();
 
-        Int_t nJets;
-        if(useBreitJets) nJets = kin->breitJetsRec.size();
-        else      nJets = kin->jetsRec.size();
+      for(int i = 0; i < kin->jetsRec.size(); i++){
 
-        for(int i = 0; i < kin->jetsRec.size(); i++){
-
-          if(useBreitJets) {
-            #if INCCENTAURO == 1
-            jet = kin->breitJetsRec[i];
-            kin->CalculateBreitJetKinematics(jet);
-            #endif
-          } else {
-            jet = kin->jetsRec[i];
-            kin->CalculateJetKinematics(jet);
-          };
-
-          // fill jet histograms in activated bins
-          FillHistosJets();
-
+        if(useBreitJets) {
+          #if INCCENTAURO == 1
+          jet = kin->breitJetsRec[i];
+          kin->CalculateBreitJetKinematics(jet);
+          #endif
+        } else {
+          jet = kin->jetsRec[i];
+          kin->CalculateJetKinematics(jet);
         };
+
+        // fill jet histograms in activated bins
+        FillHistosJets();
+
       };
     }; // end jet loop
 
