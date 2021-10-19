@@ -3,7 +3,7 @@ R__LOAD_LIBRARY(Largex)
 // make resolution plots
 // - adapted from `postprocess_pTvsEta.C`
 void postprocess_resolution(
-    TString infile="out/resolution.example_5x41.root"
+    TString infile="out/resolution.root"
 ){
   
   PostProcessor *P = new PostProcessor(infile);
