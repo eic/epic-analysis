@@ -370,7 +370,7 @@ void PostProcessor::DrawInBins(
     xaxisx2 = 0.975;
     yaxisy1 = 0.08;
   };
-  
+
   TString canvN = "canv_"+outName+"_"+histName;
   TCanvas *canv = new TCanvas(canvN,canvN, canvx, canvy);
   TPad *mainpad = new TPad("mainpad", "mainpad", 0.07, 0.07, 0.98, 0.98);
@@ -387,7 +387,7 @@ void PostProcessor::DrawInBins(
   lmRICH->SetLineColor(kRed);
   lDRICH->SetLineColor(kRed);
   TH1* histArray[nvar1][nvar2];
-  int drawpid = 1;
+  int drawpid = 0;
   outfile->cd("/");
   canv->Write();
   // get histograms from Histos 2D vector
@@ -410,25 +410,25 @@ void PostProcessor::DrawInBins(
       gPad->SetGridx(intgrid1);
       TString drawStr = "";
       switch(hist->GetDimension()) {
-      case 1:
-	drawStr = "EX0 P";       
-	break;
-      case 2:
-	drawStr = "COLZ";
-	break;
-      case 3:
-	drawStr = "BOX";
-	break;
+        case 1:
+          drawStr = ""/*"EX0 P"*/;       
+          break;
+        case 2:
+          drawStr = "COLZ";
+          break;
+        case 3:
+          drawStr = "BOX";
+          break;
       };
       //hist->Write();
       if( hist->GetEntries() > 0 ) {	
-	hist->Draw(drawStr);
-	if(drawpid){
-	  lDIRClow->Draw();
-	  lDIRC->Draw();
-	  lmRICH->Draw();
-	  lDRICH->Draw();
-	}
+        hist->Draw(drawStr);
+        if(drawpid){
+          lDIRClow->Draw();
+          lDIRC->Draw();
+          lmRICH->Draw();
+          lDRICH->Draw();
+        }
       }
     };    
   };
@@ -455,20 +455,20 @@ void PostProcessor::DrawInBins(
   xaxis->SetTextFont(40);
   xaxis->SetLabelSize(0.02);
   xaxis->SetTickSize(0.02);
-  
+
   yaxis->SetTitle(var2name);
   yaxis->SetTitleSize(0.02);
   yaxis->SetName("yaxis");
   yaxis->SetTextFont(40);
   yaxis->SetLabelSize(0.02);
   yaxis->SetTickSize(0.02);
-  
+
   newpad1->cd();
   yaxis->Draw();
   newpad2->cd();
   xaxis->Draw();
-  
-  
+
+
   //  canv->Write();
   canv->Print(pngDir+"/"+canvN+".png");
   canv->Print(pngDir+"/"+canvN+".pdf");

@@ -256,14 +256,16 @@ void Analysis::Prepare() {
     HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
     HS->DefineHist1D("qTQ_jet","jet q_{T}/Q","", NBINS, 0, 3.0);
     // -- resolutions
-    HS->DefineHist1D("x_Res","(x-x_{true})/x_{true}","", NBINS, -1, 1);
-    //HS->DefineHist1D("yRes","y - y_{true}","", NBINS, -2, 2); // TODO: defined in fullsim branch, but not yet here
-    //HS->DefineHist1D("Q2Res","Q2 - Q2_{true}","", NBINS, -2, 2); // TODO: defined in fullsim branch, but not yet here
+    HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -2, 2);
+    HS->DefineHist1D("y_Res","y-y_{true}","", NBINS, -2, 2);
+    HS->DefineHist1D("Q2_Res","Q2-Q2_{true}","GeV", NBINS, -2, 2);
+    HS->DefineHist1D("phiH_Res","#phi_{h}-#phi_{h}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
+    HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
     HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
         20,1e-4,1,
         10,1,1e4,
         true,true
-    );
+        );
     HS->DefineHist2D("Q2vsXpurity","x","Q^{2}","","GeV^{2}",
         20,1e-4,1,
         10,1,1e4,
@@ -273,7 +275,7 @@ void Analysis::Prepare() {
         20,1e-4,1,
         10,1,1e4,
         true,true
-    );
+        );
     HS->DefineHist2D("Q2vsX_pTres","x","Q^{2}","","GeV^{2}",
         20,1e-4,1,
         10,1,1e4,
@@ -541,7 +543,11 @@ void Analysis::FillHistosTracks() {
     // cross sections (divide by lumi after all events processed)
     H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),wTrack);
     // resolutions
-    if(kinTrue->x!=0) H->Hist("x_Res")->Fill((kin->x-kinTrue->x)/kinTrue->x,wTrack);
+    H->Hist("x_Res")->Fill( kin->x - kinTrue->x, wTrack );
+    H->Hist("y_Res")->Fill( kin->y - kinTrue->y, wTrack );
+    H->Hist("Q2_Res")->Fill( kin->Q2 - kinTrue->Q2, wTrack );
+    H->Hist("phiH_Res")->Fill( Kinematics::AdjAngle(kin->phiH - kinTrue->phiH), wTrack );
+    H->Hist("phiS_Res")->Fill( Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wTrack );
     dynamic_cast<TH2*>(H->Hist("Q2vsXtrue"))->Fill(kinTrue->x,kinTrue->Q2,wTrack);
     if(kinTrue->z!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_zres"))->Fill(
       kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->z - kin->z)/(kinTrue->z) ) );
