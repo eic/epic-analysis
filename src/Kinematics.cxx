@@ -609,14 +609,12 @@ void Kinematics::InjectFakeAsymmetry() {
   moduVal[1] = TMath::Sin(phiH+phiS) * depolP1; // transversity*collins
   // fake amplitudes
   ampVal[0] = 0.1;
-  ampVal[1] = 0.0;
+  ampVal[1] = 0.1;
   // fake dependence on SIDIS kinematics (linear in x)
-  /*
   asymInject = 0;
   asymInject +=  ampVal[0]/0.2 * x * moduVal[0];
   asymInject += -ampVal[1]/0.2 * x * moduVal[1];
-  */
-  asymInject = ampVal[0]*moduVal[0] + ampVal[1]*moduVal[1]; // constant
+  //asymInject = ampVal[0]*moduVal[0] + ampVal[1]*moduVal[1]; // constant
   // apply polarization
   asymInject *= pol;
   // generate random number in [0,1]
