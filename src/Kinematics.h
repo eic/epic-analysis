@@ -215,26 +215,6 @@ class Kinematics : public TObject
     void InjectFakeAsymmetry(); // test your own asymmetry, for fit code validation
 
 
-    // CUTS =====================================================
-    Bool_t CutDIS() {
-      return W>3.0 /* inelastic region */
-          && y>0.00 && y<0.95 /* ymin cut applied elsewhere */
-          ;
-    };
-    Bool_t CutHadron() {
-      return z>0.2 && z<0.9
-          && vecHadron.Pt()>0.1 /* tracking limit on pT_lab */
-          && xF>0 /* bias toward current fragmentation */
-          ;
-    };
-    Bool_t CutFull() {
-      return this->CutDIS()
-          && this->CutHadron()
-          ;
-    };
-    // ==========================================================
-
-
   private:
     static const Int_t asymInjectN = 2;
     Double_t moduVal[asymInjectN];

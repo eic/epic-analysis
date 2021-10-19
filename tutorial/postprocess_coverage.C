@@ -2,7 +2,7 @@ R__LOAD_LIBRARY(Largex)
 
 // make kinematics coverage plots, such as eta vs. p in bins of (x,Q2)
 void postprocess_coverage(
-    TString infile="out/coverage.example_5x41.root"
+    TString infile="out/coverage.root"
 ) {
 
   // setup postprocessor ========================================
@@ -39,8 +39,16 @@ void postprocess_coverage(
     // are never going to be "Full"
     for(Node *bin : bins->GetBinNodes()) {
       if(bin->GetCutType()!="Full" && bin->GetVarName()!="finalState") {
-        B = false;
-        break;
+        // we also need to ignore the bins which are just cut definitions, since they are not "Full":
+        if( bin->GetVarName() != "w"
+         && bin->GetVarName() != "y"
+         && bin->GetVarName() != "z"
+         && bin->GetVarName() != "xF"
+         && bin->GetVarName() != "ptLab"
+        ) {
+          B = false;
+          break;
+        };
       };
     };
     // call `ConditionalControl` on the current node, which is

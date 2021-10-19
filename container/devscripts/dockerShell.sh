@@ -2,7 +2,8 @@
 # start docker shell, for testing image builds
 
 #image=largexeic_ci:latest
-image=largexeic_dev:latest
+#image=largexeic_dev:latest
+image=cjdilks/largex-eic:dev
 
 homedir=/home/athena
 swdir=$homedir/largex-eic
@@ -14,5 +15,5 @@ docker run \
   -e DISPLAY \
   -v $(pwd):$swdir \
   -w $swdir \
-  $image bash \
-  -c "cat $swdir/container/devscripts/.shellrc >> $homedir/.bashrc && exec bash"
+  -u $(id -u):$(id -g) \
+  $image bash
