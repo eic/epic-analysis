@@ -531,8 +531,8 @@ void Kinematics::CalculateBreitJetKinematics(fastjet::PseudoJet jet){
 
   TLorentzVector vecElectronBreit = vecElectron;
   vecElectronBreit.Boost(breitBoost);
-  TVector3 qT(vecElectronBreit.Px()+pjet.Px(), vecElectronBreit.Py()+pjet.Py(), 0);
-  qTjet = qT.Mag();
+  TVector3 qTjetVect(vecElectronBreit.Px()+pjet.Px(), vecElectronBreit.Py()+pjet.Py(), 0);
+  qTjet = qTjetVect.Mag();
 
   TLorentzVector nbreit(0,0,1/sqrt(Q2),1/sqrt(Q2));
   double zjet = nbreit*pjet;
@@ -573,9 +573,8 @@ void Kinematics::CalculateBreitJetKinematics(fastjet::PseudoJet jet){
 void Kinematics::CalculateJetKinematics(fastjet::PseudoJet jet){
   // FIXME: anything in this method not lorentz invariant? need to be in head-on frame?
   TLorentzVector pjet(jet.px(), jet.py(), jet.pz(), jet.E());
-  // FIXME: `qT` is already defined as something else!!! /////////////////////////////// 
-  TVector3 qT( vecElectron.Px()+pjet.Px(), vecElectron.Py()+pjet.Py(), 0);
-  qTjet = qT.Mag();
+  TVector3 qTjetVect( vecElectron.Px()+pjet.Px(), vecElectron.Py()+pjet.Py(), 0);
+  qTjet = qTjetVect.Mag();
 
   zjet = (vecIonBeam.Dot(pjet))/((vecIonBeam).Dot(vecQ));
   pTjet = jet.pt(); // lab frame pT
