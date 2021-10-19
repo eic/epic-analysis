@@ -17,7 +17,7 @@ R__LOAD_LIBRARY(Largex)
  *     example, send a pull request with the new list)
  */
 void analysis_dd4hep(
-    TString infiles="tutorial/s3files.list", /* single root file or file list */
+    TString infiles="tutorial/s3files.list", /* FIXME: need example list, with cross sections (see other example macros) */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=0, /* crossing angle [mrad] */

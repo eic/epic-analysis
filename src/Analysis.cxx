@@ -167,13 +167,8 @@ void Analysis::Prepare() {
     return;
   }
 
-  // base outfileName on outfilePrefix + infileName parts
-  outfileName = infileName;
-  outfileName(TRegexp("^.*/")) = ""; // remove path
-  outfileName(TRegexp("\\*")) = ""; // remove asterisk wildcard
-  if(outfilePrefix!="") outfilePrefix+=".";
-  outfileName = "out/"+outfilePrefix+outfileName;
-  outfileName(TRegexp("\\.\\.")) = "."; // remove double dot
+  // set output file name
+  outfileName = "out/"+outfilePrefix+".root";
 
   // open output file
   cout << "-- output file: " << outfileName << endl;

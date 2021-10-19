@@ -36,6 +36,17 @@ this tutorial directory, e.g., `root -b -q tutorial/analysis_template.C`
     the event loop; the postprocessor macro is typically fast, since
     it analyzes the resulting data structures
 
+- in the analysis macros, the input files are specified by a list, with the
+  following columns for each file (so that we can combine different Q2 regions
+  together using relative weights):
+  - file name (relative to the top-level directory, unless you have an
+    absolute path)
+  - cross section (can be obtained from Pythia output logs, for example)
+  - minimum Q2
+  - see files in `../datarec/*.config` for examples
+    - the tutorials below use `../datarec/tutorial.config`, which has a
+      single file, the aforementioned example ROOT file
+
 ## Examples:
 
 1. Template
