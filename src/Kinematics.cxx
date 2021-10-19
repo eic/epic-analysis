@@ -32,6 +32,23 @@ Kinematics::Kinematics(
       );
   s = (vecEleBeam+vecIonBeam).M2();
 
+  // calculate transformations for head-on frame boost
+  // - boost lab frame -> c.o.m. frame of proton and ion Beams
+  BvecBoost = vecEleBeam + vecIonBeam;
+  Bboost = -1*BvecBoost.BoostVector();
+  // - boost c.o.m. frame of beams -> back to a frame with energies (nearly) the Original beam energies
+  OvecBoost.SetXYZT( 0.0, 0.0, BvecBoost[2], BvecBoost[3] );
+  Oboost = OvecBoost.BoostVector();
+  // - boost beams to c.o.m. frame of beams
+  this->BoostToBeamComFrame(vecEleBeam,BvecEleBeam);
+  this->BoostToBeamComFrame(vecIonBeam,BvecIonBeam);
+  // - rotation of beams about y to remove x-components
+  rotAboutY = -TMath::ATan2( BvecIonBeam.Px(), BvecIonBeam.Pz() );
+  BvecEleBeam.RotateY(rotAboutY);
+  BvecIonBeam.RotateY(rotAboutY);
+  // - rotation of beams about x to remove y-components
+  rotAboutX = TMath::ATan2( BvecIonBeam.Py(), BvecIonBeam.Pz() );
+
   // default transverse spin (needed for phiS calculation)
   tSpin = 1; // +1=spin-up, -1=spin-down
 
@@ -110,10 +127,10 @@ void Kinematics::CalculateDIS(TString recmethod){
   };
 
   // calculate SIDIS boost vectors
-  // - c.o.m. frame of virtual photon and ion
+  // - lab frame -> C.o.m. frame of virtual photon and ion
   CvecBoost = vecQ + vecIonBeam;
   Cboost = -1*CvecBoost.BoostVector();
-  // - ion rest frame
+  // - lab frame -> Ion rest frame
   IvecBoost = vecIonBeam;
   Iboost = -1*IvecBoost.BoostVector();
 
@@ -607,6 +624,36 @@ void Kinematics::CalculateJetKinematics(fastjet::PseudoJet jet){
       }
     }
   }
+};
+
+
+// BOOSTS
+/////////////////
+
+// boost from Lab frame `Lvec` to photon+ion C.o.m. frame `Cvec`
+void Kinematics::BoostToComFrame(TLorentzVector Lvec, TLorentzVector &Cvec) {
+  Cvec=Lvec;
+  Cvec.Boost(Cboost);
+};
+
+// boost from Lab frame `Lvec` to Ion rest frame `Ivec`
+void Kinematics::BoostToIonFrame(TLorentzVector Lvec, TLorentzVector &Ivec) {
+  Ivec=Lvec;
+  Ivec.Boost(Iboost);
+};
+
+// boost from Lab frame `Lvec` to ion+electron Beam c.o.m. frame `Bvec`
+void Kinematics::BoostToBeamComFrame(TLorentzVector Lvec, TLorentzVector &Bvec) {
+  Bvec=Lvec;
+  Bvec.Boost(Bboost);
+};
+
+// transform from Lab frame `Lvec` to Head-on frame `Hvec`
+void Kinematics::TransformToHeadOnFrame(TLorentzVector Lvec, TLorentzVector &Hvec) {
+  this->BoostToBeamComFrame(Lvec,Hvec); // boost to c.o.m. frame of beams
+  Hvec.RotateY(rotAboutY); // remove x-component of beams
+  Hvec.RotateX(rotAboutX); // remove y-component of beams
+  Hvec.Boost(Oboost); // return to frame where beam energies are (nearly) the original
 };
 
 

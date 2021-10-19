@@ -112,13 +112,15 @@ class Kinematics : public TObject
     Double_t IonMass;
 
 
-    // boost calculations
-    // - boost from Lab frame to photon+ion c.o.m. frame
-    void BoostToComFrame(TLorentzVector Lvec, TLorentzVector &Cvec) {
-      Cvec=Lvec; Cvec.Boost(Cboost); };
-    // - boost from Lab frame to Ion rest frame
-    void BoostToIonFrame(TLorentzVector Lvec, TLorentzVector &Ivec) {
-      Ivec=Lvec; Ivec.Boost(Iboost); };
+    // lorentz transformations
+    // - boost from Lab frame `Lvec` to photon+ion C.o.m. frame `Cvec`
+    void BoostToComFrame(TLorentzVector Lvec, TLorentzVector &Cvec);
+    // - boost from Lab frame `Lvec` to Ion rest frame `Ivec`
+    void BoostToIonFrame(TLorentzVector Lvec, TLorentzVector &Ivec);
+    // - boost from Lab frame `Lvec` to ion+electron Beam c.o.m. frame `Bvec`
+    void BoostToBeamComFrame(TLorentzVector Lvec, TLorentzVector &Bvec);
+    // - tranform from Lab frame `Lvec` to Head-on frame `Hvec`
+    void TransformToHeadOnFrame(TLorentzVector Lvec, TLorentzVector &Hvec);
 
 
     // misc calculations
@@ -226,6 +228,15 @@ class Kinematics : public TObject
     TLorentzVector IvecEleBeam, IvecIonBeam;
     TLorentzVector IvecElectron, IvecW, IvecQ;
     TLorentzVector IvecHadron;
+    // - head-on frame
+    TLorentzVector HvecEleBeam, HvecIonBeam;
+    TLorentzVector HvecElectron, HvecW, HvecQ;
+    TLorentzVector HvecHadron;
+    // - other intermediate frames (for head-on frame transformation)
+    TLorentzVector BvecBoost, OvecBoost;
+    TVector3 Bboost, Oboost;
+    TLorentzVector BvecEleBeam, BvecIonBeam;
+    Double_t rotAboutX, rotAboutY;
     // other
     TLorentzVector vecSpin, IvecSpin;
 
