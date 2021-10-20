@@ -195,6 +195,8 @@ class Kinematics : public TObject
     // asymmetry injection
     void InjectFakeAsymmetry(); // test your own asymmetry, for fit code validation
 
+    // tests and validation
+    void ValidateHeadOnFrame();
 
   protected:
 

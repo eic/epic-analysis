@@ -62,7 +62,10 @@ Kinematics::Kinematics(
 
 
 // calculates q,W, boost vecs from quadratic formula
-// FIXME: not lorentz invariant? need to be in head-on frame?
+// - determines `vecQ` and `vecW` in the lab frame; we do not boost to the 
+//   head-on frame, since downstream calculations assume these momenta
+//   are in the lab frame
+// - also calculates `W` and `Nu` (Lorentz invariant)
 void Kinematics::getqWQuadratic(){
   double f = y*(vecIonBeam.Dot(vecEleBeam));
   double hx = Pxh;
@@ -101,6 +104,12 @@ void Kinematics::getqWQuadratic(){
 
 // function to call different reconstruction methods
 void Kinematics::CalculateDIS(TString recmethod){
+
+  // transform to the head-on frame; not needed by all reconstruction methods,
+  // but best to make sure this is done up front
+  this->TransformToHeadOnFrame(vecEleBeam,HvecEleBeam);
+  this->TransformToHeadOnFrame(vecIonBeam,HvecIonBeam);
+  this->TransformToHeadOnFrame(vecElectron,HvecElectron);
 
   // calculate primary DIS variables, including Q2,x,y,W,nu
   if( recmethod.CompareTo("Ele", TString::kIgnoreCase) == 0 ){
@@ -172,8 +181,7 @@ void Kinematics::CalculateDISbyElectron() {
 // calculate DIS kinematics using JB method
 // sets q, W using quadratic equation
 void Kinematics::CalculateDISbyJB(){
-  // FIXME: not lorentz invariant? need to be in head-on frame?
-  y = sigmah/(2*vecEleBeam.E());
+  y = sigmah/(2*HvecEleBeam.E());
   Q2 = (Pxh*Pxh + Pyh*Pyh)/(1-y);
   x = Q2/(s*y);
   this->getqWQuadratic();
@@ -183,10 +191,9 @@ void Kinematics::CalculateDISbyJB(){
 // sets q, W using quadratic equation
 // requires 'vecElectron' set
 void Kinematics::CalculateDISbyDA(){
-  // FIXME: not lorentz invariant? need to be in head-on frame?
   float thetah = acos( (Pxh*Pxh+Pyh*Pyh - sigmah*sigmah)/(Pxh*Pxh+Pyh*Pyh+sigmah*sigmah) );
-  float thetae = vecElectron.Theta();
-  Q2 = 4.0*vecEleBeam.E()*vecEleBeam.E()*sin(thetah)*(1+cos(thetae))/(sin(thetah)+sin(thetae)-sin(thetah+thetae));
+  float thetae = HvecElectron.Theta();
+  Q2 = 4.0*HvecEleBeam.E()*HvecEleBeam.E()*sin(thetah)*(1+cos(thetae))/(sin(thetah)+sin(thetae)-sin(thetah+thetae));
   y = (sin(thetae)*(1-cos(thetah)))/(sin(thetah)+sin(thetae)-sin(thetah+thetae));
   x = Q2/(s*y);
   this->getqWQuadratic();
@@ -196,9 +203,9 @@ void Kinematics::CalculateDISbyDA(){
 // calculate DIS kinematics using mixed method
 // requires 'vecElectron' set
 void Kinematics::CalculateDISbyMixed(){
-  vecQ = vecEleBeam - vecElectron;
+  vecQ = vecEleBeam - vecElectron; // `vecQ` must be in lab frame, for downstream calculations
   Q2 = -1*vecQ.M2();
-  y = sigmah/(2*vecEleBeam.E()); // FIXME: sigmah not lorentz invariant?
+  y = sigmah/(2*HvecEleBeam.E()); // `sigmah` is in head-on frame, therefore divide by `HvecEleBeam`
   x = Q2/(s*y);
   vecW = vecEleBeam + vecIonBeam - vecElectron;
   W = vecW.M();
@@ -207,26 +214,24 @@ void Kinematics::CalculateDISbyMixed(){
 // calculate DIS kinematics using Sigma method
 // requires 'vecElectron' set
 void Kinematics::CalculateDISbySigma(){
-  // FIXME: not lorentz invariant? need to be in head-on frame?
-  y = sigmah/(sigmah + vecElectron.E()*(1-cos(vecElectron.Theta())));
-  Q2 = (vecElectron.Px()*vecElectron.Px() + vecElectron.Py()*vecElectron.Py())/(1-y);
+  y = sigmah/(sigmah + HvecElectron.E()*(1-cos(HvecElectron.Theta())));
+  Q2 = (HvecElectron.Px()*HvecElectron.Px() + HvecElectron.Py()*HvecElectron.Py())/(1-y);
   x = Q2/(s*y);
-  Kinematics::getqWQuadratic();
+  this->getqWQuadratic();
 };
 // calculate DIS kinematics using eSigma method                                                                                                                       
 // requires 'vecElectron' set                                                                                                                                      
 void Kinematics::CalculateDISbyeSigma(){
-  // FIXME: not lorentz invariant? need to be in head-on frame?
-  vecQ = vecEleBeam - vecElectron;
-  vecW = vecEleBeam + vecIonBeam - vecElectron;
+  vecQ = vecEleBeam - vecElectron; // `vecQ` must be in lab frame, for downstream calculations
+  vecW = vecEleBeam + vecIonBeam - vecElectron; // `vecW` must be in lab frame, for downstream
   W = vecW.M();
   Q2 = -1*vecQ.M2();
-  double ysigma = sigmah/(sigmah + vecElectron.E()*(1-cos(vecElectron.Theta())));
-  double Q2sigma = (vecElectron.Px()*vecElectron.Px() + vecElectron.Py()*vecElectron.Py())/(1-y);
+  double ysigma = sigmah/(sigmah + HvecElectron.E()*(1-cos(HvecElectron.Theta())));
+  double Q2sigma = (HvecElectron.Px()*HvecElectron.Px() + HvecElectron.Py()*HvecElectron.Py())/(1-y);
   double xsigma = Q2sigma/(s*ysigma);    
   y = Q2/(s*xsigma);
   x = xsigma;
-  Kinematics::getqWQuadratic();
+  this->getqWQuadratic();
 };
 
 // calculate hadron kinematics
@@ -273,6 +278,29 @@ void Kinematics::CalculateHadronKinematics() {
   qT = pT / z;
 };
 
+
+// validate transformations to the head-on frame
+void Kinematics::ValidateHeadOnFrame() {
+  this->TransformToHeadOnFrame(vecEleBeam,HvecEleBeam);
+  this->TransformToHeadOnFrame(vecIonBeam,HvecIonBeam);
+  this->TransformToHeadOnFrame(vecElectron,HvecElectron);
+  this->TransformToHeadOnFrame(vecHadron,HvecHadron);
+  printf("\nVALIDATION:\n");
+  printf("lab E:     "); vecEleBeam.Print();
+  printf("lab I:     "); vecIonBeam.Print();
+  printf("head-on E: "); HvecEleBeam.Print();
+  printf("head-on I: "); HvecIonBeam.Print();
+  printf("---\n");
+  printf("lab electron:     "); vecElectron.Print();
+  printf("head-on electron: "); HvecElectron.Print();
+  printf("difference:       "); (vecElectron-HvecElectron).Print();
+  printf("---\n");
+  printf("lab hadron:     "); vecHadron.Print();
+  printf("head-on hadron: "); HvecHadron.Print();
+  printf("difference:     "); (vecHadron-HvecHadron).Print();
+};
+
+
 // get PID information from PID systems tracks
 int getTrackPID(Track *track, TObjArrayIter itParticle, TObjArrayIter itPIDSystemsTrack){
   GenParticle *trackParticle = (GenParticle*)track->Particle.GetObject();
@@ -288,6 +316,7 @@ int getTrackPID(Track *track, TObjArrayIter itParticle, TObjArrayIter itPIDSyste
 
 // calculates hadronic final state variables from DELPHES tree branches
 // expects 'vecElectron' set
+// - calculates `sigmah`, `Pxh`, and `Pyh` in the head-on frame
 void Kinematics::GetHadronicFinalState(
     TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
     TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
@@ -299,7 +328,6 @@ void Kinematics::GetHadronicFinalState(
   itEFlowNeutralHadron.Reset();
   itParticle.Reset();
 
-  // FIXME: `sigmah,Pxh,Pyh` not lorentz invariant? need to be in head-on frame?
   sigmah = 0;
   Pxh = 0;
   Pyh = 0;
@@ -307,6 +335,7 @@ void Kinematics::GetHadronicFinalState(
     TLorentzVector  trackp4 = track->P4();
     if(!isnan(trackp4.E())){
       if( std::abs(track->Eta) >= 4.0  ){ 	
+        this->TransformToHeadOnFrame(trackp4,trackp4);
         sigmah += (trackp4.E() - trackp4.Pz());
         Pxh += trackp4.Px();
         Pyh +=trackp4.Py();
@@ -317,6 +346,7 @@ void Kinematics::GetHadronicFinalState(
     TLorentzVector eflowTrackp4 = eflowTrack->P4();
     if(!isnan(eflowTrackp4.E())){
       if(std::abs(eflowTrack->Eta) < 4.0){
+        this->TransformToHeadOnFrame(eflowTrackp4,eflowTrackp4);
         sigmah += (eflowTrackp4.E() - eflowTrackp4.Pz());
         Pxh += eflowTrackp4.Px();
         Pyh += eflowTrackp4.Py();
@@ -327,6 +357,7 @@ void Kinematics::GetHadronicFinalState(
     TLorentzVector  towerPhotonp4 = towerPhoton->P4();
     if(!isnan(towerPhotonp4.E())){
       if( std::abs(towerPhoton->Eta) < 4.0  ){
+        this->TransformToHeadOnFrame(towerPhotonp4,towerPhotonp4);
         sigmah += (towerPhotonp4.E() - towerPhotonp4.Pz());
         Pxh += towerPhotonp4.Px();
         Pyh += towerPhotonp4.Py();
@@ -337,16 +368,17 @@ void Kinematics::GetHadronicFinalState(
     TLorentzVector  towerNeutralHadronp4 = towerNeutralHadron->P4();
     if(!isnan(towerNeutralHadronp4.E())){
       if( std::abs(towerNeutralHadron->Eta) < 4.0 ){
+        this->TransformToHeadOnFrame(towerNeutralHadronp4,towerNeutralHadronp4);
         sigmah += (towerNeutralHadronp4.E() - towerNeutralHadronp4.Pz());
         Pxh += towerNeutralHadronp4.Px();
         Pyh += towerNeutralHadronp4.Py();
       }
     }
   }
-  if(!isnan(vecElectron.E())){
-    sigmah -= (vecElectron.E() - vecElectron.Pz());
-    Pxh -= vecElectron.Px();
-    Pyh -= vecElectron.Py();
+  if(!isnan(HvecElectron.E())){
+    sigmah -= (HvecElectron.E() - HvecElectron.Pz());
+    Pxh -= HvecElectron.Px();
+    Pyh -= HvecElectron.Py();
   }
 };
 
@@ -356,7 +388,6 @@ void Kinematics::GetJets(
     TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
     )
 {
-  // FIXME: anything in this method not lorentz invariant? need to be in head-on frame?
   itEFlowTrack.Reset();
   itEFlowPhoton.Reset();
   itEFlowNeutralHadron.Reset();
@@ -378,10 +409,12 @@ void Kinematics::GetJets(
     TLorentzVector eflowTrackp4 = eflowTrack->P4();
     if(!isnan(eflowTrackp4.E())){
       if(std::abs(eflowTrack->Eta) < 4.0 && eflowTrack->PT > 0.1){
+        this->TransformToHeadOnFrame(eflowTrackp4,eflowTrackp4);
         particles.push_back(fastjet::PseudoJet(eflowTrackp4.Px(),eflowTrackp4.Py(),eflowTrackp4.Pz(),eflowTrackp4.E()));
 
         GenParticle *trackParticle = (GenParticle*)eflowTrack->Particle.GetObject();
         TLorentzVector partp4 = trackParticle->P4();	
+        this->TransformToHeadOnFrame(partp4,partp4);
         particlesTrue.push_back(fastjet::PseudoJet(partp4.Px(),partp4.Py(),partp4.Pz(),partp4.E()));
 
         jetConstituents.insert(std::pair<double,int>(eflowTrackp4.Px(), eflowTrack->PID) );
@@ -392,11 +425,13 @@ void Kinematics::GetJets(
     TLorentzVector  towerPhotonp4 = towerPhoton->P4();
     if(!isnan(towerPhotonp4.E())){
       if( std::abs(towerPhoton->Eta) < 4.0){
+        this->TransformToHeadOnFrame(towerPhotonp4,towerPhotonp4);
         particles.push_back(fastjet::PseudoJet(towerPhotonp4.Px(),towerPhotonp4.Py(),towerPhotonp4.Pz(),towerPhotonp4.E()));
 
         for(int i = 0; i < towerPhoton->Particles.GetEntries(); i++){
           GenParticle *photonPart = (GenParticle*)towerPhoton->Particles.At(i);
           TLorentzVector photonp4 = photonPart->P4();
+          this->TransformToHeadOnFrame(photonp4,photonp4);
           particlesTrue.push_back(fastjet::PseudoJet(photonp4.Px(),photonp4.Py(),photonp4.Pz(),photonp4.E()));
         }
       }
@@ -407,6 +442,7 @@ void Kinematics::GetJets(
     TLorentzVector  towerNeutralHadronp4 = towerNeutralHadron->P4();
     if(!isnan(towerNeutralHadronp4.E())){
       if( std::abs(towerNeutralHadron->Eta) < 4.0){
+        this->TransformToHeadOnFrame(towerNeutralHadronp4,towerNeutralHadronp4);
         particles.push_back(
           fastjet::PseudoJet(towerNeutralHadronp4.Px(),towerNeutralHadronp4.Py(),towerNeutralHadronp4.Pz(),towerNeutralHadronp4.E())
           );
@@ -414,6 +450,7 @@ void Kinematics::GetJets(
         for(int i = 0; i < towerNeutralHadron->Particles.GetEntries(); i++){
           GenParticle *nhadPart = (GenParticle*)towerNeutralHadron->Particles.At(i);
           TLorentzVector nhadp4 = nhadPart->P4();
+          this->TransformToHeadOnFrame(nhadp4,nhadp4);
           particlesTrue.push_back(fastjet::PseudoJet(nhadp4.Px(),nhadp4.Py(),nhadp4.Pz(),nhadp4.E()));
         }	
       }
@@ -588,7 +625,7 @@ void Kinematics::CalculateBreitJetKinematics(fastjet::PseudoJet jet){
 
 
 void Kinematics::CalculateJetKinematics(fastjet::PseudoJet jet){
-  // FIXME: anything in this method not lorentz invariant? need to be in head-on frame?
+  // FIXME: is `jet` guaranteed to be in the head-on frame?
   TLorentzVector pjet(jet.px(), jet.py(), jet.pz(), jet.E());
   TVector3 qTjetVect( vecElectron.Px()+pjet.Px(), vecElectron.Py()+pjet.Py(), 0);
   qTjet = qTjetVect.Mag();

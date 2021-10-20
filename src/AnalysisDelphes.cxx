@@ -194,6 +194,9 @@ void AnalysisDelphes::Execute() {
       // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDD4hep)
       if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
 
+      // tests
+      //kin->ValidateHeadOnFrame();
+
     }; // end track loop
 
 
