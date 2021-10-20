@@ -236,6 +236,9 @@ void Analysis::Prepare() {
     HS->DefineHist1D("mX","m_{X}","GeV",NBINS,0,20);
     HS->DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
+    HS->DefineHist2D("phiHvsPhiS","#phi_{S}","#phi_{h}","","",
+        25,-TMath::Pi(),TMath::Pi(),
+        25,-TMath::Pi(),TMath::Pi());
     HS->DefineHist1D("phiSivers","#phi_{Sivers}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist1D("phiCollins","#phi_{Collins}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist2D("etaVsP","p","#eta","GeV","",
@@ -537,6 +540,7 @@ void Analysis::FillHistosTracks() {
     H->Hist("mX")->Fill(kin->mX,wTrack);
     H->Hist("phiH")->Fill(kin->phiH,wTrack);
     H->Hist("phiS")->Fill(kin->phiS,wTrack);
+    dynamic_cast<TH2*>(H->Hist("phiHvsPhiS"))->Fill(kin->phiS,kin->phiH,wTrack);
     H->Hist("phiSivers")->Fill(Kinematics::AdjAngle(kin->phiH - kin->phiS),wTrack);
     H->Hist("phiCollins")->Fill(Kinematics::AdjAngle(kin->phiH + kin->phiS),wTrack);
     dynamic_cast<TH2*>(H->Hist("etaVsP"))->Fill(kin->pLab,kin->etaLab,wTrack); // TODO: lab-frame p, or some other frame?
