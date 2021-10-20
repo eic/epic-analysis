@@ -77,7 +77,7 @@ void AnalysisDelphes::Execute() {
         };
       };
     };
-    kinTrue->CalculateDIS(reconMethod);
+    kinTrue->CalculateDIS("Ele");
     Double_t Q2 = kinTrue->Q2;
     CountEvent(Q2, chain->GetTreeNumber());
   }
