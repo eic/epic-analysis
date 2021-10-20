@@ -625,9 +625,9 @@ void Kinematics::CalculateBreitJetKinematics(fastjet::PseudoJet jet){
 
 
 void Kinematics::CalculateJetKinematics(fastjet::PseudoJet jet){
-  // FIXME: is `jet` guaranteed to be in the head-on frame?
+  // `jet` is already in the head-on frame, since `jetsRec` was filled with head-on frame momenta
   TLorentzVector pjet(jet.px(), jet.py(), jet.pz(), jet.E());
-  TVector3 qTjetVect( vecElectron.Px()+pjet.Px(), vecElectron.Py()+pjet.Py(), 0);
+  TVector3 qTjetVect( vecElectron.Px()+pjet.Px(), vecElectron.Py()+pjet.Py(), 0); // (used only in Lorentz invariant calculations)
   qTjet = qTjetVect.Mag();
 
   zjet = (vecIonBeam.Dot(pjet))/((vecIonBeam).Dot(vecQ));
