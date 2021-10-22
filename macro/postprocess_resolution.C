@@ -5,6 +5,9 @@ R__LOAD_LIBRARY(Largex)
 void postprocess_resolution(
     TString infile="out/resolution.root"
 ){
+
+  gROOT->ProcessLine(".! rm -v out/resolution.images/*.png"); // cleanup old image files
+  gROOT->ProcessLine(".! rm -v out/resolution.images/*.pdf"); // cleanup old image files
   
   PostProcessor *P = new PostProcessor(infile);
   P->Op()->PrintBreadth("HistosDAG Initial Setup");
