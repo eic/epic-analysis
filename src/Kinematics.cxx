@@ -145,7 +145,7 @@ void Kinematics::CalculateDIS(TString recmethod){
 
   // calculate depolarization
   // - calculate epsilon, the ratio of longitudinal and transverse photon flux [hep-ph/0611265]
-  // FIXME: not lorentz invariant? need to be in head-on frame?
+  // - these calculations are Lorentz invariant
   gamma = 2*ProtonMass()*x / TMath::Sqrt(Q2);
   epsilon = ( 1 - y - TMath::Power(gamma*y,2)/4 ) /
     ( 1 - y + y*y/2 + TMath::Power(gamma*y,2)/4 );
@@ -281,6 +281,9 @@ void Kinematics::CalculateHadronKinematics() {
 
 // validate transformations to the head-on frame
 void Kinematics::ValidateHeadOnFrame() {
+  this->BoostToIonFrame(vecEleBeam,IvecEleBeam);
+  this->BoostToIonFrame(vecIonBeam,IvecIonBeam);
+  this->TransformToHeadOnFrame(vecIonBeam,HvecIonBeam);
   this->TransformToHeadOnFrame(vecEleBeam,HvecEleBeam);
   this->TransformToHeadOnFrame(vecIonBeam,HvecIonBeam);
   this->TransformToHeadOnFrame(vecElectron,HvecElectron);
@@ -288,6 +291,8 @@ void Kinematics::ValidateHeadOnFrame() {
   printf("\nVALIDATION:\n");
   printf("lab E:     "); vecEleBeam.Print();
   printf("lab I:     "); vecIonBeam.Print();
+  printf("ion RF  E: "); IvecEleBeam.Print();
+  printf("ion RF  I: "); IvecIonBeam.Print();
   printf("head-on E: "); HvecEleBeam.Print();
   printf("head-on I: "); HvecIonBeam.Print();
   printf("---\n");
