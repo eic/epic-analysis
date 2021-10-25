@@ -52,37 +52,7 @@ void AnalysisDelphes::Execute() {
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
   TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
 
-  // get counts in different Q2 cuts
-  cout << "count events..." << endl;
-  for(Long64_t e=0; e<ENT; e++) {
-    if(e>0&&e%10000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
-    tr->ReadEntry(e);
-    itParticle.Reset();
-    maxElePtrue = 0;
-    while(GenParticle *part = (GenParticle*) itParticle()){
-      if(part->PID == 11 && part->Status == 1){
-        elePtrue = part->PT * TMath::CosH(part->Eta);
-        if(elePtrue > maxElePtrue){
-          maxElePtrue = elePtrue;
-          kinTrue->vecElectron.SetPtEtaPhiM(
-              part->PT,
-              part->Eta,
-              part->Phi,
-              Kinematics::ElectronMass()
-              );
-        };
-      };
-    };
-    kinTrue->CalculateDIS(reconMethod);
-    Double_t Q2 = kinTrue->Q2;
-    CountEvent(Q2, chain->GetTreeNumber());
-  }
-
-  cout << "count results:" << endl;
-  for(Int_t idx=0; idx<inXsecs.size(); ++idx) {
-    cout << "\tQ2 > " << inQ2mins[idx]
-      << ": xs=" << inXsecs[idx] << ", n=" << inEntries[idx] << endl;
-  }
+  CalculateEventQ2Weights();
 
   // event loop =========================================================
   cout << "begin event loop..." << endl;
