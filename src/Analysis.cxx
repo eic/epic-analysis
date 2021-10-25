@@ -161,9 +161,9 @@ void Analysis::Prepare() {
         cerr << "ERROR: Couldn't open input file '" << fileName << "'" << endl;
         return;
       }
-      TTree* tree = file->Get<TTree>("tree");
+      TTree* tree = file->Get<TTree>("Delphes");
       if (tree == nullptr) {
-        cerr << "ERROR: Couldn't find SimpleTree in file '" << fileName << "'" << endl;
+        cerr << "ERROR: Couldn't find Delphes tree in file '" << fileName << "'" << endl;
         return;
       }
       entries = tree->GetEntries();
