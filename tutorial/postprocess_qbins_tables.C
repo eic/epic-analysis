@@ -2,7 +2,7 @@ R__LOAD_LIBRARY(Largex)
 
 // make tables of kinematics averages
 void postprocess_qbins_tables(
-    TString infile="out/tutorial.qbins.example_5x41.root"
+    TString infile="out/tutorial.qbins.root"
 ) {
 
   // setup postprocessor ========================================

@@ -614,6 +614,7 @@ void Kinematics::InjectFakeAsymmetry() {
   asymInject = 0;
   asymInject +=  ampVal[0]/0.2 * x * moduVal[0];
   asymInject += -ampVal[1]/0.2 * x * moduVal[1];
+  //asymInject = ampVal[0]*moduVal[0] + ampVal[1]*moduVal[1]; // constant
   // apply polarization
   asymInject *= pol;
   // generate random number in [0,1]

@@ -2,7 +2,7 @@ R__LOAD_LIBRARY(Largex)
 
 // test DAG implementation
 void postprocess_testDAG(
-    TString infile="out/testDAG.example_5x41.root"
+    TString infile="out/testDAG.root"
 ) {
   // setup postprocessor ========================================
   PostProcessor *P = new PostProcessor(infile);

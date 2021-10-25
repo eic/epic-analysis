@@ -35,4 +35,4 @@ jobs:
         with:
           name: macro-test-images
           path: |
-            out/macro.test.ciTest_5x41.images
+            out/macro.test.images

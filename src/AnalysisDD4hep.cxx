@@ -49,10 +49,6 @@ void AnalysisDD4hep::process_event()
   // FIXME: replace it with ExRootTreeReader::UseBranch()?
   TTreeReader tr(chain);
 
-  // calculate cross section
-  CalculateCrossSection(tr.GetEntries());
-
-
   // Truth
   TTreeReaderArray<Int_t>    mcparticles2_pdgID(tr,     "mcparticles2.pdgID");
   TTreeReaderArray<Double_t> mcparticles2_psx(tr,       "mcparticles2.ps.x");
@@ -354,19 +350,15 @@ void AnalysisDD4hep::process_event()
 	  wTrack = weight->GetWeight(*kinTrue);
 	  wTrackTotal += wTrack;
 
-	  // apply cuts
-	  if(kin->CutFull()) {
+    // fill track histograms in activated bins
+    FillHistosTracks();
 
-      // fill track histograms in activated bins
-      FillHistosTracks();
+    // fill simple tree
+    // - not binned
+    // - `activeEvent` is only true if at least one bin gets filled for this track
+    // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDelphes)
+    if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
 
-      // fill simple tree
-      // - not binned
-      // - `activeEvent` is only true if at least one bin gets filled for this track
-      // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDelphes)
-      if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
-
-	  }//if cut
 	}//trk loop
 
     }// tree reader loop
