@@ -111,23 +111,23 @@ void binning(char const* file_name, char const* output="") {
 	}
 
 	std::cout << "Fitting histograms." << std::endl;
-	// Only fitting two parameters for the time being.
-	std::vector<std::vector<Double_t> > params{ {}, {} };
-	std::vector<std::vector<Double_t> > param_errs{ {}, {} };
-	std::vector<std::string> param_names{ "Sivers", "Collins" };
+	std::vector<std::vector<Double_t> > params{ {}, {}, {}, {}, {} };
+	std::vector<std::vector<Double_t> > param_errs{ {}, {}, {}, {}, {} };
+	std::vector<std::string> param_names{ "Sivers", "Collins", "sin(3φ_h - φ_s)", "sin(φ_s)", "sin(2φ_h - φ_s)" };
 	TF2* fit = new TF2(
 		"asymmetry",
-		"[0] * ([2] * sin(x - y) + [1] * [3] * sin(x + y))",
+		"[0] * ([3] * sin(x - y) + [1] * [4] * sin(x + y) + [1] * [5] * sin(3 * x - y) + [2] * [6] * sin(y) + [2] * [7] * sin(2 * x - y))",
 		-PI, PI,
 		-PI, PI);
 	fit->FixParameter(0, pol);
 	// Deal with depolarization later.
 	//fit->FixParameter(1, depol_1);
 	fit->FixParameter(1, 1.);
-	fit->SetParameter(2, 0.);
-	fit->SetParameter(3, 0.);
-	fit->SetParLimits(2, -1., 1.);
-	fit->SetParLimits(3, -1., 1.);
+	fit->FixParameter(2, 1.);
+	for (std::size_t p = 0; p < params.size(); ++p) {
+		fit->SetParameter(3 + p, 0.);
+		fit->SetParLimits(3 + p, -1., 1.);
+	}
 	for (Int_t bin = 0; bin < num_bins; ++bin) {
 		Int_t bin_x = bin % num_bins_x;
 		Int_t bin_Q2 = (bin / num_bins_x) % num_bins_Q2;
@@ -139,21 +139,22 @@ void binning(char const* file_name, char const* output="") {
 		asym_hists[bin]->SetTitle(asym_name.c_str());
 		asym_hists[bin]->SetName(asym_name.c_str());
 		asym_hists[bin]->Fit(fit, "IDMQ");
-		params[0].push_back(0.);
-		params[1].push_back(0.);
-		param_errs[0].push_back(1.);
-		param_errs[1].push_back(1.);
+		for (std::size_t p = 0; p < params.size(); ++p) {
+			params[p].push_back(0.);
+			param_errs[p].push_back(1.);
+		}
 		if (count != 0) {
 			for (Int_t p = 0; p < params.size(); ++p) {
-				params[p].back() = fit->GetParameter(2 + p);
-				param_errs[p].back() = fit->GetParError(2 + p);
+				params[p].back() = fit->GetParameter(3 + p);
+				param_errs[p].back() = fit->GetParError(3 + p);
 			}
 		}
 		std::cout << "Bin " << bin << ":" << std::endl
 			<< "\tCoords:  " << bin_x << ", " << bin_Q2 << ", " << bin_z << ", " << bin_pt << std::endl
-			<< "\tCount:   " << count << std::endl
-			<< "\tSivers:  " << params[0].back() << " ± " << param_errs[0].back() << std::endl
-			<< "\tCollins: " << params[1].back() << " ± " << param_errs[1].back() << std::endl;
+			<< "\tCount:   " << count << std::endl;
+		for (std::size_t p = 0; p < params.size(); ++p) {
+			std::cout << param_names[p] << ": " << params[p].back() << " ± " << param_errs[p].back() << std::endl;
+		}
 		if (file_plots != nullptr) {
 			angle_up_hists[bin]->Write();
 			angle_down_hists[bin]->Write();
