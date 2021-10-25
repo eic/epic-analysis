@@ -36,7 +36,9 @@ void AnalysisDelphes::Execute() {
 
   // read delphes tree
   TChain *chain = new TChain("Delphes");
-  for(TString in : infiles) chain->Add(in);
+  for(Int_t idx=0; idx<infiles.size(); ++idx) {
+    chain->Add(infiles[idx], inEntries[idx]);
+  }
   ExRootTreeReader *tr = new ExRootTreeReader(chain);
   ENT = tr->GetEntries();
 
