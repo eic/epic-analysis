@@ -21,11 +21,12 @@
 class SimpleTree : public TObject
 {
   public:
-    SimpleTree(TString treeName_, Kinematics *K_);
+    SimpleTree(TString treeName_, Kinematics *K_, Kinematics *Ktrue_);
     ~SimpleTree();
 
     TTree *GetTree() { return T; };
     Kinematics *GetKinematics() { return K; };
+    Kinematics *GetKinematicsTrue() { return Ktrue; };
     void FillTree(Double_t w) { weight = w; T->Fill(); };
     void WriteTree() { T->Write(); };
 
@@ -33,6 +34,7 @@ class SimpleTree : public TObject
     Double_t weight;
     TTree *T;
     Kinematics *K;
+    Kinematics *Ktrue;
     TString treeName;
 
   ClassDef(SimpleTree,1);

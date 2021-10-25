@@ -178,7 +178,7 @@ void Analysis::Prepare() {
   // instantiate shared objects
   kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
   kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
-  ST = new SimpleTree("tree",kin);
+  ST = new SimpleTree("tree",kin,kinTrue);
 
 
   // if there are no final states defined, default to definitions here:
