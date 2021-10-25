@@ -36,7 +36,7 @@ struct WeightsPavia : public WeightsSivers {
 
 struct WeightsTest : public WeightsSivers {
   Double_t Asymmetry(Double_t x, Double_t z, Double_t Q2, Double_t pt) const override {
-    return 0.5;
+    return 0.2;
   }
 };
 
@@ -58,7 +58,7 @@ void analysis_asymmetry(
       );
   Weights* weights = new WeightsSum({
     new WeightsUniform(),
-    new WeightsPavia()
+    new WeightsTest()
   });
   A->SetWeights(weights);
 
