@@ -96,14 +96,14 @@ Analysis::Analysis(
 
   // miscellaneous
   infiles.clear();
-  numGen = 0;
+  entriesTot = 0;
 };
 
 
 // input files
 //------------------------------------
 // add a single file
-bool Analysis::AddFile(TString fileName, Double_t xs, Double_t Q2min) {
+bool Analysis::AddFile(TString fileName, Long64_t entries, Double_t xs, Double_t Q2min) {
   if(fileName=="") return false;
   cout << "-- running analysis of " << fileName << endl;
   // insert in order of Q2min
@@ -124,11 +124,9 @@ bool Analysis::AddFile(TString fileName, Double_t xs, Double_t Q2min) {
   }
   infiles.insert(infiles.begin() + insertIdx, fileName);
   inXsecs.insert(inXsecs.begin() + insertIdx, xs);
+  inXsecsTot.insert(inXsecsTot.begin() + insertIdx, xs);
   inQ2mins.insert(inQ2mins.begin() + insertIdx, Q2min);
-  inEntries.insert(inEntries.begin() + insertIdx, 0);
-  if (insertIdx == 0) {
-    xsecTot = xs;
-  }
+  inEntries.insert(inEntries.begin() + insertIdx, entries);
   // adjust cross-sections to account for overlapping regions
   for (std::size_t idx = infiles.size() - 1; idx > insertIdx; --idx) {
     inXsecs[insertIdx] -= inXsecs[idx];
@@ -154,12 +152,27 @@ void Analysis::Prepare() {
   while (std::getline(fin, line)) {
     stringstream ss(line);
     string fileName;
+    Long64_t entries;
     Double_t xs, Q2min;
-    ss >> fileName >> xs >> Q2min;
+    ss >> fileName >> entries >> xs >> Q2min;
+    if (entries <= 0) {
+      TFile* file = new TFile(fileName.c_str());
+      if (file->IsZombie()) {
+        cerr << "ERROR: Couldn't open input file '" << fileName << "'" << endl;
+        return;
+      }
+      TTree* tree = file->Get<TTree>("Delphes");
+      if (tree == nullptr) {
+        cerr << "ERROR: Couldn't find Delphes tree in file '" << fileName << "'" << endl;
+        return;
+      }
+      entries = tree->GetEntries();
+    }
     if (!ss) {
       continue;
     }
-    if (!AddFile(TString(fileName.c_str()), xs, Q2min)) {
+    if (!AddFile(TString(fileName.c_str()), entries, xs, Q2min)) {
+      cerr << "ERROR: Couldn't add file '" << fileName << "'" << endl;
       return;
     }
   }
@@ -312,12 +325,23 @@ void Analysis::Prepare() {
   wJetTotal = 0.;
 };
 
-void Analysis::CountEvent(Double_t Q2, Int_t guess) {
-  Int_t idx = GetEventQ2Idx(Q2, guess);
-  if (idx == -1) {
-  } else {
-    inEntries[idx] += 1;
-    numGen += 1;
+void Analysis::CalculateEventQ2Weights() {
+  Q2weights.resize(infiles.size());
+  entriesTot = 0;
+  for (Long64_t entry : inEntries) {
+    entriesTot += entry;
+  }
+  xsecTot = inXsecsTot.front();
+  for (Int_t idx = 0; idx < infiles.size(); ++idx) {
+    Double_t xsecFactor = inXsecs[idx] / xsecTot;
+    Double_t entries = 0.;
+    for (Int_t idxC = 0; idxC <= idx; ++idxC) {
+      // estimate how many events from this file lie in the given Q2 range
+      entries += inEntries[idxC] * (inXsecs[idx] / inXsecsTot[idxC]);
+    }
+    Double_t numFactor = entries / entriesTot;
+    Q2weights[idx] = xsecFactor / numFactor;
+    cout << "Weights for " << infiles[idx] << ": " << numFactor << ", " << xsecFactor << endl;
   }
 }
 
@@ -326,9 +350,7 @@ Double_t Analysis::GetEventQ2Weight(Double_t Q2, Int_t guess) {
   if (idx == -1) {
     return 0.;
   } else {
-    Double_t xsecFactor = inXsecs[idx] / xsecTot;
-    Double_t numFactor = (Double_t) inEntries[idx] / (Double_t) numGen;
-    return xsecFactor / numFactor;
+    return Q2weights[idx];
   }
 }
 

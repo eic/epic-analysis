@@ -41,6 +41,10 @@ this tutorial directory, e.g., `root -b -q tutorial/analysis_template.C`
   together using relative weights):
   - file name (relative to the top-level directory, unless you have an
     absolute path)
+  - the number of events for the weighting and cross section
+    - set to `-1` for all
+    - this is not related to `Analysis::maxEvents`, which limits how
+      many events to process
   - cross section (can be obtained from Pythia output logs, for example)
   - minimum Q2
   - see files in `../datarec/*.config` for examples
