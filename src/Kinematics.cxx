@@ -229,6 +229,7 @@ void Kinematics::CalculateHadronKinematics() {
   xF = 2 * CvecHadron.Vect().Dot(CvecQ.Vect()) /
       (W * CvecQ.Vect().Mag());
   // phiH
+  thetaH = IvecQ.Vect().Angle(IvecHadron.Vect());
   phiH = AdjAngle(PlaneAngle(
       IvecQ.Vect(), IvecElectron.Vect(),
       IvecQ.Vect(), IvecHadron.Vect()

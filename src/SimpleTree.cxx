@@ -18,8 +18,10 @@ SimpleTree::SimpleTree(TString treeName_, Kinematics *K_, Kinematics *Ktrue_)
   T->Branch("W",         &(K->W),         "W/D");
   T->Branch("MX",        &(K->mX),        "MX/D");
   T->Branch("PhPerp",    &(K->pT),        "PhPerp/D");
+  T->Branch("ThetaH",    &(K->thetaH),    "ThetaH/D");
   T->Branch("PhiH",      &(K->phiH),      "PhiH/D");
   T->Branch("PhiS",      &(K->phiS),      "PhiS/D");
+  T->Branch("TrueThetaH",&(Ktrue->thetaH),"TrueThetaH/D");
   T->Branch("TruePhiH",  &(Ktrue->phiH),  "TruePhiH/D");
   T->Branch("TruePhiS",  &(Ktrue->phiS),  "TruePhiS/D");
   T->Branch("Pol",       &(K->pol),       "Pol/D");
