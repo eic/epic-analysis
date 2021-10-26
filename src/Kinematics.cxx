@@ -67,13 +67,13 @@ Kinematics::Kinematics(
 //   are in the lab frame
 // - also calculates `W` and `Nu` (Lorentz invariant)
 void Kinematics::getqWQuadratic(){
-  double f = y*(vecIonBeam.Dot(vecEleBeam));
+  double f = y*(HvecIonBeam.Dot(HvecEleBeam));
   double hx = Pxh;
   double hy = Pyh;
-  double pz = vecIonBeam.Pz();
-  double py = vecIonBeam.Py();
-  double px = vecIonBeam.Px();
-  double pE = vecIonBeam.E();
+  double pz = HvecIonBeam.Pz();
+  double py = HvecIonBeam.Py();
+  double px = HvecIonBeam.Px();
+  double pE = HvecIonBeam.E();
 
   double a = 1.0 - (pE*pE)/(pz*pz);
   double b = (2*pE/(pz*pz))*(px*hx + py*hy + f);
@@ -96,9 +96,9 @@ void Kinematics::getqWQuadratic(){
     }
 
     vecQ.SetPxPyPzE(Pxh, Pyh, qz, qE);
-    vecW = vecIonBeam + vecQ;
+    vecW = HvecIonBeam + vecQ;
     W = vecW.M();
-    Nu = vecIonBeam.Dot(vecQ)/IonMass;
+    Nu = HvecIonBeam.Dot(vecQ)/IonMass;
   }
 };
 
@@ -333,6 +333,12 @@ void Kinematics::GetHadronicFinalState(
   itEFlowNeutralHadron.Reset();
   itParticle.Reset();
 
+  // assuming these are mainly needed for hadronic final state methods,
+  // this is probably a fine place to make sure they're calculated
+  this->TransformToHeadOnFrame(vecEleBeam,HvecEleBeam);
+  this->TransformToHeadOnFrame(vecIonBeam,HvecIonBeam);
+  this->TransformToHeadOnFrame(vecElectron,HvecElectron);
+  
   sigmah = 0;
   Pxh = 0;
   Pyh = 0;
