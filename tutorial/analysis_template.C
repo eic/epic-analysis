@@ -21,6 +21,10 @@ void analysis_template(
       outfilePrefix
       );
   //A->maxEvents = 10000; // use this to limit the number of events
+  /* this `maxEvents` limit should only be applied for quick tests;
+   * you should not set it if you are using the number of events
+   * column in `infiles` (the input files table)
+   */
   A->writeSimpleTree = true; // write SimpleTree (for one bin)
 
   // set reconstruction method =============================
