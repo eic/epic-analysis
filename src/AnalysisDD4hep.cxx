@@ -349,8 +349,9 @@ void AnalysisDD4hep::process_event()
     //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
     //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
-	  wTrack = weight->GetWeight(*kinTrue);
-	  wTrackTotal += wTrack;
+    Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
+    wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+    wTrackTotal += wTrack;
 
     // fill track histograms in activated bins
     FillHistosTracks();
