@@ -67,13 +67,13 @@ Kinematics::Kinematics(
 //   are in the lab frame
 // - also calculates `W` and `Nu` (Lorentz invariant)
 void Kinematics::getqWQuadratic(){
-  double f = y*(HvecIonBeam.Dot(HvecEleBeam));
+  double f = y*(vecIonBeam.Dot(vecEleBeam));
   double hx = Pxh;
   double hy = Pyh;
-  double pz = HvecIonBeam.Pz();
-  double py = HvecIonBeam.Py();
-  double px = HvecIonBeam.Px();
-  double pE = HvecIonBeam.E();
+  double pz = vecIonBeam.Pz();
+  double py = vecIonBeam.Py();
+  double px = vecIonBeam.Px();
+  double pE = vecIonBeam.E();
 
   double a = 1.0 - (pE*pE)/(pz*pz);
   double b = (2*pE/(pz*pz))*(px*hx + py*hy + f);
@@ -96,9 +96,9 @@ void Kinematics::getqWQuadratic(){
     }
 
     vecQ.SetPxPyPzE(Pxh, Pyh, qz, qE);
-    vecW = HvecIonBeam + vecQ;
+    vecW = vecIonBeam + vecQ;
     W = vecW.M();
-    Nu = HvecIonBeam.Dot(vecQ)/IonMass;
+    Nu = vecIonBeam.Dot(vecQ)/IonMass;
   }
 };
 
@@ -181,8 +181,8 @@ void Kinematics::CalculateDISbyElectron() {
 // calculate DIS kinematics using JB method
 // sets q, W using quadratic equation
 void Kinematics::CalculateDISbyJB(){
-  y = sigmah/(2*HvecEleBeam.E());
-  Q2 = (Pxh*Pxh + Pyh*Pyh)/(1-y);
+  y = Hsigmah/(2*HvecEleBeam.E());
+  Q2 = (HPxh*HPxh + HPyh*HPyh)/(1-y);
   x = Q2/(s*y);
   this->getqWQuadratic();
 };
@@ -191,9 +191,9 @@ void Kinematics::CalculateDISbyJB(){
 // sets q, W using quadratic equation
 // requires 'vecElectron' set
 void Kinematics::CalculateDISbyDA(){
-  float thetah = acos( (Pxh*Pxh+Pyh*Pyh - sigmah*sigmah)/(Pxh*Pxh+Pyh*Pyh+sigmah*sigmah) );
+  float thetah = acos( (HPxh*HPxh+HPyh*HPyh - Hsigmah*Hsigmah)/(HPxh*HPxh+HPyh*HPyh+Hsigmah*Hsigmah) );
   float thetae = HvecElectron.Theta();
-  Q2 = 4.0*HvecEleBeam.E()*HvecEleBeam.E()*sin(thetah)*(1+cos(thetae))/(sin(thetah)+sin(thetae)-sin(thetah+thetae));
+  Q2 = 4.0*vecEleBeam.E()*vecEleBeam.E()*sin(thetah)*(1+cos(thetae))/(sin(thetah)+sin(thetae)-sin(thetah+thetae));
   y = (sin(thetae)*(1-cos(thetah)))/(sin(thetah)+sin(thetae)-sin(thetah+thetae));
   x = Q2/(s*y);
   this->getqWQuadratic();
@@ -205,7 +205,7 @@ void Kinematics::CalculateDISbyDA(){
 void Kinematics::CalculateDISbyMixed(){
   vecQ = vecEleBeam - vecElectron; // `vecQ` must be in lab frame, for downstream calculations
   Q2 = -1*vecQ.M2();
-  y = sigmah/(2*HvecEleBeam.E()); // `sigmah` is in head-on frame, therefore divide by `HvecEleBeam`
+  y = Hsigmah/(2*HvecEleBeam.E()); // `sigmah` is in head-on frame, therefore divide by `HvecEleBeam`
   x = Q2/(s*y);
   vecW = vecEleBeam + vecIonBeam - vecElectron;
   W = vecW.M();
@@ -214,7 +214,7 @@ void Kinematics::CalculateDISbyMixed(){
 // calculate DIS kinematics using Sigma method
 // requires 'vecElectron' set
 void Kinematics::CalculateDISbySigma(){
-  y = sigmah/(sigmah + HvecElectron.E()*(1-cos(HvecElectron.Theta())));
+  y = Hsigmah/(Hsigmah + HvecElectron.E()*(1-cos(HvecElectron.Theta())));
   Q2 = (HvecElectron.Px()*HvecElectron.Px() + HvecElectron.Py()*HvecElectron.Py())/(1-y);
   x = Q2/(s*y);
   this->getqWQuadratic();
@@ -226,7 +226,7 @@ void Kinematics::CalculateDISbyeSigma(){
   vecW = vecEleBeam + vecIonBeam - vecElectron; // `vecW` must be in lab frame, for downstream
   W = vecW.M();
   Q2 = -1*vecQ.M2();
-  double ysigma = sigmah/(sigmah + HvecElectron.E()*(1-cos(HvecElectron.Theta())));
+  double ysigma = Hsigmah/(Hsigmah + HvecElectron.E()*(1-cos(HvecElectron.Theta())));
   double Q2sigma = (HvecElectron.Px()*HvecElectron.Px() + HvecElectron.Py()*HvecElectron.Py())/(1-y);
   double xsigma = Q2sigma/(s*ysigma);    
   y = Q2/(s*xsigma);
@@ -342,14 +342,20 @@ void Kinematics::GetHadronicFinalState(
   sigmah = 0;
   Pxh = 0;
   Pyh = 0;
+  Hsigmah = 0;
+  HPxh = 0;
+  HPyh = 0;
   while(Track *track = (Track*)itTrack() ){
     TLorentzVector  trackp4 = track->P4();
     if(!isnan(trackp4.E())){
-      if( std::abs(track->Eta) >= 4.0  ){ 	
-        this->TransformToHeadOnFrame(trackp4,trackp4);
-        sigmah += (trackp4.E() - trackp4.Pz());
+      if( std::abs(track->Eta) >= 4.0  ){
+	sigmah += (trackp4.E() - trackp4.Pz());
         Pxh += trackp4.Px();
-        Pyh +=trackp4.Py();
+        Pyh +=trackp4.Py();	
+        this->TransformToHeadOnFrame(trackp4,trackp4);
+        Hsigmah += (trackp4.E() - trackp4.Pz());
+        HPxh += trackp4.Px();
+        HPyh +=trackp4.Py();
       }
     }
   }
@@ -357,10 +363,13 @@ void Kinematics::GetHadronicFinalState(
     TLorentzVector eflowTrackp4 = eflowTrack->P4();
     if(!isnan(eflowTrackp4.E())){
       if(std::abs(eflowTrack->Eta) < 4.0){
-        this->TransformToHeadOnFrame(eflowTrackp4,eflowTrackp4);
         sigmah += (eflowTrackp4.E() - eflowTrackp4.Pz());
         Pxh += eflowTrackp4.Px();
-        Pyh += eflowTrackp4.Py();
+        Pyh += eflowTrackp4.Py();	
+	this->TransformToHeadOnFrame(eflowTrackp4,eflowTrackp4);
+        Hsigmah += (eflowTrackp4.E() - eflowTrackp4.Pz());
+        HPxh += eflowTrackp4.Px();
+        HPyh += eflowTrackp4.Py();
       }
     }
   }
@@ -368,10 +377,13 @@ void Kinematics::GetHadronicFinalState(
     TLorentzVector  towerPhotonp4 = towerPhoton->P4();
     if(!isnan(towerPhotonp4.E())){
       if( std::abs(towerPhoton->Eta) < 4.0  ){
-        this->TransformToHeadOnFrame(towerPhotonp4,towerPhotonp4);
-        sigmah += (towerPhotonp4.E() - towerPhotonp4.Pz());
-        Pxh += towerPhotonp4.Px();
+	sigmah += (towerPhotonp4.E() - towerPhotonp4.Pz());
+	Pxh += towerPhotonp4.Px();
         Pyh += towerPhotonp4.Py();
+        this->TransformToHeadOnFrame(towerPhotonp4,towerPhotonp4);
+        Hsigmah += (towerPhotonp4.E() - towerPhotonp4.Pz());
+        HPxh += towerPhotonp4.Px();
+        HPyh += towerPhotonp4.Py();
       }
     }
   }
@@ -379,18 +391,25 @@ void Kinematics::GetHadronicFinalState(
     TLorentzVector  towerNeutralHadronp4 = towerNeutralHadron->P4();
     if(!isnan(towerNeutralHadronp4.E())){
       if( std::abs(towerNeutralHadron->Eta) < 4.0 ){
-        this->TransformToHeadOnFrame(towerNeutralHadronp4,towerNeutralHadronp4);
-        sigmah += (towerNeutralHadronp4.E() - towerNeutralHadronp4.Pz());
+	sigmah += (towerNeutralHadronp4.E() - towerNeutralHadronp4.Pz());
         Pxh += towerNeutralHadronp4.Px();
         Pyh += towerNeutralHadronp4.Py();
+        this->TransformToHeadOnFrame(towerNeutralHadronp4,towerNeutralHadronp4);
+        Hsigmah += (towerNeutralHadronp4.E() - towerNeutralHadronp4.Pz());
+        HPxh += towerNeutralHadronp4.Px();
+        HPyh += towerNeutralHadronp4.Py();
       }
     }
   }
-  if(!isnan(HvecElectron.E())){
-    sigmah -= (HvecElectron.E() - HvecElectron.Pz());
-    Pxh -= HvecElectron.Px();
-    Pyh -= HvecElectron.Py();
-  }
+  //if(!isnan(vecElectron.E())){
+    sigmah -= (vecElectron.E() - vecElectron.Pz());
+    Pxh -= vecElectron.Px();
+    Pyh -= vecElectron.Py();
+
+    Hsigmah -= (HvecElectron.E() - HvecElectron.Pz());
+    HPxh -= HvecElectron.Px();
+    HPyh -= HvecElectron.Py();
+    //  }
 };
 
 
