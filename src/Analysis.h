@@ -133,7 +133,6 @@ class Analysis : public TNamed
 
     // event loop objects
     Long64_t ENT;
-    std::vector<Long64_t> counts;
     Double_t eleP,maxEleP;
     Double_t elePtrue, maxElePtrue;
     int pid;
