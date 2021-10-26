@@ -104,20 +104,10 @@ void AnalysisDelphes::Execute() {
     // calculate DIS kinematics
     kin->CalculateDIS(reconMethod); // reconstructed
     kinTrue->CalculateDIS(reconMethod); // generated (truth)
-    Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
 
     // get vector of jets
     // TODO: should this have an option for clustering method?
     kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
-    
-    // asymmetry injection
-    //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
-    //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
-    //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
-
-    // Get index of file that the event comes from.
-    wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
-    wTrackTotal += wTrack;
 
 
     // track loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -157,6 +147,16 @@ void AnalysisDelphes::Execute() {
       kin->CalculateHadronKinematics();
       kinTrue->CalculateHadronKinematics();
 
+      // asymmetry injection
+      //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
+      //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
+      //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
+  
+      // Get index of file that the event comes from.
+      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
+      wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+      wTrackTotal += wTrack;
+
       // fill track histograms in activated bins
       FillHistosTracks();
 
@@ -177,6 +177,7 @@ void AnalysisDelphes::Execute() {
       if(useBreitJets) kin->GetBreitFrameJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
       #endif
 
+      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
       wJet = Q2weightFactor * weightJet->GetWeight(*kinTrue); // TODO: should we separate weights for breit and non-breit jets?
       wJetTotal += wJet;
 
