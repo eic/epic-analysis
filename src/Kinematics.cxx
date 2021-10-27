@@ -307,14 +307,36 @@ void Kinematics::ValidateHeadOnFrame() {
 
 
 // get PID information from PID systems tracks
-int getTrackPID(Track *track, TObjArrayIter itParticle, TObjArrayIter itPIDSystemsTrack){
+int getTrackPID(Track *track, TObjArrayIter itParticle,
+		TObjArrayIter itmRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack){
+  itParticle.Reset();
+  itmRICHTrack.Reset();
+  itbarrelDIRCTrack.Reset();
+  itdualRICHagTrack.Reset();
+  itdualRICHcfTrack.Reset();
   GenParticle *trackParticle = (GenParticle*)track->Particle.GetObject();
   GenParticle *detectorParticle;
   int pidOut = -1;
-  while(Track *detectorTrack = (Track*)itPIDSystemsTrack() ){
+  while(Track *detectorTrack = (Track*)itmRICHTrack() ){
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
   }
+  itParticle.Reset();
+  while(Track *detectorTrack = (Track*)itbarrelDIRCTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+  }
+  itParticle.Reset();
+  while(Track *detectorTrack = (Track*)itdualRICHagTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+  }
+  while(Track *detectorTrack = (Track*)itdualRICHcfTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+  }
+
+
   return pidOut;
 }
 
@@ -324,7 +346,8 @@ int getTrackPID(Track *track, TObjArrayIter itParticle, TObjArrayIter itPIDSyste
 // - calculates `sigmah`, `Pxh`, and `Pyh` in the head-on frame
 void Kinematics::GetHadronicFinalState(
     TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
-    TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
+    TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle,
+    TObjArrayIter itmRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack,TObjArrayIter itdualRICHcfTrack
     )
 {
   itTrack.Reset();
@@ -348,7 +371,11 @@ void Kinematics::GetHadronicFinalState(
   while(Track *track = (Track*)itTrack() ){
     TLorentzVector  trackp4 = track->P4();
     if(!isnan(trackp4.E())){
-      if( std::abs(track->Eta) >= 4.0  ){
+      if( std::abs(track->Eta) < 4.0  ){
+	int pid = getTrackPID(track, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
+	if(pid != -1){
+	  trackp4.SetPtEtaPhiM(trackp4.Pt(),trackp4.Eta(),trackp4.Phi(),correctMass(pid));	  
+	}
 	sigmah += (trackp4.E() - trackp4.Pz());
         Pxh += trackp4.Px();
         Pyh +=trackp4.Py();	
@@ -357,12 +384,13 @@ void Kinematics::GetHadronicFinalState(
         HPxh += trackp4.Px();
         HPyh +=trackp4.Py();
       }
-    }
+    }    
   }
+  					    
   while(Track *eflowTrack = (Track*)itEFlowTrack() ){
     TLorentzVector eflowTrackp4 = eflowTrack->P4();
     if(!isnan(eflowTrackp4.E())){
-      if(std::abs(eflowTrack->Eta) < 4.0){
+      if(std::abs(eflowTrack->Eta) >= 4.0){
         sigmah += (eflowTrackp4.E() - eflowTrackp4.Pz());
         Pxh += eflowTrackp4.Px();
         Pyh += eflowTrackp4.Py();	
@@ -401,6 +429,7 @@ void Kinematics::GetHadronicFinalState(
       }
     }
   }
+  
   //if(!isnan(vecElectron.E())){
     sigmah -= (vecElectron.E() - vecElectron.Pz());
     Pxh -= vecElectron.Px();
