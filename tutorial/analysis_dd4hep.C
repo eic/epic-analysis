@@ -20,7 +20,7 @@ void analysis_dd4hep(
     TString infiles="tutorial/s3files.list", /* list of input files (S3 URLs, plus other columns) */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
-    Double_t crossingAngle=0, /* crossing angle [mrad] */
+    Double_t crossingAngle=25, /* crossing angle [mrad] */
     TString outfilePrefix="tutorial.dd4hep" /* output filename prefix*/)
 {
 
