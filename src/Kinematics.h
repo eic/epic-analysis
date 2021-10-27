@@ -48,6 +48,9 @@ class Kinematics : public TObject
 	TObjArrayIter itmRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack,TObjArrayIter itdualRICHcfTrack
 
         );
+    void GetHadronicFinalStateTrue(
+        TObjArrayIter itParticle
+	);
     void GetJets(
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
