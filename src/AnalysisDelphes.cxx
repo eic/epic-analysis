@@ -53,6 +53,10 @@ void AnalysisDelphes::Execute() {
   TObjArrayIter itEFlowPhoton(tr->UseBranch("EFlowPhoton"));
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
   TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
+  TObjArrayIter itmRICHTrack(tr->UseBranch("mRICHTrack"));
+  TObjArrayIter itbarrelDIRCTrack(tr->UseBranch("barrelDIRCTrack"));
+  TObjArrayIter itdualRICHagTrack(tr->UseBranch("dualRICHagTrack"));
+  TObjArrayIter itdualRICHcfTrack(tr->UseBranch("dualRICHcfTrack"));
 
   CalculateEventQ2Weights();
 
@@ -135,11 +139,11 @@ void AnalysisDelphes::Execute() {
     if(errorCount>=100 && errorCount<1000) { cerr << "ERROR: .... suppressing beam finder errors ...." << endl; errorCount=1000; };
 
     // get hadronic final state variables
-    kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
+    kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
 
     // calculate DIS kinematics
     kin->CalculateDIS(reconMethod); // reconstructed
-    kinTrue->CalculateDIS(reconMethod); // generated (truth)
+    kinTrue->CalculateDIS("Ele"); // generated (truth)
 
     // get vector of jets
     // TODO: should this have an option for clustering method?
@@ -201,6 +205,9 @@ void AnalysisDelphes::Execute() {
       // - `activeEvent` is only true if at least one bin gets filled for this track
       // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDD4hep)
       if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
+
+      // tests
+      //kin->ValidateHeadOnFrame();
 
     }; // end track loop
 

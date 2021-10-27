@@ -305,9 +305,11 @@ void AnalysisDD4hep::process_event()
 	}
 
       //Hadronic reconstruction 
-      kin->sigmah = (kin->vecElectron.E() - kin->vecElectron.Pz());
-      kin->Pxh = hpx - kin->vecElectron.Px();
-      kin->Pyh = hpy - kin->vecElectron.Py();
+      TLorentzVector head_vecElectron;
+      kin->TransformToHeadOnFrame(kin->vecElectron,head_vecElectron);
+      kin->sigmah = (head_vecElectron.E() - head_vecElectron.Pz());
+      kin->Pxh = hpx - head_vecElectron.Px();
+      kin->Pyh = hpy - head_vecElectron.Py();
 
       // calculate DIS kinematics
       kin->CalculateDIS(reconMethod); // reconstructed
