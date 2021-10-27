@@ -156,14 +156,15 @@ void Analysis::Prepare() {
     Double_t xs, Q2min;
     ss >> fileName >> entries >> xs >> Q2min;
     if (entries <= 0) {
-      TFile* file = new TFile(fileName.c_str());
+      TFile* file = TFile::Open(fileName.c_str());
       if (file->IsZombie()) {
         cerr << "ERROR: Couldn't open input file '" << fileName << "'" << endl;
         return;
       }
       TTree* tree = file->Get<TTree>("Delphes");
+      if (tree == nullptr) tree = file->Get<TTree>("events");
       if (tree == nullptr) {
-        cerr << "ERROR: Couldn't find Delphes tree in file '" << fileName << "'" << endl;
+        cerr << "ERROR: Couldn't find Delphes or events tree in file '" << fileName << "'" << endl;
         return;
       }
       entries = tree->GetEntries();

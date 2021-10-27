@@ -150,7 +150,7 @@ class Kinematics : public TObject
     // - vector projection: returns vA projected onto vB
     static TVector3 Project(TVector3 vA, TVector3 vB) {
       if(fabs(vB.Dot(vB))<0.0001) {
-        cerr << "WARNING: Kinematics::Project to null vector" << endl;
+        //cerr << "WARNING: Kinematics::Project to null vector" << endl;
         return TVector3(0,0,0);
       };
       return vB * ( vA.Dot(vB) / ( vB.Dot(vB) ) );
@@ -158,7 +158,7 @@ class Kinematics : public TObject
     // - vector rejection: returns vC projected onto plane transverse to vD
     static TVector3 Reject(TVector3 vC, TVector3 vD) {
       if(fabs(vD.Dot(vD))<0.0001) {
-        cerr << "WARNING: Kinematics::Reject to null vector" << endl;
+        //cerr << "WARNING: Kinematics::Reject to null vector" << endl;
         return TVector3(0,0,0);
       };
       return vC - Project(vC,vD);
@@ -169,14 +169,14 @@ class Kinematics : public TObject
       TVector3 crossCD = vC.Cross(vD); // CxD
       Double_t sgn = crossAB.Dot(vD); // (AxB).D
       if(fabs(sgn)<0.00001) {
-        cerr << "WARNING: Kinematics:PlaneAngle (AxB).D=0" << endl;
+        //cerr << "WARNING: Kinematics:PlaneAngle (AxB).D=0" << endl;
         return -10000;
       };
       sgn /= fabs(sgn); // sign of (AxB).D
       Double_t numer = crossAB.Dot(crossCD); // (AxB).(CxD)
       Double_t denom = crossAB.Mag() * crossCD.Mag(); // |AxB|*|CxD|
       if(fabs(denom)<0.00001) {
-        cerr << "WARNING: Kinematics:PlaneAngle denominator=0" << endl;
+        //cerr << "WARNING: Kinematics:PlaneAngle denominator=0" << endl;
         return -10000;
       };
       return sgn * TMath::ACos(numer/denom);

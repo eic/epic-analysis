@@ -58,6 +58,7 @@ void AnalysisDelphes::Execute() {
 
   // event loop =========================================================
   cout << "begin event loop..." << endl;
+  int errorCount=0;
   for(Long64_t e=0; e<ENT; e++) {
     if(e>0&&e%10000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
     tr->ReadEntry(e);
@@ -108,7 +109,7 @@ void AnalysisDelphes::Execute() {
               part->Mass
               );
         }else{
-          cerr << "ERROR: Found two beam electrons in one event" << endl;
+          if(++errorCount<100) cerr << "ERROR: Found two beam electrons in one event" << endl;
         };
       };
       if(part->PID != 11 && part->Status == 1){
@@ -121,16 +122,17 @@ void AnalysisDelphes::Execute() {
               part->Mass
               );
         }else{
-          cerr << "ERROR: Found two beam ions in one event" << endl;
+          if(++errorCount<100) cerr << "ERROR: Found two beam ions in one event" << endl;
         };
       };
     };
     if(!found_elec){
-      cerr << "ERROR: Didn't find beam electron in event" << endl;
+      if(++errorCount<100) cerr << "ERROR: Didn't find beam electron in event" << endl;
     };
     if(!found_ion){
-      cerr << "ERROR: Didn't find beam ion in event" << endl;
+      if(++errorCount<100) cerr << "ERROR: Didn't find beam ion in event" << endl;
     }
+    if(errorCount>=100 && errorCount<1000) { cerr << "ERROR: .... suppressing beam finder errors ...." << endl; errorCount=1000; };
 
     // get hadronic final state variables
     kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
