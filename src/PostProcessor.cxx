@@ -234,6 +234,46 @@ void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat) 
   canv->Print(pngDir+"/"+canvN+".png");
 };
 
+/* ALGORITHM: draw a summary histogram to a canvas, and write it
+ * - `histName` is the name of the histogram given in Histos
+ * - `drawFormat` is the formatting string passed to TH1::Draw()
+ */
+void PostProcessor::DrawSummary(Histos *H, TString histName, TString drawFormat) {
+  cout << "draw summary plot " << histName << "..." << endl;
+  TH1 *hist = H->Hist(histName);
+  if(hist==nullptr) {
+    cerr << "ERROR: cannot find histogram " << histName << endl;
+    return;
+  };
+
+  // Repurposed from deprecated code in OLD VERSION of DrawSingle() below.
+  TH1 *histClone = (TH1*) hist->Clone();
+  TString canvN = "summaryCanv_"+histName;
+  histClone->SetLineColor(nsum<nsumMax?summaryColor[nsum]:kBlack);
+  histClone->SetMarkerColor(nsum<nsumMax?summaryColor[nsum]:kBlack);
+  histClone->SetMarkerStyle(nsum<nsumMax?summaryStyle[nsum]:kFullCircle);
+
+  if(nsum==0) {
+    summaryCanv = new TCanvas(
+        "summaryCanv_"+histName,
+        "summaryCanv_"+histName,
+        dimx,dimy
+        );
+    summaryCanv->SetGrid(1,1);
+    summaryCanv->SetLogx(H->GetHistConfig(histName)->logx);
+    summaryCanv->SetLogy(H->GetHistConfig(histName)->logy);
+    summaryCanv->SetLogz(H->GetHistConfig(histName)->logz);
+    summaryCanv->SetBottomMargin(0.15);
+    summaryCanv->SetLeftMargin(0.15);
+  };
+  summaryCanv->cd();
+  // std::cout << "histClone max = " << histClone->GetBinContent(histClone->GetMaximumBin()) << std::endl; //DEBUGGING
+  histClone->Draw(drawFormat+(nsum>0?" SAME":""));
+  summaryCanv->Print(pngDir+"/"+canvN+".png");
+  nsum++;
+
+};
+
 // OLD VERSION: 
 void PostProcessor::DrawSingle(TString histSet, TString histName) {
 

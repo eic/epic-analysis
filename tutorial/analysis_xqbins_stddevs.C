@@ -4,12 +4,12 @@ R__LOAD_LIBRARY(Largex)
  * - various ways to make a grid are demonstrated
  * - observe how the resulting histograms differ in each (x,Q2) bin
  */
-void analysis_xqbins(
+void analysis_xqbins_stddevs(
     TString infiles="datarec/tutorial.config", /* list of input files */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=0, /* crossing angle [mrad] */
-    TString outfilePrefix="tutorial.xqbins" /* output filename prefix*/
+    TString outfilePrefix="tutorial.xqbins.stddevs." /* output filename prefix*/
 ) {
 
   // setup analysis ========================================
@@ -20,7 +20,7 @@ void analysis_xqbins(
       crossingAngle,
       outfilePrefix
       );
-  A->NBINS = 50; // use this to set the number of bins along each axis for each overall bin in e.g. x and Q2
+  A->NBINS = 3; // use this to set the number of bins along each axis for each overall bin in e.g. x and Q2
   //A->maxEvents = 30000; // use this to limit the number of events
   A->SetReconMethod("Ele"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state

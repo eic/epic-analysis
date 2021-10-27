@@ -265,28 +265,77 @@ void Analysis::Prepare() {
     HS->DefineHist1D("phiH_Res","#phi_{h}-#phi_{h}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
     HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
     HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
-        20,1e-4,1,
-        10,1,1e4,
+        // 20,1e-4,1,//TODO: OLD -> Might revert...
+        // 10,1,1e4,
+        // true,true
+        NBINS,1e-3,1,
+        NBINS,1,100,
         true,true
         );
     HS->DefineHist2D("Q2vsXpurity","x","Q^{2}","","GeV^{2}",
-        20,1e-4,1,
-        10,1,1e4,
+        NBINS,1e-3,1,
+        NBINS,1,100,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_q2res","x","Q^{2}","","GeV^{2}",
+        NBINS,1e-3,1,
+        NBINS,1,100,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_xres","x","Q^{2}","","GeV^{2}",
+        NBINS,1e-3,1,
+        NBINS,1,100,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_yres","x","Q^{2}","","GeV^{2}",
+        NBINS,1e-3,1,
+        NBINS,1,100,
         true,true
         );
     HS->DefineHist2D("Q2vsX_zres","x","Q^{2}","","GeV^{2}",
-        20,1e-4,1,
-        10,1,1e4,
+        NBINS,1e-3,1,
+        NBINS,1,100,
         true,true
         );
     HS->DefineHist2D("Q2vsX_pTres","x","Q^{2}","","GeV^{2}",
-        20,1e-4,1,
-        10,1,1e4,
+        NBINS,1e-3,1,
+        NBINS,1,100,
         true,true
         );
     HS->DefineHist2D("Q2vsX_phiHres","x","Q^{2}","","GeV^{2}",
-        20,1e-4,1,
-        10,1,1e4,
+        NBINS,1e-3,1,
+        NBINS,1,100,
+        true,true
+        );
+    // -- resolutions StdDevs
+    HS->DefineHist2D("Q2vsX_q2resSD","x","Q^{2}","","GeV^{2}",
+        NBINS,1e-3,1,
+        NBINS,1,100,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_xresSD","x","Q^{2}","","GeV^{2}",
+        NBINS,1e-3,1,
+        NBINS,1,100,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_yresSD","x","Q^{2}","","GeV^{2}",
+        NBINS,1e-3,1,
+        NBINS,1,100,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_zresSD","x","Q^{2}","","GeV^{2}",
+        NBINS,1e-3,1,
+        NBINS,1,100,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_pTresSD","x","Q^{2}","","GeV^{2}",
+        NBINS,1e-3,1,
+        NBINS,1,100,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_phiHresSD","x","Q^{2}","","GeV^{2}",
+        NBINS,1e-3,1,
+        NBINS,1,100,
         true,true
         );
     // -- reconstructed vs. generated
@@ -347,6 +396,40 @@ Int_t Analysis::GetEventQ2Idx(Double_t Q2, Int_t guess) {
   }
 }
 
+//TODO: Find a better place for this
+/**
+* Element-wise sqrt function for 2D histograms like in numpy. 
+* Modifies histogram in place.
+*/
+void Analysis::npSqrt(Histos *H, TString name) {
+    int xBins, q2Bins;
+
+    // Get axes' # bins
+    xBins  = dynamic_cast<TH2*>(H->Hist(name))->GetXaxis()->GetNbins();
+    q2Bins = dynamic_cast<TH2*>(H->Hist(name))->GetYaxis()->GetNbins();
+
+    // Loop x vs. Q2 histogram
+    for (int i=1;i<=xBins;i++) {
+        for (int j=1;j<=q2Bins;j++){
+            dynamic_cast<TH2*>(H->Hist(name))->SetBinContent(i,j,TMath::Sqrt(dynamic_cast<TH2*>(H->Hist(name))->GetBinContent(i,j)));
+        }
+    }
+}
+
+/**
+* Get mean counts per bin for 2D histogram.
+*/
+Double_t Analysis::GetMean(Histos *H, TString name) {
+    int xBins, q2Bins;
+    Double_t counts;
+
+    // Get axes' # bins
+    counts = dynamic_cast<TH2D*>(H->Hist(name))->GetSum();
+    xBins  = dynamic_cast<TH2*>(H->Hist(name))->GetXaxis()->GetNbins();
+    q2Bins = dynamic_cast<TH2*>(H->Hist(name))->GetYaxis()->GetNbins();
+    return counts / (xBins * q2Bins);
+}
+
 
 // finish the analysis
 //-----------------------------------
@@ -364,7 +447,7 @@ void Analysis::Finish() {
   // calculate cross sections, and print yields
   HD->Initial([this](){ cout << sep << endl << "Histogram Entries:" << endl; });
   HD->Final([this](){ cout << sep << endl; });
-  HD->Payload([&lumi](Histos *H){
+  HD->Payload([&lumi,this](Histos *H){
     cout << H->GetSetTitle() << " ::: "
          << H->Hist("Q2vsX")->GetEntries()
          << endl;
@@ -372,10 +455,20 @@ void Analysis::Finish() {
     H->Hist("Q_xsec")->Scale(1./lumi); // TODO: generalize (`if (name contains "xsec") ...`)
     // divide resolution plots by true counts per x-Q2 bin
     H->Hist("Q2vsXpurity")->Divide(H->Hist("Q2vsXtrue"));
-    H->Hist("Q2vsX_zres")->Divide(H->Hist("Q2vsXtrue"));
-    H->Hist("Q2vsX_pTres")->Divide(H->Hist("Q2vsXtrue"));
-    H->Hist("Q2vsX_phiHres")->Divide(H->Hist("Q2vsXtrue"));        
+    H->Hist("Q2vsX_q2resSD")->Divide(H->Hist("Q2vsXtrue"));
+    H->Hist("Q2vsX_xresSD")->Divide(H->Hist("Q2vsXtrue"));
+    H->Hist("Q2vsX_yresSD")->Divide(H->Hist("Q2vsXtrue"));
+    H->Hist("Q2vsX_zresSD")->Divide(H->Hist("Q2vsXtrue"));
+    H->Hist("Q2vsX_pTresSD")->Divide(H->Hist("Q2vsXtrue"));
+    H->Hist("Q2vsX_phiHresSD")->Divide(H->Hist("Q2vsXtrue"));
+    this->npSqrt(H,"Q2vsX_q2resSD"); //NOTE: Important: Take sqrt() AFTER normalizing.
+    this->npSqrt(H,"Q2vsX_xresSD");
+    this->npSqrt(H,"Q2vsX_yresSD");
+    this->npSqrt(H,"Q2vsX_zresSD");
+    this->npSqrt(H,"Q2vsX_pTresSD");
+    this->npSqrt(H,"Q2vsX_phiHresSD");
   });
+
   HD->ExecuteAndClearOps();
 
   // write histograms
@@ -553,18 +646,80 @@ void Analysis::FillHistosTracks() {
     H->Hist("phiH_Res")->Fill( Kinematics::AdjAngle(kin->phiH - kinTrue->phiH), wTrack );
     H->Hist("phiS_Res")->Fill( Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wTrack );
     dynamic_cast<TH2*>(H->Hist("Q2vsXtrue"))->Fill(kinTrue->x,kinTrue->Q2,wTrack);
+    if(kinTrue->Q2!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_q2res"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( (kinTrue->Q2 - kin->Q2)/(kinTrue->Q2) ) );
+    if(kinTrue->x!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_xres"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( (kinTrue->x - kin->x)/(kinTrue->x) ) );
+    if(kinTrue->y!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_yres"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( (kinTrue->y - kin->y)/(kinTrue->y) ) );
     if(kinTrue->z!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_zres"))->Fill(
-      kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->z - kin->z)/(kinTrue->z) ) );
+      kinTrue->x,kinTrue->Q2,wTrack*( (kinTrue->z - kin->z)/(kinTrue->z) ) );
     if(kinTrue->pT!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_pTres"))->Fill(
-      kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->pT - kin->pT)/(kinTrue->pT) ) );
-    dynamic_cast<TH2*>(H->Hist("Q2vsX_phiHres"))->Fill(kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->phiH - kin->phiH) ) );
-    
+      kinTrue->x,kinTrue->Q2,wTrack*( (kinTrue->pT - kin->pT)/(kinTrue->pT) ) );
+    dynamic_cast<TH2*>(H->Hist("Q2vsX_phiHres"))->Fill(kinTrue->x,kinTrue->Q2,wTrack*( (kinTrue->phiH - kin->phiH) ) );
+
     if( (H->Hist("Q2vsXtrue"))->FindBin(kinTrue->x,kinTrue->Q2) == (H->Hist("Q2vsXtrue"))->FindBin(kin->x,kin->Q2) ) dynamic_cast<TH2*>(H->Hist("Q2vsXpurity"))->Fill(kin->x,kin->Q2,wTrack);
     
     // -- reconstructed vs. generated
     dynamic_cast<TH2*>(H->Hist("x_RvG"))->Fill(kinTrue->x,kin->x,wTrack);
     dynamic_cast<TH2*>(H->Hist("phiH_RvG"))->Fill(kinTrue->phiH,kin->phiH,wTrack);
     dynamic_cast<TH2*>(H->Hist("phiS_RvG"))->Fill(kinTrue->phiS,kin->phiS,wTrack);
+  });
+  // execute the payload
+  // - save time and don't call `ClearOps` (next loop will overwrite lambda)
+  // - called with `activeNodesOnly==true` since we only want to fill bins associated
+  //   with this track
+  HD->ExecuteOps(true);
+};
+
+//--------------------------------------------------------------------------
+// tracks (single particles) (StdDevs)
+void Analysis::FillHistosTracksSD() {
+
+  // add kinematic values to `valueMap`
+  valueMap.clear();
+  activeEvent = false;
+  /* DIS */
+  valueMap.insert(std::pair<TString,Double_t>( "x", kin->x ));
+  valueMap.insert(std::pair<TString,Double_t>( "q2", kin->Q2 ));
+  valueMap.insert(std::pair<TString,Double_t>( "w", kin->W ));
+  valueMap.insert(std::pair<TString,Double_t>( "y", kin->y ));
+  /* single hadron */
+  valueMap.insert(std::pair<TString,Double_t>( "p", kin->pLab ));
+  valueMap.insert(std::pair<TString,Double_t>( "eta", kin->etaLab ));
+  valueMap.insert(std::pair<TString,Double_t>( "pt", kin->pT ));
+  valueMap.insert(std::pair<TString,Double_t>( "ptLab", kin->pTlab ));
+  valueMap.insert(std::pair<TString,Double_t>( "z", kin->z ));
+  valueMap.insert(std::pair<TString,Double_t>( "qT", kin->qT ));
+  valueMap.insert(std::pair<TString,Double_t>( "qTq", kin->qT/TMath::Sqrt(kin->Q2) ));
+  valueMap.insert(std::pair<TString,Double_t>( "mX", kin->mX ));
+  valueMap.insert(std::pair<TString,Double_t>( "xF", kin->xF ));
+  valueMap.insert(std::pair<TString,Double_t>( "phiH", kin->phiH ));
+  valueMap.insert(std::pair<TString,Double_t>( "phiS", kin->phiS ));
+  valueMap.insert(std::pair<TString,Double_t>( "tSpin", (Double_t)kin->tSpin ));
+
+  // check bins
+  // - activates HistosDAG bin nodes which contain this track
+  // - sets `activeEvent` if there is at least one multidimensional bin to fill
+  HD->TraverseBreadth(CheckBin());
+  if(!activeEvent) return;
+  
+  // fill histograms, for activated bins only
+  HD->Payload([this](Histos *H){
+
+    if(kinTrue->Q2!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_q2resSD"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->Q2 - kin->Q2)/(kinTrue->Q2) - this->GetMean(H,"Q2vsX_q2res"),2) ) );
+    if(kinTrue->x!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_xresSD"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->x - kin->x)/(kinTrue->x) - this->GetMean(H,"Q2vsX_xres"),2) ) );
+    if(kinTrue->y!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_yresSD"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->y - kin->y)/(kinTrue->y) - this->GetMean(H,"Q2vsX_yres"),2) ) );
+    if(kinTrue->z!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_zresSD"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->z - kin->z)/(kinTrue->z) - this->GetMean(H,"Q2vsX_zres"),2) ) );
+    if(kinTrue->pT!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_pTresSD"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->pT - kin->pT)/(kinTrue->pT) - this->GetMean(H,"Q2vsX_pTres"),2) ) );
+    dynamic_cast<TH2*>(H->Hist("Q2vsX_phiHresSD"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->z - kin->z)/(kinTrue->z) - this->GetMean(H,"Q2vsX_phiHres"),2)  ) );
+
   });
   // execute the payload
   // - save time and don't call `ClearOps` (next loop will overwrite lambda)
@@ -613,9 +768,6 @@ void Analysis::FillHistosJets() {
   //   with this jet
   HD->ExecuteOps(true);
 };
-
-
-
 
 // destructor
 Analysis::~Analysis() {

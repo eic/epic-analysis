@@ -62,6 +62,7 @@ class PostProcessor : public TNamed
     void DumpHist(TString datFile, TString histSet, TString varName);
     void DumpAve(TString datFile, Histos *H, TString cutName);
     void DrawSingle(Histos *H, TString histName, TString drawFormat="");
+    void DrawSummary(Histos *H, TString histName, TString drawFormat="");
     void DrawSingle(TString histSet, TString histName);
     void DrawRatios(
         TString outName, Histos *numerSet, Histos *denomSet, Bool_t plotRatioOnly=false
