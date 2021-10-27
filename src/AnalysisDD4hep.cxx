@@ -44,19 +44,21 @@ void AnalysisDD4hep::process_event()
 
   // read dd4hep tree
   TChain *chain = new TChain("events");
-  for(TString in : infiles) chain->Add(in);
+  for(Int_t idx=0; idx<infiles.size(); ++idx) {
+    chain->Add(infiles[idx], inEntries[idx]);
+  }
 
   // FIXME: replace it with ExRootTreeReader::UseBranch()?
   TTreeReader tr(chain);
 
   // Truth
-  TTreeReaderArray<Int_t>    mcparticles2_pdgID(tr,     "mcparticles2.pdgID");
-  TTreeReaderArray<Double_t> mcparticles2_psx(tr,       "mcparticles2.ps.x");
-  TTreeReaderArray<Double_t> mcparticles2_psy(tr,       "mcparticles2.ps.y");
-  TTreeReaderArray<Double_t> mcparticles2_psz(tr,       "mcparticles2.ps.z");
-  TTreeReaderArray<Int_t>    mcparticles2_status(tr,    "mcparticles2.status");
-  TTreeReaderArray<Int_t>    mcparticles2_genStatus(tr, "mcparticles2.genStatus");
-  TTreeReaderArray<Double_t> mcparticles2_mass(tr,      "mcparticles2.mass");
+  TTreeReaderArray<Int_t>    mcparticles_pdgID(tr,     "mcparticles.pdgID");
+  TTreeReaderArray<Double_t> mcparticles_psx(tr,       "mcparticles.ps.x");
+  TTreeReaderArray<Double_t> mcparticles_psy(tr,       "mcparticles.ps.y");
+  TTreeReaderArray<Double_t> mcparticles_psz(tr,       "mcparticles.ps.z");
+  TTreeReaderArray<Int_t>    mcparticles_status(tr,    "mcparticles.status");
+  TTreeReaderArray<Int_t>    mcparticles_genStatus(tr, "mcparticles.genStatus");
+  TTreeReaderArray<Double_t> mcparticles_mass(tr,      "mcparticles.mass");
 
   // Reco
   TTreeReaderArray<int> ReconstructedParticles_pid(tr, "ReconstructedParticles.pid");
@@ -128,31 +130,31 @@ void AnalysisDD4hep::process_event()
 
       std::vector<Particles> mcpart;
       double maxP = 0;
-      for(int imc=0; imc<mcparticles2_pdgID.GetSize(); imc++)
+      for(int imc=0; imc<mcparticles_pdgID.GetSize(); imc++)
 	{
-	  int pid_ = mcparticles2_pdgID[imc];
-	  double px_ = mcparticles2_psx[imc];
-	  double py_ = mcparticles2_psy[imc];
-	  double pz_ = mcparticles2_psz[imc];
-	  double mass_ = mcparticles2_mass[imc]; // in GeV
-	  double p_ = sqrt(pow(mcparticles2_psx[imc],2) + pow(mcparticles2_psy[imc],2) + pow(mcparticles2_psz[imc],2));
+	  int pid_ = mcparticles_pdgID[imc];
+	  double px_ = mcparticles_psx[imc];
+	  double py_ = mcparticles_psy[imc];
+	  double pz_ = mcparticles_psz[imc];
+	  double mass_ = mcparticles_mass[imc]; // in GeV
+	  double p_ = sqrt(pow(mcparticles_psx[imc],2) + pow(mcparticles_psy[imc],2) + pow(mcparticles_psz[imc],2));
 
 	  // genStatus 4: beam particle 1: final state 
-	  if(mcparticles2_genStatus[imc] == 1)
+	  if(mcparticles_genStatus[imc] == 1)
 	    {
 	      Particles part;
 	      part.pid = pid_;
 	      part.vecPart.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
 	      mcpart.push_back(part);
 
-	      if(mcparticles2_pdgID[imc] == 11)
+	      if(mcparticles_pdgID[imc] == 11)
 		{
 		  if(p_ > maxP)
 		    {
 		      maxP = p_;
-		      kinTrue->vecElectron.SetPxPyPzE(mcparticles2_psx[imc],
-						      mcparticles2_psy[imc],
-						      mcparticles2_psz[imc],
+		      kinTrue->vecElectron.SetPxPyPzE(mcparticles_psx[imc],
+						      mcparticles_psy[imc],
+						      mcparticles_psz[imc],
 						      sqrt(p_*p_ + mass_*mass_));
 		    }
 		}// if electron
@@ -349,8 +351,9 @@ void AnalysisDD4hep::process_event()
     //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
     //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
-	  wTrack = weight->GetWeight(*kinTrue);
-	  wTrackTotal += wTrack;
+    Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
+    wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+    wTrackTotal += wTrack;
 
     // fill track histograms in activated bins
     FillHistosTracks();

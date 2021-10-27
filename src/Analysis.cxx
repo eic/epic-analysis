@@ -96,14 +96,14 @@ Analysis::Analysis(
 
   // miscellaneous
   infiles.clear();
-  numGen = 0;
+  entriesTot = 0;
 };
 
 
 // input files
 //------------------------------------
 // add a single file
-bool Analysis::AddFile(TString fileName, Double_t xs, Double_t Q2min) {
+bool Analysis::AddFile(TString fileName, Long64_t entries, Double_t xs, Double_t Q2min) {
   if(fileName=="") return false;
   cout << "-- running analysis of " << fileName << endl;
   // insert in order of Q2min
@@ -124,11 +124,9 @@ bool Analysis::AddFile(TString fileName, Double_t xs, Double_t Q2min) {
   }
   infiles.insert(infiles.begin() + insertIdx, fileName);
   inXsecs.insert(inXsecs.begin() + insertIdx, xs);
+  inXsecsTot.insert(inXsecsTot.begin() + insertIdx, xs);
   inQ2mins.insert(inQ2mins.begin() + insertIdx, Q2min);
-  inEntries.insert(inEntries.begin() + insertIdx, 0);
-  if (insertIdx == 0) {
-    xsecTot = xs;
-  }
+  inEntries.insert(inEntries.begin() + insertIdx, entries);
   // adjust cross-sections to account for overlapping regions
   for (std::size_t idx = infiles.size() - 1; idx > insertIdx; --idx) {
     inXsecs[insertIdx] -= inXsecs[idx];
@@ -154,12 +152,28 @@ void Analysis::Prepare() {
   while (std::getline(fin, line)) {
     stringstream ss(line);
     string fileName;
+    Long64_t entries;
     Double_t xs, Q2min;
-    ss >> fileName >> xs >> Q2min;
+    ss >> fileName >> entries >> xs >> Q2min;
+    if (entries <= 0) {
+      TFile* file = TFile::Open(fileName.c_str());
+      if (file->IsZombie()) {
+        cerr << "ERROR: Couldn't open input file '" << fileName << "'" << endl;
+        return;
+      }
+      TTree* tree = file->Get<TTree>("Delphes");
+      if (tree == nullptr) tree = file->Get<TTree>("events");
+      if (tree == nullptr) {
+        cerr << "ERROR: Couldn't find Delphes or events tree in file '" << fileName << "'" << endl;
+        return;
+      }
+      entries = tree->GetEntries();
+    }
     if (!ss) {
       continue;
     }
-    if (!AddFile(TString(fileName.c_str()), xs, Q2min)) {
+    if (!AddFile(TString(fileName.c_str()), entries, xs, Q2min)) {
+      cerr << "ERROR: Couldn't add file '" << fileName << "'" << endl;
       return;
     }
   }
@@ -178,7 +192,7 @@ void Analysis::Prepare() {
   // instantiate shared objects
   kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
   kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
-  ST = new SimpleTree("tree",kin);
+  ST = new SimpleTree("tree",kin,kinTrue);
 
 
   // if there are no final states defined, default to definitions here:
@@ -236,6 +250,9 @@ void Analysis::Prepare() {
     HS->DefineHist1D("mX","m_{X}","GeV",NBINS,0,20);
     HS->DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
+    HS->DefineHist2D("phiHvsPhiS","#phi_{S}","#phi_{h}","","",
+        25,-TMath::Pi(),TMath::Pi(),
+        25,-TMath::Pi(),TMath::Pi());
     HS->DefineHist1D("phiSivers","#phi_{Sivers}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist1D("phiCollins","#phi_{Collins}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist2D("etaVsP","p","#eta","GeV","",
@@ -309,12 +326,23 @@ void Analysis::Prepare() {
   wJetTotal = 0.;
 };
 
-void Analysis::CountEvent(Double_t Q2, Int_t guess) {
-  Int_t idx = GetEventQ2Idx(Q2, guess);
-  if (idx == -1) {
-  } else {
-    inEntries[idx] += 1;
-    numGen += 1;
+void Analysis::CalculateEventQ2Weights() {
+  Q2weights.resize(infiles.size());
+  entriesTot = 0;
+  for (Long64_t entry : inEntries) {
+    entriesTot += entry;
+  }
+  xsecTot = inXsecsTot.front();
+  for (Int_t idx = 0; idx < infiles.size(); ++idx) {
+    Double_t xsecFactor = inXsecs[idx] / xsecTot;
+    Double_t entries = 0.;
+    for (Int_t idxC = 0; idxC <= idx; ++idxC) {
+      // estimate how many events from this file lie in the given Q2 range
+      entries += inEntries[idxC] * (inXsecs[idx] / inXsecsTot[idxC]);
+    }
+    Double_t numFactor = entries / entriesTot;
+    Q2weights[idx] = xsecFactor / numFactor;
+    cout << "Weights for " << infiles[idx] << ": " << numFactor << ", " << xsecFactor << endl;
   }
 }
 
@@ -323,9 +351,7 @@ Double_t Analysis::GetEventQ2Weight(Double_t Q2, Int_t guess) {
   if (idx == -1) {
     return 0.;
   } else {
-    Double_t xsecFactor = inXsecs[idx] / xsecTot;
-    Double_t numFactor = (Double_t) inEntries[idx] / (Double_t) numGen;
-    return xsecFactor / numFactor;
+    return Q2weights[idx];
   }
 }
 
@@ -537,6 +563,7 @@ void Analysis::FillHistosTracks() {
     H->Hist("mX")->Fill(kin->mX,wTrack);
     H->Hist("phiH")->Fill(kin->phiH,wTrack);
     H->Hist("phiS")->Fill(kin->phiS,wTrack);
+    dynamic_cast<TH2*>(H->Hist("phiHvsPhiS"))->Fill(kin->phiS,kin->phiH,wTrack);
     H->Hist("phiSivers")->Fill(Kinematics::AdjAngle(kin->phiH - kin->phiS),wTrack);
     H->Hist("phiCollins")->Fill(Kinematics::AdjAngle(kin->phiH + kin->phiS),wTrack);
     dynamic_cast<TH2*>(H->Hist("etaVsP"))->Fill(kin->pLab,kin->etaLab,wTrack); // TODO: lab-frame p, or some other frame?
