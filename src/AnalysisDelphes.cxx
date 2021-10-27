@@ -73,7 +73,7 @@ void AnalysisDelphes::Execute() {
         };
       };
     };
-    kinTrue->CalculateDIS("Ele");
+    kinTrue->CalculateDIS(reconMethod);
     Double_t Q2 = kinTrue->Q2;
     CountEvent(Q2, chain->GetTreeNumber());
   }
@@ -131,7 +131,7 @@ void AnalysisDelphes::Execute() {
 
     // calculate DIS kinematics
     kin->CalculateDIS(reconMethod); // reconstructed
-    kinTrue->CalculateDIS("Ele"); // generated (truth)
+    kinTrue->CalculateDIS(reconMethod); // generated (truth)
     Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
 
     // get vector of jets
