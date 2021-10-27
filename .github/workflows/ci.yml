@@ -10,7 +10,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     container:
-      image: cjdilks/largex-eic:ci
+      image: cjdilks/largex-eic:dev
       options: --user root
 
     steps:
