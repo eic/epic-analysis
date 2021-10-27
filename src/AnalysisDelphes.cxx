@@ -116,7 +116,7 @@ void AnalysisDelphes::Execute() {
           if(++errorCount<100) cerr << "ERROR: Found two beam electrons in one event" << endl;
         };
       };
-      if(part->PID != 11 && part->Status == 1){
+      if(part->PID != 11 && part->Status == 4){
         if(!found_ion){
           found_ion = true;
           kinTrue->vecIonBeam.SetPtEtaPhiM(
