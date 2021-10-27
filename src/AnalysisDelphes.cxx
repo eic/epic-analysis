@@ -51,6 +51,10 @@ void AnalysisDelphes::Execute() {
   TObjArrayIter itEFlowPhoton(tr->UseBranch("EFlowPhoton"));
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
   TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
+  TObjArrayIter itmRICHTrack(tr->UseBranch("mRICHTrack"));
+  TObjArrayIter itbarrelDIRCTrack(tr->UseBranch("barrelDIRCTrack"));
+  TObjArrayIter itdualRICHagTrack(tr->UseBranch("dualRICHagTrack"));
+  TObjArrayIter itdualRICHcfTrack(tr->UseBranch("dualRICHcfTrack"));
 
   // get counts in different Q2 cuts
   cout << "count events..." << endl;
@@ -127,11 +131,12 @@ void AnalysisDelphes::Execute() {
     };
 
     // get hadronic final state variables
-    kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
+    kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
 
     // calculate DIS kinematics
     kin->CalculateDIS(reconMethod); // reconstructed
     kinTrue->CalculateDIS("Ele"); // generated (truth)
+
     Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
 
     // get vector of jets

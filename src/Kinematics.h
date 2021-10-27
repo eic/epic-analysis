@@ -44,7 +44,9 @@ class Kinematics : public TObject
     void CalculateHadronKinematics();
     void GetHadronicFinalState(
         TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
-        TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
+        TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle,
+	TObjArrayIter itmRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack,TObjArrayIter itdualRICHcfTrack
+
         );
     void GetJets(
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
