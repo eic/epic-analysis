@@ -21,7 +21,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
       - name: Config
-        run: source env.sh
+        run: |
+          source env.sh
+          echo "MSTWPDF_HOME=$(GITHUB_WORKSPACE)/mstwpdf" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=$LD_LIBRARY:${{env.MSTWPDF}}" >> $GITHUB_ENV
+          more $GITHUB_ENV
       - name: Compile
         run: make
 
