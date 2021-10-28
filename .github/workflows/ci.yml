@@ -6,27 +6,29 @@ on:
     branches:
       - main
 
-jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
-    container:
-      image: cjdilks/largex-eic:dev
-      options: --user root
+defaults:
+  run:
+    shell: bash
+  runs-on: ubuntu-latest
+  container:
+    image: cjdilks/largex-eic:dev
+    options: --user root
 
+jobs:
+
+  build:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
 
-      - name: Build Test
-        shell: bash
-        run: |
-          source env.sh
-          make
+      - name: Config
+        run: source env.sh
+
+      - name: Compile
+        run: make
 
       - name: Macro Test
-        shell: bash
         run: |
-          source env.sh
           root -b -q container/ci/macro/analysis_xqbins.C
           root -b -q container/ci/macro/postprocess_xqbins_draw.C
 
