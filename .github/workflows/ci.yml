@@ -17,23 +17,26 @@ jobs:
     container:
       image: cjdilks/largex-eic:dev
       options: --user root
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
-
       - name: Config
         run: source env.sh
-
       - name: Compile
         run: make
 
-      - name: Macro Test
-        run: |
-          root -b -q container/ci/macro/analysis_xqbins.C
-          root -b -q container/ci/macro/postprocess_xqbins_draw.C
-
-      - name: Upload Artifacts
+  test:coverage:
+    needs: [ build ]
+    runs-on: [ ubuntu-latest ]
+    container:
+      image: cjdilks/largex-eic:dev
+      options: --user root
+    steps:
+      - name: analysis
+        run: root -b -q container/ci/macro/analysis_xqbins.C
+      - name: postprocess
+        run: root -b -q container/ci/macro/postprocess_xqbins_draw.C
+      - name: artifacts
         uses: actions/upload-artifact@v2
         with:
           name: macro-test-images
