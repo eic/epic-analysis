@@ -6,31 +6,51 @@ on:
     branches:
       - main
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
+
+  build:
+    runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
       options: --user root
-
     steps:
-      - name: Checkout Code
+      - name: checkout
         uses: actions/checkout@v2
-
-      - name: Build Test
-        shell: bash
+      - name: config
         run: |
           source env.sh
-          make
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
+          more $GITHUB_ENV
+      - name: compile
+        run: make
 
-      - name: Macro Test
-        shell: bash
+  test-coverage:
+    needs: [ build ]
+    runs-on: [ ubuntu-latest ]
+    container:
+      image: cjdilks/largex-eic:dev
+      options: --user root
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: config
         run: |
           source env.sh
-          root -b -q container/ci/macro/analysis_xqbins.C
-          root -b -q container/ci/macro/postprocess_xqbins_draw.C
-
-      - name: Upload Artifacts
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
+          more $GITHUB_ENV
+      - name: compile
+        run: make
+      - name: analysis
+        run: root -b -q container/ci/macro/analysis_xqbins.C
+      - name: postprocess
+        run: root -b -q container/ci/macro/postprocess_xqbins_draw.C
+      - name: artifacts
         uses: actions/upload-artifact@v2
         with:
           name: macro-test-images
