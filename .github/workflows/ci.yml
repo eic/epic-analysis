@@ -23,8 +23,8 @@ jobs:
       - name: Config
         run: |
           source env.sh
-          echo "MSTWPDF_HOME=${GITHUB_WORKSPACE}/mstwpdf" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=$LD_LIBRARY:${MSTWPDF}" >> $GITHUB_ENV
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
           more $GITHUB_ENV
       - name: Compile
         run: make
