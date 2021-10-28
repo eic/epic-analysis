@@ -1,3 +1,4 @@
+
 #include "Kinematics.h"
 
 ClassImp(Kinematics)
@@ -68,12 +69,12 @@ Kinematics::Kinematics(
 // - also calculates `W` and `Nu` (Lorentz invariant)
 void Kinematics::getqWQuadratic(){
   double f = y*(vecIonBeam.Dot(vecEleBeam));
-  double hx = Pxh;
-  double hy = Pyh;
   double pz = vecIonBeam.Pz();
   double py = vecIonBeam.Py();
   double px = vecIonBeam.Px();
   double pE = vecIonBeam.E();
+  double hx = Pxh-px;
+  double hy = Pyh-py;
 
   double a = 1.0 - (pE*pE)/(pz*pz);
   double b = (2*pE/(pz*pz))*(px*hx + py*hy + f);
@@ -95,7 +96,7 @@ void Kinematics::getqWQuadratic(){
       qz = qz2;
     }
 
-    vecQ.SetPxPyPzE(Pxh, Pyh, qz, qE);
+    vecQ.SetPxPyPzE(hx, hy, qz, qE);
     vecW = vecIonBeam + vecQ;
     W = vecW.M();
     Nu = vecIonBeam.Dot(vecQ)/IonMass;
@@ -193,6 +194,7 @@ void Kinematics::CalculateDISbyJB(){
 void Kinematics::CalculateDISbyDA(){
   float thetah = acos( (HPxh*HPxh+HPyh*HPyh - Hsigmah*Hsigmah)/(HPxh*HPxh+HPyh*HPyh+Hsigmah*Hsigmah) );
   float thetae = HvecElectron.Theta();
+  
   Q2 = 4.0*vecEleBeam.E()*vecEleBeam.E()*sin(thetah)*(1+cos(thetae))/(sin(thetah)+sin(thetae)-sin(thetah+thetae));
   y = (sin(thetae)*(1-cos(thetah)))/(sin(thetah)+sin(thetae)-sin(thetah+thetae));
   x = Q2/(s*y);
@@ -430,7 +432,7 @@ void Kinematics::GetHadronicFinalState(
     }
   }
   
-  //if(!isnan(vecElectron.E())){
+  if(!isnan(vecElectron.E())){
     sigmah -= (vecElectron.E() - vecElectron.Pz());
     Pxh -= vecElectron.Px();
     Pyh -= vecElectron.Py();
@@ -438,9 +440,43 @@ void Kinematics::GetHadronicFinalState(
     Hsigmah -= (HvecElectron.E() - HvecElectron.Pz());
     HPxh -= HvecElectron.Px();
     HPyh -= HvecElectron.Py();
-    //  }
+  }
 };
 
+void Kinematics::GetHadronicFinalStateTrue(TObjArrayIter itParticle){
+  itParticle.Reset();
+
+  this->TransformToHeadOnFrame(vecEleBeam,HvecEleBeam);
+  this->TransformToHeadOnFrame(vecIonBeam,HvecIonBeam);
+  this->TransformToHeadOnFrame(vecElectron,HvecElectron);
+
+  Hsigmah = 0;
+  HPxh = 0;
+  HPyh = 0;
+  sigmah = 0;
+  Pxh = 0;
+  Pyh = 0;
+  while(GenParticle *partTrue = (GenParticle*)itParticle() ){
+    if(partTrue->Status == 1){
+      TLorentzVector partp4 = partTrue->P4();
+      sigmah += (partp4.E() - partp4.Pz());
+      Pxh += partp4.Px();
+      Pyh += partp4.Py();
+      this->TransformToHeadOnFrame(partp4,partp4);
+      Hsigmah += (partp4.E() - partp4.Pz());
+      HPxh += partp4.Px();
+      HPyh += partp4.Py();
+    }    
+  }
+  sigmah -= (vecElectron.E()-vecElectron.Pz());
+  Pxh -= vecElectron.Px();
+  Pyh -= vecElectron.Py();
+
+  Hsigmah -= (HvecElectron.E()-HvecElectron.Pz());
+  HPxh -= HvecElectron.Px();
+  HPyh -= HvecElectron.Py();
+};
+				       
 
 void Kinematics::GetJets(
     TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
