@@ -9,7 +9,6 @@ on:
 defaults:
   run:
     shell: bash
-  runs-on: [ ubuntu-latest ]
   container:
     image: cjdilks/largex-eic:dev
     options: --user root
@@ -17,6 +16,7 @@ defaults:
 jobs:
 
   build:
+    runs-on: [ ubuntu-latest ]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
