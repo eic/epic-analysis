@@ -36,6 +36,8 @@ jobs:
       image: cjdilks/largex-eic:dev
       options: --user root
     steps:
+      - name: checkout
+        uses: actions/checkout@v2
       - name: config
         run: |
           source env.sh
