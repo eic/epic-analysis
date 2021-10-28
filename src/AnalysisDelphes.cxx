@@ -116,7 +116,7 @@ void AnalysisDelphes::Execute() {
           if(++errorCount<100) cerr << "ERROR: Found two beam electrons in one event" << endl;
         };
       };
-      if(part->PID != 11 && part->Status == 1){
+      if(part->PID != 11 && part->Status == 4){
         if(!found_ion){
           found_ion = true;
           kinTrue->vecIonBeam.SetPtEtaPhiM(
@@ -139,17 +139,16 @@ void AnalysisDelphes::Execute() {
     if(errorCount>=100 && errorCount<1000) { cerr << "ERROR: .... suppressing beam finder errors ...." << endl; errorCount=1000; };
 
     // get hadronic final state variables
-    kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
-
+    kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);    
+    kinTrue->GetHadronicFinalStateTrue(itParticle);
     // calculate DIS kinematics
     kin->CalculateDIS(reconMethod); // reconstructed
-    kinTrue->CalculateDIS("Ele"); // generated (truth)
+    kinTrue->CalculateDIS(reconMethod); // generated (truth)
 
     // get vector of jets
     // TODO: should this have an option for clustering method?
     kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
-
-
+   
     // track loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     itTrack.Reset();
     while(Track *trk = (Track*) itTrack()) {
@@ -182,8 +181,8 @@ void AnalysisDelphes::Execute() {
           trkPart->Eta,
           trkPart->Phi,
           trkPart->Mass /* TODO: do we use track mass here ?? */
-          );
-
+          );      
+      
       kin->CalculateHadronKinematics();
       kinTrue->CalculateHadronKinematics();
 

@@ -1,3 +1,4 @@
+
 #include "Kinematics.h"
 
 ClassImp(Kinematics)
@@ -72,8 +73,8 @@ void Kinematics::getqWQuadratic(){
   double py = vecIonBeam.Py();
   double px = vecIonBeam.Px();
   double pE = vecIonBeam.E();
-  double hx = Pxh+px;
-  double hy = Pyh+py;
+  double hx = Pxh-px;
+  double hy = Pyh-py;
 
   double a = 1.0 - (pE*pE)/(pz*pz);
   double b = (2*pE/(pz*pz))*(px*hx + py*hy + f);
@@ -431,7 +432,7 @@ void Kinematics::GetHadronicFinalState(
     }
   }
   
-  //if(!isnan(vecElectron.E())){
+  if(!isnan(vecElectron.E())){
     sigmah -= (vecElectron.E() - vecElectron.Pz());
     Pxh -= vecElectron.Px();
     Pyh -= vecElectron.Py();
@@ -439,7 +440,7 @@ void Kinematics::GetHadronicFinalState(
     Hsigmah -= (HvecElectron.E() - HvecElectron.Pz());
     HPxh -= HvecElectron.Px();
     HPyh -= HvecElectron.Py();
-    //  }
+  }
 };
 
 void Kinematics::GetHadronicFinalStateTrue(TObjArrayIter itParticle){
