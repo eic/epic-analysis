@@ -9,14 +9,15 @@ on:
 defaults:
   run:
     shell: bash
-  container:
-    image: cjdilks/largex-eic:dev
-    options: --user root
 
 jobs:
 
   build:
     runs-on: [ ubuntu-latest ]
+    container:
+      image: cjdilks/largex-eic:dev
+      options: --user root
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
