@@ -18,15 +18,15 @@ jobs:
       image: cjdilks/largex-eic:dev
       options: --user root
     steps:
-      - name: Checkout Code
+      - name: checkout
         uses: actions/checkout@v2
-      - name: Config
+      - name: config
         run: |
           source env.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
           more $GITHUB_ENV
-      - name: Compile
+      - name: compile
         run: make
 
   test-coverage:
@@ -36,6 +36,14 @@ jobs:
       image: cjdilks/largex-eic:dev
       options: --user root
     steps:
+      - name: config
+        run: |
+          source env.sh
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
+          more $GITHUB_ENV
+      - name: compile
+        run: make
       - name: analysis
         run: root -b -q container/ci/macro/analysis_xqbins.C
       - name: postprocess
