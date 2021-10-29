@@ -1,11 +1,11 @@
 R__LOAD_LIBRARY(Largex)
 
 void analysis_xqbins(
-    TString infiles="container/ci/macro/files.config", /* list of input files */
+    TString infiles="macro/ci/files.config", /* list of input files */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=25, /* crossing angle [mrad] */
-    TString outfilePrefix="macro.test" /* output filename prefix*/
+    TString outfilePrefix="coverage" /* output filename prefix*/
 ) {
 
   AnalysisDelphes *A = new AnalysisDelphes(
