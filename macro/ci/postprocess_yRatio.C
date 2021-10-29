@@ -2,7 +2,7 @@ R__LOAD_LIBRARY(Largex)
 
 // plot ratios of distributions for various y minima
 void postprocess_yRatio(
-    TString infile="out/yRatio.example_5x41.root"
+    TString infile="out/yRatio.root"
 ) {
 
   // setup postprocessor ========================================
