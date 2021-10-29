@@ -29,7 +29,7 @@ jobs:
       - name: compile
         run: make
 
-  test-coverage:
+  benchmark-coverage:
     needs: [ build ]
     runs-on: [ ubuntu-latest ]
     container:
@@ -47,12 +47,68 @@ jobs:
       - name: compile
         run: make
       - name: analysis
-        run: root -b -q container/ci/macro/analysis_xqbins.C
+        run: root -b -q macro/ci/analysis_xqbins.C
       - name: postprocess
-        run: root -b -q container/ci/macro/postprocess_xqbins_draw.C
+        run: root -b -q macro/ci/postprocess_xqbins_draw.C
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: macro-test-images
+          name: coverage-plots
           path: |
-            out/macro.test.images
+            out/coverage.images
+
+  benchmark-y-minima:
+    needs: [ build ]
+    runs-on: [ ubuntu-latest ]
+    container:
+      image: cjdilks/largex-eic:dev
+      options: --user root
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: config
+        run: |
+          source env.sh
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
+          more $GITHUB_ENV
+      - name: compile
+        run: make
+      - name: analysis
+        run: root -b -q macro/ci/analysis_yRatio.C
+      - name: postprocess
+        run: root -b -q macro/ci/postprocess_yRatio.C
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: y-minima-ratio-plots
+          path: |
+            out/yRatio.images/yRatio*.png
+
+  benchmark-resolutions:
+    needs: [ build ]
+    runs-on: [ ubuntu-latest ]
+    container:
+      image: cjdilks/largex-eic:dev
+      options: --user root
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: config
+        run: |
+          source env.sh
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
+          more $GITHUB_ENV
+      - name: compile
+        run: make
+      - name: analysis
+        run: root -b -q macro/ci/analysis_resolution.C
+      - name: postprocess
+        run: root -b -q macro/ci/postprocess_resolution.C
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: resolution-plots
+          path: |
+            out/resolution.images/*.pdf

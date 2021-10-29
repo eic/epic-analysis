@@ -413,7 +413,7 @@ void PostProcessor::DrawInBins(
       TString drawStr = "";
       switch(hist->GetDimension()) {
         case 1:
-          drawStr = ""/*"EX0 P"*/;       
+          drawStr = "HIST";       
           break;
         case 2:
           drawStr = "COLZ";
