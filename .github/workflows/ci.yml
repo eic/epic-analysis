@@ -142,4 +142,4 @@ jobs:
         with:
           name: fullsim-coverage-plots
           path: |
-            out/resolution.images/*.pdf
+            out/fullsim.coverage.images

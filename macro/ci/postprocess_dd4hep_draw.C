@@ -2,7 +2,7 @@ R__LOAD_LIBRARY(Largex)
 
 // make kinematics coverage plots, such as eta vs. p in bins of (x,Q2)
 void postprocess_dd4hep_draw(
-    TString infile="out/fullsim.test.root"
+    TString infile="out/fullsim.coverage.root"
 ) {
 
   // setup postprocessor ========================================
