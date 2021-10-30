@@ -29,7 +29,7 @@ jobs:
       - name: compile
         run: make
 
-  benchmark-coverage:
+  benchmark-fastsim-coverage:
     needs: [ build ]
     runs-on: [ ubuntu-latest ]
     container:
@@ -57,7 +57,7 @@ jobs:
           path: |
             out/coverage.images
 
-  benchmark-y-minima:
+  benchmark-fastsim-y-minima:
     needs: [ build ]
     runs-on: [ ubuntu-latest ]
     container:
@@ -85,7 +85,7 @@ jobs:
           path: |
             out/yRatio.images/yRatio*.png
 
-  benchmark-resolutions:
+  benchmark-fastsim-resolutions:
     needs: [ build ]
     runs-on: [ ubuntu-latest ]
     container:
@@ -106,6 +106,37 @@ jobs:
         run: root -b -q macro/ci/analysis_resolution.C
       - name: postprocess
         run: root -b -q macro/ci/postprocess_resolution.C
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: resolution-plots
+          path: |
+            out/resolution.images/*.pdf
+
+  benchmark-fullsim-coverage:
+    needs: [ build ]
+    runs-on: [ ubuntu-latest ]
+    container:
+      image: cjdilks/largex-eic:dev
+      options: --user root
+    steps:
+      - env:
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: config
+        run: |
+          source env.sh
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
+          more $GITHUB_ENV
+      - name: compile
+        run: make
+      - name: analysis
+        run: root -b -q macro/ci/analysis_dd4hep.C
+      - name: postprocess
+        run: root -b -q macro/ci/postprocess_dd4hep_draw.C
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
