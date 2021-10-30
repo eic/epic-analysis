@@ -29,7 +29,7 @@ jobs:
       - name: compile
         run: make
 
-  benchmark-fastsim-coverage:
+  fastsim-coverage:
     needs: [ build ]
     runs-on: [ ubuntu-latest ]
     container:
@@ -53,11 +53,11 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: coverage-plots
+          name: fastsim-coverage-plots
           path: |
             out/coverage.images
 
-  benchmark-fastsim-y-minima:
+  fastsim-y-minima:
     needs: [ build ]
     runs-on: [ ubuntu-latest ]
     container:
@@ -81,11 +81,11 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: y-minima-ratio-plots
+          name: fastsim-y-minima-ratio-plots
           path: |
             out/yRatio.images/yRatio*.png
 
-  benchmark-fastsim-resolutions:
+  fastsim-resolutions:
     needs: [ build ]
     runs-on: [ ubuntu-latest ]
     container:
@@ -109,11 +109,11 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: resolution-plots
+          name: fastsim-resolution-plots
           path: |
             out/resolution.images/*.pdf
 
-  benchmark-fullsim-coverage:
+  fullsim-coverage:
     needs: [ build ]
     runs-on: [ ubuntu-latest ]
     container:
@@ -140,6 +140,6 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: resolution-plots
+          name: fullsim-coverage-plots
           path: |
             out/resolution.images/*.pdf
