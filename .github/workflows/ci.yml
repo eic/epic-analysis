@@ -123,8 +123,8 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2
         env:
-          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          S3_ACCESS: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET: ${{ secrets.S3_SECRET_KEY }}
       - name: config
         run: |
           source env.sh
@@ -134,7 +134,10 @@ jobs:
       - name: compile
         run: make
       - name: analysis
-        run: root -b -q macro/ci/analysis_dd4hep.C
+        run: |
+          export S3_ACCESS_KEY=$S3_ACCESS
+          export S3_SECRET_KEY=$S3_SECRET
+          root -b -q macro/ci/analysis_dd4hep.C
       - name: postprocess
         run: root -b -q macro/ci/postprocess_dd4hep_draw.C
       - name: artifacts
