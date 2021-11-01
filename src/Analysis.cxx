@@ -273,12 +273,12 @@ void Analysis::Prepare() {
     HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
     HS->DefineHist1D("qTQ_jet","jet q_{T}/Q","", NBINS, 0, 3.0);
     // -- resolutions
-    HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -2, 2);
-    HS->DefineHist1D("y_Res","y-y_{true}","", NBINS, -2, 2);
-    HS->DefineHist1D("Q2_Res","Q2-Q2_{true}","GeV", NBINS, -2, 2);
+    HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -0.5, 0.5);
+    HS->DefineHist1D("y_Res","y-y_{true}","", NBINS, -0.2, 0.2);
+    HS->DefineHist1D("Q2_Res","Q2-Q2_{true}","GeV", NBINS, -0.5, 0.5);
     HS->DefineHist1D("phiH_Res","#phi_{h}-#phi_{h}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
-    HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
-    HS->DefineHist1D("pT_Res","pT-pT^{true}","GeV",NBINS,-5,5);
+    HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -0.1*TMath::Pi(), 0.1*TMath::Pi());
+    HS->DefineHist1D("pT_Res","pT-pT^{true}","GeV", NBINS, -1.5, 1.5);
     HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
         20,1e-4,1,
         10,1,1e4,

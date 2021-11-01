@@ -52,7 +52,7 @@ void postprocess_resolution(
 
     // loop over resolution histograms (see ../src/Analysis.cxx `DefineHist*` calls 
     // for available histograms, or add your own there)
-    for( TString histname : {"x_Res","y_Res","Q2_Res","phiH_Res","phiS_Res","phiHvsPhiS"} ) {
+    for( TString histname : {"x_Res","y_Res","pT_Res","Q2_Res","phiH_Res","phiS_Res","phiHvsPhiS"} ) {
       P->DrawInBins(
           canvname, histos_xQ2, histname,
           "x", nx, xMin, xMax, true,
