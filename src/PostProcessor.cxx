@@ -411,6 +411,8 @@ void PostProcessor::DrawInBins(
     yaxisy1 = 0.08;
   };
 
+  double yMin = 0; double yMax = 1;//TODO CHECK THIS WORKS
+
   TString canvN = "canv_"+outName+"_"+histName;
   TCanvas *canv = new TCanvas(canvN,canvN, canvx, canvy);
   TPad *mainpad = new TPad("mainpad", "mainpad", 0.07, 0.07, 0.98, 0.98);
@@ -442,6 +444,18 @@ void PostProcessor::DrawInBins(
       //hist->GetYaxis()->SetTitle("");
       //hist->GetXaxis()->SetLabelSize(0);
       //hist->GetYaxis()->SetLabelSize(0);
+      hist->GetXaxis()->SetTitleSize(0.1);
+      hist->GetXaxis()->SetTitleOffset(0.5);
+      hist->GetXaxis()->SetNdivisions(8);
+      hist->GetXaxis()->SetLabelSize(0.06);
+      hist->GetYaxis()->SetRangeUser(-15,15);//TODO: CHECK THIS IS REASONABLE ALSO WHAT ABOUT ERROR BARS???
+      hist->GetYaxis()->SetNdivisions(8);
+      hist->GetYaxis()->SetLabelSize(0.06);
+      // for(int k = 0; k < i; k++){
+      //   for(int l = 0; l < j; k++){
+      //     histArray[k][l]->GetYaxis()->SetRangeUser(TMath::Min(yMin,hist->GetYaxis()->GetMinimum(),TMath::Max(yMax,hist->GetYaxis()->GetMaximum())));
+      //   }
+      // }
 
       mainpad->cd((nvar2-j-1)*nvar1 + i + 1);
       gPad->SetLogx(intlog1);
@@ -461,8 +475,10 @@ void PostProcessor::DrawInBins(
           break;
       };
       //hist->Write();
-      if( hist->GetEntries() > 0 ) {	
+      if( hist->GetEntries() > 0 ) {	//TODO come back and do this after setting up all histograms???
         hist->Draw(drawStr);
+        // TF1 *zeroF = new TF1("zeroF","0",0,1); //TODO: Add optional switch for this?
+        // zeroF->Draw("SAME"); //TODO: Added zero line
         if(drawpid){
           lDIRClow->Draw();
           lDIRC->Draw();

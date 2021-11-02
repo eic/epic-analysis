@@ -264,6 +264,26 @@ void Analysis::Prepare() {
     HS->DefineHist1D("Q2_Res","Q2-Q2_{true}","GeV", NBINS, -2, 2);
     HS->DefineHist1D("phiH_Res","#phi_{h}-#phi_{h}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
     HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
+
+    // 1D z-binned resolutions
+    HS->DefineHist1D("z_true","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_purity","purity","", NBINS, 0, 1);
+    HS->DefineHist1D("z_q2res","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_xres","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_yres","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_zres","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_pTres","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_phiHres","z","", NBINS, 0, 1);
+    // 1D z-binned resolutions StdDevs
+    // HS->DefineHist1D("z_puritySD","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_q2resSD","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_xresSD","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_yresSD","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_zresSD","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_pTresSD","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_phiHresSD","z","", NBINS, 0, 1);
+
+    // 2D Q2 vs. x binned resolutions
     HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
         // 20,1e-4,1,//TODO: OLD -> Might revert...
         // 10,1,1e4,
@@ -307,7 +327,7 @@ void Analysis::Prepare() {
         NBINS,1,100,
         true,true
         );
-    // -- resolutions StdDevs
+    // 2D Q2 vs. x resolutions StdDevs
     HS->DefineHist2D("Q2vsX_q2resSD","x","Q^{2}","","GeV^{2}",
         NBINS,1e-3,1,
         NBINS,1,100,
@@ -355,7 +375,6 @@ void Analysis::Prepare() {
   });
   HD->ExecuteAndClearOps();
 
-
   // initialize total weights
   wTrackTotal = 0.;
   wJetTotal = 0.;
@@ -396,12 +415,28 @@ Int_t Analysis::GetEventQ2Idx(Double_t Q2, Int_t guess) {
   }
 }
 
-//TODO: Find a better place for this
+//TODO: Find a better place for the following functions
+/**
+* Element-wise sqrt function for 1D histograms like in numpy. 
+* Modifies histogram in place.
+*/
+void Analysis::npSqrt1D(Histos *H, TString name) {
+    int zBins;
+
+    // Get axes' # bins
+    zBins  = H->Hist(name)->GetXaxis()->GetNbins();
+
+    // Loop z binned histogram
+    for (int i=1;i<=zBins;i++) {
+      H->Hist(name)->SetBinContent(i,TMath::Sqrt(H->Hist(name)->GetBinContent(i)));
+    }
+}
+
 /**
 * Element-wise sqrt function for 2D histograms like in numpy. 
 * Modifies histogram in place.
 */
-void Analysis::npSqrt(Histos *H, TString name) {
+void Analysis::npSqrt2D(Histos *H, TString name) {
     int xBins, q2Bins;
 
     // Get axes' # bins
@@ -417,9 +452,22 @@ void Analysis::npSqrt(Histos *H, TString name) {
 }
 
 /**
+* Get mean counts per bin for 1D histogram.
+*/
+Double_t Analysis::GetMean1D(Histos *H, TString name) {
+    int zBins;
+    Double_t counts;
+
+    // Get axes' # bins
+    counts = dynamic_cast<TH1D*>(H->Hist(name))->GetSum();
+    zBins  = H->Hist(name)->GetXaxis()->GetNbins();
+    return counts / zBins;
+}
+
+/**
 * Get mean counts per bin for 2D histogram.
 */
-Double_t Analysis::GetMean(Histos *H, TString name) {
+Double_t Analysis::GetMean2D(Histos *H, TString name) {
     int xBins, q2Bins;
     Double_t counts;
 
@@ -429,7 +477,6 @@ Double_t Analysis::GetMean(Histos *H, TString name) {
     q2Bins = dynamic_cast<TH2*>(H->Hist(name))->GetYaxis()->GetNbins();
     return counts / (xBins * q2Bins);
 }
-
 
 // finish the analysis
 //-----------------------------------
@@ -453,7 +500,28 @@ void Analysis::Finish() {
          << endl;
     // calculate cross sections
     H->Hist("Q_xsec")->Scale(1./lumi); // TODO: generalize (`if (name contains "xsec") ...`)
-    // divide resolution plots by true counts per x-Q2 bin
+
+    // Normalize and sqrt 1D z-binned resolution StdDevs
+    H->Hist("z_purity")->Divide(H->Hist("z_true"));
+    H->Hist("z_q2resSD")->Divide(H->Hist("z_true"));
+    H->Hist("z_xresSD")->Divide(H->Hist("z_true"));
+    H->Hist("z_yresSD")->Divide(H->Hist("z_true"));
+    H->Hist("z_zresSD")->Divide(H->Hist("z_true"));
+    H->Hist("z_pTresSD")->Divide(H->Hist("z_true"));
+    H->Hist("z_phiHresSD")->Divide(H->Hist("z_true"));
+    this->npSqrt1D(H,"z_q2resSD"); //NOTE: Important: Take sqrt() AFTER normalizing.
+    this->npSqrt1D(H,"z_xresSD");
+    this->npSqrt1D(H,"z_yresSD");
+    this->npSqrt1D(H,"z_zresSD");
+    this->npSqrt1D(H,"z_pTresSD");
+    this->npSqrt1D(H,"z_phiHresSD");
+
+    //DEBUGGING
+    cout << "DEBUGGING z_purity: " << H->Hist("z_purity")->GetMean() << std::endl;
+    cout << "DEBUGGING z_q2res: " << H->Hist("z_q2res")->GetMean() << std::endl;
+    cout << "DEBUGGING z_q2resSD: " << H->Hist("z_q2resSD")->GetMean() << std::endl;
+
+    // Normalize and sqrt 2D Q2 vs. x binned resolution StdDevs
     H->Hist("Q2vsXpurity")->Divide(H->Hist("Q2vsXtrue"));
     H->Hist("Q2vsX_q2resSD")->Divide(H->Hist("Q2vsXtrue"));
     H->Hist("Q2vsX_xresSD")->Divide(H->Hist("Q2vsXtrue"));
@@ -461,12 +529,17 @@ void Analysis::Finish() {
     H->Hist("Q2vsX_zresSD")->Divide(H->Hist("Q2vsXtrue"));
     H->Hist("Q2vsX_pTresSD")->Divide(H->Hist("Q2vsXtrue"));
     H->Hist("Q2vsX_phiHresSD")->Divide(H->Hist("Q2vsXtrue"));
-    this->npSqrt(H,"Q2vsX_q2resSD"); //NOTE: Important: Take sqrt() AFTER normalizing.
-    this->npSqrt(H,"Q2vsX_xresSD");
-    this->npSqrt(H,"Q2vsX_yresSD");
-    this->npSqrt(H,"Q2vsX_zresSD");
-    this->npSqrt(H,"Q2vsX_pTresSD");
-    this->npSqrt(H,"Q2vsX_phiHresSD");
+    this->npSqrt2D(H,"Q2vsX_q2resSD"); //NOTE: Important: Take sqrt() AFTER normalizing.
+    this->npSqrt2D(H,"Q2vsX_xresSD");
+    this->npSqrt2D(H,"Q2vsX_yresSD");
+    this->npSqrt2D(H,"Q2vsX_zresSD");
+    this->npSqrt2D(H,"Q2vsX_pTresSD");
+    this->npSqrt2D(H,"Q2vsX_phiHresSD");
+
+    //DEBUGGING
+    cout << "DEBUGGING Q2vsXpurity: " << H->Hist("Q2vsXpurity")->GetMean() << std::endl;
+    cout << "DEBUGGING Q2vsX_q2res: " << H->Hist("Q2vsX_q2res")->GetMean() << std::endl;
+    cout << "DEBUGGING Q2vsX_q2resSD: " << H->Hist("Q2vsX_q2resSD")->GetMean() << std::endl;
   });
 
   HD->ExecuteAndClearOps();
@@ -645,6 +718,18 @@ void Analysis::FillHistosTracks() {
     H->Hist("Q2_Res")->Fill( kin->Q2 - kinTrue->Q2, wTrack );
     H->Hist("phiH_Res")->Fill( Kinematics::AdjAngle(kin->phiH - kinTrue->phiH), wTrack );
     H->Hist("phiS_Res")->Fill( Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wTrack );
+
+    // z binned resolutions
+    H->Hist("z_true")->Fill(kinTrue->z, wTrack );
+    if( (H->Hist("z_true"))->FindBin(kinTrue->z) == (H->Hist("z_true"))->FindBin(kin->z) ) H->Hist("z_purity")->Fill(kin->z,wTrack);
+    if(kinTrue->Q2!=0) H->Hist("z_q2res")->Fill( kinTrue->z, (kinTrue->Q2 - kinTrue->Q2)/kinTrue->Q2 * wTrack );
+    if(kinTrue->x!=0) H->Hist("z_xres")->Fill( kinTrue->z, (kinTrue->x - kin->x)/kinTrue->x * wTrack );
+    if(kinTrue->y!=0) H->Hist("z_yres")->Fill( kinTrue->z, (kinTrue->y - kin->y)/kinTrue->y * wTrack );
+    if(kinTrue->z!=0) H->Hist("z_zres")->Fill( kinTrue->z, (kinTrue->z - kin->z)/kinTrue->z * wTrack );
+    if(kinTrue->pT!=0) H->Hist("z_pTres")->Fill( kinTrue->z, (kinTrue->pT - kin->pT)/kinTrue->pT * wTrack );
+    H->Hist("z_phiHres")->Fill( kinTrue->z, (kinTrue->phiH - kin->phiH) * wTrack );
+
+    // Q2 vs. x binned resolutions
     dynamic_cast<TH2*>(H->Hist("Q2vsXtrue"))->Fill(kinTrue->x,kinTrue->Q2,wTrack);
     if(kinTrue->Q2!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_q2res"))->Fill(
       kinTrue->x,kinTrue->Q2,wTrack*( (kinTrue->Q2 - kin->Q2)/(kinTrue->Q2) ) );
@@ -707,18 +792,27 @@ void Analysis::FillHistosTracksSD() {
   // fill histograms, for activated bins only
   HD->Payload([this](Histos *H){
 
+    // z binned resolution StdDevs
+    if(kinTrue->Q2!=0) H->Hist("z_q2resSD")->Fill( kinTrue->z, wTrack * TMath::Power( (kinTrue->Q2 - kin->Q2)/kinTrue->Q2 - this->GetMean1D(H,"z_q2res"),2) );
+    if(kinTrue->x!=0) H->Hist("z_xresSD")->Fill( kinTrue->z, wTrack * TMath::Power( (kinTrue->x - kin->x)/kinTrue->x - this->GetMean1D(H,"z_xres"),2) );
+    if(kinTrue->y!=0) H->Hist("z_yresSD")->Fill( kinTrue->z, wTrack * TMath::Power( (kinTrue->y - kin->y)/kinTrue->y - this->GetMean1D(H,"z_yres"),2) );
+    if(kinTrue->z!=0) H->Hist("z_zresSD")->Fill( kinTrue->z, wTrack * TMath::Power( (kinTrue->z - kin->z)/kinTrue->z - this->GetMean1D(H,"z_zres"),2) );
+    if(kinTrue->pT!=0) H->Hist("z_pTresSD")->Fill( kinTrue->z, wTrack * TMath::Power( (kinTrue->pT - kin->pT)/kinTrue->pT - this->GetMean1D(H,"z_pTres"),2) );
+    H->Hist("z_phiHresSD")->Fill( kinTrue->z, wTrack * TMath::Power( (kinTrue->phiH - kin->phiH) -this->GetMean1D(H,"z_phiHres"),2) );
+
+    // Q2 vs. x resolution StdDevs
     if(kinTrue->Q2!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_q2resSD"))->Fill(
-      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->Q2 - kin->Q2)/(kinTrue->Q2) - this->GetMean(H,"Q2vsX_q2res"),2) ) );
+      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->Q2 - kin->Q2)/(kinTrue->Q2) - this->GetMean2D(H,"Q2vsX_q2res"),2) ) );
     if(kinTrue->x!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_xresSD"))->Fill(
-      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->x - kin->x)/(kinTrue->x) - this->GetMean(H,"Q2vsX_xres"),2) ) );
+      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->x - kin->x)/(kinTrue->x) - this->GetMean2D(H,"Q2vsX_xres"),2) ) );
     if(kinTrue->y!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_yresSD"))->Fill(
-      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->y - kin->y)/(kinTrue->y) - this->GetMean(H,"Q2vsX_yres"),2) ) );
+      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->y - kin->y)/(kinTrue->y) - this->GetMean2D(H,"Q2vsX_yres"),2) ) );
     if(kinTrue->z!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_zresSD"))->Fill(
-      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->z - kin->z)/(kinTrue->z) - this->GetMean(H,"Q2vsX_zres"),2) ) );
+      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->z - kin->z)/(kinTrue->z) - this->GetMean2D(H,"Q2vsX_zres"),2) ) );
     if(kinTrue->pT!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_pTresSD"))->Fill(
-      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->pT - kin->pT)/(kinTrue->pT) - this->GetMean(H,"Q2vsX_pTres"),2) ) );
+      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->pT - kin->pT)/(kinTrue->pT) - this->GetMean2D(H,"Q2vsX_pTres"),2) ) );
     dynamic_cast<TH2*>(H->Hist("Q2vsX_phiHresSD"))->Fill(
-      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->z - kin->z)/(kinTrue->z) - this->GetMean(H,"Q2vsX_phiHres"),2)  ) );
+      kinTrue->x,kinTrue->Q2,wTrack*( TMath::Power((kinTrue->phiH - kin->phiH) - this->GetMean2D(H,"Q2vsX_phiHres"),2)  ) );
 
   });
   // execute the payload

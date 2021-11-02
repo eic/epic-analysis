@@ -102,8 +102,10 @@ class Analysis : public TNamed
     void FillHistosJetsSD();
 
     // Miscellaneous histogram operations
-    void npSqrt(Histos *H, TString name);
-    Double_t GetMean(Histos *H, TString name);
+    void npSqrt1D(Histos *H, TString name);
+    Double_t GetMean1D(Histos *H, TString name);
+    void npSqrt2D(Histos *H, TString name);
+    Double_t GetMean2D(Histos *H, TString name);
 
     // lambda to check which bins an observable is in, during DAG breadth
     // traversal; it requires `finalStateID`, `valueMap`, and will
