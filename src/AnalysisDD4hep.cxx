@@ -273,6 +273,8 @@ void AnalysisDD4hep::process_event()
       std::vector<Particles> recopart;
       double hpx=0; 
       double hpy=0;
+      double hpz=0;
+      double hE=0;
       for(int itrk=0; itrk<(int)ReconstructedParticles_pid.GetSize(); itrk++)
 	{
 	  // FIXME: pid is using the true information
@@ -302,14 +304,20 @@ void AnalysisDD4hep::process_event()
 	  recopart.push_back(part);
 	  hpx += reco_px;
 	  hpy += reco_py;
+	  hpz += reco_pz;
+	  hE += reco_E;
 	}
+      kin->vecHadron.SetPxPyPzE(hpx, hpy, hpz, hE);
+      kin->vecHadron -= kin->vecElectron;
 
       //Hadronic reconstruction 
       TLorentzVector head_vecElectron;
+      TLorentzVector head_vecHadron;
       kin->TransformToHeadOnFrame(kin->vecElectron,head_vecElectron);
-      kin->sigmah = (head_vecElectron.E() - head_vecElectron.Pz());
-      kin->Pxh = hpx - head_vecElectron.Px();
-      kin->Pyh = hpy - head_vecElectron.Py();
+      kin->TransformToHeadOnFrame(kin->vecHadron,head_vecHadron);
+      kin->sigmah = (head_vecHadron.E() - head_vecHadron.Pz());
+      kin->Pxh = head_vecHadron.Px();
+      kin->Pyh = head_vecHadron.Py();
 
       // calculate DIS kinematics
       kin->CalculateDIS(reconMethod); // reconstructed
