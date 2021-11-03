@@ -51,7 +51,7 @@ void AnalysisDD4hep::process_event()
   TTreeReader tr(chain);
 
   // Truth
-  TTreeReaderArray<Int_t>    mcparticles_ID(tr,     "mcparticles.ID");
+  TTreeReaderArray<Int_t>    mcparticles_ID(tr,        "mcparticles.ID");
   TTreeReaderArray<Int_t>    mcparticles_pdgID(tr,     "mcparticles.pdgID");
   TTreeReaderArray<Double_t> mcparticles_psx(tr,       "mcparticles.ps.x");
   TTreeReaderArray<Double_t> mcparticles_psy(tr,       "mcparticles.ps.y");
@@ -147,11 +147,11 @@ void AnalysisDD4hep::process_event()
 	  part.mcID = ReconstructedParticles_mcID[ireco];
 	  part.charge = ReconstructedParticles_charge[ireco];
 
-	  double reco_E = ReconstructedParticles_energy[itrk];
-	  double reco_px = ReconstructedParticles_p_x[itrk];
-	  double reco_py = ReconstructedParticles_p_y[itrk];
-	  double reco_pz = ReconstructedParticles_p_z[itrk];
-	  double reco_mass = ReconstructedParticles_mass[itrk];
+	  double reco_E = ReconstructedParticles_energy[ireco];
+	  double reco_px = ReconstructedParticles_p_x[ireco];
+	  double reco_py = ReconstructedParticles_p_y[ireco];
+	  double reco_pz = ReconstructedParticles_p_z[ireco];
+	  double reco_mass = ReconstructedParticles_mass[ireco];
 	  double reco_p = sqrt(reco_px*reco_px + reco_py*reco_py + reco_pz*reco_pz);
 
 	  part.vecPart.SetPxPyPzE(reco_px, 
@@ -178,6 +178,11 @@ void AnalysisDD4hep::process_event()
 
 	    }	  
 	}//reco loop
+
+      if(!foundElectron){
+	noele++;
+	continue;
+      }
 
       kin->vecHadron.SetPxPyPzE(hpx, hpy, hpz, hE);
       kin->vecHadron -= kin->vecElectron;
