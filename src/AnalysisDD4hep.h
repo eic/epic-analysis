@@ -31,6 +31,8 @@ class Particles
 {
  public:
   int pid;
+  int charge;
+  int mcID;
   TLorentzVector vecPart;
 };
 
