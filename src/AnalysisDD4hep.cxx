@@ -48,10 +48,10 @@ void AnalysisDD4hep::process_event()
     chain->Add(infiles[idx], inEntries[idx]);
   }
 
-  // FIXME: replace it with ExRootTreeReader::UseBranch()?
   TTreeReader tr(chain);
 
   // Truth
+  TTreeReaderArray<Int_t>    mcparticles_ID(tr,     "mcparticles.ID");
   TTreeReaderArray<Int_t>    mcparticles_pdgID(tr,     "mcparticles.pdgID");
   TTreeReaderArray<Double_t> mcparticles_psx(tr,       "mcparticles.ps.x");
   TTreeReaderArray<Double_t> mcparticles_psy(tr,       "mcparticles.ps.y");
@@ -61,62 +61,19 @@ void AnalysisDD4hep::process_event()
   TTreeReaderArray<Double_t> mcparticles_mass(tr,      "mcparticles.mass");
 
   // Reco
-  TTreeReaderArray<int> ReconstructedParticles_pid(tr, "ReconstructedParticles.pid");
-  TTreeReaderArray<float> ReconstructedParticles_energy(tr, "ReconstructedParticles.energy");
-  TTreeReaderArray<float> ReconstructedParticles_p_x(tr, "ReconstructedParticles.p.x");
-  TTreeReaderArray<float> ReconstructedParticles_p_y(tr, "ReconstructedParticles.p.y");
-  TTreeReaderArray<float> ReconstructedParticles_p_z(tr, "ReconstructedParticles.p.z");
-  TTreeReaderArray<float> ReconstructedParticles_mass(tr, "ReconstructedParticles.mass");
-
-  //HcalEndcap
-  TTreeReaderArray<float>  HcalEndcapPClusters_energy(tr, "HcalEndcapPClusters.energy");
-  TTreeReaderArray<float> HcalEndcapPClusters_x(tr,      "HcalEndcapPClusters.position.x");
-  TTreeReaderArray<float> HcalEndcapPClusters_y(tr,      "HcalEndcapPClusters.position.y");
-  TTreeReaderArray<float> HcalEndcapPClusters_z(tr,      "HcalEndcapPClusters.position.z");
-  TTreeReaderArray<float>  HcalEndcapPClusters_theta(tr,  "HcalEndcapPClustersInfo.polar.theta");
-  TTreeReaderArray<float>  HcalEndcapPClusters_phi(tr,    "HcalEndcapPClustersInfo.polar.phi");
-
-  //HcalEndcap
-  TTreeReaderArray<float> HcalEndcapNClusters_energy(tr, "HcalEndcapNClusters.energy");
-  TTreeReaderArray<float> HcalEndcapNClusters_x(tr,      "HcalEndcapNClusters.position.x");
-  TTreeReaderArray<float> HcalEndcapNClusters_y(tr,      "HcalEndcapNClusters.position.y");
-  TTreeReaderArray<float> HcalEndcapNClusters_z(tr,      "HcalEndcapNClusters.position.z");
-  TTreeReaderArray<float> HcalEndcapNClusters_theta(tr,  "HcalEndcapNClustersInfo.polar.theta");
-  TTreeReaderArray<float> HcalEndcapNClusters_phi(tr,    "HcalEndcapNClustersInfo.polar.phi");
-
-  //HcalBarrel
-  TTreeReaderArray<float> HcalBarrelClusters_energy(tr, "HcalBarrelClusters.energy");
-  TTreeReaderArray<float> HcalBarrelClusters_x(tr,      "HcalBarrelClusters.position.x");
-  TTreeReaderArray<float> HcalBarrelClusters_y(tr,      "HcalBarrelClusters.position.y");
-  TTreeReaderArray<float> HcalBarrelClusters_z(tr,      "HcalBarrelClusters.position.z");
-  TTreeReaderArray<float> HcalBarrelClusters_theta(tr,  "HcalBarrelClustersInfo.polar.theta");
-  TTreeReaderArray<float> HcalBarrelClusters_phi(tr,    "HcalBarrelClustersInfo.polar.phi");
-
-  //Ecal
-  TTreeReaderArray<float> EcalEndcapPClusters_energy(tr, "EcalEndcapPClusters.energy");
-  TTreeReaderArray<float> EcalEndcapPClusters_x(tr,      "EcalEndcapPClusters.position.x");
-  TTreeReaderArray<float> EcalEndcapPClusters_y(tr,      "EcalEndcapPClusters.position.y");
-  TTreeReaderArray<float> EcalEndcapPClusters_z(tr,      "EcalEndcapPClusters.position.z");
-  TTreeReaderArray<float> EcalEndcapPClusters_theta(tr,  "EcalEndcapPClustersInfo.polar.theta");
-  TTreeReaderArray<float> EcalEndcapPClusters_phi(tr,    "EcalEndcapPClustersInfo.polar.phi");
-
-  TTreeReaderArray<float> EcalEndcapNClusters_energy(tr, "EcalEndcapNClusters.energy");
-  TTreeReaderArray<float> EcalEndcapNClusters_x(tr,      "EcalEndcapNClusters.position.x");
-  TTreeReaderArray<float> EcalEndcapNClusters_y(tr,      "EcalEndcapNClusters.position.y");
-  TTreeReaderArray<float> EcalEndcapNClusters_z(tr,      "EcalEndcapNClusters.position.z");
-  //watch out the branch name
-  TTreeReaderArray<float>  EcalEndcapNClusters_theta(tr,  "EcalEndcapNClusterInfo.polar.theta");
-  TTreeReaderArray<float>  EcalEndcapNClusters_phi(tr,    "EcalEndcapNClusterInfo.polar.phi");
-
-  TTreeReaderArray<float> EcalBarrelClusters_energy(tr, "EcalBarrelImagingClusters.energy");
-  TTreeReaderArray<float> EcalBarrelClusters_x(tr,      "EcalBarrelImagingClusters.position.x");
-  TTreeReaderArray<float> EcalBarrelClusters_y(tr,      "EcalBarrelImagingClusters.position.y");
-  TTreeReaderArray<float> EcalBarrelClusters_z(tr,      "EcalBarrelImagingClusters.position.z");
-  TTreeReaderArray<float> EcalBarrelClusters_theta(tr,  "EcalBarrelImagingClustersInfo.polar.theta");
-  TTreeReaderArray<float>  EcalBarrelClusters_phi(tr,    "EcalBarrelImagingClustersInfo.polar.phi");
+  TTreeReaderArray<int>   ReconstructedParticles_pid(tr,     "ReconstructedParticles.pid");
+  TTreeReaderArray<float> ReconstructedParticles_energy(tr,  "ReconstructedParticles.energy");
+  TTreeReaderArray<float> ReconstructedParticles_p_x(tr,     "ReconstructedParticles.p.x");
+  TTreeReaderArray<float> ReconstructedParticles_p_y(tr,     "ReconstructedParticles.p.y");
+  TTreeReaderArray<float> ReconstructedParticles_p_z(tr,     "ReconstructedParticles.p.z");
+  TTreeReaderArray<float> ReconstructedParticles_p(tr,       "ReconstructedParticles.momentum");
+  TTreeReaderArray<float> ReconstructedParticles_th(tr,      "ReconstructedParticles.direction.theta");
+  TTreeReaderArray<float> ReconstructedParticles_phi(tr,     "ReconstructedParticles.direction.phi");
+  TTreeReaderArray<float> ReconstructedParticles_mass(tr,    "ReconstructedParticles.mass");
+  TTreeReaderArray<int>   ReconstructedParticles_charge(tr,  "ReconstructedParticles.charge");
+  TTreeReaderArray<float> ReconstructedParticles_mcID(tr,    "ReconstructedParticles.mcID.value");
 
   TTreeReader::EEntryStatus entrystats = tr.SetEntry(0);
-
 
   int noele = 0;
   // event loop =========================================================
@@ -128,8 +85,10 @@ void AnalysisDD4hep::process_event()
       nevt++;      
       if(nevt>maxEvents) break;
 
+      // mcparticles loop
       std::vector<Particles> mcpart;
       double maxP = 0;
+      int electronID = 0;
       for(int imc=0; imc<mcparticles_pdgID.GetSize(); imc++)
 	{
 	  int pid_ = mcparticles_pdgID[imc];
@@ -145,6 +104,7 @@ void AnalysisDD4hep::process_event()
 	      Particles part;
 	      part.pid = pid_;
 	      part.vecPart.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
+	      part.mcID = mcparticles_ID[imc];
 	      mcpart.push_back(part);
 
 	      if(mcparticles_pdgID[imc] == 11)
@@ -156,6 +116,8 @@ void AnalysisDD4hep::process_event()
 						      mcparticles_psy[imc],
 						      mcparticles_psz[imc],
 						      sqrt(p_*p_ + mass_*mass_));
+
+		      electronID = mcparticles_ID[imc];
 		    }
 		}// if electron
 	    }//
@@ -164,137 +126,33 @@ void AnalysisDD4hep::process_event()
       // calculate true DIS kinematics
       kinTrue->CalculateDIS(reconMethod); // generated (truth)
 
-      // Loop over calorimeters
-      // fill cluster container
-      vector<Clusters*> v_ecal_clusters;
-      vector<Clusters*> v_hcal_clusters;
-
-      // HcalBarrel
-      for(int icl=0; icl<HcalBarrelClusters_x.GetSize(); icl++)
-	{
-	  Clusters* clus = new Clusters();
-	  clus->E = HcalBarrelClusters_energy[icl]; // use edep?
-	  clus->x = HcalBarrelClusters_x[icl]; // use edep?
-	  clus->y = HcalBarrelClusters_y[icl]; // use edep?
-	  clus->z = HcalBarrelClusters_z[icl]; // use edep?
-	  clus->theta = HcalBarrelClusters_theta[icl]; // use edep?
-	  clus->phi = HcalBarrelClusters_phi[icl]; // use edep?
-	  v_hcal_clusters.push_back(clus);
-	}
-      // HcalEndcapP
-      for(int icl=0; icl<HcalEndcapPClusters_x.GetSize(); icl++)
-	{
-	  Clusters* clus = new Clusters();
-	  clus->E = HcalEndcapPClusters_energy[icl]; // use edep?
-	  clus->x = HcalEndcapPClusters_x[icl]; // use edep?
-	  clus->y = HcalEndcapPClusters_y[icl]; // use edep?
-	  clus->z = HcalEndcapPClusters_z[icl]; // use edep?
-	  clus->theta = HcalEndcapPClusters_theta[icl]; // use edep?
-	  clus->phi = HcalEndcapPClusters_phi[icl]; // use edep?
-	  v_hcal_clusters.push_back(clus);
-	}
-
-      // HcalEndcapN
-      for(int icl=0; icl<HcalEndcapNClusters_x.GetSize(); icl++)
-	{
-	  Clusters* clus = new Clusters();
-	  clus->E = HcalEndcapNClusters_energy[icl]; // use edep?
-	  clus->x = HcalEndcapNClusters_x[icl]; // use edep?
-	  clus->y = HcalEndcapNClusters_y[icl]; // use edep?
-	  clus->z = HcalEndcapNClusters_z[icl]; // use edep?
-	  clus->theta = HcalEndcapNClusters_theta[icl]; // use edep?
-	  clus->phi = HcalEndcapNClusters_phi[icl]; // use edep?
-	  v_hcal_clusters.push_back(clus);
-	}
-
-      // Barrel
-      for(int icl=0; icl<EcalBarrelClusters_x.GetSize(); icl++)
-	{
-	  Clusters* clus = new Clusters();
-	  clus->E = EcalBarrelClusters_energy[icl]; // use edep?
-	  clus->x = EcalBarrelClusters_x[icl]; // use edep?
-	  clus->y = EcalBarrelClusters_y[icl]; // use edep?
-	  clus->z = EcalBarrelClusters_z[icl]; // use edep?
-	  clus->theta = EcalBarrelClusters_theta[icl]; // use edep?
-	  clus->phi = EcalBarrelClusters_phi[icl]; // use edep?
-	  v_ecal_clusters.push_back(clus);
-	}
-
-      // EndcapP
-      for(int icl=0; icl<EcalEndcapPClusters_x.GetSize(); icl++)
-	{
-	  Clusters* clus = new Clusters();
-	  clus->E = EcalEndcapPClusters_energy[icl]; // use edep?
-	  clus->x = EcalEndcapPClusters_x[icl]; // use edep?
-	  clus->y = EcalEndcapPClusters_y[icl]; // use edep?
-	  clus->z = EcalEndcapPClusters_z[icl]; // use edep?
-	  clus->theta = EcalEndcapPClusters_theta[icl]; // use edep?
-	  clus->phi = EcalEndcapPClusters_phi[icl]; // use edep?
-	  v_ecal_clusters.push_back(clus);
-	}
-
-      // EndcapN
-      for(int icl=0; icl<EcalEndcapNClusters_x.GetSize(); icl++)
-	{
-	  Clusters* clus = new Clusters();
-	  clus->E = EcalEndcapNClusters_energy[icl]; // use edep?
-	  clus->x = EcalEndcapNClusters_x[icl]; // use edep?
-	  clus->y = EcalEndcapNClusters_y[icl]; // use edep?
-	  clus->z = EcalEndcapNClusters_z[icl]; // use edep?
-	  clus->theta = EcalEndcapNClusters_theta[icl]; // use edep?
-	  clus->phi = EcalEndcapNClusters_phi[icl]; // use edep?
-	  v_ecal_clusters.push_back(clus);
-	}
-
-      // find scattered electron
-      int electron_index = find_electron(v_ecal_clusters, v_hcal_clusters, fEThreshold);
-      if(electron_index < 0)
-	{
-	  noele++;
-	  continue;
-	}
-
-      // Set electron kinematics
-      double electron_E     = v_ecal_clusters[electron_index]->E;
-      double electron_theta = v_ecal_clusters[electron_index]->theta;
-      double electron_phi = v_ecal_clusters[electron_index]->phi;
-      // FIXME: use track information?
-      double electron_pt    = electron_E * sin(electron_theta);
-      double electron_eta = -log(tan(electron_theta/2.0));
-
-      kin->vecElectron.SetPtEtaPhiM(
-				    electron_pt,
-				    electron_eta,
-				    electron_phi,
-				    Kinematics::ElectronMass()
-				    );
-
-      // track loop
+      // collect reconstructed particles
       std::vector<Particles> recopart;
       double hpx=0; 
       double hpy=0;
       double hpz=0;
       double hE=0;
-      for(int itrk=0; itrk<(int)ReconstructedParticles_pid.GetSize(); itrk++)
+      bool foundElectron = false;
+      for(int ireco=0; ireco<ReconstructedParticles_pid.GetSize(); ireco++)
 	{
-	  // FIXME: pid is using the true information
-	  // Add PID smearing
-	  int pid_ = ReconstructedParticles_pid[itrk];
+
+	  int pid_ = ReconstructedParticles_pid[ireco];
 
 	  // pid==0: reconstructed tracks with no matching truth pid
 	  if(pid_ == 0) continue;
+	  
 
 	  Particles part;
 	  part.pid = pid_;
+	  part.mcID = ReconstructedParticles_mcID[ireco];
+	  part.charge = ReconstructedParticles_charge[ireco];
 
-	  TLorentzVector v_temp;
 	  double reco_E = ReconstructedParticles_energy[itrk];
 	  double reco_px = ReconstructedParticles_p_x[itrk];
 	  double reco_py = ReconstructedParticles_p_y[itrk];
 	  double reco_pz = ReconstructedParticles_p_z[itrk];
 	  double reco_mass = ReconstructedParticles_mass[itrk];
 	  double reco_p = sqrt(reco_px*reco_px + reco_py*reco_py + reco_pz*reco_pz);
-	  v_temp.SetPxPyPzE(reco_px, reco_py, reco_pz, reco_E);
 
 	  part.vecPart.SetPxPyPzE(reco_px, 
 				  reco_py, 
@@ -302,11 +160,25 @@ void AnalysisDD4hep::process_event()
 				  sqrt(reco_p*reco_p + reco_mass*reco_mass));
 
 	  recopart.push_back(part);
+
 	  hpx += reco_px;
 	  hpy += reco_py;
 	  hpz += reco_pz;
 	  hE += reco_E;
-	}
+
+	  // find scattered electron
+	  if(part.mcID == electronID)
+	    {
+	      foundElectron = true;
+	      kin->vecElectron.SetPxPyPzE(reco_px,
+					  reco_py,
+					  reco_pz,
+					  sqrt(reco_p*reco_p + reco_mass*reco_mass));					  
+	      
+
+	    }	  
+	}//reco loop
+
       kin->vecHadron.SetPxPyPzE(hpx, hpy, hpz, hE);
       kin->vecHadron -= kin->vecElectron;
 
@@ -322,37 +194,36 @@ void AnalysisDD4hep::process_event()
       // calculate DIS kinematics
       kin->CalculateDIS(reconMethod); // reconstructed
 
-      for(auto trk : recopart)
+
+      // calculate hadron kinematics
+      for(auto part : recopart)
 	{
-	  int pid_ = trk.pid;
+	  int pid_ = part.pid;
+	  int mcid_ = part.mcID; 
 
-    // final state cut
-    // - check PID, to see if it's a final state we're interested in for
-    //   histograms; if not, proceed to next track
-    auto kv = PIDtoFinalState.find(pid_);
-    if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
-    if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
+	  // final state cut
+	  // - check PID, to see if it's a final state we're interested in for
+	  //   histograms; if not, proceed to next track
 
-	  kin->vecHadron = trk.vecPart;
-
+	  auto kv = PIDtoFinalState.find(pid_);
+	  if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
+	  if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
+	  
+	  kin->vecHadron = part.vecPart;
 	  kin->CalculateHadronKinematics();
-
-	  // find the true info
-	  double mineta = 4.0;
-	  for(int imc=0; imc<(int)mcpart.size(); imc++)
+	  
+	  // find the matching truth information
+	  for(auto imc : mcpart)
 	    {
-	      if(pid_ == mcpart[imc].pid)
+	      if(mcid_ == imc.mcID)
 		{
-		  double deta = abs(kin->vecHadron.Eta() - mcpart[imc].vecPart.Eta());
-		  if( deta < mineta )
-		    {
-		      mineta = deta;
-		      kinTrue->vecHadron = mcpart[imc].vecPart;
-		    }
+		  kinTrue->vecHadron = imc.vecPart;
+		  kinTrue->CalculateHadronKinematics();
+		  break;
 		}
 	    }
+	}//hadron loop
 
-	  kinTrue->CalculateHadronKinematics();
 
     // asymmetry injection
     //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
