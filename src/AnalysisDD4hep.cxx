@@ -61,7 +61,7 @@ void AnalysisDD4hep::process_event()
   TTreeReaderArray<Double_t> mcparticles_mass(tr,      "mcparticles.mass");
 
   // Reco
-  TTreeReaderArray<int>   ReconstructedParticles_pid(tr,     "ReconstructedParticles.pid");
+  TTreeReaderArray<Int_t>   ReconstructedParticles_pid(tr,   "ReconstructedParticles.pid");
   TTreeReaderArray<float> ReconstructedParticles_energy(tr,  "ReconstructedParticles.energy");
   TTreeReaderArray<float> ReconstructedParticles_p_x(tr,     "ReconstructedParticles.p.x");
   TTreeReaderArray<float> ReconstructedParticles_p_y(tr,     "ReconstructedParticles.p.y");
@@ -135,7 +135,6 @@ void AnalysisDD4hep::process_event()
       bool foundElectron = false;
       for(int ireco=0; ireco<ReconstructedParticles_pid.GetSize(); ireco++)
 	{
-
 	  int pid_ = ReconstructedParticles_pid[ireco];
 
 	  // pid==0: reconstructed tracks with no matching truth pid
@@ -229,7 +228,6 @@ void AnalysisDD4hep::process_event()
 	    }
 	}//hadron loop
 
-
     // asymmetry injection
     //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
     //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
@@ -247,9 +245,8 @@ void AnalysisDD4hep::process_event()
     // - `activeEvent` is only true if at least one bin gets filled for this track
     // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDelphes)
     if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
-
-	}//trk loop
-
+    
+    
     }// tree reader loop
 
   cout << "Total no scattered electron found: " << noele << endl;
