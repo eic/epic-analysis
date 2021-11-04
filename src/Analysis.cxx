@@ -67,12 +67,14 @@ Analysis::Analysis(
   finalStateToTitle.insert(std::pair<TString,TString>("pimTrack","#pi^{-} tracks"));
   finalStateToTitle.insert(std::pair<TString,TString>("KpTrack","K^{+} tracks"));
   finalStateToTitle.insert(std::pair<TString,TString>("KmTrack","K^{-} tracks"));
+  finalStateToTitle.insert(std::pair<TString,TString>("pTrack","p^{+} tracks"));
   finalStateToTitle.insert(std::pair<TString,TString>("jet","jets"));
   // - PID -> finalState ID
   PIDtoFinalState.insert(std::pair<int, TString>( 211,"pipTrack"));
   PIDtoFinalState.insert(std::pair<int, TString>(-211,"pimTrack"));
   PIDtoFinalState.insert(std::pair<int, TString>( 321,"KpTrack"));
   PIDtoFinalState.insert(std::pair<int, TString>(-321,"KmTrack"));
+  PIDtoFinalState.insert(std::pair<int, TString>(2212,"pTrack"));
 
 
   // kinematics reconstruction methods
