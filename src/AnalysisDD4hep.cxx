@@ -61,7 +61,7 @@ void AnalysisDD4hep::process_event()
   TTreeReaderArray<Double_t> mcparticles_mass(tr,      "mcparticles.mass");
 
   // Reco
-  TTreeReaderArray<Int_t>   ReconstructedParticles_pid(tr,   "ReconstructedParticles.pid");
+  TTreeReaderArray<Int_t> ReconstructedParticles_pid(tr,   "ReconstructedParticles.pid");
   TTreeReaderArray<float> ReconstructedParticles_energy(tr,  "ReconstructedParticles.energy");
   TTreeReaderArray<float> ReconstructedParticles_p_x(tr,     "ReconstructedParticles.p.x");
   TTreeReaderArray<float> ReconstructedParticles_p_y(tr,     "ReconstructedParticles.p.y");
@@ -70,10 +70,12 @@ void AnalysisDD4hep::process_event()
   TTreeReaderArray<float> ReconstructedParticles_th(tr,      "ReconstructedParticles.direction.theta");
   TTreeReaderArray<float> ReconstructedParticles_phi(tr,     "ReconstructedParticles.direction.phi");
   TTreeReaderArray<float> ReconstructedParticles_mass(tr,    "ReconstructedParticles.mass");
-  TTreeReaderArray<int>   ReconstructedParticles_charge(tr,  "ReconstructedParticles.charge");
-  TTreeReaderArray<float> ReconstructedParticles_mcID(tr,    "ReconstructedParticles.mcID.value");
+  TTreeReaderArray<short> ReconstructedParticles_charge(tr,  "ReconstructedParticles.charge");
+  TTreeReaderArray<int>   ReconstructedParticles_mcID(tr,    "ReconstructedParticles.mcID.value");
 
   TTreeReader::EEntryStatus entrystats = tr.SetEntry(0);
+
+  CalculateEventQ2Weights();
 
   int noele = 0;
   // event loop =========================================================
@@ -132,7 +134,7 @@ void AnalysisDD4hep::process_event()
       double hpy=0;
       double hpz=0;
       double hE=0;
-      bool foundElectron = false;
+      int foundElectron = 0;
       for(int ireco=0; ireco<ReconstructedParticles_pid.GetSize(); ireco++)
 	{
 	  int pid_ = ReconstructedParticles_pid[ireco];
@@ -166,21 +168,22 @@ void AnalysisDD4hep::process_event()
 	  hE += reco_E;
 
 	  // find scattered electron
-	  if(part.mcID == electronID)
+	  if(pid_ == 11 && part.mcID == electronID)
 	    {
-	      foundElectron = true;
+	      foundElectron = 1;
 	      kin->vecElectron.SetPxPyPzE(reco_px,
 					  reco_py,
 					  reco_pz,
-					  sqrt(reco_p*reco_p + reco_mass*reco_mass));					  
-	      
-
+					  sqrt(reco_p*reco_p + reco_mass*reco_mass));
 	    }	  
 	}//reco loop
 
-      if(!foundElectron){
+      // skip the event if the scattered electron is not found
+      // and we need it to calculate the DIS kinematics
+      if(foundElectron < 1){
 	noele++;
-	continue;
+	if(reconMethod != "JB")
+	  continue;
       }
 
       kin->vecHadron.SetPxPyPzE(hpx, hpy, hpz, hE);
@@ -198,7 +201,6 @@ void AnalysisDD4hep::process_event()
       // calculate DIS kinematics
       kin->CalculateDIS(reconMethod); // reconstructed
 
-
       // calculate hadron kinematics
       for(auto part : recopart)
 	{
@@ -208,7 +210,6 @@ void AnalysisDD4hep::process_event()
 	  // final state cut
 	  // - check PID, to see if it's a final state we're interested in for
 	  //   histograms; if not, proceed to next track
-
 	  auto kv = PIDtoFinalState.find(pid_);
 	  if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
 	  if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
@@ -217,38 +218,57 @@ void AnalysisDD4hep::process_event()
 	  kin->CalculateHadronKinematics();
 	  
 	  // find the matching truth information
-	  for(auto imc : mcpart)
-	    {
-	      if(mcid_ == imc.mcID)
-		{
-		  kinTrue->vecHadron = imc.vecPart;
-		  kinTrue->CalculateHadronKinematics();
-		  break;
-		}
-	    }
+	  // using mcID
+	  if(mcid_ > 0){
+	    for(auto imc : mcpart)
+	      {
+		if(mcid_ == imc.mcID)
+		  {
+		    kinTrue->vecHadron = imc.vecPart;
+		    break;
+		  }
+	      }
+	  }
+	  else{
+	    // give it another shot
+	    double mineta = 4.0;
+	    for(int imc=0; imc<(int)mcpart.size(); imc++)
+	      {
+		if(pid_ == mcpart[imc].pid)
+		  {
+		    double deta = abs(kin->vecHadron.Eta() - mcpart[imc].vecPart.Eta());
+		    if( deta < mineta )
+		      {
+			mineta = deta;
+			kinTrue->vecHadron = mcpart[imc].vecPart;
+		      }
+		  }
+	      }
+	  }
+
+	  kinTrue->CalculateHadronKinematics();
 	}//hadron loop
+      
+      // asymmetry injection
+      //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
+      //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
+      //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
-    // asymmetry injection
-    //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
-    //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
-    //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
+      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
+      wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+      wTrackTotal += wTrack;
 
-    Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
-    wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
-    wTrackTotal += wTrack;
-
-    // fill track histograms in activated bins
-    FillHistosTracks();
-
-    // fill simple tree
-    // - not binned
-    // - `activeEvent` is only true if at least one bin gets filled for this track
-    // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDelphes)
-    if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
-    
-    
+      // fill track histograms in activated bins
+      FillHistosTracks();
+      
+      // fill simple tree
+      // - not binned
+      // - `activeEvent` is only true if at least one bin gets filled for this track
+      // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDelphes)
+      if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
+      
     }// tree reader loop
-
+  
   cout << "Total no scattered electron found: " << noele << endl;
   cout << "end event loop" << endl;
   // event loop end =========================================================                 
