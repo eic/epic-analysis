@@ -12,6 +12,8 @@
 #include "TROOT.h"
 #include "TStyle.h"
 #include "TGaxis.h"
+#include "THStack.h"
+#include "TLegend.h"
 
 // largex-eic
 #include "Histos.h"
@@ -70,6 +72,14 @@ class PostProcessor : public TNamed
     void DrawInBins(
         TString outName,
         std::vector<std::vector<Histos*>>& histList, TString histName,
+        TString var1name, int nvar1, double var1low, double var1high, bool var1log,
+        TString var2name, int nvar2, double var2low, double var2high, bool var2log,
+        bool intlog1=false, bool intlog2=false, bool intgrid1=false, bool intgrid2=false
+        );
+
+    void DrawInBinsTogether(
+        TString outName,
+        std::vector<std::vector<Histos*>>& histList, TString histNames[], TString labels[], int nNames,
         TString var1name, int nvar1, double var1low, double var1high, bool var1log,
         TString var2name, int nvar2, double var2low, double var2high, bool var2log,
         bool intlog1=false, bool intlog2=false, bool intgrid1=false, bool intgrid2=false

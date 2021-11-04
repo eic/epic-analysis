@@ -437,25 +437,29 @@ void PostProcessor::DrawInBins(
     for(int j = 0; j < nvar2; j++){
       //Histos *H = (Histos*) infile->Get(histList[i][j]);
       Histos *H = histList[i][j];
+      // INTRODUCE LOOP OVER HISTNAMES HERE -> TURN INTO MULTIGRAPHS AND SHOW PERSPECTIVE WISE
       TH1 *hist = H->Hist(histName);
       histArray[i][j] = hist;
       hist->SetTitle("");
-      //hist->GetXaxis()->SetTitle("");
-      //hist->GetYaxis()->SetTitle("");
-      //hist->GetXaxis()->SetLabelSize(0);
-      //hist->GetYaxis()->SetLabelSize(0);
+      // //hist->GetXaxis()->SetTitle("");
+      // //hist->GetYaxis()->SetTitle("");
+      // //hist->GetXaxis()->SetLabelSize(0);
+      // //hist->GetYaxis()->SetLabelSize(0);
       hist->GetXaxis()->SetTitleSize(0.1);
       hist->GetXaxis()->SetTitleOffset(0.5);
       hist->GetXaxis()->SetNdivisions(8);
       hist->GetXaxis()->SetLabelSize(0.06);
+      hist->GetXaxis()->CenterTitle();
+      hist->GetXaxis()->SetLabelOffset(0.02);
       hist->GetYaxis()->SetRangeUser(-15,15);//TODO: CHECK THIS IS REASONABLE ALSO WHAT ABOUT ERROR BARS???
       hist->GetYaxis()->SetNdivisions(8);
       hist->GetYaxis()->SetLabelSize(0.06);
-      // for(int k = 0; k < i; k++){
-      //   for(int l = 0; l < j; k++){
-      //     histArray[k][l]->GetYaxis()->SetRangeUser(TMath::Min(yMin,hist->GetYaxis()->GetMinimum(),TMath::Max(yMax,hist->GetYaxis()->GetMaximum())));
-      //   }
-      // }
+      hist->GetYaxis()->SetLabelOffset(0.02);
+      // // for(int k = 0; k < i; k++){
+      // //   for(int l = 0; l < j; k++){
+      // //     histArray[k][l]->GetYaxis()->SetRangeUser(TMath::Min(yMin,hist->GetYaxis()->GetMinimum(),TMath::Max(yMax,hist->GetYaxis()->GetMaximum())));
+      // //   }
+      // // }
 
       mainpad->cd((nvar2-j-1)*nvar1 + i + 1);
       gPad->SetLogx(intlog1);
@@ -479,6 +483,191 @@ void PostProcessor::DrawInBins(
         hist->Draw(drawStr);
         // TF1 *zeroF = new TF1("zeroF","0",0,1); //TODO: Add optional switch for this?
         // zeroF->Draw("SAME"); //TODO: Added zero line
+        if(drawpid){
+          lDIRClow->Draw();
+          lDIRC->Draw();
+          lmRICH->Draw();
+          lDRICH->Draw();
+        }
+      }
+    };    
+  };
+  canv->cd();
+
+  TPad *newpad1 = new TPad("newpad1","full pad",0,0,1,1);
+  TPad *newpad2 = new TPad("newpad2","full pad",0,0,1,1);
+  newpad1->SetFillStyle(4000);
+  newpad1->Draw();
+  newpad2->SetFillStyle(4000);
+  newpad2->Draw();
+
+  TString xopt, yopt;
+  if(var1log) xopt = "GS";
+  else xopt = "S";
+  if(var2log) yopt = "GS";
+  else yopt = "S";
+
+  TGaxis *xaxis = new TGaxis(xaxisx1,xaxisy,xaxisx2,xaxisy,var1low,var1high,510,xopt);
+  TGaxis *yaxis = new TGaxis(yaxisx,yaxisy1,yaxisx,yaxisy2,var2low,var2high,510,yopt);
+  xaxis->SetTitle(var1name);
+  xaxis->SetName("xaxis");
+  xaxis->SetTitleSize(0.02);
+  xaxis->SetTextFont(40);
+  xaxis->SetLabelSize(0.02);
+  xaxis->SetTickSize(0.02);
+
+  yaxis->SetTitle(var2name);
+  yaxis->SetTitleSize(0.02);
+  yaxis->SetName("yaxis");
+  yaxis->SetTextFont(40);
+  yaxis->SetLabelSize(0.02);
+  yaxis->SetTickSize(0.02);
+
+  newpad1->cd();
+  yaxis->Draw();
+  newpad2->cd();
+  xaxis->Draw();
+
+
+  //  canv->Write();
+  canv->Print(pngDir+"/"+canvN+".png");
+  canv->Print(pngDir+"/"+canvN+".pdf");
+  outfile->cd("/");
+  canv->Write();
+  for(int i = 0; i <nvar1; i++){
+    for(int j = 0; j < nvar2; j++){
+      histArray[i][j]->Write();
+    }
+  }
+};
+
+//=========================================================================
+/* ALGORITHM: draw histograms from different bins in their respective bins
+on axis of bin variables, e.g. Q2 vs x.
+*/
+void PostProcessor::DrawInBinsTogether(
+    TString outName,    
+    std::vector<std::vector<Histos*>>& histList,
+    TString histNames[], TString labels[], int nNames,
+    TString var1name, int nvar1, double var1low, double var1high, bool var1log,
+    TString var2name, int nvar2, double var2low, double var2high, bool var2log,
+    bool intlog1, bool intlog2, bool intgrid1, bool intgrid2 // log option for small plots
+    
+){
+  // default values set for nvar1==nvar2
+  int canvx = 933;//700;
+  int canvy = 800;//600;//TODO: check new numbers are better?
+  double botmargin = 0.2;
+  double leftmargin = 0.2;
+  double xaxisy = 0.04;
+  double xaxisx1 = 0.08;
+  double xaxisx2 = 0.97;
+  double yaxisx = 0.04;
+  double yaxisy1 = 0.085;
+  double yaxisy2 = 0.97;
+  if(nvar1 > nvar2){
+    // different canvas sizing/axis position for unequal binning
+    canvx = 1100;
+    canvy = 700;
+    xaxisx1 = 0.075;
+    xaxisx2 = 0.975;
+    yaxisy1 = 0.08;
+  };
+
+  TString canvN = "canv_"+outName+"_all__";
+  for (int k=0; k<nNames; k++){canvN += histNames[k]+"__";}
+  TCanvas *canv = new TCanvas(canvN,canvN, canvx, canvy);
+  TPad *mainpad = new TPad("mainpad", "mainpad", 0.07, 0.07, 0.98, 0.98);
+
+  mainpad->SetFillStyle(4000);
+  mainpad->Divide(nvar1,nvar2,0,0);
+  mainpad->Draw();
+  TLine * lDIRC = new TLine(6,-1,6,1);
+  TLine * lDIRClow = new TLine(0.5,-1,0.5,1);
+  TLine * lmRICH = new TLine(2,-1,2,-4);
+  TLine * lDRICH = new TLine(2.5,1,2.5,4);
+  lDIRC->SetLineColor(kRed);
+  lDIRClow->SetLineColor(kRed);
+  lmRICH->SetLineColor(kRed);
+  lDRICH->SetLineColor(kRed);
+  THStack* histArray[nvar1][nvar2];
+  int drawpid = 0;
+  outfile->cd("/");
+  canv->Write();
+  // get histograms from Histos 2D vector
+  for(int i = 0; i < nvar1; i++){
+    for(int j = 0; j < nvar2; j++){
+      //Histos *H = (Histos*) infile->Get(histList[i][j]);
+      Histos *H = histList[i][j];
+
+      THStack *hist = new THStack();
+      TLegend *lg = new TLegend(0.1,0.1,0.9,0.9);
+      lg->SetTextSize(0.2);
+
+      for (int k=0; k<nNames; k++) {
+        TH1 *subHist = (TH1*)H->Hist(histNames[k])->Clone();
+        subHist->SetTitle("");
+        //subHist->GetXaxis()->SetTitle("");
+        //subHist->GetYaxis()->SetTitle("");
+        //subHist->GetXaxis()->SetLabelSize(0);
+        //subHist->GetYaxis()->SetLabelSize(0);
+
+        subHist->GetXaxis()->SetTitleSize(0.1);
+        subHist->GetXaxis()->SetTitleOffset(0.5);
+        subHist->GetXaxis()->SetNdivisions(8);
+        subHist->GetXaxis()->SetLabelSize(0.06);
+        subHist->GetXaxis()->CenterTitle();
+        subHist->GetXaxis()->SetLabelOffset(0.02);
+        subHist->GetYaxis()->SetRangeUser(-15,15);//TODO: CHECK THIS IS REASONABLE ALSO WHAT ABOUT ERROR BARS???
+        subHist->GetYaxis()->SetNdivisions(8);
+        subHist->GetYaxis()->SetLabelSize(0.06);
+        subHist->GetYaxis()->SetLabelOffset(0.02);
+
+        subHist->SetTitle(histNames[k]);
+        subHist->SetMarkerStyle(k+24);
+        subHist->SetMarkerColor(k+2);
+        if (k+2>=5) subHist->SetMarkerColor(k+3); //NOTE: 5 is yellow: very hard to see.
+        subHist->SetMarkerSize(0.5);//NOTE: Remember these will be small plots so keep the binning small and the markers big
+        if ( subHist->GetEntries() > 10 ) {
+          hist->Add(subHist);
+          std::cout<<"DEBUGGING: Added hist:"<<histNames[k]<<std::endl;
+          std::cout<<"\tmarker style = "<<subHist->GetMarkerStyle()<<std::endl;
+          std::cout<<"\tmarker size  = "<<subHist->GetMarkerSize()<<std::endl;
+          std::cout<<"\tmarker color = "<<subHist->GetMarkerColor()<<std::endl;
+
+          if (i==0 && j==0){
+            lg->AddEntry(subHist,labels[k],"p");//NOTE: Only grabs hists that are in 0,0 bin
+          }
+
+          }
+      }
+      histArray[i][j] = hist;
+
+      mainpad->cd((nvar2-j-1)*nvar1 + i + 1);
+      gPad->SetLogx(intlog1);
+      gPad->SetLogy(intlog2);
+      gPad->SetGridy(intgrid2);
+      gPad->SetGridx(intgrid1);
+      TString drawStr = "";
+      switch(1) {//TODO: figure out how to get THStack dimension? //can't use hist->GetHistogram()->GetDimension()
+        case 1:
+          drawStr = "hist p nostack"/*"ex0 p nostack"*/;//NOTE: nostackb will just throw an error, don't use
+          break;
+        case 2:
+          drawStr = "COLZ";
+          break;
+        case 3:
+          drawStr = "BOX";
+          break;
+      };
+      //hist->Write();
+      if( hist->GetNhists() > 0 ) {
+        hist->Draw(drawStr);
+        if (i==0 && j==0) {
+          mainpad->cd(1);// Upper left corner pad
+          lg->Draw();
+          mainpad->cd((nvar2-j-1)*nvar1 + i + 1);// Return to original pad
+        }
         if(drawpid){
           lDIRClow->Draw();
           lDIRC->Draw();

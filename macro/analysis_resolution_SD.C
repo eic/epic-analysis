@@ -17,7 +17,7 @@ void analysis_resolution_SD(
       crossingAngle,
       outfilePrefix
       );
-
+  A->NBINS = 5; // use this to set the number of bins along each axis for each overall bin in e.g. x and Q2
   //A->maxEvents = 30000; // use this to limit the number of events
   A->SetReconMethod("Ele"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
