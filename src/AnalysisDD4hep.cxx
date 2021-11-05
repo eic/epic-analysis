@@ -325,6 +325,7 @@ void AnalysisDD4hep::process_event()
     if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
     if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
 
+    kin->hadPID = trk.pid;
 	  kin->vecHadron = trk.vecPart;
 
 	  kin->CalculateHadronKinematics();
@@ -339,6 +340,7 @@ void AnalysisDD4hep::process_event()
 		  if( deta < mineta )
 		    {
 		      mineta = deta;
+          kinTrue->hadPID = mcpart[imc].pid;
 		      kinTrue->vecHadron = mcpart[imc].vecPart;
 		    }
 		}

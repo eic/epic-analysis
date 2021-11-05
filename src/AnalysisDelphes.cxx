@@ -169,6 +169,7 @@ void AnalysisDelphes::Execute() {
       int parentPID = (parentParticle->PID); // TODO: this is not used yet...
 
       // calculate hadron kinematics
+      kin->hadPID = pid;
       kin->vecHadron.SetPtEtaPhiM(
           trk->PT,
           trk->Eta,
@@ -176,12 +177,13 @@ void AnalysisDelphes::Execute() {
           trk->Mass /* TODO: do we use track mass here ?? */
           );
       GenParticle* trkPart = (GenParticle*)trk->Particle.GetObject();
+      kinTrue->hadPID = pid;
       kinTrue->vecHadron.SetPtEtaPhiM(
           trkPart->PT,
           trkPart->Eta,
           trkPart->Phi,
           trkPart->Mass /* TODO: do we use track mass here ?? */
-          );      
+          );
       
       kin->CalculateHadronKinematics();
       kinTrue->CalculateHadronKinematics();

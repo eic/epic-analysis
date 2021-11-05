@@ -1,7 +1,5 @@
 #include "Weights.h"
 
-#include <TMath.h>
-
 using std::vector;
 
 ClassImp(Weights)
@@ -12,13 +10,13 @@ ClassImp(WeightsProduct)
 ClassImp(WeightsSum)
 
 Double_t WeightsSivers::GetWeight(const Kinematics& kin) const {
-    return kin.pol * kin.tSpin
+    return kin.polT * kin.tSpin
         * this->Asymmetry(kin.x, kin.z, kin.Q2, kin.pT)
         * TMath::Sin(kin.phiH - kin.phiS);
 }
 
 Double_t WeightsCollins::GetWeight(const Kinematics& kin) const {
-    return kin.pol * kin.tSpin * kin.depolP1
+    return kin.polT * kin.tSpin * kin.depolP1
         * this->Asymmetry(kin.x, kin.z, kin.Q2, kin.pT)
         * TMath::Sin(kin.phiH + kin.phiS);
 }
