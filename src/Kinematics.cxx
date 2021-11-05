@@ -52,9 +52,12 @@ Kinematics::Kinematics(
 
   // default transverse spin (needed for phiS calculation)
   tSpin = 1; // +1=spin-up, -1=spin-down
+  lSpin = 1;
 
   // default proton polarization
-  pol = 0.80;
+  polT = 0.80;
+  polL = 0.;
+  polBeam = 0.;
 
   // random number generator (for asymmetry injection
   RNG = new TRandomMixMax(91874); // (TODO: fixed seed?)
@@ -265,6 +268,7 @@ void Kinematics::CalculateHadronKinematics() {
       ));
   // phiS: calculated in ion rest frame
   tSpin = RNG->Uniform() < 0.5 ? 1 : -1;
+  lSpin = RNG->Uniform() < 0.5 ? 1 : -1;
   vecSpin.SetXYZT(0,1,0,0); // Pauli-Lubanski pseudovector, in lab frame
   this->BoostToIonFrame(vecSpin,IvecSpin); // boost to ion rest frame
   phiS = AdjAngle(PlaneAngle(
@@ -804,7 +808,7 @@ void Kinematics::InjectFakeAsymmetry() {
   asymInject += -ampVal[1]/0.2 * x * moduVal[1];
   //asymInject = ampVal[0]*moduVal[0] + ampVal[1]*moduVal[1]; // constant
   // apply polarization
-  asymInject *= pol;
+  asymInject *= polT;
   // generate random number in [0,1]
   RN = RNG->Uniform();
   tSpin = (RN<0.5*(1+asymInject)) ? 1 : -1;

@@ -52,6 +52,7 @@ Analysis::Analysis(
   availableBinSchemes.insert(std::pair<TString,TString>("phiH","#phi_{h}"));
   availableBinSchemes.insert(std::pair<TString,TString>("phiS","#phi_{S}"));
   availableBinSchemes.insert(std::pair<TString,TString>("tSpin","spin"));
+  availableBinSchemes.insert(std::pair<TString,TString>("lSpin","spinL"));
   /* jets */
   availableBinSchemes.insert(std::pair<TString,TString>("ptJet", "jet p_{T}"));
   availableBinSchemes.insert(std::pair<TString,TString>("zJet", "jet z"));
@@ -534,6 +535,7 @@ void Analysis::FillHistosTracks() {
   valueMap.insert(std::pair<TString,Double_t>( "phiH", kin->phiH ));
   valueMap.insert(std::pair<TString,Double_t>( "phiS", kin->phiS ));
   valueMap.insert(std::pair<TString,Double_t>( "tSpin", (Double_t)kin->tSpin ));
+  valueMap.insert(std::pair<TString,Double_t>( "lSpin", (Double_t)kin->lSpin ));
 
   // check bins
   // - activates HistosDAG bin nodes which contain this track
