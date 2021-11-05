@@ -276,30 +276,67 @@ struct ProkudinImpl {
 
 }
 
-struct ProkudinSfSet::Impl {
+struct ProkudinWeights::Impl {
 	ProkudinImpl impl;
 };
 
-ProkudinSfSet::ProkudinSfSet(ProkudinSfSet&& other) noexcept :
+ProkudinWeights::ProkudinWeights(ProkudinWeights&& other) noexcept :
 		_impl(nullptr) {
 	std::swap(_impl, other._impl);
 }
-ProkudinSfSet& ProkudinSfSet::operator=(ProkudinSfSet&& other) noexcept {
+ProkudinWeights& ProkudinWeights::operator=(ProkudinWeights&& other) noexcept {
 	std::swap(_impl, other._impl);
 	return *this;
 }
 
-ProkudinSfSet::ProkudinSfSet() : SfSet() {
+ProkudinWeights::ProkudinWeights() : Weights() {
 	_impl = new Impl();
 }
 
-ProkudinSfSet::~ProkudinSfSet() {
+ProkudinWeights::~ProkudinWeights() {
 	if (_impl != nullptr) {
 		delete _impl;
 	}
 }
 
-double ProkudinSfSet::F_UUT(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::GetWeight(const Kinematics& kin) const {
+	Int_t h = kin.hadPID;
+	double x = kin.x;
+	double z = kin.z;
+	double Q2 = kin.Q2;
+	double pT2 = kin.pT * kin.pT;
+	double p1 = kin.depolP1;
+	double p2 = kin.depolP2;
+	double p3 = kin.depolP3;
+	double p4 = kin.depolP4;
+	double phiH = kin.phiH;
+	double phiS = kin.phiS;
+	double polT = kin.polT*kin.tSpin;
+	double polL = kin.polL*kin.lSpin;
+	double polBeam = kin.polBeam;
+	double asym = (
+		TMath::Cos(2*phiH)*p1*F_UU_cos_2phih(h,x,z,Q2,pT2)
+		+ polL*TMath::Sin(2*phiH)*p1*F_UL_sin_2phih(h,x,z,Q2,pT2)
+		+ polBeam*polL*p2*F_LL(h,x,z,Q2,pT2)
+		+ polT*TMath::Sin(phiH-phiS)*F_UTT_sin_phih_m_phis(h,x,z,Q2,pT2)
+		+ polT*TMath::Sin(phiH+phiS)*p1*F_UT_sin_phih_p_phis(h,x,z,Q2,pT2)
+		+ polT*TMath::Sin(3*phiH-phiS)*p1*F_UT_sin_3phih_m_phis(h,x,z,Q2,pT2)
+		+ polBeam*polT*TMath::Cos(phiH - phiS)*p2*F_LT_cos_phih_m_phis(h,x,z,Q2,pT2)
+		+ TMath::Cos(phiH)*p3*F_UU_cos_phih(h,x,z,Q2,pT2)
+		+ polL*TMath::Sin(phiH)*p3*F_UL_sin_phih(h,x,z,Q2,pT2)
+		+ polBeam*polL*TMath::Cos(phiH)*p4*F_LL_cos_phih(h,x,z,Q2,pT2)
+		+ polT*TMath::Sin(2*phiH-phiS)*p3*F_UT_sin_2phih_m_phis(h,x,z,Q2,pT2)
+		+ polT*TMath::Sin(phiS)*p3*F_UT_sin_phis(h,x,z,Q2,pT2)
+		+ polBeam*polT*TMath::Cos(phiS)*p4*F_LT_cos_phis(h,x,z,Q2,pT2)
+		+ polBeam*polT*TMath::Cos(2*phiH-phiS)*p4*F_LT_cos_2phih_m_phis(h,x,z,Q2,pT2))
+			/ F_UUT(h,x,z,Q2,pT2);
+	if (!std::isfinite(asym) || std::abs(asym) > 1.) {
+		asym = 0.;
+	}
+	return 1. + asym;
+}
+
+double ProkudinWeights::F_UUT(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.5.1a].
 	double result = 0.;
 	for (unsigned fl = 0; fl < NUM_FLAVORS; ++fl) {
@@ -308,7 +345,7 @@ double ProkudinSfSet::F_UUT(Hadron h, double x, double z, double Q_sq, double ph
 	double l = lambda(z, F1_MEAN_K_PERP_SQ, D1_MEAN_P_PERP_SQ);
 	return G(ph_t_sq, l)*result;
 }
-double ProkudinSfSet::F_UU_cos_phih(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::F_UU_cos_phih(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.7.9a].
 	double Q = std::sqrt(Q_sq);
 	double ph_t = std::sqrt(ph_t_sq);
@@ -320,7 +357,7 @@ double ProkudinSfSet::F_UU_cos_phih(Hadron h, double x, double z, double Q_sq, d
 	double l = lambda(z, F1_MEAN_K_PERP_SQ, D1_MEAN_P_PERP_SQ);
 	return -2.*F1_MEAN_K_PERP_SQ/Q*ph_t*(z/l)*G(ph_t_sq, l)*result;
 }
-double ProkudinSfSet::F_UU_cos_2phih(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::F_UU_cos_2phih(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.5.9a].
 	double result = 0.;
 	for (unsigned fl = 0; fl < NUM_FLAVORS; ++fl) {
@@ -330,7 +367,7 @@ double ProkudinSfSet::F_UU_cos_2phih(Hadron h, double x, double z, double Q_sq, 
 	return 4.*M*mh*ph_t_sq*sq(z/l)*G(ph_t_sq, l)*result;
 }
 
-double ProkudinSfSet::F_UL_sin_phih(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::F_UL_sin_phih(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.7.6a].
 	double Q = std::sqrt(Q_sq);
 	double ph_t = std::sqrt(ph_t_sq);
@@ -343,7 +380,7 @@ double ProkudinSfSet::F_UL_sin_phih(Hadron h, double x, double z, double Q_sq, d
 	double l = lambda(z, H1_MEAN_K_PERP_SQ, COLLINS_MEAN_P_PERP_SQ);
 	return -8.*M*mh*z*ph_t/(Q*l)*G(ph_t_sq, l)*result;
 }
-double ProkudinSfSet::F_UL_sin_2phih(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::F_UL_sin_2phih(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.6.2a].
 	double result = 0.;
 	for (unsigned fl = 0; fl < NUM_FLAVORS; ++fl) {
@@ -354,7 +391,7 @@ double ProkudinSfSet::F_UL_sin_2phih(Hadron h, double x, double z, double Q_sq, 
 	return 4.*M*mh*ph_t_sq*sq(z/l)*G(ph_t_sq, l)*result;
 }
 
-double ProkudinSfSet::F_UTT_sin_phih_m_phis(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::F_UTT_sin_phih_m_phis(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.5.7a].
 	double ph_t = std::sqrt(ph_t_sq);
 	double result = 0.;
@@ -364,7 +401,7 @@ double ProkudinSfSet::F_UTT_sin_phih_m_phis(Hadron h, double x, double z, double
 	double l = lambda(z, SIVERS_MEAN_K_PERP_SQ, D1_MEAN_P_PERP_SQ);
 	return -2.*M*z*ph_t/l*G(ph_t_sq, l)*result;
 }
-double ProkudinSfSet::F_UT_sin_2phih_m_phis(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::F_UT_sin_2phih_m_phis(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.7.8a].
 	double Q = std::sqrt(Q_sq);
 	double result_1 = 0.;
@@ -388,7 +425,7 @@ double ProkudinSfSet::F_UT_sin_2phih_m_phis(Hadron h, double x, double z, double
 		SIVERS_MEAN_K_PERP_SQ*sq(z/l_1)*G(ph_t_sq, l_1)*result_1
 		- 2.*M*mh*sq(z/l_2)*G(ph_t_sq, l_2)*result_2);
 }
-double ProkudinSfSet::F_UT_sin_3phih_m_phis(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::F_UT_sin_3phih_m_phis(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.5.10a].
 	double ph_t = std::sqrt(ph_t_sq);
 	double result = 0.;
@@ -398,7 +435,7 @@ double ProkudinSfSet::F_UT_sin_3phih_m_phis(Hadron h, double x, double z, double
 	double l = lambda(z, PRETZ_MEAN_K_PERP_SQ, COLLINS_MEAN_P_PERP_SQ);
 	return 2.*sq(M)*mh*std::pow(z*ph_t/l, 3)*G(ph_t_sq, l)*result;
 }
-double ProkudinSfSet::F_UT_sin_phis(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::F_UT_sin_phis(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.7.7a].
 	double Q = std::sqrt(Q_sq);
 	double result = 0.;
@@ -409,7 +446,7 @@ double ProkudinSfSet::F_UT_sin_phis(Hadron h, double x, double z, double Q_sq, d
 	double l = lambda(z, PRETZ_MEAN_K_PERP_SQ, COLLINS_MEAN_P_PERP_SQ);
 	return 8.*sq(M)*mh*sq(z)/(Q*l)*(1. - ph_t_sq/l)*G(ph_t_sq, l)*result;
 }
-double ProkudinSfSet::F_UT_sin_phih_p_phis(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::F_UT_sin_phih_p_phis(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.5.8a].
 	double ph_t = std::sqrt(ph_t_sq);
 	double result = 0.;
@@ -420,7 +457,7 @@ double ProkudinSfSet::F_UT_sin_phih_p_phis(Hadron h, double x, double z, double 
 	return 2.*mh*z*ph_t/l*G(ph_t_sq, l)*result;
 }
 
-double ProkudinSfSet::F_LL(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::F_LL(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.5.5a].
 	double result = 0.;
 	for (unsigned fl = 0; fl < NUM_FLAVORS; ++fl) {
@@ -429,7 +466,7 @@ double ProkudinSfSet::F_LL(Hadron h, double x, double z, double Q_sq, double ph_
 	double l = lambda(z, G1_MEAN_K_PERP_SQ, D1_MEAN_P_PERP_SQ);
 	return G(ph_t_sq, l)*result;
 }
-double ProkudinSfSet::F_LL_cos_phih(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::F_LL_cos_phih(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.7.5a].
 	double Q = std::sqrt(Q_sq);
 	double ph_t = std::sqrt(ph_t_sq);
@@ -443,7 +480,7 @@ double ProkudinSfSet::F_LL_cos_phih(Hadron h, double x, double z, double Q_sq, d
 	return -2.*G1_MEAN_K_PERP_SQ*z*ph_t/(Q*l)*G(ph_t_sq, l)*result;
 }
 
-double ProkudinSfSet::F_LT_cos_phih_m_phis(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::F_LT_cos_phih_m_phis(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.6.1a].
 	double ph_t = std::sqrt(ph_t_sq);
 	double result = 0.;
@@ -455,7 +492,7 @@ double ProkudinSfSet::F_LT_cos_phih_m_phis(Hadron h, double x, double z, double 
 	double l = lambda(z, G1_MEAN_K_PERP_SQ, D1_MEAN_P_PERP_SQ);
 	return 2.*M*x*z*ph_t/l*G(ph_t_sq, l)*result;
 }
-double ProkudinSfSet::F_LT_cos_2phih_m_phis(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::F_LT_cos_2phih_m_phis(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.7.4a].
 	double Q = std::sqrt(Q_sq);
 	double result = 0.;
@@ -467,7 +504,7 @@ double ProkudinSfSet::F_LT_cos_2phih_m_phis(Hadron h, double x, double z, double
 	double l = lambda(z, G1_MEAN_K_PERP_SQ, D1_MEAN_P_PERP_SQ);
 	return -2.*G1_MEAN_K_PERP_SQ*M*x*ph_t_sq*sq(z/l)/Q*G(ph_t_sq, l)*result;
 }
-double ProkudinSfSet::F_LT_cos_phis(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const {
+double ProkudinWeights::F_LT_cos_phis(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
 	// Equation [2.7.2a].
 	double Q = std::sqrt(Q_sq);
 	double result = 0.;
@@ -480,25 +517,25 @@ double ProkudinSfSet::F_LT_cos_phis(Hadron h, double x, double z, double Q_sq, d
 }
 
 // Fragmentation functions.
-double ProkudinSfSet::D1(Hadron h, unsigned fl, double z, double Q_sq) const {
+double ProkudinWeights::D1(Int_t h, unsigned fl, double z, double Q_sq) const {
 	switch (h) {
-	case Hadron::PI_P:
+	case -211:
 		return _impl->impl.interp_D1_pi_plus[fl]({ z, Q_sq });
-	case Hadron::PI_M:
+	case 211:
 		return _impl->impl.interp_D1_pi_minus[fl]({ z, Q_sq });
 	default:
 		return 0.;
 	}
 }
-double ProkudinSfSet::H1perpM1(Hadron h, unsigned fl, double z, double Q_sq) const {
+double ProkudinWeights::H1perpM1(Int_t h, unsigned fl, double z, double Q_sq) const {
 	double collins_coeff = 0.;
-	if (h == Hadron::PI_P) {
+	if (h == -211) {
 		if (fl == 0 || fl == 4) {
 			collins_coeff = COLLINS_N_FAV;
 		} else if (fl == 1 || fl == 3) {
 			collins_coeff = COLLINS_N_DISFAV;
 		}
-	} else if (h == Hadron::PI_M) {
+	} else if (h == 211) {
 		if (fl == 1 || fl == 3) {
 			collins_coeff = COLLINS_N_FAV;
 		} else if (fl == 0 || fl == 4) {
@@ -518,7 +555,7 @@ double ProkudinSfSet::H1perpM1(Hadron h, unsigned fl, double z, double Q_sq) con
 }
 
 // Parton distribution functions.
-double ProkudinSfSet::xf1(unsigned fl, double x, double Q_sq) const {
+double ProkudinWeights::xf1(unsigned fl, double x, double Q_sq) const {
 	double Q = std::sqrt(Q_sq);
 	switch (fl) {
 	case 0:
@@ -539,7 +576,7 @@ double ProkudinSfSet::xf1(unsigned fl, double x, double Q_sq) const {
 }
 
 // Transverse momentum distributions.
-double ProkudinSfSet::xf1TperpM1(unsigned fl, double x, double Q_sq) const {
+double ProkudinWeights::xf1TperpM1(unsigned fl, double x, double Q_sq) const {
 	// Equation [2.A.4].
 	return -std::sqrt(E/2.)/(M*SIVERS_M_1)
 		*sq(SIVERS_MEAN_K_PERP_SQ)/F1_MEAN_K_PERP_SQ
@@ -551,13 +588,13 @@ double ProkudinSfSet::xf1TperpM1(unsigned fl, double x, double Q_sq) const {
 		*std::pow(SIVERS_BETA[fl], -SIVERS_BETA[fl])
 		*xf1(fl, x, Q_sq);
 }
-double ProkudinSfSet::xg1(unsigned fl, double x, double Q_sq) const {
+double ProkudinWeights::xg1(unsigned fl, double x, double Q_sq) const {
 	return x*_impl->impl.interp_g1[fl]({ x, Q_sq });
 }
-double ProkudinSfSet::xgT(unsigned fl, double x, double Q_sq) const {
+double ProkudinWeights::xgT(unsigned fl, double x, double Q_sq) const {
 	return _impl->impl.interp_xgT[fl]({ x, Q_sq });
 }
-double ProkudinSfSet::xh1(unsigned fl, double x, double Q_sq) const {
+double ProkudinWeights::xh1(unsigned fl, double x, double Q_sq) const {
 	// Use the Soffer bound to get an upper limit on transversity (Equation
 	// [2.A.7]).
 	return x*H1_N[fl]
@@ -567,10 +604,10 @@ double ProkudinSfSet::xh1(unsigned fl, double x, double Q_sq) const {
 		*std::pow(H1_BETA, -H1_BETA)
 		*_impl->impl.interp_sb[fl]({ x, Q_sq });
 }
-double ProkudinSfSet::xh1M1(unsigned fl, double x, double Q_sq) const {
+double ProkudinWeights::xh1M1(unsigned fl, double x, double Q_sq) const {
 	return H1_MEAN_K_PERP_SQ/(2.*sq(M))*xh1(fl, x, Q_sq);
 }
-double ProkudinSfSet::xh1LperpM1(unsigned fl, double x, double Q_sq) const {
+double ProkudinWeights::xh1LperpM1(unsigned fl, double x, double Q_sq) const {
 	// Data only exists for up and down quarks.
 	if (!(fl == 0 || fl == 1)) {
 		return 0.;
@@ -578,7 +615,7 @@ double ProkudinSfSet::xh1LperpM1(unsigned fl, double x, double Q_sq) const {
 		return _impl->impl.interp_xh1LperpM1[fl]({ x, Q_sq });
 	}
 }
-double ProkudinSfSet::xh1TperpM2(unsigned fl, double x, double Q_sq) const {
+double ProkudinWeights::xh1TperpM2(unsigned fl, double x, double Q_sq) const {
 	// Equation [2.A.24].
 	return E/(2.*sq(M)*PRETZ_M_TT_SQ)
 		*std::pow(PRETZ_MEAN_K_PERP_SQ, 3)/F1_MEAN_K_PERP_SQ
@@ -589,7 +626,7 @@ double ProkudinSfSet::xh1TperpM2(unsigned fl, double x, double Q_sq) const {
 		*std::pow(PRETZ_BETA, -PRETZ_BETA)
 		*(xf1(fl, x, Q_sq) - xg1(fl, x, Q_sq));
 }
-double ProkudinSfSet::xh1perpM1(unsigned fl, double x, double Q_sq) const {
+double ProkudinWeights::xh1perpM1(unsigned fl, double x, double Q_sq) const {
 	// Equation [2.A.18].
 	return -std::sqrt(E/2.)/(M*BM_M_1)
 		*sq(BM_MEAN_K_PERP_SQ)/F1_MEAN_K_PERP_SQ

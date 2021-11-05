@@ -1,26 +1,29 @@
 #ifndef Pavia_
 #define Pavia_
 
-#include "StructureFunction.h"
+#include <TMath.h>
 
-class PaviaSfSet final : public SfSet {
+#include "../Kinematics.h"
+#include "../Weights.h"
+
+class PaviaWeights final : public Weights {
 	struct Impl;
 	Impl* _impl;
 
 public:
-	PaviaSfSet();
-	PaviaSfSet(PaviaSfSet const& other) = delete;
-	PaviaSfSet(PaviaSfSet&& other) noexcept;
-	PaviaSfSet& operator=(PaviaSfSet const& other) = delete;
-	PaviaSfSet& operator=(PaviaSfSet&& other) noexcept;
-	virtual ~PaviaSfSet();
+	PaviaWeights();
+	PaviaWeights(PaviaWeights const& other) = delete;
+	PaviaWeights(PaviaWeights&& other) noexcept;
+	PaviaWeights& operator=(PaviaWeights const& other) = delete;
+	PaviaWeights& operator=(PaviaWeights&& other) noexcept;
+	virtual ~PaviaWeights();
 
-	// Structure functions.
-	double F_UUT(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const override;
-	double F_UTT_sin_phih_m_phis(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const override;
-	double F_UT_sin_phih_p_phis(Hadron h, double x, double z, double Q_sq, double ph_t_sq) const override {
-		return 0.;
-	}
+	Double_t GetWeight(const Kinematics& kin) const override;
+
+	// Asymmetries.
+	Double_t Sivers(Int_t hadPID, Double_t x, Double_t z, Double_t Q2, Double_t pT) const;
+	Double_t SiversLower(Int_t hadPID, Double_t x, Double_t z, Double_t Q2, Double_t pT) const;
+	Double_t SiversUpper(Int_t hadPID, Double_t x, Double_t z, Double_t Q2, Double_t pT) const;
 };
 
 #endif
