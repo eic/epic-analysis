@@ -45,12 +45,12 @@ class Kinematics : public TObject
     void GetHadronicFinalState(
         TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle,
-	TObjArrayIter itmRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack,TObjArrayIter itdualRICHcfTrack
+    TObjArrayIter itmRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack,TObjArrayIter itdualRICHcfTrack
 
         );
     void GetHadronicFinalStateTrue(
         TObjArrayIter itParticle
-	);
+    );
     void GetJets(
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
@@ -76,9 +76,13 @@ class Kinematics : public TObject
     // it must be done before calculating `phiS` (before
     // `CalculateHadronKinematics`)
     Int_t tSpin; // should be +1 or -1
+    Int_t lSpin; // should be +1 or -1
+    Int_t hadPID;
 
     // polarization
-    Double_t pol;
+    Double_t polT;
+    Double_t polL;
+    Double_t polBeam;
 
     // depolarization
     Double_t gamma,epsilon;
