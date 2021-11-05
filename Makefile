@@ -15,7 +15,8 @@ EXES := $(addsuffix .exe, $(SOURCES))
 
 
 all: 
-	@cd mstwpdf; make
+	@cd mstwpdf; make all
+	@cd torino; make all
 	@cd src; make
 	make exe
 
@@ -31,5 +32,6 @@ exe: $(EXES)
 
 clean:
 	@cd mstwpdf; make clean
+	@cd torino; make clean
 	@cd src; make clean
 #$(RM) $(EXES)

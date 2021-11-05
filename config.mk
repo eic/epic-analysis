@@ -25,6 +25,10 @@ LIBS += -L${DELPHES_HOME} -lDelphes
 DEPS += -I${MSTWPDF_HOME}
 LIBS += -L${MSTWPDF_HOME} -lmstwpdf
 
+# Torino
+DEPS += -I${TORINO_HOME}/src
+LIBS += -L${TORINO_HOME}/src -lTMDS -lgfortran
+
 # Fastjet Centauro
 INCCENTAURO = 0
 ifeq ($(INCCENTAURO),1)
