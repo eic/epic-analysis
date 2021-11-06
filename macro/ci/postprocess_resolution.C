@@ -8,44 +8,36 @@ void postprocess_resolution(
   // cleanup old image files
   gROOT->ProcessLine(".! rm -v out/resolution.images/*.png");
   gROOT->ProcessLine(".! rm -v out/resolution.images/*.pdf");
-  
+
   // build DAG
   PostProcessor *P = new PostProcessor(infile);
   //P->Op()->PrintBreadth("HistosDAG Initial Setup");
 
-  // get number of bins in x and Q2
-  Int_t numXbins = P->Op()->GetBinSet("x")->GetNumBins();
-  Int_t numQbins = P->Op()->GetBinSet("q2")->GetNumBins();
-  Double_t xMin = 1;
-  Double_t xMax = 0;
-  Double_t qMin = 1e6;
-  Double_t qMax = 0;
-  
+  // (x,Q2) binning
+  auto xBins = P->Op()->GetBinSet("x");
+  auto qBins = P->Op()->GetBinSet("q2");
+  Int_t numXbins = xBins->GetNumBins();
+  Int_t numQbins = qBins->GetNumBins();
+  Double_t xMin = xBins->GetMin();
+  Double_t xMax = xBins->GetMax();
+  Double_t qMin = qBins->GetMin();
+  Double_t qMax = qBins->GetMax();
+
   // 2D array of Histos pointers
   std::vector<std::vector<Histos*>> histosArr(numXbins,std::vector<Histos*>(numQbins));
-  
+
   // payload operator: find (x,Q2) bin, get (x,Q2) ranges, fill histosArr
-  auto fillHistosArr = [&histosArr,&xMin,&xMax,&qMin,&qMax](NodePath *NP, Histos *H ) {
-    auto xBin = NP->GetBinNode("x");
-    auto qBin = NP->GetBinNode("q2");
-    xMin = xBin->GetCut()->GetMin() < xMin ? xBin->GetCut()->GetMin() : xMin;
-    xMax = xBin->GetCut()->GetMax() > xMax ? xBin->GetCut()->GetMax() : xMax;
-    qMin = qBin->GetCut()->GetMin() < qMin ? qBin->GetCut()->GetMin() : qMin;
-    qMax = qBin->GetCut()->GetMax() > qMax ? qBin->GetCut()->GetMax() : qMax;
-    Int_t bx = xBin->GetBinNum();
-    Int_t bq = qBin->GetBinNum();
+  auto fillHistosArr = [&histosArr](NodePath *NP, Histos *H ) {
+    Int_t bx = NP->GetBinNode("x")->GetBinNum();
+    Int_t bq = NP->GetBinNode("q2")->GetBinNum();
+    printf("   bx, bq = %d, %d\n",bx,bq);
     try { histosArr.at(bx).at(bq) = H; }
     catch(const std::out_of_range &e) { cerr << "ERROR: (x,Q2) bin number (" << bx << "," << bq << ") invalid" << endl; };
   };
 
   // after subloop operator: draw array of plots in (x,Q2) bins
-  auto drawHistosArr = [&histosArr, &P, &numXbins, &numQbins](NodePath *NP) { // after subloop
-
+  auto drawHistosArr = [&histosArr, &P, &numXbins, &numQbins, &xMin, &xMax, &qMin, &qMax](NodePath *NP) {
     TString canvName = "xQ2cov_" + NP->BinListName();
-    cout << "canvName = " << canvName << endl;
-
-    // loop over resolution histograms (see ../src/Analysis.cxx `DefineHist*` calls 
-    // for available histograms, or add your own there)
     for( TString histName : {"x_Res","y_Res","pT_Res","Q2_Res","phiH_Res","phiS_Res","phiHvsPhiS"} ) {
       P->DrawInBins(
           canvName, histosArr, histName,
@@ -55,9 +47,9 @@ void postprocess_resolution(
     };
   };
 
-  P->Op()->Payload(fillHistosArr); 
+  // staging and execution
   P->Op()->AfterSubloop( {"x","q2"}, drawHistosArr );
-
+  P->Op()->Payload(fillHistosArr);
   P->Execute();
   P->Finish();
 };
