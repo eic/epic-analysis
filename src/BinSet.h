@@ -34,6 +34,10 @@ class BinSet : public TObject
     TObjArray *GetBinList() { return binList; };
     Int_t GetNumBins() { return (Int_t) binList->GetEntries(); };
 
+    // get minimum or maximum of this BinSet (note: each bin must actually have min and max set)
+    Double_t GetMin();
+    Double_t GetMax();
+
     // accessors
     TString GetVarName() { return varName; };
     TString GetVarTitle() { return varTitle; };
@@ -70,7 +74,7 @@ class BinSet : public TObject
     static void BinLog(TAxis *ax);
 
   private:
-    TObjArray *binList;
+    TObjArray *binList; // array of `CutDef*`s
     TString varName,varTitle;
 
   ClassDef(BinSet,1);

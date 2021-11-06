@@ -76,6 +76,21 @@ void BinSet::BinLog(TAxis *ax) {
 }; 
 
 
+// get minimum or maximum of this BinSet (note: each bin must actually have min and max set)
+Double_t BinSet::GetMin() {
+  Double_t min = 1e6;
+  TObjArrayIter next(binList);
+  while(CutDef *cut = (CutDef*) next()) min = cut->GetMin() < min ? cut->GetMin() : min;
+  return min;
+};
+Double_t BinSet::GetMax() {
+  Double_t max = -1e6;
+  TObjArrayIter next(binList);
+  while(CutDef *cut = (CutDef*) next()) max = cut->GetMax() > max ? cut->GetMax() : max;
+  return max;
+};
+
+
 BinSet::~BinSet() {
 };
 
