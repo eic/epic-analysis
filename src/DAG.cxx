@@ -111,10 +111,11 @@ void DAG::RemoveEdge(Node *inN, Node *outN) {
 // - primary usage is to add a layer of bins from a BinSet
 void DAG::AddLayer(BinSet *BS) {
   std::vector<Node*> nodes;
-  int cnt=0;
+  int binNum=0; // enumerate bin number
   TObjArrayIter next(BS->GetBinList());
   while(CutDef *cut = (CutDef*) next()) {
-    nodes.push_back(new Node( NT::bin, cut->GetVarName()+Form("_%d",cnt++), cut ));
+    nodes.push_back(new Node( NT::bin, cut->GetVarName()+Form("_%d",binNum), cut, binNum ));
+    binNum++;
   };
   AddLayer(nodes);
   layerMap.insert(std::pair<TString,BinSet*>(BS->GetVarName(),new BinSet(*BS)));
