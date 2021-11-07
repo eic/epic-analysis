@@ -119,10 +119,9 @@ Double_t PaviaWeights::GetWeight(const Kinematics& kin) const {
 Double_t PaviaWeights::Sivers(Int_t hadPID, Double_t x, Double_t z, Double_t Q2, Double_t pT) const {
 	Double_t Q = TMath::Sqrt(Q2);
 	Double_t qTtoQ = pT / (z * Q);
-	// TODO: Positive pions in Delphes have PID of -211?
-	if (hadPID == -211) {
+	if (hadPID == 211) {
 		return _impl->interp_pip_sivers({ Q, x, z, qTtoQ });
-	} else if (hadPID == 211) {
+	} else if (hadPID == -211) {
 		return _impl->interp_pim_sivers({ Q, x, z, qTtoQ });
 	} else {
 		return 0.;
@@ -132,9 +131,9 @@ Double_t PaviaWeights::Sivers(Int_t hadPID, Double_t x, Double_t z, Double_t Q2,
 Double_t PaviaWeights::SiversLower(Int_t hadPID, Double_t x, Double_t z, Double_t Q2, Double_t pT) const {
 	Double_t Q = TMath::Sqrt(Q2);
 	Double_t qTtoQ = pT / (z * Q);
-	if (hadPID == -211) {
+	if (hadPID == 211) {
 		return _impl->interp_pip_sivers_lower({ Q, x, z, qTtoQ });
-	} else if (hadPID == 211) {
+	} else if (hadPID == -211) {
 		return _impl->interp_pim_sivers_lower({ Q, x, z, qTtoQ });
 	} else {
 		return 0.;
@@ -144,9 +143,9 @@ Double_t PaviaWeights::SiversLower(Int_t hadPID, Double_t x, Double_t z, Double_
 Double_t PaviaWeights::SiversUpper(Int_t hadPID, Double_t x, Double_t z, Double_t Q2, Double_t pT) const {
 	Double_t Q = TMath::Sqrt(Q2);
 	Double_t qTtoQ = pT / (z * Q);
-	if (hadPID == -211) {
+	if (hadPID == 211) {
 		return _impl->interp_pip_sivers_upper({ Q, x, z, qTtoQ });
-	} else if (hadPID == 211) {
+	} else if (hadPID == -211) {
 		return _impl->interp_pim_sivers_upper({ Q, x, z, qTtoQ });
 	} else {
 		return 0.;

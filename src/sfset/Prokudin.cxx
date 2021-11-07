@@ -519,9 +519,9 @@ double ProkudinWeights::F_LT_cos_phis(Int_t h, double x, double z, double Q_sq, 
 // Fragmentation functions.
 double ProkudinWeights::D1(Int_t h, unsigned fl, double z, double Q_sq) const {
 	switch (h) {
-	case -211:
-		return _impl->impl.interp_D1_pi_plus[fl]({ z, Q_sq });
 	case 211:
+		return _impl->impl.interp_D1_pi_plus[fl]({ z, Q_sq });
+	case -211:
 		return _impl->impl.interp_D1_pi_minus[fl]({ z, Q_sq });
 	default:
 		return 0.;
@@ -529,13 +529,13 @@ double ProkudinWeights::D1(Int_t h, unsigned fl, double z, double Q_sq) const {
 }
 double ProkudinWeights::H1perpM1(Int_t h, unsigned fl, double z, double Q_sq) const {
 	double collins_coeff = 0.;
-	if (h == -211) {
+	if (h == 211) {
 		if (fl == 0 || fl == 4) {
 			collins_coeff = COLLINS_N_FAV;
 		} else if (fl == 1 || fl == 3) {
 			collins_coeff = COLLINS_N_DISFAV;
 		}
-	} else if (h == 211) {
+	} else if (h == -211) {
 		if (fl == 1 || fl == 3) {
 			collins_coeff = COLLINS_N_FAV;
 		} else if (fl == 0 || fl == 4) {
