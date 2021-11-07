@@ -25,6 +25,7 @@ void analysis_coverage(
   A->SetReconMethod("Ele"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
   A->AddFinalState("KpTrack"); // kaon final state
+  A->AddFinalState("pTrack"); // proton final state                                                                                                                         
   //A->AddFinalState("jet"); // jets
 
 
@@ -48,10 +49,11 @@ void analysis_coverage(
   A->AddBinScheme("x");
   A->AddBinScheme("z");
 
-  A->BinScheme("q2")->BuildBins( 2, 1,    100,  true );
-  A->BinScheme("x")->BuildBins(  3, 0.01, 1,    true );
-  A->BinScheme("z")->BuildBin("Range", 0.2, 0.5 );
-  A->BinScheme("z")->BuildBin("Range", 0.5, 0.8 );
+  A->BinScheme("q2")->BuildBins( 5, 1,    1000,  true );
+  A->BinScheme("x")->BuildBins(  10, 1e-4, 1,    true );
+  A->BinScheme("z")->BuildBin("Range", 0.2, 0.4 );
+  A->BinScheme("z")->BuildBin("Range", 0.4, 0.8 );
+  A->BinScheme("z")->BuildBin("Min", 0.2);
 
 
   // perform the analysis ==================================
