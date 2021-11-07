@@ -258,8 +258,8 @@ void Analysis::Prepare() {
     HS->DefineHist1D("phiSivers","#phi_{Sivers}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist1D("phiCollins","#phi_{Collins}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist2D("etaVsP","p","#eta","GeV","",
-        NBINS,0.1,100,
-        NBINS,-4,4,
+        3,0.1,100,
+        3,-4,4,
         true,false
         );
     // -- single-hadron cross sections
