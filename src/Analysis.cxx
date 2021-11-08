@@ -68,12 +68,14 @@ Analysis::Analysis(
   finalStateToTitle.insert(std::pair<TString,TString>("pimTrack","#pi^{-} tracks"));
   finalStateToTitle.insert(std::pair<TString,TString>("KpTrack","K^{+} tracks"));
   finalStateToTitle.insert(std::pair<TString,TString>("KmTrack","K^{-} tracks"));
+  finalStateToTitle.insert(std::pair<TString,TString>("pTrack","p^{+} tracks"));
   finalStateToTitle.insert(std::pair<TString,TString>("jet","jets"));
   // - PID -> finalState ID
   PIDtoFinalState.insert(std::pair<int, TString>( 211,"pipTrack"));
   PIDtoFinalState.insert(std::pair<int, TString>(-211,"pimTrack"));
   PIDtoFinalState.insert(std::pair<int, TString>( 321,"KpTrack"));
   PIDtoFinalState.insert(std::pair<int, TString>(-321,"KmTrack"));
+  PIDtoFinalState.insert(std::pair<int, TString>(2212,"pTrack"));
 
 
   // kinematics reconstruction methods
@@ -261,6 +263,15 @@ void Analysis::Prepare() {
         NBINS,-4,4,
         true,false
         );
+    Double_t etabinsCoarse[] = {-4.0,-1.0,1.0,4.0};
+    Double_t pbinsCoarse[] = {0.1,1,10,100};
+    HS->DefineHist2D("etaVsPcoarse","p","#eta","GeV","",
+	3, pbinsCoarse,
+	3, etabinsCoarse,
+	true,false
+	);
+	
+		     
     // -- single-hadron cross sections
     //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
     HS->DefineHist1D("Q_xsec","Q","GeV",10,1.0,10.0,true,true); // log
@@ -570,6 +581,7 @@ void Analysis::FillHistosTracks() {
     H->Hist("phiSivers")->Fill(Kinematics::AdjAngle(kin->phiH - kin->phiS),wTrack);
     H->Hist("phiCollins")->Fill(Kinematics::AdjAngle(kin->phiH + kin->phiS),wTrack);
     dynamic_cast<TH2*>(H->Hist("etaVsP"))->Fill(kin->pLab,kin->etaLab,wTrack); // TODO: lab-frame p, or some other frame?
+    dynamic_cast<TH2*>(H->Hist("etaVsPcoarse"))->Fill(kin->pLab,kin->etaLab,wTrack); 
     // cross sections (divide by lumi after all events processed)
     H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),wTrack);
     // resolutions
