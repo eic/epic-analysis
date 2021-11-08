@@ -112,8 +112,7 @@ Double_t PaviaWeights::GetWeight(const Kinematics& kin) const {
 	if (!TMath::Finite(sivers) || TMath::Abs(sivers) > 1.) {
 		sivers = 0.;
 	}
-	return 1. + kin.polT * kin.tSpin
-		* sivers * TMath::Sin(kin.phiH - kin.phiS);
+	return kin.polT * kin.tSpin * sivers * TMath::Sin(kin.phiH - kin.phiS);
 }
 
 Double_t PaviaWeights::Sivers(Int_t hadPID, Double_t x, Double_t z, Double_t Q2, Double_t pT) const {

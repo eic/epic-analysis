@@ -333,7 +333,7 @@ double ProkudinWeights::GetWeight(const Kinematics& kin) const {
 	if (!std::isfinite(asym) || std::abs(asym) > 1.) {
 		asym = 0.;
 	}
-	return 1. + asym;
+	return asym;
 }
 
 double ProkudinWeights::F_UUT(Int_t h, double x, double z, double Q_sq, double ph_t_sq) const {
