@@ -24,8 +24,7 @@ void analysis_asymmetry(
       );
   Weights* weights = new WeightsSum({
     new WeightsUniform(),
-    //new WeightsTest()
-		new PaviaWeights()
+    new PaviaWeights()
   });
   A->SetWeights(weights);
 
