@@ -258,10 +258,19 @@ void Analysis::Prepare() {
     HS->DefineHist1D("phiSivers","#phi_{Sivers}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist1D("phiCollins","#phi_{Collins}","",NBINS,-TMath::Pi(),TMath::Pi());
     HS->DefineHist2D("etaVsP","p","#eta","GeV","",
-        3,0.1,100,
-        3,-4,4,
+        NBINS,0.1,100,
+        NBINS,-4,4,
         true,false
         );
+    Double_t etabinsCoarse[] = {-4.0,-1.0,1.0,4.0};
+    Double_t pbinsCoarse[] = {0.1,1,10,100};
+    HS->DefineHist2D("etaVsPcoarse","p","#eta","GeV","",
+	3, pbinsCoarse,
+	3, etabinsCoarse,
+	true,false
+	);
+	
+		     
     // -- single-hadron cross sections
     //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
     HS->DefineHist1D("Q_xsec","Q","GeV",10,1.0,10.0,true,true); // log
@@ -570,6 +579,7 @@ void Analysis::FillHistosTracks() {
     H->Hist("phiSivers")->Fill(Kinematics::AdjAngle(kin->phiH - kin->phiS),wTrack);
     H->Hist("phiCollins")->Fill(Kinematics::AdjAngle(kin->phiH + kin->phiS),wTrack);
     dynamic_cast<TH2*>(H->Hist("etaVsP"))->Fill(kin->pLab,kin->etaLab,wTrack); // TODO: lab-frame p, or some other frame?
+    dynamic_cast<TH2*>(H->Hist("etaVsPcoarse"))->Fill(kin->pLab,kin->etaLab,wTrack); 
     // cross sections (divide by lumi after all events processed)
     H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),wTrack);
     // resolutions
