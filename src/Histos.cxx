@@ -75,7 +75,30 @@ void Histos::DefineHist2D(
   config->logz = logz;
   this->RegisterHist(varname,hist,config);
 };
-
+// define 2D histogram with custom bins
+void Histos::DefineHist2D(
+    TString varname,
+    TString vartitlex, TString vartitley,
+    TString unitsx, TString unitsy,
+    Int_t numBinsx, Double_t *xBins, 
+    Int_t numBinsy, Double_t *yBins, 
+    Bool_t logx, Bool_t logy, Bool_t logz
+    ) {
+  if(unitsx!="") unitsx=" ["+unitsx+"]";
+  if(unitsy!="") unitsy=" ["+unitsy+"]";
+  TString histT;
+  TH2D *hist = new TH2D(
+      setname+"_hist_"+varname,
+      histT+", "+settitle+";"+vartitlex+unitsx+";"+vartitley+unitsy,
+      numBinsx,xBins,
+      numBinsy,yBins
+      );
+  HistConfig *config = new HistConfig();
+  config->logx = logx;
+  config->logy = logy;
+  config->logz = logz;
+  this->RegisterHist(varname,hist,config);
+};
 
 // define a 3D histogram
 void Histos::DefineHist3D(
