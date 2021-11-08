@@ -247,25 +247,26 @@ void AnalysisDD4hep::process_event()
 	  }
 
 	  kinTrue->CalculateHadronKinematics();
+      
+          // asymmetry injection
+          //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
+          //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
+          //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
+
+          Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
+          wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+          wTrackTotal += wTrack;
+
+          // fill track histograms in activated bins
+          FillHistosTracks();
+          
+          // fill simple tree
+          // - not binned
+          // - `activeEvent` is only true if at least one bin gets filled for this track
+          // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDelphes)
+          if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
+
 	}//hadron loop
-      
-      // asymmetry injection
-      //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
-      //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
-      //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
-
-      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
-      wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
-      wTrackTotal += wTrack;
-
-      // fill track histograms in activated bins
-      FillHistosTracks();
-      
-      // fill simple tree
-      // - not binned
-      // - `activeEvent` is only true if at least one bin gets filled for this track
-      // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDelphes)
-      if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
       
     }// tree reader loop
   
