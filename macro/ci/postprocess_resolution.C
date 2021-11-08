@@ -1,74 +1,55 @@
 R__LOAD_LIBRARY(Largex)
 
 // make resolution plots
-// - adapted from `postprocess_pTvsEta.C`
 void postprocess_resolution(
     TString infile="out/resolution.root"
 ){
 
-  gROOT->ProcessLine(".! rm -v out/resolution.images/*.png"); // cleanup old image files
-  gROOT->ProcessLine(".! rm -v out/resolution.images/*.pdf"); // cleanup old image files
-  
+  // cleanup old image files
+  gROOT->ProcessLine(".! rm -v out/resolution.images/*.png");
+  gROOT->ProcessLine(".! rm -v out/resolution.images/*.pdf");
+
+  // build DAG
   PostProcessor *P = new PostProcessor(infile);
-  P->Op()->PrintBreadth("HistosDAG Initial Setup");
+  //P->Op()->PrintBreadth("HistosDAG Initial Setup");
 
-  // number of bins in x and Q2
-  int nx = P->Op()->GetBinSet("x")->GetNumBins();
-  int nq2 = P->Op()->GetBinSet("q2")->GetNumBins();
+  // (x,Q2) binning
+  auto xBins = P->Op()->GetBinSet("x");
+  auto qBins = P->Op()->GetBinSet("q2");
+  Int_t numXbins = xBins->GetNumBins();
+  Int_t numQbins = qBins->GetNumBins();
+  Double_t xMin = xBins->GetMin();
+  Double_t xMax = xBins->GetMax();
+  Double_t qMin = qBins->GetMin();
+  Double_t qMax = qBins->GetMax();
 
-  // just counters for filling Histos vector
-  int xbin = 0;
-  int q2bin = 0;
-  
-  // initialize this 2D vector to be some large size
-  std::vector<std::vector<Histos*>> histos_xQ2(30,std::vector<Histos*>(30));
-  
-  auto findxQ2bins = [&histos_xQ2,&P,&xbin,&q2bin,nx,nq2](Histos *H ){
-    histos_xQ2[xbin][q2bin] = H;    
-    q2bin++;
-    if(q2bin == nq2){
-      q2bin=0; xbin++; 
-      if(xbin == nx) xbin = 0;
-    }
+  // 2D array of Histos pointers
+  std::vector<std::vector<Histos*>> histosArr(numXbins,std::vector<Histos*>(numQbins));
+
+  // payload operator: find (x,Q2) bin, get (x,Q2) ranges, fill histosArr
+  auto fillHistosArr = [&histosArr](NodePath *NP, Histos *H ) {
+    Int_t bx = NP->GetBinNode("x")->GetBinNum();
+    Int_t bq = NP->GetBinNode("q2")->GetBinNum();
+    printf("   bx, bq = %d, %d\n",bx,bq);
+    try { histosArr.at(bx).at(bq) = H; }
+    catch(const std::out_of_range &e) { cerr << "ERROR: (x,Q2) bin number (" << bx << "," << bq << ") invalid" << endl; };
   };
-  
-  auto drawinxQ2bins = [&histos_xQ2, &P, &nx, &nq2](NodePath *bins){    
-    TString canvname = "xQ2cov_"; //+ bins->GetVar
-    for(Node *bin: bins->GetBinNodes()){
-      if(bin->GetVarName() == "finalState"){
-        canvname+=bin->GetID();
-        canvname+="_";
-      }
-      if(bin->GetVarName() == "z"){
-        canvname+=bin->GetID();
-        canvname+="_";
-      }
-    }
 
-    double xMin = 1e-4;
-    double xMax = 1;
-    double q2Min = 0.99;
-    double q2Max = 1000;
-
-    // loop over resolution histograms (see ../src/Analysis.cxx `DefineHist*` calls 
-    // for available histograms, or add your own there)
-    for( TString histname : {"x_Res","y_Res","pT_Res","Q2_Res","phiH_Res","phiS_Res","phiHvsPhiS"} ) {
+  // after subloop operator: draw array of plots in (x,Q2) bins
+  auto drawHistosArr = [&histosArr, &P, &numXbins, &numQbins, &xMin, &xMax, &qMin, &qMax](NodePath *NP) {
+    TString canvName = "xQ2cov_" + NP->BinListName();
+    for( TString histName : {"x_Res","y_Res","pT_Res","Q2_Res","phiH_Res","phiS_Res","phiHvsPhiS"} ) {
       P->DrawInBins(
-          canvname, histos_xQ2, histname,
-          "x", nx, xMin, xMax, true,
-          "Q^{2}", nq2, q2Min, q2Max, true
+          canvName, histosArr, histName,
+          "x", numXbins, xMin, xMax, true,
+          "Q^{2}", numQbins, qMin, qMax, true
           );
     };
   };
 
-  auto beforefunction = [](){
-  };
-
-  P->Op()->Subloop({"x","q2"},beforefunction,drawinxQ2bins);
-  P->Op()->Payload(findxQ2bins);
-  //P->Op()->PrintBreadth("HistosDAG Final Setup");
-
+  // staging and execution
+  P->Op()->AfterSubloop( {"x","q2"}, drawHistosArr );
+  P->Op()->Payload(fillHistosArr);
   P->Execute();
-  
   P->Finish();
 };
