@@ -31,6 +31,8 @@ class Particles
 {
  public:
   int pid;
+  int charge;
+  int mcID;
   TLorentzVector vecPart;
 };
 
@@ -50,13 +52,13 @@ class AnalysisDD4hep : public Analysis
     void process_event(); // TODO: rename process_event to Execute?
     void Execute() override { process_event(); };
 
+    /* // DEPRECATED electron finder; TODO: remove?
     void SetEleEnergyThreshold(double e_threshold_) { fEThreshold = e_threshold_; }
     void SetIsoConeRadius(double r_ ) { fIsoR = r_; }
     void SetIsoCut(double isocut_ ) { fIsoCut = isocut_; }
-
-  protected:
     int find_electron(std::vector<Clusters*> ecal_cluster, std::vector<Clusters*> hcal_cluster, double e_threshold);
     double isolation(double cone_theta, double cone_phi, std::vector<Clusters*> cluster_container, double E_threshold);
+    */
 
   private:
 
