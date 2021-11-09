@@ -119,7 +119,32 @@ repository (pull requests are also welcome).
 
 ## ATHENA Full Simulation
 
-- TODO 
+### Accessing S3
+- first, you need the MinIO client
+  - if you are using the Singularity or Docker container, it is already installed
+  - the main command is `mc`
+- next, setup your client to connect to our S3 host (ask someone for credentials):
+  - `mc config host add S3 https://dtn01.sdcc.bnl.gov:9000 <login> <password>`
+  - only needs to be done once on your machine or container
+  - it is recommended to use env vars `$S3_ACCESS_KEY` and `$S3_SECRET_KEY`
+    - scripts will automatically use these if they are set
+    - you will need these env vars when running `root` macros to stream from S3
+    - alternatively you can use `mc` to download the files from S3
+- find a directory of full simulation files; example S3 navigation commands:
+  - directory tree `mc tree S3/eictest/ATHENA/RECO/acadia-v2.1/DIS/NC/`
+  - list files: `mc ls S3/eictest/ATHENA/RECO/acadia-v2.1/DIS/NC/10x275/minQ2=1`
+- run `./generate-s3list.sh` to generate a list of files
+  - running it with no arguments will print the usage
+  - pipe the output somewhere
+
+### Full Simulation Analysis
+- in general, everything that can be done in fast simulation can also be done in
+  full simulation; just replace your usage of `AnalysisDelphes` with
+  `AnalysisDD4hep`
+  - in practice, implementations may sometimes be a bit out of sync, where some
+    features exist in fast simulation do not exist in full simulation, or vice
+    versa
+- TODO: more details
 
 
 
