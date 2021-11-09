@@ -14,6 +14,10 @@
 #include "TGaxis.h"
 #include "THStack.h"
 #include "TLegend.h"
+#include "TF1.h"
+#include "TFitResult.h"
+#include "TFitResultPtr.h"
+#include "TMatrixDSym.h"
 
 // largex-eic
 #include "Histos.h"
@@ -77,9 +81,11 @@ class PostProcessor : public TNamed
         bool intlog1=false, bool intlog2=false, bool intgrid1=false, bool intgrid2=false
         );
 
-    void DrawInBinsTogether(
+    TH1D *GetSDs(TH2D* fitHist);
+
+    void DrawSDInBinsTogether(
         TString outName,
-        std::vector<std::vector<Histos*>>& histList, TString histNames[], TString labels[], int nNames,
+        std::vector<std::vector<Histos*>>& histList, TString histNames[], TString labels[], int nNames, double yMin, double yMax,
         TString var1name, int nvar1, double var1low, double var1high, bool var1log,
         TString var2name, int nvar2, double var2low, double var2high, bool var2log,
         bool intlog1=false, bool intlog2=false, bool intgrid1=false, bool intgrid2=false

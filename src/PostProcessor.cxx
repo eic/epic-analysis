@@ -451,7 +451,7 @@ void PostProcessor::DrawInBins(
       hist->GetXaxis()->SetLabelSize(0.06);
       hist->GetXaxis()->CenterTitle();
       hist->GetXaxis()->SetLabelOffset(0.02);
-      hist->GetYaxis()->SetRangeUser(-15,15);//TODO: CHECK THIS IS REASONABLE ALSO WHAT ABOUT ERROR BARS???
+      hist->GetYaxis()->SetRangeUser(0,0.05);//TODO: CHECK THIS IS REASONABLE ALSO WHAT ABOUT ERROR BARS???
       hist->GetYaxis()->SetNdivisions(8);
       hist->GetYaxis()->SetLabelSize(0.06);
       hist->GetYaxis()->SetLabelOffset(0.02);
@@ -542,13 +542,72 @@ void PostProcessor::DrawInBins(
 };
 
 //=========================================================================
+/* Convert 2D histogram to 1D histogram of stddevs from y distribution. 
+ * Fits slices along x axis with Gaussian.
+ */
+
+TH1D *PostProcessor::GetSDs(TH2D* fitHist){
+
+  int nbins      = fitHist->GetNbinsX();
+  double high    = fitHist->GetXaxis()->GetXmax();
+  double low     = fitHist->GetXaxis()->GetXmin();
+  double highY   = fitHist->GetYaxis()->GetXmax();
+  double lowY    = fitHist->GetYaxis()->GetXmin();
+  TString name   = fitHist->GetName();
+  TString title  = fitHist->GetTitle();
+  TString xtitle = fitHist->GetXaxis()->GetTitle();
+  TH1D* subHist = new TH1D(name,title,nbins,low,high);
+  subHist->GetXaxis()->SetTitle(xtitle);
+
+  // Loop x-axis bins and fit y profiles to get stdev and errors
+  for (int bin=1; bin<=nbins; bin++) { //NOTE: Bin #'s begin at 1!
+
+    // Define fit function //NOTE: Keep this definition, do not change syntax or use lambda!  It will not work, still not sure why...
+    TF1 *func = new TF1("func","[0]*(1/([1]*TMath::Sqrt(2*TMath::Pi())))*TMath::Exp(-0.5*(x-[2])*(x-[2])/[1]/[1])",lowY,highY);
+    TH1D *h = new TH1D("h","h",fitHist->GetNbinsY(),lowY,highY);
+    for (int i=1; i<=h->GetNbinsX(); i++) { //NOTE: Bin #'s start at 1!
+      h->SetBinContent(i,fitHist->GetBinContent(bin,i));
+    }
+    if (h->GetEntries() < 10 || h->GetMaximum()<1 ) continue;
+    func->SetParameters(h->GetMaximum()*h->GetStdDev(),h->GetStdDev(),h->GetMean());
+    TFitResultPtr fr = h->Fit("func","NS","",lowY,highY); //IMPORTANT: N option keeps fit results from being plotted, otherwise you change the current canvas.
+    if (fr->IsEmpty() || !(fr->IsValid())) { continue; }
+    // TMatrixDSym *covMat = new TMatrixDSym(fr->GetCovarianceMatrix());
+
+    // Gaussian fit parameters
+    double N0    = func->GetParameter(0);
+    double sigma = func->GetParameter(1);
+    double mu    = func->GetParameter(2);
+
+    // Gaussian fit errors
+    double EN0    = func->GetParError(0);
+    double Esigma = func->GetParError(1);
+    double Emu    = func->GetParError(2);
+    double chi2   = func->GetChisquare();
+    double ndf    = func->GetNDF();
+
+    // //DEBUGGING
+    // std::cout<<"\tINFO bin["<<bin<<"] : sigma±err = "<<sigma<<"±"<<Esigma<<std::endl;
+    // std::cout<<"\tINFO bin["<<bin<<"] : chi2/ndf = "<<(chi2/ndf)<<std::endl;
+
+    subHist->SetBinContent(bin,sigma);
+    subHist->SetBinError(bin,Esigma);
+
+  }
+
+  return subHist;
+
+}
+
+//=========================================================================
 /* ALGORITHM: draw histograms from different bins in their respective bins
 on axis of bin variables, e.g. Q2 vs x.
 */
-void PostProcessor::DrawInBinsTogether(
+
+void PostProcessor::DrawSDInBinsTogether(
     TString outName,    
     std::vector<std::vector<Histos*>>& histList,
-    TString histNames[], TString labels[], int nNames,
+    TString histNames[], TString labels[], int nNames, double yMin, double yMax,
     TString var1name, int nvar1, double var1low, double var1high, bool var1log,
     TString var2name, int nvar2, double var2low, double var2high, bool var2log,
     bool intlog1, bool intlog2, bool intgrid1, bool intgrid2 // log option for small plots
@@ -594,6 +653,7 @@ void PostProcessor::DrawInBinsTogether(
   int drawpid = 0;
   outfile->cd("/");
   canv->Write();
+
   // get histograms from Histos 2D vector
   for(int i = 0; i < nvar1; i++){
     for(int j = 0; j < nvar2; j++){
@@ -605,12 +665,15 @@ void PostProcessor::DrawInBinsTogether(
       lg->SetTextSize(0.2);
 
       for (int k=0; k<nNames; k++) {
-        TH1 *subHist = (TH1*)H->Hist(histNames[k])->Clone();
-        subHist->SetTitle("");
+        TH2D *fitHist = (TH2D*)H->Hist(histNames[k])->Clone();
+        if ( fitHist->GetEntries() < 10 ) continue; // Filter out low filled hists that can't get good fits.
+        fitHist->SetTitle("");
+
         //subHist->GetXaxis()->SetTitle("");
         //subHist->GetYaxis()->SetTitle("");
         //subHist->GetXaxis()->SetLabelSize(0);
         //subHist->GetYaxis()->SetLabelSize(0);
+        TH1D *subHist = this->GetSDs(fitHist);
 
         subHist->GetXaxis()->SetTitleSize(0.1);
         subHist->GetXaxis()->SetTitleOffset(0.5);
@@ -618,7 +681,7 @@ void PostProcessor::DrawInBinsTogether(
         subHist->GetXaxis()->SetLabelSize(0.06);
         subHist->GetXaxis()->CenterTitle();
         subHist->GetXaxis()->SetLabelOffset(0.02);
-        subHist->GetYaxis()->SetRangeUser(-15,15);//TODO: CHECK THIS IS REASONABLE ALSO WHAT ABOUT ERROR BARS???
+        subHist->GetYaxis()->SetRangeUser(yMin,yMax);//TODO: CHECK THIS IS REASONABLE ALSO WHAT ABOUT ERROR BARS???
         subHist->GetYaxis()->SetNdivisions(8);
         subHist->GetYaxis()->SetLabelSize(0.06);
         subHist->GetYaxis()->SetLabelOffset(0.02);
@@ -628,12 +691,8 @@ void PostProcessor::DrawInBinsTogether(
         subHist->SetMarkerColor(k+2);
         if (k+2>=5) subHist->SetMarkerColor(k+3); //NOTE: 5 is yellow: very hard to see.
         subHist->SetMarkerSize(0.5);//NOTE: Remember these will be small plots so keep the binning small and the markers big
-        if ( subHist->GetEntries() > 10 ) {
+        if ( subHist->GetEntries()>0 ) {
           hist->Add(subHist);
-          std::cout<<"DEBUGGING: Added hist:"<<histNames[k]<<std::endl;
-          std::cout<<"\tmarker style = "<<subHist->GetMarkerStyle()<<std::endl;
-          std::cout<<"\tmarker size  = "<<subHist->GetMarkerSize()<<std::endl;
-          std::cout<<"\tmarker color = "<<subHist->GetMarkerColor()<<std::endl;
 
           if (i==0 && j==0){
             lg->AddEntry(subHist,labels[k],"p");//NOTE: Only grabs hists that are in 0,0 bin
@@ -651,7 +710,7 @@ void PostProcessor::DrawInBinsTogether(
       TString drawStr = "";
       switch(1) {//TODO: figure out how to get THStack dimension? //can't use hist->GetHistogram()->GetDimension()
         case 1:
-          drawStr = "hist p nostack"/*"ex0 p nostack"*/;//NOTE: nostackb will just throw an error, don't use
+          drawStr = "ex0 p nostack"; //NOTE: nostackb will just throw an error, don't use. /*"ex0 p nostack"*/
           break;
         case 2:
           drawStr = "COLZ";
@@ -726,7 +785,7 @@ void PostProcessor::DrawInBinsTogether(
   }
 };
 
-//=========================================================================
+// =========================================================================
 
 /* ALGORITHM: draw a ratio of all 1D histograms in the specified histogram set
 * - the ratio will be of `numerSet` over `denomSet`

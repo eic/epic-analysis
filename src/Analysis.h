@@ -46,7 +46,8 @@ class Analysis : public TNamed
     ~Analysis();
 
     // number of bins for histograms
-    Int_t NBINS = 50;
+    Int_t NBINS    = 50;
+    Int_t NBINSRES = 50;
     const Int_t NBINS_FULL = 10;
 
     // bin schemes
@@ -97,15 +98,7 @@ class Analysis : public TNamed
 
     // FillHistos methods: fill histograms
     void FillHistosTracks();
-    void FillHistosTracksSD();
     void FillHistosJets();
-    void FillHistosJetsSD();
-
-    // Miscellaneous histogram operations
-    void npSqrt1D(Histos *H, TString name);
-    Double_t GetMean1D(Histos *H, TString name);
-    void npSqrt2D(Histos *H, TString name);
-    Double_t GetMean2D(Histos *H, TString name);
 
     // lambda to check which bins an observable is in, during DAG breadth
     // traversal; it requires `finalStateID`, `valueMap`, and will

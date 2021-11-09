@@ -52,21 +52,20 @@ void postprocess_resolution_SD(
 
     // loop over resolution histograms (see ../src/Analysis.cxx `DefineHist*` calls 
     // for available histograms, or add your own there)
-    for( TString histname : {"x_Res","y_Res","Q2_Res","phiH_Res","phiS_Res","phiHvsPhiS","z_purity","z_q2resSD","z_xresSD","z_yresSD","z_zresSD","z_pTresSD","z_phiHresSD"} ) {
+    for( TString histname : {"x_Res","y_Res","Q2_Res","phiH_Res","phiS_Res","phiHvsPhiS","z_purity"} ) {
       P->DrawInBins(
           canvname, histos_xQ2, histname,
           "x", nx, xMin, xMax, true,
           "Q^{2}", nq2, q2Min, q2Max, true
           );
     };
-    // int nNames = 6;//Don't forget to change both nNames and allocation # below!
-    // TString histNames[6] = {"z_q2resSD","z_xresSD","z_yresSD","z_zresSD","z_pTresSD","z_phiHresSD"};//,"z_yresSD","z_zresSD","z_pTresSD","z_phiHresSD"};
-    // TString labels[6] = {"Q^{2}","x","y","z","p_{T}","#phi_{H}"};
-    int nNames = 2;
-    TString histNames[2] = {"z_q2resSD","z_xresSD"};//,"z_yresSD","z_zresSD","z_pTresSD","z_phiHresSD"};
-    TString labels[2] = {"Q^{2}","x"};
-    P->DrawInBinsTogether(
-          canvname, histos_xQ2, histNames, labels, nNames,
+
+    const int nNames = 2;
+    double yMin, yMax; yMin = -0.1; yMax = 0.5;//Adjust as needed
+    TString histNames[nNames] = {"z_Q2_Res","z_x_Res"};//,"z_y_Res","z_z_Res","z_pT_Res","z_phiH_Res","z_phiS_Res"};
+    TString labels[nNames] = {"Q^{2}","x"};
+    P->DrawSDInBinsTogether(
+          canvname, histos_xQ2, histNames, labels, nNames, yMin, yMax,
           "x", nx, xMin, xMax, true,
           "Q^{2}", nq2, q2Min, q2Max, true
     );
@@ -77,13 +76,6 @@ void postprocess_resolution_SD(
 
   P->Op()->Subloop({"x","q2"},beforefunction,drawinxQ2bins);
   P->Op()->Payload(findxQ2bins);
-
-  // //DEBUGGING
-  // P->Op()->Payload([&P](Histos *H) {
-  //       P->DrawSingle(H,"Q2vsX_q2resSD","COLZ");
-  // }
-  // );
-  // //END DEBUGGING
 
   //P->Op()->PrintBreadth("HistosDAG Final Setup");
 

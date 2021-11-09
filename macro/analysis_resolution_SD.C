@@ -2,7 +2,7 @@ R__LOAD_LIBRARY(Largex)
 
 // make resolution plots
 void analysis_resolution_SD(
-    TString infiles="datarec/tutorial.config", /* list of input files */
+    TString infiles="datarec/test.config", /* list of input files */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=0, /* crossing angle [mrad] */
@@ -17,7 +17,10 @@ void analysis_resolution_SD(
       crossingAngle,
       outfilePrefix
       );
-  A->NBINS = 5; // use this to set the number of bins along each axis for each overall bin in e.g. x and Q2
+  A->NBINS = 5; // use this to set the number of bins along each axis, e.g., z binning (except resolution axes) for each overall bin in e.g. x and Q2
+  A->NBINSRES = 100; // use this to set the number of bins along the resolution axes for each overall bin in e.g. x and Q2
+  // A->RESHIGH = 1;
+  // A->RESLOW = -1;
   //A->maxEvents = 30000; // use this to limit the number of events
   A->SetReconMethod("Ele"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
