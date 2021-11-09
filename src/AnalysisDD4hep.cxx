@@ -26,10 +26,11 @@ AnalysisDD4hep::AnalysisDD4hep(
   outfilePrefix_
 ) {
   // dd4hep-specific settings defaults
-  // initialize scatt. electron cuts
+  /*// initialize scatt. electron cuts // DEPRECATED; TODO: remove?
   fEThreshold = eleBeamEn_*0.1; // min energy cut
   fIsoR = 1.0;                  // Isolation cone R
   fIsoCut = 0.1;                // 10%
+  */
 };
 
 // destructor
@@ -279,6 +280,11 @@ void AnalysisDD4hep::process_event()
 
 }//execute
 
+
+
+
+// DEPRECATED electron finder methods; TODO: remove?
+/*
 double AnalysisDD4hep::isolation(double cone_theta, double cone_phi, std::vector<Clusters*> cluster_container, double E_threshold)
 {
   double cone_eta = -log(tan(cone_theta/2.0));
@@ -350,4 +356,4 @@ int AnalysisDD4hep::find_electron(std::vector<Clusters*> ecal_cluster, std::vect
   
   return index_max-1;
 }
-
+*/

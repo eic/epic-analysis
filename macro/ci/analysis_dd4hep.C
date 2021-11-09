@@ -22,11 +22,6 @@ void analysis_dd4hep(
   //A->maxEvents = 300000; // use this to limit the number of events
   A->writeSimpleTree = true;
 
-  // Set scatt. electron cuts
-  A->SetEleEnergyThreshold(eleBeamEn * 0.1);  // default is 10% of beamE
-  A->SetIsoCut(0.1);        // default is 10%
-  A->SetIsoConeRadius(1.0); // default is 1.0
-
   // set reconstruction method and final states =============================
   // - see `Analysis` constructor for methods (or other tutorials)
   A->SetReconMethod("Ele");
