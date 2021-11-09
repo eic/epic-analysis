@@ -13,25 +13,25 @@ using std::cerr;
 using std::endl;
 
 AnalysisDD4hep::AnalysisDD4hep(
-  TString infileName_,
-  Double_t eleBeamEn_,
-  Double_t ionBeamEn_,
-  Double_t crossingAngle_,
-  TString outfilePrefix_
-) : Analysis(
-  infileName_,
-  eleBeamEn_,
-  ionBeamEn_,
-  crossingAngle_,
-  outfilePrefix_
-) {
-  // dd4hep-specific settings defaults
-  /*// initialize scatt. electron cuts // DEPRECATED; TODO: remove?
-  fEThreshold = eleBeamEn_*0.1; // min energy cut
-  fIsoR = 1.0;                  // Isolation cone R
-  fIsoCut = 0.1;                // 10%
-  */
-};
+    TString infileName_,
+    Double_t eleBeamEn_,
+    Double_t ionBeamEn_,
+    Double_t crossingAngle_,
+    TString outfilePrefix_
+    ) : Analysis(
+      infileName_,
+      eleBeamEn_,
+      ionBeamEn_,
+      crossingAngle_,
+      outfilePrefix_
+      ) {
+      // dd4hep-specific settings defaults
+      /*// initialize scatt. electron cuts // DEPRECATED; TODO: remove?
+        fEThreshold = eleBeamEn_*0.1; // min energy cut
+        fIsoR = 1.0;                  // Isolation cone R
+        fIsoCut = 0.1;                // 10%
+        */
+    };
 
 // destructor
 AnalysisDD4hep::~AnalysisDD4hep() {
@@ -83,198 +83,198 @@ void AnalysisDD4hep::process_event()
   cout << "begin event loop..." << endl;
   Long64_t nevt = 0;
   while(tr.Next())
+  {
+    if(nevt%10000==0) cout << nevt << " events..." << endl;
+    nevt++;      
+    if(nevt>maxEvents) break;
+
+    // mcparticles loop
+    std::vector<Particles> mcpart;
+    double maxP = 0;
+    int electronID = 0;
+    for(int imc=0; imc<mcparticles_pdgID.GetSize(); imc++)
     {
-      if(nevt%10000==0) cout << nevt << " events..." << endl;
-      nevt++;      
-      if(nevt>maxEvents) break;
+      int pid_ = mcparticles_pdgID[imc];
+      double px_ = mcparticles_psx[imc];
+      double py_ = mcparticles_psy[imc];
+      double pz_ = mcparticles_psz[imc];
+      double mass_ = mcparticles_mass[imc]; // in GeV
+      double p_ = sqrt(pow(mcparticles_psx[imc],2) + pow(mcparticles_psy[imc],2) + pow(mcparticles_psz[imc],2));
 
-      // mcparticles loop
-      std::vector<Particles> mcpart;
-      double maxP = 0;
-      int electronID = 0;
-      for(int imc=0; imc<mcparticles_pdgID.GetSize(); imc++)
-	{
-	  int pid_ = mcparticles_pdgID[imc];
-	  double px_ = mcparticles_psx[imc];
-	  double py_ = mcparticles_psy[imc];
-	  double pz_ = mcparticles_psz[imc];
-	  double mass_ = mcparticles_mass[imc]; // in GeV
-	  double p_ = sqrt(pow(mcparticles_psx[imc],2) + pow(mcparticles_psy[imc],2) + pow(mcparticles_psz[imc],2));
+      // genStatus 4: beam particle 1: final state 
+      if(mcparticles_genStatus[imc] == 1)
+      {
+        Particles part;
+        part.pid = pid_;
+        part.vecPart.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
+        part.mcID = mcparticles_ID[imc];
+        mcpart.push_back(part);
 
-	  // genStatus 4: beam particle 1: final state 
-	  if(mcparticles_genStatus[imc] == 1)
-	    {
-	      Particles part;
-	      part.pid = pid_;
-	      part.vecPart.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
-	      part.mcID = mcparticles_ID[imc];
-	      mcpart.push_back(part);
+        if(mcparticles_pdgID[imc] == 11)
+        {
+          if(p_ > maxP)
+          {
+            maxP = p_;
+            kinTrue->vecElectron.SetPxPyPzE(mcparticles_psx[imc],
+                mcparticles_psy[imc],
+                mcparticles_psz[imc],
+                sqrt(p_*p_ + mass_*mass_));
 
-	      if(mcparticles_pdgID[imc] == 11)
-		{
-		  if(p_ > maxP)
-		    {
-		      maxP = p_;
-		      kinTrue->vecElectron.SetPxPyPzE(mcparticles_psx[imc],
-						      mcparticles_psy[imc],
-						      mcparticles_psz[imc],
-						      sqrt(p_*p_ + mass_*mass_));
+            electronID = mcparticles_ID[imc];
+          }
+        }// if electron
+      }//
+    }//mcparticles loop
 
-		      electronID = mcparticles_ID[imc];
-		    }
-		}// if electron
-	    }//
-	}//mcparticles loop
+    // calculate true DIS kinematics
+    kinTrue->CalculateDIS(reconMethod); // generated (truth)
 
-      // calculate true DIS kinematics
-      kinTrue->CalculateDIS(reconMethod); // generated (truth)
+    // collect reconstructed particles
+    std::vector<Particles> recopart;
+    double hpx=0; 
+    double hpy=0;
+    double hpz=0;
+    double hE=0;
+    int foundElectron = 0;
+    for(int ireco=0; ireco<ReconstructedParticles_pid.GetSize(); ireco++)
+    {
+      int pid_ = ReconstructedParticles_pid[ireco];
 
-      // collect reconstructed particles
-      std::vector<Particles> recopart;
-      double hpx=0; 
-      double hpy=0;
-      double hpz=0;
-      double hE=0;
-      int foundElectron = 0;
-      for(int ireco=0; ireco<ReconstructedParticles_pid.GetSize(); ireco++)
-	{
-	  int pid_ = ReconstructedParticles_pid[ireco];
+      // pid==0: reconstructed tracks with no matching truth pid
+      if(pid_ == 0) continue;
 
-	  // pid==0: reconstructed tracks with no matching truth pid
-	  if(pid_ == 0) continue;
-	  
 
-	  Particles part;
-	  part.pid = pid_;
-	  part.mcID = ReconstructedParticles_mcID[ireco];
-	  part.charge = ReconstructedParticles_charge[ireco];
+      Particles part;
+      part.pid = pid_;
+      part.mcID = ReconstructedParticles_mcID[ireco];
+      part.charge = ReconstructedParticles_charge[ireco];
 
-	  double reco_E = ReconstructedParticles_energy[ireco];
-	  double reco_px = ReconstructedParticles_p_x[ireco];
-	  double reco_py = ReconstructedParticles_p_y[ireco];
-	  double reco_pz = ReconstructedParticles_p_z[ireco];
-	  double reco_mass = ReconstructedParticles_mass[ireco];
-	  double reco_p = sqrt(reco_px*reco_px + reco_py*reco_py + reco_pz*reco_pz);
+      double reco_E = ReconstructedParticles_energy[ireco];
+      double reco_px = ReconstructedParticles_p_x[ireco];
+      double reco_py = ReconstructedParticles_p_y[ireco];
+      double reco_pz = ReconstructedParticles_p_z[ireco];
+      double reco_mass = ReconstructedParticles_mass[ireco];
+      double reco_p = sqrt(reco_px*reco_px + reco_py*reco_py + reco_pz*reco_pz);
 
-	  part.vecPart.SetPxPyPzE(reco_px, 
-				  reco_py, 
-				  reco_pz, 
-				  sqrt(reco_p*reco_p + reco_mass*reco_mass));
+      part.vecPart.SetPxPyPzE(reco_px, 
+          reco_py, 
+          reco_pz, 
+          sqrt(reco_p*reco_p + reco_mass*reco_mass));
 
-	  recopart.push_back(part);
+      recopart.push_back(part);
 
-	  hpx += reco_px;
-	  hpy += reco_py;
-	  hpz += reco_pz;
-	  hE += reco_E;
+      hpx += reco_px;
+      hpy += reco_py;
+      hpz += reco_pz;
+      hE += reco_E;
 
-	  // find scattered electron
-	  if(pid_ == 11 && part.mcID == electronID)
-	    {
-	      foundElectron = 1;
-	      kin->vecElectron.SetPxPyPzE(reco_px,
-					  reco_py,
-					  reco_pz,
-					  sqrt(reco_p*reco_p + reco_mass*reco_mass));
-	    }	  
-	}//reco loop
+      // find scattered electron
+      if(pid_ == 11 && part.mcID == electronID)
+      {
+        foundElectron = 1;
+        kin->vecElectron.SetPxPyPzE(reco_px,
+            reco_py,
+            reco_pz,
+            sqrt(reco_p*reco_p + reco_mass*reco_mass));
+      }	  
+    }//reco loop
 
-      // skip the event if the scattered electron is not found
-      // and we need it to calculate the DIS kinematics
-      if(foundElectron < 1){
-	noele++;
-	if(reconMethod != "JB")
-	  continue;
+    // skip the event if the scattered electron is not found
+    // and we need it to calculate the DIS kinematics
+    if(foundElectron < 1){
+      noele++;
+      if(reconMethod != "JB")
+        continue;
+    }
+
+    kin->vecHadron.SetPxPyPzE(hpx, hpy, hpz, hE);
+    kin->vecHadron -= kin->vecElectron;
+
+    //Hadronic reconstruction 
+    TLorentzVector head_vecElectron;
+    TLorentzVector head_vecHadron;
+    kin->TransformToHeadOnFrame(kin->vecElectron,head_vecElectron);
+    kin->TransformToHeadOnFrame(kin->vecHadron,head_vecHadron);
+    kin->sigmah = (head_vecHadron.E() - head_vecHadron.Pz());
+    kin->Pxh = head_vecHadron.Px();
+    kin->Pyh = head_vecHadron.Py();
+
+    // calculate DIS kinematics
+    kin->CalculateDIS(reconMethod); // reconstructed
+
+    // calculate hadron kinematics
+    for(auto part : recopart)
+    {
+      int pid_ = part.pid;
+      int mcid_ = part.mcID; 
+
+      // final state cut
+      // - check PID, to see if it's a final state we're interested in for
+      //   histograms; if not, proceed to next track
+      auto kv = PIDtoFinalState.find(pid_);
+      if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
+      if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
+
+      kin->vecHadron = part.vecPart;
+      kin->CalculateHadronKinematics();
+
+      // find the matching truth information
+      // using mcID
+      if(mcid_ > 0){
+        for(auto imc : mcpart)
+        {
+          if(mcid_ == imc.mcID)
+          {
+            kinTrue->vecHadron = imc.vecPart;
+            break;
+          }
+        }
+      }
+      else{
+        // give it another shot
+        double mineta = 4.0;
+        for(int imc=0; imc<(int)mcpart.size(); imc++)
+        {
+          if(pid_ == mcpart[imc].pid)
+          {
+            double deta = abs(kin->vecHadron.Eta() - mcpart[imc].vecPart.Eta());
+            if( deta < mineta )
+            {
+              mineta = deta;
+              kinTrue->vecHadron = mcpart[imc].vecPart;
+            }
+          }
+        }
       }
 
-      kin->vecHadron.SetPxPyPzE(hpx, hpy, hpz, hE);
-      kin->vecHadron -= kin->vecElectron;
+      kinTrue->CalculateHadronKinematics();
 
-      //Hadronic reconstruction 
-      TLorentzVector head_vecElectron;
-      TLorentzVector head_vecHadron;
-      kin->TransformToHeadOnFrame(kin->vecElectron,head_vecElectron);
-      kin->TransformToHeadOnFrame(kin->vecHadron,head_vecHadron);
-      kin->sigmah = (head_vecHadron.E() - head_vecHadron.Pz());
-      kin->Pxh = head_vecHadron.Px();
-      kin->Pyh = head_vecHadron.Py();
+      // asymmetry injection
+      //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
+      //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
+      //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
-      // calculate DIS kinematics
-      kin->CalculateDIS(reconMethod); // reconstructed
+      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
+      wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+      wTrackTotal += wTrack;
 
-      // calculate hadron kinematics
-      for(auto part : recopart)
-	{
-	  int pid_ = part.pid;
-	  int mcid_ = part.mcID; 
+      // fill track histograms in activated bins
+      FillHistosTracks();
 
-	  // final state cut
-	  // - check PID, to see if it's a final state we're interested in for
-	  //   histograms; if not, proceed to next track
-	  auto kv = PIDtoFinalState.find(pid_);
-	  if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
-	  if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
-	  
-	  kin->vecHadron = part.vecPart;
-	  kin->CalculateHadronKinematics();
-	  
-	  // find the matching truth information
-	  // using mcID
-	  if(mcid_ > 0){
-	    for(auto imc : mcpart)
-	      {
-		if(mcid_ == imc.mcID)
-		  {
-		    kinTrue->vecHadron = imc.vecPart;
-		    break;
-		  }
-	      }
-	  }
-	  else{
-	    // give it another shot
-	    double mineta = 4.0;
-	    for(int imc=0; imc<(int)mcpart.size(); imc++)
-	      {
-		if(pid_ == mcpart[imc].pid)
-		  {
-		    double deta = abs(kin->vecHadron.Eta() - mcpart[imc].vecPart.Eta());
-		    if( deta < mineta )
-		      {
-			mineta = deta;
-			kinTrue->vecHadron = mcpart[imc].vecPart;
-		      }
-		  }
-	      }
-	  }
+      // fill simple tree
+      // - not binned
+      // - `activeEvent` is only true if at least one bin gets filled for this track
+      // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDelphes)
+      if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
 
-	  kinTrue->CalculateHadronKinematics();
-      
-          // asymmetry injection
-          //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
-          //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
-          //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
+    }//hadron loop
 
-          Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
-          wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
-          wTrackTotal += wTrack;
+  }// tree reader loop
 
-          // fill track histograms in activated bins
-          FillHistosTracks();
-          
-          // fill simple tree
-          // - not binned
-          // - `activeEvent` is only true if at least one bin gets filled for this track
-          // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDelphes)
-          if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
-
-	}//hadron loop
-      
-    }// tree reader loop
-  
   cout << "Total no scattered electron found: " << noele << endl;
   cout << "end event loop" << endl;
   // event loop end =========================================================                 
-  
+
   // finish execution
   Finish();
 
