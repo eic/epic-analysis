@@ -17,13 +17,12 @@ For more details, see [S3 file storage documentation](https://doc.athena-eic.org
     - you will need these env vars when running `root` macros to stream from S3
     - alternatively you can use `mc` to download the files from S3
 - find a directory of full simulation files; example S3 navigation commands:
-  - directory tree `mc tree S3/eictest/ATHENA/RECO/acadia-v2.1/DIS/NC/`
+  - show directory tree: `mc tree S3/eictest/ATHENA/RECO/acadia-v2.1/DIS/NC/`
   - list files: `mc ls S3/eictest/ATHENA/RECO/acadia-v2.1/DIS/NC/10x275/minQ2=1`
 - from here, you have two options:
-  - generate a list of S3 file URLs, including extra information such as Q2
-    minimum and cross section; these files will be "streamed" when running
+  - generate a list of S3 file URLs, which will be "streamed" when running
     the analysis code, and will not be stored locally
-  - if streaming files from S3 is unsuitable, you can download them instead,
+  - if streaming files from S3 is unsuitable, you can download them instead
     using MinIO client: `mc cp S3/.../.../source.root ./your/data/directory/`
 
 # Generating Config Files
@@ -45,7 +44,7 @@ To stream, we need to make a list of URLs.
       `generate-s3-list.sh S3/.../... 0 3e-4 1 | grep -v OLD > files.config`
 
 ### Downloaded from S3
-Instead of URLs, we make a list of files, together with the columns needed to
+Instead of URLs, we make a list of local files, together with the columns needed to
 make a config file
 - the script `generate-local-list.sh` is similar to `generate-s3-list.sh`, but
   uses files from the specified local directory; see above for details and
