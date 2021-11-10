@@ -16,21 +16,23 @@ For more details, see [S3 file storage documentation](https://doc.athena-eic.org
     - `export=S3_SECRET_KEY=*****`
   - then add our S3 host to MinIO client: `add-host.sh`
     - this only needs to be done once on your machine or container
-- find a directory of full simulation files; example S3 navigation commands:
+- find a directory on S3 with full simulation files; example S3 navigation commands:
+  - top-level ATHENA directory list: `mc ls S3/eictest/ATHENA`
   - show directory tree: `mc tree S3/eictest/ATHENA/RECO/acadia-v2.1/DIS/NC/`
   - list files: `mc ls S3/eictest/ATHENA/RECO/acadia-v2.1/DIS/NC/10x275/minQ2=1`
-- from here, you have two options:
+- from here, you have two options, both of which are described in the next sections:
   - generate a list of S3 file URLs, which will be "streamed" when running
     the analysis code, and will not be stored locally
   - if streaming files from S3 is unsuitable, you can download them instead
-    using MinIO client: `mc cp S3/.../.../source.root ./your/data/directory/`
+    using MinIO client: `mc cp S3/.../.../source.root ./your/data/directory/`;
+    see below for a download script for automation and filtering
 
 # Generating Config Files
 Next we need to make a "config file", which consists of the file name, and
 additional comments such as Q2min (see [documentation here](../tutorial/README.md)).
 Follow the next sections, whether you plan to stream from S3 or download.
 
-### Streaming from S3
+### Stream from S3
 To stream, we need to make a list of URLs.
 - run `generate-s3-list.sh` to generate a list of files
   - running it with no arguments will print the usage and required arguments
@@ -43,7 +45,7 @@ To stream, we need to make a list of URLs.
     - use `grep` to remove files that have `"OLD"` in their filename:
       `generate-s3-list.sh S3/.../... 0 3e-4 1 | grep -v OLD > files.config`
 
-### Downloaded from S3
+### Download from S3
 Instead of URLs, we make a list of local files, together with the columns needed to
 make a config file
 - first, to download the files from S3 to a local directory
