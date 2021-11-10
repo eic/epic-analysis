@@ -36,9 +36,11 @@ this tutorial directory, e.g., `root -b -q tutorial/analysis_template.C`
     the event loop; the postprocessor macro is typically fast, since
     it analyzes the resulting data structures
 
-- in the analysis macros, the input files are specified by a list, with the
-  following columns for each file (so that we can combine different Q2 regions
-  together using relative weights):
+## Input File Lists (Config Files)
+
+- in the analysis macros, the input files are specified by a list, a "config
+  file", with the following columns for each file (so that we can combine
+  different Q2 regions together using relative weights):
   - file name (relative to the top-level directory, unless you have an
     absolute path)
   - the number of events for the weighting and cross section
@@ -50,6 +52,8 @@ this tutorial directory, e.g., `root -b -q tutorial/analysis_template.C`
   - see files in `../datarec/*.config` for examples
     - the tutorials below use `../datarec/tutorial.config`, which has a
       single file, the aforementioned example ROOT file
+  - the script `../s3tools/generate-local-list.sh` can also be used to help
+    generate such a file; see the README in this directory for more information
 
 ## Examples:
 
