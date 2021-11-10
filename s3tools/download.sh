@@ -7,6 +7,7 @@ if [ $# -lt 1 ]; then
   exit 2
 fi
 targetPath=$1
+mkdir -p $targetPath
 shift
 
 # start downloader script

@@ -13,6 +13,7 @@ out/*/*.txt
 external
 *.sif
 container/img
+get-files.sh
 
 # users' custom ignores
 datagen/escalate

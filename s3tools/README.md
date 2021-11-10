@@ -5,6 +5,25 @@ repository
 
 For more details, see [S3 file storage documentation](https://doc.athena-eic.org/en/latest/howto/s3_file_storage.html)
 
+### Quick Start
+Here are commands I'm using for testing; documentation below describes what they do
+```
+# download files for 5x41, 3 different Q2 minima
+s3tools/generate-s3-list.sh S3/eictest/ATHENA/RECO/canyonlands-v1.2/DIS/NC/5x41/minQ2=1   | s3tools/download.sh datarec/canyonlands/5x41/minQ2=1
+s3tools/generate-s3-list.sh S3/eictest/ATHENA/RECO/canyonlands-v1.2/DIS/NC/5x41/minQ2=10  | s3tools/download.sh datarec/canyonlands/5x41/minQ2=10
+s3tools/generate-s3-list.sh S3/eictest/ATHENA/RECO/canyonlands-v1.2/DIS/NC/5x41/minQ2=100 | s3tools/download.sh datarec/canyonlands/5x41/minQ2=100
+tree datarec/canyonlands
+
+# build a config file (TODO: need to set $crossSection for each case); Q2 min should be decreasing
+s3tools/generate-local-list.sh datarec/canyonlands/5x41/minQ2=100 0 $crossSection 100 | tee    datarec/canyonlands/5x41/files.config
+s3tools/generate-local-list.sh datarec/canyonlands/5x41/minQ2=10  0 $crossSection 10  | tee -a datarec/canyonlands/5x41/files.config
+s3tools/generate-local-list.sh datarec/canyonlands/5x41/minQ2=1   0 $crossSection 1   | tee -a datarec/canyonlands/5x41/files.config
+more datarec/canyonlands/5x41/files.config
+
+# run a macro
+root -b -q macro/ci/analysis_dd4hep.C'("datarec/canyonlands/5x41/files.config",5,41)'
+```
+
 ### Accessing S3 Files
 - first, download the [MinIO client](https://docs.min.io/docs/minio-client-complete-guide)
   - if you are using the Singularity or Docker container, it is already installed
