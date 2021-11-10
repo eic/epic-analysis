@@ -10,12 +10,12 @@ For more details, see [S3 file storage documentation](https://doc.athena-eic.org
   - if you are using the Singularity or Docker container, it is already installed
   - the main command is `mc`
 - next, setup your client to connect to our S3 host (ask someone for credentials):
-  - `mc config host add S3 https://dtn01.sdcc.bnl.gov:9000 <login> <password>`
-  - only needs to be done once on your machine or container
-  - it is recommended to use env vars `$S3_ACCESS_KEY` and `$S3_SECRET_KEY`
-    - scripts will automatically use these if they are set
-    - you will need these env vars when running `root` macros to stream from S3
-    - alternatively you can use `mc` to download the files from S3
+  - first set env vars `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password
+    (ask someone if you don't know):
+    - `export=S3_ACCESS_KEY=*****`
+    - `export=S3_SECRET_KEY=*****`
+  - then add our S3 host to MinIO client: `add-host.sh`
+    - this only needs to be done once on your machine or container
 - find a directory of full simulation files; example S3 navigation commands:
   - show directory tree: `mc tree S3/eictest/ATHENA/RECO/acadia-v2.1/DIS/NC/`
   - list files: `mc ls S3/eictest/ATHENA/RECO/acadia-v2.1/DIS/NC/10x275/minQ2=1`
@@ -46,9 +46,19 @@ To stream, we need to make a list of URLs.
 ### Downloaded from S3
 Instead of URLs, we make a list of local files, together with the columns needed to
 make a config file
-- the script `generate-local-list.sh` is similar to `generate-s3-list.sh`, but
-  uses files from the specified local directory; see above for details and
-  example usage
-- Important: execute this script from the main repository directory (`../`), so
-  that the file names are relative to the same directory that the macros are
-  designed to be executed from
+- first, to download the files from S3 to a local directory
+  `/my/local/directory`, pipe the output of `generate-s3-list.sh` (see above)
+  to `download.sh`, for example:
+  - `generate-s3-list.sh S3/.../... | grep -v OLD | download.sh /my/local/directory`
+  - this will generate a downloader script `/my/local/directory/get-files.sh`,
+    and execute it; this `get-files.sh` script is useful because it tells you
+    where the files have been downloaded from, and can be easily executed again
+    or editted in case the downloading experience any problems
+- next run the script `generate-local-list.sh`, which is very similar to
+  `generate-s3-list.sh`, but uses files from the specified local directory; see
+  above for details and example usage
+  - **Important**: execute this script from the main repository directory
+    (`../`), so that the file names are relative to the same directory that the
+    macros are designed to be executed from:
+    `s3tools/generate-local-list.sh path/to/data`
+    - or just specify an absolute path, which is more robust

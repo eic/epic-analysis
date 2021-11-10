@@ -16,7 +16,7 @@ shift
 columns=$@
 
 # get file list from local directory ########################
-ls $dataDir |\
+ls $dataDir | grep -E '\.root$' |\
 while read fileName; do
   echo "$dataDir/$fileName $columns"
 done
