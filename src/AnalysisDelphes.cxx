@@ -148,15 +148,6 @@ void AnalysisDelphes::Execute() {
     // get vector of jets
     // TODO: should this have an option for clustering method?
     kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
-    
-    // asymmetry injection
-    //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
-    //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
-    //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
-
-    // Get index of file that the event comes from.
-    wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
-    wTrackTotal += wTrack;
 
     // track loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     itTrack.Reset();
