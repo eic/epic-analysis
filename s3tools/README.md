@@ -57,6 +57,13 @@ The config files require the following columns, in this order:
 - cross section (can be obtained from Pythia output logs, for example)
 - minimum Q2
 
+**Patch**: the above format is the original format, however, the current Q2min
+weighting implementation requires a new format. In case we revert to using the
+above old format, we temporarily use the script `reformat-config.sh` to
+transform the above old format into the new format. See comments in
+`reformat-config.sh` for details. Execute:
+  - `s3tools/reformat-config.sh files.config files.new.config`
+
 ### Stream from S3
 To stream, we need to make a list of URLs.
 - run `generate-s3-list.sh` to generate a list of files
@@ -89,10 +96,3 @@ make a config file
     macros are designed to be executed from:
     `s3tools/generate-local-list.sh path/to/data`
     - or just specify an absolute path, which is more robust
-
-**Patch**: the above format is the original format, however, the current Q2min
-weighting implementation requires a new format. In case we revert to using the
-above old format, we temporarily use the script `reformat-config.sh` to
-transform the above old format into the new format. See comments in
-`reformat-config.sh` for details. Execute:
-  - `s3tools/reformat-config.sh files.config files.new.config`
