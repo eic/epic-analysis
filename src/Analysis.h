@@ -69,7 +69,7 @@ class Analysis : public TNamed
     // add files to the TChain; this is called by `Prepare()`, but you can use these public
     // methods to add more files if you want
     // add single file `fileName` with given Q2 range and xs.
-    bool AddFile(std::vector<std::string> fileName, std::vector<Long64_t> entries, Double_t xs, Double_t Q2min);
+    bool AddFile(std::vector<std::string> fileNames, std::vector<Long64_t> entries, Double_t xs, Double_t Q2min);
 
     // access HistosDAG
     HistosDAG *GetHistosDAG();
