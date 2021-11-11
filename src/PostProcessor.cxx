@@ -687,7 +687,7 @@ void PostProcessor::DrawSDInBinsTogether(
         subHist->GetYaxis()->SetLabelOffset(0.02);
 
         subHist->SetTitle(histNames[k]);
-        subHist->SetMarkerStyle(k+24);
+        subHist->SetMarkerStyle(k==0 ? 32 : k+25);
         subHist->SetMarkerColor(k+2);
         if (k+2>=5) subHist->SetMarkerColor(k+3); //NOTE: 5 is yellow: very hard to see.
         subHist->SetMarkerSize(0.5);//NOTE: Remember these will be small plots so keep the binning small and the markers big

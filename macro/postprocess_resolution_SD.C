@@ -60,10 +60,10 @@ void postprocess_resolution_SD(
           );
     };
 
-    const int nNames = 2;
+    const int nNames = 3;
     double yMin, yMax; yMin = -0.1; yMax = 0.5;//Adjust as needed
-    TString histNames[nNames] = {"z_Q2_Res","z_x_Res"};//,"z_y_Res","z_z_Res","z_pT_Res","z_phiH_Res","z_phiS_Res"};
-    TString labels[nNames] = {"Q^{2}","x"};
+    TString histNames[nNames] = {"z_purity","z_Q2_Res","z_x_Res"};//,"z_y_Res","z_z_Res","z_pT_Res","z_phiH_Res","z_phiS_Res"};
+    TString labels[nNames] = {"purity","Q^{2}","x"};
     P->DrawSDInBinsTogether(
           canvname, histos_xQ2, histNames, labels, nNames, yMin, yMax,
           "x", nx, xMin, xMax, true,

@@ -156,6 +156,7 @@ void Analysis::Prepare() {
     string fileName;
     Double_t xs, Q2min;
     ss >> fileName >> xs >> Q2min;
+    std::cout<<fileName<<" xs "<<xs<<" Q2min "<<Q2min<<std::endl;//DEBUGGING
     if (!ss) {
       continue;
     }
@@ -565,8 +566,6 @@ void Analysis::FillHistosTracks() {
     // purities
     H->Hist("z_true")->Fill(kinTrue->z, wTrack );
     if( (H->Hist("z_true"))->FindBin(kinTrue->z) == (H->Hist("z_true"))->FindBin(kin->z) ) H->Hist("z_purity")->Fill(kin->z,wTrack);
-
-    if( (H->Hist("Q2vsXtrue"))->FindBin(kinTrue->x,kinTrue->Q2) == (H->Hist("Q2vsXtrue"))->FindBin(kin->x,kin->Q2) ) dynamic_cast<TH2*>(H->Hist("Q2vsXpurity"))->Fill(kin->x,kin->Q2,wTrack);
     
     // -- reconstructed vs. generated
     dynamic_cast<TH2*>(H->Hist("x_RvG"))->Fill(kinTrue->x,kin->x,wTrack);
