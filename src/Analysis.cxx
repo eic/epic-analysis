@@ -106,42 +106,52 @@ Analysis::Analysis(
 // input files
 //------------------------------------
 // add a single file
-bool Analysis::AddFile(TString fileName, Long64_t entries, Double_t xs, Double_t Q2min) {
-  if(fileName=="") return false;
-  cout << "-- running analysis of " << fileName << endl;
+bool Analysis::AddFile(std::vector<std::string> fileNames, std::vector<Long64_t> entries, Double_t xs, Double_t Q2min) {
+  cout << "AddFile: " << Q2min << ", " << xs << ", ";
+  for (string fileName : fileNames) {
+      cout << fileName << ", ";
+  }
+  cout << endl;
   // insert in order of Q2min
   std::size_t insertIdx = 0;
   for (std::size_t idx = 0; idx < infiles.size(); ++idx) {
-    if (infiles[idx] == fileName) {
-      cerr << "File " << fileName << " appears twice in config file" << endl;
-      return false;
-    }
-    if (Q2min == inQ2mins[idx]) {
+    if (Q2min == Q2mins[idx]) {
       cerr << "Q2min " << Q2min << "appears twice in config file" << endl;
       return false;
-    } else if (Q2min < inQ2mins[idx]) {
+    } else if (Q2min < Q2mins[idx]) {
       break;
     } else {
       insertIdx += 1;
     }
   }
-  infiles.insert(infiles.begin() + insertIdx, fileName);
-  inXsecs.insert(inXsecs.begin() + insertIdx, xs);
-  inXsecsTot.insert(inXsecsTot.begin() + insertIdx, xs);
-  inQ2mins.insert(inQ2mins.begin() + insertIdx, Q2min);
+  infiles.insert(infiles.begin() + insertIdx, fileNames);
+  Q2xsecs.insert(Q2xsecs.begin() + insertIdx, xs);
+  Q2xsecsTot.insert(Q2xsecsTot.begin() + insertIdx, xs);
+  Q2mins.insert(Q2mins.begin() + insertIdx, Q2min);
   inEntries.insert(inEntries.begin() + insertIdx, entries);
+  Long64_t totalEntry = 0;
+  for (Long64_t entry : entries) {
+      totalEntry += entry;
+  }
+  Q2entries.insert(Q2entries.begin() + insertIdx, totalEntry);
   // adjust cross-sections to account for overlapping regions
   for (std::size_t idx = infiles.size() - 1; idx > insertIdx; --idx) {
-    inXsecs[insertIdx] -= inXsecs[idx];
+    Q2xsecs[insertIdx] -= Q2xsecs[idx];
   }
   if (insertIdx > 0) {
-    inXsecs[insertIdx - 1] -= inXsecs[insertIdx];
+    Q2xsecs[insertIdx - 1] -= Q2xsecs[insertIdx];
   }
-  for (std::size_t idx = 0; idx < inXsecs.size(); ++idx) {
-    if (inXsecs[idx] < 0.) {
+  for (std::size_t idx = 0; idx < Q2xsecs.size(); ++idx) {
+    if (Q2xsecs[idx] < 0.) {
       cerr << "Cross-sections must strictly decrease with stricter Q2min cuts" << endl;
       return false;
     }
+  }
+  inLookup.clear();
+  std::size_t total = 0;
+  for (std::size_t idx = 0; idx < infiles.size(); ++idx) {
+    total += infiles[idx].size();
+    inLookup.resize(total, idx);
   }
   return true;
 }
@@ -154,29 +164,46 @@ void Analysis::Prepare() {
   string line;
   while (std::getline(fin, line)) {
     stringstream ss(line);
-    string fileName;
-    Long64_t entries;
+    std::vector<string> fileNames;
+    std::vector<Long64_t> entries;
     Double_t xs, Q2min;
-    ss >> fileName >> entries >> xs >> Q2min;
-    if (entries <= 0) {
-      TFile* file = TFile::Open(fileName.c_str());
-      if (file->IsZombie()) {
-        cerr << "ERROR: Couldn't open input file '" << fileName << "'" << endl;
-        return;
-      }
-      TTree* tree = file->Get<TTree>("Delphes");
-      if (tree == nullptr) tree = file->Get<TTree>("events");
-      if (tree == nullptr) {
-        cerr << "ERROR: Couldn't find Delphes or events tree in file '" << fileName << "'" << endl;
-        return;
-      }
-      entries = tree->GetEntries();
-    }
+    ss >> Q2min >> xs;
     if (!ss) {
       continue;
     }
-    if (!AddFile(TString(fileName.c_str()), entries, xs, Q2min)) {
-      cerr << "ERROR: Couldn't add file '" << fileName << "'" << endl;
+    while (true) {
+      std::string fileName;
+      Long64_t entry;
+      ss >> fileName >> entry;
+      if (ss) {
+        fileNames.push_back(fileName);
+        entries.push_back(entry);
+      } else {
+        break;
+      }
+    }
+    for (std::size_t idx = 0; idx < fileNames.size(); ++idx) {
+      if (entries[idx] <= 0) {
+        TFile* file = TFile::Open(fileNames[idx].c_str());
+        if (file->IsZombie()) {
+          cerr << "ERROR: Couldn't open input file '" << fileNames[idx] << "'" << endl;
+          return;
+        }
+        TTree* tree = file->Get<TTree>("Delphes");
+        if (tree == nullptr) tree = file->Get<TTree>("events");
+        if (tree == nullptr) {
+          cerr << "ERROR: Couldn't find Delphes or events tree in file '" << fileNames[idx] << "'" << endl;
+          return;
+        }
+        entries[idx] = tree->GetEntries();
+      }
+    }
+    if (!AddFile(fileNames, entries, xs, Q2min)) {
+      cerr << "ERROR: Couldn't add files ";
+      for (std::string fileName : fileNames) {
+        cerr << fileName << " ";
+      }
+      cerr << endl;
       return;
     }
   }
@@ -266,12 +293,12 @@ void Analysis::Prepare() {
     Double_t etabinsCoarse[] = {-4.0,-1.0,1.0,4.0};
     Double_t pbinsCoarse[] = {0.1,1,10,100};
     HS->DefineHist2D("etaVsPcoarse","p","#eta","GeV","",
-	3, pbinsCoarse,
-	3, etabinsCoarse,
-	true,false
-	);
-	
-		     
+        3, pbinsCoarse,
+        3, etabinsCoarse,
+        true,false
+        );
+
+     
     // -- single-hadron cross sections
     //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
     HS->DefineHist1D("Q_xsec","Q","GeV",10,1.0,10.0,true,true); // log
@@ -340,22 +367,32 @@ void Analysis::Prepare() {
 };
 
 void Analysis::CalculateEventQ2Weights() {
-  Q2weights.resize(infiles.size());
+  Q2weights.resize(Q2xsecs.size());
   entriesTot = 0;
-  for (Long64_t entry : inEntries) {
+  for (Long64_t entry : Q2entries) {
     entriesTot += entry;
   }
-  xsecTot = inXsecsTot.front();
-  for (Int_t idx = 0; idx < infiles.size(); ++idx) {
-    Double_t xsecFactor = inXsecs[idx] / xsecTot;
+  xsecTot = Q2xsecsTot.front();
+  cout << "Q2 weighting info:" << endl;
+  for (Int_t idx = 0; idx < Q2xsecs.size(); ++idx) {
+    Double_t xsecFactor = Q2xsecs[idx] / xsecTot;
     Double_t entries = 0.;
     for (Int_t idxC = 0; idxC <= idx; ++idxC) {
       // estimate how many events from this file lie in the given Q2 range
-      entries += inEntries[idxC] * (inXsecs[idx] / inXsecsTot[idxC]);
+      entries += Q2entries[idxC] * (Q2xsecs[idx] / Q2xsecsTot[idxC]);
     }
     Double_t numFactor = entries / entriesTot;
     Q2weights[idx] = xsecFactor / numFactor;
-    cout << "Weights for " << infiles[idx] << ": " << numFactor << ", " << xsecFactor << endl;
+    cout << "\tQ2 > " << Q2mins[idx] << ":" << endl;
+    cout << "\t\t";
+    for (Int_t idxF = 0; idxF < infiles[idx].size(); ++idxF) {
+      cout << infiles[idx][idxF] << "; ";
+    }
+    cout << endl;
+    cout << "\t\tcount    = " << Q2entries[idx] << endl;
+    cout << "\t\txsec     = " << Q2xsecs[idx] << endl;
+    cout << "\t\txsec_tot = " << Q2xsecsTot[idx] << endl;
+    cout << "\t\tweight   = " << Q2weights[idx] << endl;
   }
 }
 
@@ -370,13 +407,13 @@ Double_t Analysis::GetEventQ2Weight(Double_t Q2, Int_t guess) {
 
 Int_t Analysis::GetEventQ2Idx(Double_t Q2, Int_t guess) {
   Int_t idx = guess;
-  if (Q2 < inQ2mins[idx]) {
+  if (Q2 < Q2mins[idx]) {
     do {
       idx -= 1;
-    } while (idx >= 0 && Q2 < inQ2mins[idx]);
+    } while (idx >= 0 && Q2 < Q2mins[idx]);
     return idx;
   } else {
-    while (idx + 1 < inQ2mins.size() && Q2 >= inQ2mins[idx + 1]) {
+    while (idx + 1 < Q2mins.size() && Q2 >= Q2mins[idx + 1]) {
       idx += 1;
     }
     return idx;

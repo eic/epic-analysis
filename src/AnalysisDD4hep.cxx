@@ -46,7 +46,10 @@ void AnalysisDD4hep::process_event()
   // read dd4hep tree
   TChain *chain = new TChain("events");
   for(Int_t idx=0; idx<infiles.size(); ++idx) {
-    chain->Add(infiles[idx], inEntries[idx]);
+    for(std::size_t idxF=0; idxF<infiles[idx].size(); ++idxF) {
+      std::cout << "Adding " << infiles[idx][idxF] << " with " << inEntries[idx][idxF] << std::endl;
+      chain->Add(infiles[idx][idxF].c_str(), inEntries[idx][idxF]);
+    }
   }
 
   TTreeReader tr(chain);
@@ -254,7 +257,7 @@ void AnalysisDD4hep::process_event()
       //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
       //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
-      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
+      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
       wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
       wTrackTotal += wTrack;
 
