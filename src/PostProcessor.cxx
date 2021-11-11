@@ -665,6 +665,7 @@ void PostProcessor::DrawSDInBinsTogether(
       THStack *hist = new THStack();
       TLegend *lg = new TLegend(0.1,0.1,0.9,0.9);
       lg->SetTextSize(0.2);
+      if (nNames>3) lg->SetNColumns(2);
 
       for (int k=0; k<nNames; k++) {
         TH2D *fitHist = (TH2D*)H->Hist(histNames[k])->Clone();
