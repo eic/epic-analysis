@@ -314,15 +314,30 @@ void Analysis::Prepare() {
     // HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -0.1*TMath::Pi(), 0.1*TMath::Pi());
     // HS->DefineHist1D("pT_Res","pT-pT^{true}","GeV", NBINS, -1.5, 1.5);
     HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
-        // 20,1e-4,1,//TODO: OLD -> Might revert...
-        // 10,1,1e4,
-        // true,true
-        NBINS,1e-3,1,
-        NBINS,1,100,
+        20,1e-4,1,
+        10,1,1e4,
         true,true
         );
-
-
+    HS->DefineHist2D("Q2vsXpurity","x","Q^{2}","","GeV^{2}",
+        20,1e-4,1,
+        10,1,1e4,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_zres","x","Q^{2}","","GeV^{2}",
+        20,1e-4,1,
+        10,1,1e4,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_pTres","x","Q^{2}","","GeV^{2}",
+        20,1e-4,1,
+        10,1,1e4,
+        true,true
+        );
+    HS->DefineHist2D("Q2vsX_phiHres","x","Q^{2}","","GeV^{2}",
+        20,1e-4,1,
+        10,1,1e4,
+        true,true
+        );
     // -- reconstructed vs. generated
     HS->DefineHist2D("x_RvG","generated x","reconstructed x","","",
         NBINS,1e-3,1,
