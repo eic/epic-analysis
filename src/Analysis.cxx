@@ -52,6 +52,7 @@ Analysis::Analysis(
   availableBinSchemes.insert(std::pair<TString,TString>("phiH","#phi_{h}"));
   availableBinSchemes.insert(std::pair<TString,TString>("phiS","#phi_{S}"));
   availableBinSchemes.insert(std::pair<TString,TString>("tSpin","spin"));
+  availableBinSchemes.insert(std::pair<TString,TString>("lSpin","spinL"));
   /* jets */
   availableBinSchemes.insert(std::pair<TString,TString>("ptJet", "jet p_{T}"));
   availableBinSchemes.insert(std::pair<TString,TString>("zJet", "jet z"));
@@ -67,12 +68,14 @@ Analysis::Analysis(
   finalStateToTitle.insert(std::pair<TString,TString>("pimTrack","#pi^{-} tracks"));
   finalStateToTitle.insert(std::pair<TString,TString>("KpTrack","K^{+} tracks"));
   finalStateToTitle.insert(std::pair<TString,TString>("KmTrack","K^{-} tracks"));
+  finalStateToTitle.insert(std::pair<TString,TString>("pTrack","p^{+} tracks"));
   finalStateToTitle.insert(std::pair<TString,TString>("jet","jets"));
   // - PID -> finalState ID
   PIDtoFinalState.insert(std::pair<int, TString>( 211,"pipTrack"));
   PIDtoFinalState.insert(std::pair<int, TString>(-211,"pimTrack"));
   PIDtoFinalState.insert(std::pair<int, TString>( 321,"KpTrack"));
   PIDtoFinalState.insert(std::pair<int, TString>(-321,"KmTrack"));
+  PIDtoFinalState.insert(std::pair<int, TString>(2212,"pTrack"));
 
 
   // kinematics reconstruction methods
@@ -96,14 +99,14 @@ Analysis::Analysis(
 
   // miscellaneous
   infiles.clear();
-  numGen = 0;
+  entriesTot = 0;
 };
 
 
 // input files
 //------------------------------------
 // add a single file
-bool Analysis::AddFile(TString fileName, Double_t xs, Double_t Q2min) {
+bool Analysis::AddFile(TString fileName, Long64_t entries, Double_t xs, Double_t Q2min) {
   if(fileName=="") return false;
   cout << "-- running analysis of " << fileName << endl;
   // insert in order of Q2min
@@ -124,11 +127,9 @@ bool Analysis::AddFile(TString fileName, Double_t xs, Double_t Q2min) {
   }
   infiles.insert(infiles.begin() + insertIdx, fileName);
   inXsecs.insert(inXsecs.begin() + insertIdx, xs);
+  inXsecsTot.insert(inXsecsTot.begin() + insertIdx, xs);
   inQ2mins.insert(inQ2mins.begin() + insertIdx, Q2min);
-  inEntries.insert(inEntries.begin() + insertIdx, 0);
-  if (insertIdx == 0) {
-    xsecTot = xs;
-  }
+  inEntries.insert(inEntries.begin() + insertIdx, entries);
   // adjust cross-sections to account for overlapping regions
   for (std::size_t idx = infiles.size() - 1; idx > insertIdx; --idx) {
     inXsecs[insertIdx] -= inXsecs[idx];
@@ -154,13 +155,28 @@ void Analysis::Prepare() {
   while (std::getline(fin, line)) {
     stringstream ss(line);
     string fileName;
+    Long64_t entries;
     Double_t xs, Q2min;
-    ss >> fileName >> xs >> Q2min;
-    std::cout<<fileName<<" xs "<<xs<<" Q2min "<<Q2min<<std::endl;//DEBUGGING
+    ss >> fileName >> entries >> xs >> Q2min;
+    if (entries <= 0) {
+      TFile* file = TFile::Open(fileName.c_str());
+      if (file->IsZombie()) {
+        cerr << "ERROR: Couldn't open input file '" << fileName << "'" << endl;
+        return;
+      }
+      TTree* tree = file->Get<TTree>("Delphes");
+      if (tree == nullptr) tree = file->Get<TTree>("events");
+      if (tree == nullptr) {
+        cerr << "ERROR: Couldn't find Delphes or events tree in file '" << fileName << "'" << endl;
+        return;
+      }
+      entries = tree->GetEntries();
+    }
     if (!ss) {
       continue;
     }
-    if (!AddFile(TString(fileName.c_str()), xs, Q2min)) {
+    if (!AddFile(TString(fileName.c_str()), entries, xs, Q2min)) {
+      cerr << "ERROR: Couldn't add file '" << fileName << "'" << endl;
       return;
     }
   }
@@ -247,6 +263,15 @@ void Analysis::Prepare() {
         NBINS,-4,4,
         true,false
         );
+    Double_t etabinsCoarse[] = {-4.0,-1.0,1.0,4.0};
+    Double_t pbinsCoarse[] = {0.1,1,10,100};
+    HS->DefineHist2D("etaVsPcoarse","p","#eta","GeV","",
+	3, pbinsCoarse,
+	3, etabinsCoarse,
+	true,false
+	);
+	
+		     
     // -- single-hadron cross sections
     //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
     HS->DefineHist1D("Q_xsec","Q","GeV",10,1.0,10.0,true,true); // log
@@ -281,7 +306,13 @@ void Analysis::Prepare() {
     HS->DefineHist1D("z_true","z","", NBINS, 0, 1);
     HS->DefineHist1D("z_purity","purity","", NBINS, 0, 1);
 
-    // 2D Q2 vs. x binned resolutions
+    // // 2D Q2 vs. x binned resolutions
+    // HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -0.5, 0.5);
+    // HS->DefineHist1D("y_Res","y-y_{true}","", NBINS, -0.2, 0.2);
+    // HS->DefineHist1D("Q2_Res","Q2-Q2_{true}","GeV", NBINS, -0.5, 0.5);
+    // HS->DefineHist1D("phiH_Res","#phi_{h}-#phi_{h}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
+    // HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -0.1*TMath::Pi(), 0.1*TMath::Pi());
+    // HS->DefineHist1D("pT_Res","pT-pT^{true}","GeV", NBINS, -1.5, 1.5);
     HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
         // 20,1e-4,1,//TODO: OLD -> Might revert...
         // 10,1,1e4,
@@ -314,12 +345,23 @@ void Analysis::Prepare() {
   wJetTotal = 0.;
 };
 
-void Analysis::CountEvent(Double_t Q2, Int_t guess) {
-  Int_t idx = GetEventQ2Idx(Q2, guess);
-  if (idx == -1) {
-  } else {
-    inEntries[idx] += 1;
-    numGen += 1;
+void Analysis::CalculateEventQ2Weights() {
+  Q2weights.resize(infiles.size());
+  entriesTot = 0;
+  for (Long64_t entry : inEntries) {
+    entriesTot += entry;
+  }
+  xsecTot = inXsecsTot.front();
+  for (Int_t idx = 0; idx < infiles.size(); ++idx) {
+    Double_t xsecFactor = inXsecs[idx] / xsecTot;
+    Double_t entries = 0.;
+    for (Int_t idxC = 0; idxC <= idx; ++idxC) {
+      // estimate how many events from this file lie in the given Q2 range
+      entries += inEntries[idxC] * (inXsecs[idx] / inXsecsTot[idxC]);
+    }
+    Double_t numFactor = entries / entriesTot;
+    Q2weights[idx] = xsecFactor / numFactor;
+    cout << "Weights for " << infiles[idx] << ": " << numFactor << ", " << xsecFactor << endl;
   }
 }
 
@@ -328,9 +370,7 @@ Double_t Analysis::GetEventQ2Weight(Double_t Q2, Int_t guess) {
   if (idx == -1) {
     return 0.;
   } else {
-    Double_t xsecFactor = inXsecs[idx] / xsecTot;
-    Double_t numFactor = (Double_t) inEntries[idx] / (Double_t) numGen;
-    return xsecFactor / numFactor;
+    return Q2weights[idx];
   }
 }
 
@@ -511,6 +551,7 @@ void Analysis::FillHistosTracks() {
   valueMap.insert(std::pair<TString,Double_t>( "phiH", kin->phiH ));
   valueMap.insert(std::pair<TString,Double_t>( "phiS", kin->phiS ));
   valueMap.insert(std::pair<TString,Double_t>( "tSpin", (Double_t)kin->tSpin ));
+  valueMap.insert(std::pair<TString,Double_t>( "lSpin", (Double_t)kin->lSpin ));
 
   // check bins
   // - activates HistosDAG bin nodes which contain this track
@@ -545,6 +586,7 @@ void Analysis::FillHistosTracks() {
     H->Hist("phiSivers")->Fill(Kinematics::AdjAngle(kin->phiH - kin->phiS),wTrack);
     H->Hist("phiCollins")->Fill(Kinematics::AdjAngle(kin->phiH + kin->phiS),wTrack);
     dynamic_cast<TH2*>(H->Hist("etaVsP"))->Fill(kin->pLab,kin->etaLab,wTrack); // TODO: lab-frame p, or some other frame?
+    dynamic_cast<TH2*>(H->Hist("etaVsPcoarse"))->Fill(kin->pLab,kin->etaLab,wTrack); 
     // cross sections (divide by lumi after all events processed)
     H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),wTrack);
     // resolutions
@@ -566,6 +608,15 @@ void Analysis::FillHistosTracks() {
     // purities
     H->Hist("z_true")->Fill(kinTrue->z, wTrack );
     if( (H->Hist("z_true"))->FindBin(kinTrue->z) == (H->Hist("z_true"))->FindBin(kin->z) ) H->Hist("z_purity")->Fill(kin->z,wTrack);
+    H->Hist("pT_Res")->Fill( kin->pT - kinTrue->pT, wTrack );
+    dynamic_cast<TH2*>(H->Hist("Q2vsXtrue"))->Fill(kinTrue->x,kinTrue->Q2,wTrack);
+    if(kinTrue->z!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_zres"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->z - kin->z)/(kinTrue->z) ) );
+    if(kinTrue->pT!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_pTres"))->Fill(
+      kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->pT - kin->pT)/(kinTrue->pT) ) );
+    dynamic_cast<TH2*>(H->Hist("Q2vsX_phiHres"))->Fill(kinTrue->x,kinTrue->Q2,wTrack*( fabs(Kinematics::AdjAngle(kinTrue->phiH - kin->phiH) ) ) );
+    
+    if( (H->Hist("Q2vsXtrue"))->FindBin(kinTrue->x,kinTrue->Q2) == (H->Hist("Q2vsXtrue"))->FindBin(kin->x,kin->Q2) ) dynamic_cast<TH2*>(H->Hist("Q2vsXpurity"))->Fill(kin->x,kin->Q2,wTrack);
     
     // -- reconstructed vs. generated
     dynamic_cast<TH2*>(H->Hist("x_RvG"))->Fill(kinTrue->x,kin->x,wTrack);

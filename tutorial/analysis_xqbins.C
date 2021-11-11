@@ -8,7 +8,7 @@ void analysis_xqbins(
     TString infiles="datarec/tutorial.config", /* list of input files */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
-    Double_t crossingAngle=0, /* crossing angle [mrad] */
+    Double_t crossingAngle=25, /* crossing angle [mrad] */
     TString outfilePrefix="tutorial.xqbins" /* output filename prefix*/
 ) {
 
@@ -51,7 +51,7 @@ void analysis_xqbins(
    * want to apply a Q2>10 GeV2 cut, and then do an analysis in bins of Q2. If
    * you do
    *   A->AddBinScheme("q2");
-   *   A->BinScheme("q2")->BuildBin("Min",10); // your Q2>19 GeV2 cut
+   *   A->BinScheme("q2")->BuildBin("Min",10); // Q2>10 GeV2 cut
    *   A->BinScheme("q2")->BuildBins( 5, 10,    100,  true ); // 5 bins in range 10-100 GeV, equal width log scale
    * you are actually defining 6 Q2 bins: the 5 you specify with `BuildBins`
    * plus the one you specified with `BuildBin("Min",10)`. In this case, only

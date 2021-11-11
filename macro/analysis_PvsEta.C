@@ -8,7 +8,7 @@ void analysis_PvsEta(
     TString infiles="datarec/in.config", /* delphes tree(s) */
     Double_t eleBeamEn=10, /* electron beam energy [GeV] */
     Double_t ionBeamEn=100, /* ion beam energy [GeV] */
-    Double_t crossingAngle=-25, /* crossing angle [mrad] */
+    Double_t crossingAngle=25, /* crossing angle [mrad] */
     TString outfilePrefix="coverage_pVsEtabins" /* output filename prefix*/
 ) {
 

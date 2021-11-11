@@ -1,8 +1,5 @@
 version: '3'
 services:
-  ci:
-    build: ./container/ci
-    container_name: largex-eic-ci
   dev:
     build: ./container/dev
     container_name: largex-eic-dev

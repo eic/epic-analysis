@@ -38,8 +38,8 @@ class Node : public TObject
   public:
 
     // constructor: nodeType (see NT above), and unique ID string;
-    // a CutDef can be stored too, useful for bin nodes
-    Node(Int_t nodeType_=NT::bin, TString id_="0", CutDef *cut_=nullptr);
+    // a CutDef and bin number can be stored too, useful for bin nodes
+    Node(Int_t nodeType_=NT::bin, TString id_="0", CutDef *cut_=nullptr, Int_t binNum_=-1);
     ~Node();
 
     // accessors and modifiers
@@ -47,6 +47,8 @@ class Node : public TObject
     void SetNodeType(Int_t nodeType_) { nodeType=nodeType_; };
     TString GetID() { return id; };
     void SetID(TString id_) { id=id_; };
+    Int_t GetBinNum() { return binNum; };
+    void SetBinNum(Int_t binNum_) { binNum=binNum_; };
     CutDef *GetCut() { return cut; };
     TString GetCutType();
     TString GetVarName();
@@ -139,6 +141,7 @@ class Node : public TObject
     Bool_t debug;
     Int_t nodeType;
     TString id;
+    Int_t binNum;
     Bool_t active;
     std::vector<Node*> inputList;
     std::vector<Node*> outputList;

@@ -36,7 +36,9 @@ void AnalysisDelphes::Execute() {
 
   // read delphes tree
   TChain *chain = new TChain("Delphes");
-  for(TString in : infiles) chain->Add(in);
+  for(Int_t idx=0; idx<infiles.size(); ++idx) {
+    chain->Add(infiles[idx], inEntries[idx]);
+  }
   ExRootTreeReader *tr = new ExRootTreeReader(chain);
   ENT = tr->GetEntries();
 
@@ -51,41 +53,16 @@ void AnalysisDelphes::Execute() {
   TObjArrayIter itEFlowPhoton(tr->UseBranch("EFlowPhoton"));
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
   TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
+  TObjArrayIter itmRICHTrack(tr->UseBranch("mRICHTrack"));
+  TObjArrayIter itbarrelDIRCTrack(tr->UseBranch("barrelDIRCTrack"));
+  TObjArrayIter itdualRICHagTrack(tr->UseBranch("dualRICHagTrack"));
+  TObjArrayIter itdualRICHcfTrack(tr->UseBranch("dualRICHcfTrack"));
 
-  // get counts in different Q2 cuts
-  cout << "count events..." << endl;
-  for(Long64_t e=0; e<ENT; e++) {
-    if(e>0&&e%10000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
-    tr->ReadEntry(e);
-    itParticle.Reset();
-    maxElePtrue = 0;
-    while(GenParticle *part = (GenParticle*) itParticle()){
-      if(part->PID == 11 && part->Status == 1){
-        elePtrue = part->PT * TMath::CosH(part->Eta);
-        if(elePtrue > maxElePtrue){
-          maxElePtrue = elePtrue;
-          kinTrue->vecElectron.SetPtEtaPhiM(
-              part->PT,
-              part->Eta,
-              part->Phi,
-              Kinematics::ElectronMass()
-              );
-        };
-      };
-    };
-    kinTrue->CalculateDIS(reconMethod);
-    Double_t Q2 = kinTrue->Q2;
-    CountEvent(Q2, chain->GetTreeNumber());
-  }
-
-  cout << "count results:" << endl;
-  for(Int_t idx=0; idx<inXsecs.size(); ++idx) {
-    cout << "\tQ2 > " << inQ2mins[idx]
-      << ": xs=" << inXsecs[idx] << ", n=" << inEntries[idx] << endl;
-  }
+  CalculateEventQ2Weights();
 
   // event loop =========================================================
   cout << "begin event loop..." << endl;
+  int errorCount=0;
   for(Long64_t e=0; e<ENT; e++) {
     if(e>0&&e%10000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
     tr->ReadEntry(e);
@@ -111,6 +88,8 @@ void AnalysisDelphes::Execute() {
     // - repeat for truth electron
     itParticle.Reset();
     maxElePtrue = 0;
+    bool found_elec = false;
+    bool found_ion = false;
     while(GenParticle *part = (GenParticle*) itParticle()){
       if(part->PID == 11 && part->Status == 1){
         elePtrue = part->PT * TMath::CosH(part->Eta);
@@ -120,19 +99,51 @@ void AnalysisDelphes::Execute() {
               part->PT,
               part->Eta,
               part->Phi,
-              Kinematics::ElectronMass()
+              part->Mass
               );
         };
       };
+      if(part->PID == 11 && part->Status == 4){
+        if(!found_elec){
+          found_elec = true;
+          kinTrue->vecEleBeam.SetPtEtaPhiM(
+              part->PT,
+              part->Eta,
+              part->Phi,
+              part->Mass
+              );
+        }else{
+          if(++errorCount<100) cerr << "ERROR: Found two beam electrons in one event" << endl;
+        };
+      };
+      if(part->PID != 11 && part->Status == 4){
+        if(!found_ion){
+          found_ion = true;
+          kinTrue->vecIonBeam.SetPtEtaPhiM(
+              part->PT,
+              part->Eta,
+              part->Phi,
+              part->Mass
+              );
+        }else{
+          if(++errorCount<100) cerr << "ERROR: Found two beam ions in one event" << endl;
+        };
+      };
     };
+    if(!found_elec){
+      if(++errorCount<100) cerr << "ERROR: Didn't find beam electron in event" << endl;
+    };
+    if(!found_ion){
+      if(++errorCount<100) cerr << "ERROR: Didn't find beam ion in event" << endl;
+    }
+    if(errorCount>=100 && errorCount<1000) { cerr << "ERROR: .... suppressing beam finder errors ...." << endl; errorCount=1000; };
 
     // get hadronic final state variables
-    kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
-
+    kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);    
+    kinTrue->GetHadronicFinalStateTrue(itParticle);
     // calculate DIS kinematics
     kin->CalculateDIS(reconMethod); // reconstructed
     kinTrue->CalculateDIS(reconMethod); // generated (truth)
-    Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
 
     // get vector of jets
     // TODO: should this have an option for clustering method?
@@ -167,6 +178,7 @@ void AnalysisDelphes::Execute() {
       int parentPID = (parentParticle->PID); // TODO: this is not used yet...
 
       // calculate hadron kinematics
+      kin->hadPID = pid;
       kin->vecHadron.SetPtEtaPhiM(
           trk->PT,
           trk->Eta,
@@ -174,15 +186,26 @@ void AnalysisDelphes::Execute() {
           trk->Mass /* TODO: do we use track mass here ?? */
           );
       GenParticle* trkPart = (GenParticle*)trk->Particle.GetObject();
+      kinTrue->hadPID = pid;
       kinTrue->vecHadron.SetPtEtaPhiM(
           trkPart->PT,
           trkPart->Eta,
           trkPart->Phi,
           trkPart->Mass /* TODO: do we use track mass here ?? */
           );
-
+      
       kin->CalculateHadronKinematics();
       kinTrue->CalculateHadronKinematics();
+
+      // asymmetry injection
+      //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
+      //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
+      //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
+  
+      // Get index of file that the event comes from.
+      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
+      wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+      wTrackTotal += wTrack;
 
       // fill track histograms in activated bins
       FillHistosTracks();
@@ -192,6 +215,9 @@ void AnalysisDelphes::Execute() {
       // - `activeEvent` is only true if at least one bin gets filled for this track
       // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDD4hep)
       if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
+
+      // tests
+      //kin->ValidateHeadOnFrame();
 
     }; // end track loop
 
@@ -204,6 +230,7 @@ void AnalysisDelphes::Execute() {
       if(useBreitJets) kin->GetBreitFrameJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
       #endif
 
+      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
       wJet = Q2weightFactor * weightJet->GetWeight(*kinTrue); // TODO: should we separate weights for breit and non-breit jets?
       wJetTotal += wJet;
 

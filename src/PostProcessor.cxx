@@ -225,6 +225,8 @@ void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat) 
   TString canvN = "canv_"+histName+"___"+H->GetSetName();
   TCanvas *canv = new TCanvas(canvN,canvN,dimx,dimy);
   hist->Draw(drawFormat);
+  if(hist->GetMinimum()>=0 && hist->GetDimension()==1)
+    hist->GetYaxis()->SetRangeUser(0,hist->GetMaximum()*1.1); // do not suppress zero
   canv->SetGrid(1,1);
   canv->SetLogx(H->GetHistConfig(histName)->logx);
   canv->SetLogy(H->GetHistConfig(histName)->logy);
@@ -469,7 +471,7 @@ void PostProcessor::DrawInBins(
       TString drawStr = "";
       switch(hist->GetDimension()) {
         case 1:
-          drawStr = ""/*"EX0 P"*/;       
+          drawStr = "HIST";       
           break;
         case 2:
           drawStr = "COLZ";

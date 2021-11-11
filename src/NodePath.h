@@ -12,6 +12,7 @@
 #include "TObject.h"
 #include "TNamed.h"
 #include "TString.h"
+#include "TRegexp.h"
 
 // largex-eic
 #include "CutDef.h"
@@ -31,7 +32,8 @@ class NodePath : public TObject
      * - use these methods to get specific nodes, along with things the nodes holds such as cuts
      * - this class stores the list unsorted; use the sort methods to traverse the linked list in order 
      */
-    TString BinListString(); // return a string of bin names
+    TString BinListName(); // return a string of bin names, formatted for object names: `"bin1_bin2_bin3"`
+    TString BinListString(); // return a string of bin names, formatted for printing: `"[ bin1 bin2 bin3 ]"`
     void PrintBinList(); // print a string of node names
     TString CutListString(); // return a string of cuts (CutDef titles)
     Node *GetBinNode(TString varName); // return the bin node for the given variable name

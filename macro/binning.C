@@ -144,7 +144,7 @@ void binning(char const* file_name, char const* output="") {
 			param_errs[p].push_back(1.);
 		}
 		if (count != 0) {
-			for (Int_t p = 0; p < params.size(); ++p) {
+			for (std::size_t p = 0; p < params.size(); ++p) {
 				params[p].back() = fit->GetParameter(3 + p);
 				param_errs[p].back() = fit->GetParError(3 + p);
 			}

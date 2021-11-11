@@ -17,10 +17,10 @@ R__LOAD_LIBRARY(Largex)
  *     example, send a pull request with the new list)
  */
 void analysis_dd4hep(
-    TString infiles="tutorial/s3files.list", /* FIXME: need example list, with cross sections (see other example macros) */
+    TString infiles="tutorial/s3files.list", /* list of input files (S3 URLs, plus other columns) */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
-    Double_t crossingAngle=0, /* crossing angle [mrad] */
+    Double_t crossingAngle=25, /* crossing angle [mrad] */
     TString outfilePrefix="tutorial.dd4hep" /* output filename prefix*/)
 {
 
@@ -36,12 +36,6 @@ void analysis_dd4hep(
 
   A->maxEvents = 300000; // use this to limit the number of events
   A->writeSimpleTree = true;
-
-  // Set scatt. electron cuts
-  A->SetEleEnergyThreshold(eleBeamEn * 0.1);  // default is 10% of beamE
-  A->SetIsoCut(0.1);        // default is 10%
-  A->SetIsoConeRadius(1.0); // default is 1.0
-
 
   // set reconstruction method and final states =============================
   // - see `Analysis` constructor for methods (or other tutorials)

@@ -39,26 +39,25 @@ class Kinematics : public TObject
     Kinematics(Double_t enEleBeam, Double_t enIonBeam, Double_t crossAng);
     ~Kinematics();
 
-    // calculators
+    // SIDIS calculators
     void CalculateDIS(TString recmethod);
-    void CalculateDISbyElectron();
-    void CalculateDISbyJB();
-    void CalculateDISbyDA();
-    void CalculateDISbyMixed();
-    void CalculateDISbySigma();
-    void CalculateDISbyeSigma();
-    void getqWQuadratic();
     void CalculateHadronKinematics();
     void GetHadronicFinalState(
         TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
-        TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
+        TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle,
+    TObjArrayIter itmRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack,TObjArrayIter itdualRICHcfTrack
+
         );
+    void GetHadronicFinalStateTrue(
+        TObjArrayIter itParticle
+    );
     void GetJets(
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
         );
-    void CalculateJetKinematics(fastjet::PseudoJet jet);
 
+    // jet calculators
+    void CalculateJetKinematics(fastjet::PseudoJet jet);
     #if INCCENTAURO == 1
     void GetBreitFrameJets(
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
@@ -70,15 +69,20 @@ class Kinematics : public TObject
     // kinematics (should be Double_t, if going in SimpleTree)
     Double_t W,Q2,Nu,x,y,s; // DIS
     Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // hadron
-    Double_t sigmah, Pxh, Pyh; // hadronic final state
+    Double_t sigmah, Pxh, Pyh; // hadronic final state, lab frame
+    Double_t Hsigmah, HPxh, HPyh; // hadronic final state, lab frame                                                                                                 
 
     // nucleon transverse spin; if you set this externally,
     // it must be done before calculating `phiS` (before
     // `CalculateHadronKinematics`)
     Int_t tSpin; // should be +1 or -1
+    Int_t lSpin; // should be +1 or -1
+    Int_t hadPID;
 
     // polarization
-    Double_t pol;
+    Double_t polT;
+    Double_t polL;
+    Double_t polBeam;
 
     // depolarization
     Double_t gamma,epsilon;
@@ -109,21 +113,6 @@ class Kinematics : public TObject
     // struck quark information
     Double_t quarkpT;
 
-    // - c.o.m. frame of virtual photon and ion
-    TLorentzVector CvecBoost;
-    TVector3 Cboost;
-    TLorentzVector CvecEleBeam, CvecIonBeam;
-    TLorentzVector CvecElectron, CvecW, CvecQ;
-    TLorentzVector CvecHadron;
-    // - ion rest frame
-    TLorentzVector IvecBoost;
-    TVector3 Iboost;
-    TLorentzVector IvecEleBeam, IvecIonBeam;
-    TLorentzVector IvecElectron, IvecW, IvecQ;
-    TLorentzVector IvecHadron;
-    // other
-    TLorentzVector vecSpin, IvecSpin;
-
 
     // particle masses
     static Double_t ElectronMass() { return 0.000511; };
@@ -133,13 +122,15 @@ class Kinematics : public TObject
     Double_t IonMass;
 
 
-    // boost calculations
-    // - boost from Lab frame to photon+ion C.o.m. frame
-    void BoostToComFrame(TLorentzVector Lvec, TLorentzVector &Cvec) {
-      Cvec=Lvec; Cvec.Boost(Cboost); };
-    // - boost from Lab frame to Ion rest frame
-    void BoostToIonFrame(TLorentzVector Lvec, TLorentzVector &Ivec) {
-      Ivec=Lvec; Ivec.Boost(Iboost); };
+    // lorentz transformations
+    // - boost from Lab frame `Lvec` to photon+ion C.o.m. frame `Cvec`
+    void BoostToComFrame(TLorentzVector Lvec, TLorentzVector &Cvec);
+    // - boost from Lab frame `Lvec` to Ion rest frame `Ivec`
+    void BoostToIonFrame(TLorentzVector Lvec, TLorentzVector &Ivec);
+    // - boost from Lab frame `Lvec` to ion+electron Beam c.o.m. frame `Bvec`
+    void BoostToBeamComFrame(TLorentzVector Lvec, TLorentzVector &Bvec);
+    // - tranform from Lab frame `Lvec` to Head-on frame `Hvec`
+    void TransformToHeadOnFrame(TLorentzVector Lvec, TLorentzVector &Hvec);
 
 
     // misc calculations
@@ -150,7 +141,7 @@ class Kinematics : public TObject
     // - vector projection: returns vA projected onto vB
     static TVector3 Project(TVector3 vA, TVector3 vB) {
       if(fabs(vB.Dot(vB))<0.0001) {
-        cerr << "WARNING: Kinematics::Project to null vector" << endl;
+        //cerr << "WARNING: Kinematics::Project to null vector" << endl;
         return TVector3(0,0,0);
       };
       return vB * ( vA.Dot(vB) / ( vB.Dot(vB) ) );
@@ -158,7 +149,7 @@ class Kinematics : public TObject
     // - vector rejection: returns vC projected onto plane transverse to vD
     static TVector3 Reject(TVector3 vC, TVector3 vD) {
       if(fabs(vD.Dot(vD))<0.0001) {
-        cerr << "WARNING: Kinematics::Reject to null vector" << endl;
+        //cerr << "WARNING: Kinematics::Reject to null vector" << endl;
         return TVector3(0,0,0);
       };
       return vC - Project(vC,vD);
@@ -169,14 +160,14 @@ class Kinematics : public TObject
       TVector3 crossCD = vC.Cross(vD); // CxD
       Double_t sgn = crossAB.Dot(vD); // (AxB).D
       if(fabs(sgn)<0.00001) {
-        cerr << "WARNING: Kinematics:PlaneAngle (AxB).D=0" << endl;
+        //cerr << "WARNING: Kinematics:PlaneAngle (AxB).D=0" << endl;
         return -10000;
       };
       sgn /= fabs(sgn); // sign of (AxB).D
       Double_t numer = crossAB.Dot(crossCD); // (AxB).(CxD)
       Double_t denom = crossAB.Mag() * crossCD.Mag(); // |AxB|*|CxD|
       if(fabs(denom)<0.00001) {
-        cerr << "WARNING: Kinematics:PlaneAngle denominator=0" << endl;
+        //cerr << "WARNING: Kinematics:PlaneAngle denominator=0" << endl;
         return -10000;
       };
       return sgn * TMath::ACos(numer/denom);
@@ -214,6 +205,20 @@ class Kinematics : public TObject
     // asymmetry injection
     void InjectFakeAsymmetry(); // test your own asymmetry, for fit code validation
 
+    // tests and validation
+    void ValidateHeadOnFrame();
+
+  protected:
+
+    // protected calculators (called by public calculators)
+    void CalculateDISbyElectron();
+    void CalculateDISbyJB();
+    void CalculateDISbyDA();
+    void CalculateDISbyMixed();
+    void CalculateDISbySigma();
+    void CalculateDISbyeSigma();
+    void getqWQuadratic();
+
 
   private:
     static const Int_t asymInjectN = 2;
@@ -222,6 +227,31 @@ class Kinematics : public TObject
     Double_t asymInject;
     TRandom *RNG;
     Float_t RN;
+
+    // - c.o.m. frame of virtual photon and ion
+    TLorentzVector CvecBoost;
+    TVector3 Cboost;
+    TLorentzVector CvecEleBeam, CvecIonBeam;
+    TLorentzVector CvecElectron, CvecW, CvecQ;
+    TLorentzVector CvecHadron;
+    // - ion rest frame
+    TLorentzVector IvecBoost;
+    TVector3 Iboost;
+    TLorentzVector IvecEleBeam, IvecIonBeam;
+    TLorentzVector IvecElectron, IvecW, IvecQ;
+    TLorentzVector IvecHadron;
+    // - head-on frame
+    TLorentzVector HvecEleBeam, HvecIonBeam;
+    TLorentzVector HvecElectron, HvecW, HvecQ;
+    TLorentzVector HvecHadron;
+    // - other intermediate frames (for head-on frame transformation)
+    TLorentzVector BvecBoost, OvecBoost;
+    TVector3 Bboost, Oboost;
+    TLorentzVector BvecEleBeam, BvecIonBeam;
+    Double_t rotAboutX, rotAboutY;
+    // other
+    TLorentzVector vecSpin, IvecSpin;
+
 
   ClassDef(Kinematics,1);
 };

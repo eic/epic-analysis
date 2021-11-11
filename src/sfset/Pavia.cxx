@@ -76,8 +76,8 @@ struct PaviaSfSet::Impl {
 	CubicView<double, 4> interp_pim_uu;
 	CubicView<double, 4> interp_pim_ut_sivers;
 	Impl() :
-		grid_pip(load_grids("grid_Pip.txt")),
-		grid_pim(load_grids("grid_Pim.txt")),
+		grid_pip(load_grids("grid_Pip_2.txt")),
+		grid_pim(load_grids("grid_Pim_2.txt")),
 		interp_pip_uu(grid_pip[0]),
 		interp_pip_ut_sivers(grid_pip[1]),
 		interp_pim_uu(grid_pim[0]),
