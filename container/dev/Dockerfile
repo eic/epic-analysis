@@ -85,6 +85,13 @@ ENV LD_LIBRARY_PATH=$DELPHES_HOME:$LD_LIBRARY_PATH
 ENV PYTHONPATH=$DELPHES_HOME/python:$PYTHONPATH
 ENV LIBRARY_PATH=$DELPHES_HOME:$LIBRARY_PATH
 
+# minIO client
+WORKDIR /opt
+RUN \
+wget -Pbin https://dl.min.io/client/mc/release/linux-amd64/mc && \
+chmod +x bin/mc
+ENV PATH=$PATH:/opt/bin
+
 # copy sample root file for tests (source path is w.r.t. Dockerfile)
 COPY datarec/example_5x41.root /data/
 

@@ -6,7 +6,6 @@ development scripts for image maintenance
 ### building docker images
 - user must be in `docker` group, `pwd` must contain `docker-compose.yml`
 ```
-docker-compose build ci # deprecated
 docker-compose build dev
 ```
 
@@ -15,7 +14,7 @@ example for CI image: give it the dockerhub repo name, with the tag `dev`
 ```
 docker login
 docker images
-docker tag largexeic-dev:latest cjdilks/largex-eic:dev
+docker tag largexeic_dev:latest cjdilks/largex-eic:dev
 docker scan cjdilks/largex-eic:dev  2>&1 | tee vulnerabilities.txt
 docker push cjdilks/largex-eic:dev
 docker logout
