@@ -17,6 +17,7 @@
 #include "TClonesArray.h"
 #include "TFile.h"
 #include "TRegexp.h"
+#include "TF1.h"
 
 // largex-eic
 #include "Histos.h"

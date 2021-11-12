@@ -4,6 +4,7 @@ R__LOAD_LIBRARY(Largex)
 // - adapted from `postprocess_pTvsEta.C`
 void postprocess_resolution_SD(
     TString infile="out/resolution.root"
+    TString header="resolution"
 ){
 
   gROOT->ProcessLine(".! rm -v out/resolution.images/*.png"); // cleanup old image files

@@ -608,7 +608,7 @@ on axis of bin variables, e.g. Q2 vs x.
 
 void PostProcessor::DrawSDInBinsTogether(
     TString outName,    
-    std::vector<std::vector<Histos*>>& histList,
+    std::vector<std::vector<Histos*>>& histList, TString header,
     TString histNames[], TString labels[], int nNames, double yMin, double yMax,
     TString var1name, int nvar1, double var1low, double var1high, bool var1log,
     TString var2name, int nvar2, double var2low, double var2high, bool var2log,
@@ -665,6 +665,7 @@ void PostProcessor::DrawSDInBinsTogether(
       THStack *hist = new THStack();
       TLegend *lg = new TLegend(0.1,0.1,0.9,0.9);
       lg->SetTextSize(0.2);
+      lg->SetHeader(header);
       if (nNames>3) lg->SetNColumns(2);
 
       for (int k=0; k<nNames; k++) {
@@ -676,7 +677,9 @@ void PostProcessor::DrawSDInBinsTogether(
         //subHist->GetYaxis()->SetTitle("");
         //subHist->GetXaxis()->SetLabelSize(0);
         //subHist->GetYaxis()->SetLabelSize(0);
-        TH1D *subHist = this->GetSDs(fitHist);
+        TH1D *subHist;
+        if (histNames[k]=="z_purity") subHist = (TH1D*)H->Hist(histNames[k])->Clone();
+        else subHist = this->GetSDs(fitHist);
 
         subHist->GetXaxis()->SetTitleSize(0.1);
         subHist->GetXaxis()->SetTitleOffset(0.5);
@@ -728,7 +731,7 @@ void PostProcessor::DrawSDInBinsTogether(
         TF1 *f1 = new TF1("f1","0",hist->GetXaxis()->GetXmin(),hist->GetXaxis()->GetXmax());
         f1->SetLineColor(1);
         f1->Draw("SAME");
-        if (i==nvar1-1 && j==nvar2-1) {
+        if (i==0 && j==0) {
           mainpad->cd(nvar1*nvar2);// Bottom right corner pad
           lg->Draw();
           mainpad->cd((nvar2-j-1)*nvar1 + i + 1);// Return to original pad

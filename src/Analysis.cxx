@@ -464,8 +464,11 @@ void Analysis::Finish() {
     // calculate cross sections
     H->Hist("Q_xsec")->Scale(1./lumi); // TODO: generalize (`if (name contains "xsec") ...`)
 
-    // // Normalize and sqrt 1D z-binned resolution StdDevs
+    // Convert to contamination plot since the y scale is better for plotting with stddevs
+    H->Hist("z_purity")->Add(H->Hist("z_true"),-1);
     H->Hist("z_purity")->Divide(H->Hist("z_true"));
+    TF1 *f1 = new TF1("f1","1",0,1); //TODO: Set limits automatically
+    H->Hist("z_purity")->Multiply(f1,-1);
 
   });
 
