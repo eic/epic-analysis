@@ -713,7 +713,7 @@ void PostProcessor::DrawSDInBinsTogether(
       TString drawStr = "";
       switch(1) {//TODO: figure out how to get THStack dimension? //can't use hist->GetHistogram()->GetDimension()
         case 1:
-          drawStr = "ex0 p nostack"; //NOTE: nostackb will just throw an error, don't use. /*"ex0 p nostack"*/
+          drawStr = "hist p nostack"; //NOTE: nostackb will just throw an error, don't use. /*"ex0 p nostack"*/
           break;
         case 2:
           drawStr = "COLZ";
@@ -725,8 +725,11 @@ void PostProcessor::DrawSDInBinsTogether(
       //hist->Write();
       if( hist->GetNhists() > 0 ) {
         hist->Draw(drawStr);
+        TF1 *f1 = new TF1("f1","0",hist->GetXaxis()->GetXmin(),hist->GetXaxis()->GetXmax());
+        f1->SetLineColor(1);
+        f1->Draw("SAME");
         if (i==nvar1-1 && j==nvar2-1) {
-          mainpad->cd(1);// Bottom right corner pad
+          mainpad->cd(nvar1*nvar2);// Bottom right corner pad
           lg->Draw();
           mainpad->cd((nvar2-j-1)*nvar1 + i + 1);// Return to original pad
         }
