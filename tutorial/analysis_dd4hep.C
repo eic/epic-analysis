@@ -11,13 +11,13 @@ R__LOAD_LIBRARY(Largex)
  *   - for S3, you must know the username and password, and have them in your environment:
  *     - `export S3_ACCESS_KEY=<login>`
  *     - `export S3_SECRET_KEY=<password>`
- *   - a sample list of files is in `s3files.list`, but if these files are moved on S3,
+ *   - a sample list of files is in `s3files.config`, but if these files are moved on S3,
  *     then this list becomes out of date; in that case, use this list as a template
  *     (and if you want to replace it for the sake of keeping a working tutorial 
  *     example, send a pull request with the new list)
  */
 void analysis_dd4hep(
-    TString infiles="tutorial/s3files.list", /* list of input files (S3 URLs, plus other columns) */
+    TString infiles="tutorial/s3files.config", /* list of input files (S3 URLs, plus other columns) */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=25, /* crossing angle [mrad] */
