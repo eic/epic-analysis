@@ -70,7 +70,7 @@ class Analysis : public TNamed
     // add files to the TChain; this is called by `Prepare()`, but you can use these public
     // methods to add more files if you want
     // add single file `fileName` with given Q2 range and xs.
-    bool AddFile(TString fileName, Long64_t entries, Double_t xs, Double_t Q2min);
+    bool AddFile(std::vector<std::string> fileNames, std::vector<Long64_t> entries, Double_t xs, Double_t Q2min);
 
     // access HistosDAG
     HistosDAG *GetHistosDAG();
@@ -80,7 +80,7 @@ class Analysis : public TNamed
     void SetWeightsJet(Weights const* w) { weightJet = w; }
 
     Double_t GetEventQ2Weight(Double_t Q2, Int_t guess=0);
-	// after adding all files, estimate the weights for events in each Q2 range
+    // after adding all files, estimate the weights for events in each Q2 range
     void CalculateEventQ2Weights();
     Int_t GetEventQ2Idx(Double_t Q2, Int_t guess=0);
 
@@ -119,11 +119,14 @@ class Analysis : public TNamed
     const TString sep = "--------------------------------------------";
 
     // setup / common settings
-    std::vector<TString> infiles;
-    std::vector<Double_t> inXsecs;
-    std::vector<Double_t> inXsecsTot;
-    std::vector<Double_t> inQ2mins;
-    std::vector<Long64_t> inEntries;
+    std::vector<std::vector<std::string> > infiles;
+    std::vector<std::vector<Long64_t> > inEntries;
+    // A lookup index for guessing which Q2 range an event belongs to.
+    std::vector<std::size_t> inLookup;
+    std::vector<Double_t> Q2xsecs;
+    std::vector<Double_t> Q2xsecsTot;
+    std::vector<Double_t> Q2mins;
+    std::vector<Long64_t> Q2entries;
     std::vector<Double_t> Q2weights;
     TString infileName,outfileName,outfilePrefix;
     TFile *outFile;

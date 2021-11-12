@@ -37,7 +37,10 @@ void AnalysisDelphes::Execute() {
   // read delphes tree
   TChain *chain = new TChain("Delphes");
   for(Int_t idx=0; idx<infiles.size(); ++idx) {
-    chain->Add(infiles[idx], inEntries[idx]);
+    for(std::size_t idxF=0; idxF<infiles[idx].size(); ++idxF) {
+      std::cout << "Adding " << infiles[idx][idxF] << " with " << inEntries[idx][idxF] << std::endl;
+      chain->Add(infiles[idx][idxF].c_str(), inEntries[idx][idxF]);
+    }
   }
   ExRootTreeReader *tr = new ExRootTreeReader(chain);
   ENT = tr->GetEntries();
@@ -194,7 +197,7 @@ void AnalysisDelphes::Execute() {
       //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
   
       // Get index of file that the event comes from.
-      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
+      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
       wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
       wTrackTotal += wTrack;
 

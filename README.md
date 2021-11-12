@@ -119,7 +119,15 @@ repository (pull requests are also welcome).
 
 ## ATHENA Full Simulation
 
-- TODO 
+- full simulation files are stored on S3; follow [s3tools documentation](s3tools/README.md)
+  for scripts and guidance
+- in general, everything that can be done in fast simulation can also be done in
+  full simulation; just replace your usage of `AnalysisDelphes` with
+  `AnalysisDD4hep`
+  - in practice, implementations may sometimes be a bit out of sync, where some
+    features exist in fast simulation do not exist in full simulation, or vice
+    versa
+- TODO: more details
 
 
 
