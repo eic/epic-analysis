@@ -17,6 +17,9 @@ One top-level script automates all the work:
     for the convenience of SIDIS full simulation analysis
   - this script calls several other scripts in this directory; read on for their
     documentation
+- if you are not running in the Singularity/Docker container, download and install
+  the [MinIO client](https://docs.min.io/docs/minio-client-complete-guide) first
+  - (otherwise update your Singularity image)
 
 
 ## Accessing S3 Files
