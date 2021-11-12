@@ -725,8 +725,8 @@ void PostProcessor::DrawSDInBinsTogether(
       //hist->Write();
       if( hist->GetNhists() > 0 ) {
         hist->Draw(drawStr);
-        if (i==0 && j==0) {
-          mainpad->cd(1);// Upper left corner pad
+        if (i==nvar1-1 && j==nvar2-1) {
+          mainpad->cd(1);// Bottom right corner pad
           lg->Draw();
           mainpad->cd((nvar2-j-1)*nvar1 + i + 1);// Return to original pad
         }
