@@ -37,7 +37,7 @@ pushd $(dirname $(realpath $0))/..
 # settings #############################################################
 sourceDir="S3/eictest/ATHENA/RECO/canyonlands-v1.2/DIS/NC/$energy"
 targetDir="datarec/canyonlands/$energy"
-Q2minima=( 100 10 1 ) # should be decreasing order
+Q2minima=( 1000 100 10 1 ) # should be decreasing order
 ########################################################################
 
 # download files from S3
@@ -54,8 +54,8 @@ status "build config file..."
 mkdir -p $targetDir
 configFile=$targetDir/files.config
 > $configFile
-crossSection=4e4    #TODO: need to set $crossSection for each case ##################################
 for Q2min in ${Q2minima[@]}; do
+  crossSection=$(python -c "print(10000.0/$Q2min)") # TODO: fake cross section; need to get actual one ###############
   if [ "$mode" == "d" -o "$mode" == "c" ]
     then s3tools/generate-local-list.sh "$targetDir/minQ2=$Q2min" 0 $crossSection $Q2min | tee -a $configFile
     else s3tools/generate-s3-list.sh    "$sourceDir/minQ2=$Q2min" 0 $crossSection $Q2min | tee -a $configFile

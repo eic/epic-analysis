@@ -1,3 +1,0 @@
-s3https://dtn01.sdcc.bnl.gov:9000/eictest/ATHENA/RECO/canyonlands-v1.2/CI/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.root -1 2.921e-04 1
-s3https://dtn01.sdcc.bnl.gov:9000/eictest/ATHENA/RECO/canyonlands-v1.2/CI/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.root -1 2.921e-04 1
-s3https://dtn01.sdcc.bnl.gov:9000/eictest/ATHENA/RECO/canyonlands-v1.2/CI/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.root -1 2.921e-04 1
