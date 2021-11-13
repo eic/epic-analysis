@@ -11,6 +11,12 @@ SimpleTree::SimpleTree(TString treeName_, Kinematics *K_, Kinematics *Ktrue_)
   // branch names are set to match `brufit` implementation
   // (see `https://github.com/c-dilks/dispin/tree/master/src`)
   T = new TTree(treeName,treeName);
+  T->Branch("TrueX",     &(Ktrue->x),     "TrueX/D");
+  T->Branch("TrueZ",     &(Ktrue->z),     "TrueZ/D");
+  T->Branch("TrueQSq",   &(Ktrue->Q2),    "TrueQSq/D");
+  T->Branch("TruePhPerp",&(Ktrue->pT),    "TruePhPerp/D");
+  T->Branch("TruePhiS",  &(Ktrue->phiS),  "TruePhiS/D");
+  T->Branch("TruePhiH",  &(Ktrue->phiH),  "TruePhiH/D");
   T->Branch("QSq",       &(K->Q2),        "QSq/D");
   T->Branch("X",         &(K->x),         "X/D");
   T->Branch("Y",         &(K->y),         "Y/D");
@@ -20,8 +26,6 @@ SimpleTree::SimpleTree(TString treeName_, Kinematics *K_, Kinematics *Ktrue_)
   T->Branch("PhPerp",    &(K->pT),        "PhPerp/D");
   T->Branch("PhiH",      &(K->phiH),      "PhiH/D");
   T->Branch("PhiS",      &(K->phiS),      "PhiS/D");
-  T->Branch("TruePhiH",  &(Ktrue->phiH),  "TruePhiH/D");
-  T->Branch("TruePhiS",  &(Ktrue->phiS),  "TruePhiS/D");
   T->Branch("PolT",      &(K->polT),      "PolT/D");
   T->Branch("PolL",      &(K->polL),      "PolL/D");
   T->Branch("PolB",      &(K->polBeam),   "PolB/D");

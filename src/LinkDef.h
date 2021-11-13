@@ -23,6 +23,10 @@
 #pragma link C++ class WeightsUniform+;
 #pragma link C++ class WeightsSivers+;
 #pragma link C++ class WeightsCollins+;
+#pragma link C++ class WeightsALL+;
+#pragma link C++ class PaviaWeights+;
+#pragma link C++ class ProkudinWeights+;
+#pragma link C++ class AllgridWeights+;
 #pragma link C++ class WeightsProduct+;
 #pragma link C++ class WeightsSum+;
 

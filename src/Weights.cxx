@@ -11,14 +11,19 @@ ClassImp(WeightsSum)
 
 Double_t WeightsSivers::GetWeight(const Kinematics& kin) const {
     return kin.polT * kin.tSpin
-        * this->Asymmetry(kin.x, kin.z, kin.Q2, kin.pT)
+        * this->Asymmetry(kin.hadPID, kin.x, kin.z, kin.Q2, kin.pT)
         * TMath::Sin(kin.phiH - kin.phiS);
 }
 
 Double_t WeightsCollins::GetWeight(const Kinematics& kin) const {
     return kin.polT * kin.tSpin * kin.depolP1
-        * this->Asymmetry(kin.x, kin.z, kin.Q2, kin.pT)
+        * this->Asymmetry(kin.hadPID, kin.x, kin.z, kin.Q2, kin.pT)
         * TMath::Sin(kin.phiH + kin.phiS);
+}
+
+Double_t WeightsALL::GetWeight(const Kinematics& kin) const {
+    return kin.polBeam * kin.polL * kin.lSpin * kin.depolP2
+        * this->Asymmetry(kin.hadPID, kin.x, kin.z, kin.Q2, kin.pT);
 }
 
 WeightsProduct::WeightsProduct(std::initializer_list<Weights const*> init) {

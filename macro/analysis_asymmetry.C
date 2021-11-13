@@ -1,7 +1,7 @@
 R__LOAD_LIBRARY(Largex)
 
 struct WeightsTest : public WeightsSivers {
-  Double_t Asymmetry(Double_t x, Double_t z, Double_t Q2, Double_t pt) const override {
+  Double_t Asymmetry(Int_t h, Double_t x, Double_t z, Double_t Q2, Double_t pt) const override {
     return 0.2;
   }
 };

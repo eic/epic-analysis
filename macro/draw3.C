@@ -1,5 +1,7 @@
-//R__LOAD_LIBRARY(LargexAsym)
+R__LOAD_LIBRARY(Largex)
 //#include "BruAsymmetry.h"
+
+#include "../src/sfset/Pavia.h"
 
 void draw3(char const* file_name/*TString bru_dir="bruspin", TString minimizer_str="minuit"*/) {
 	/*
@@ -74,10 +76,30 @@ void draw3(char const* file_name/*TString bru_dir="bruspin", TString minimizer_s
 	auto params_ptr = file->Get<std::vector<std::vector<Double_t> > >("Params");
 	auto param_names_ptr = file->Get<std::vector<std::string>>("ParamNames");
 	auto param_errs_ptr = file->Get<std::vector<std::vector<Double_t> > >("ParamErrs");
+	auto model_ptr = file->Get<std::vector<std::vector<Double_t> > >("Model");
+	auto model_lower_ptr = file->Get<std::vector<std::vector<Double_t> > >("ModelLower");
+	auto model_upper_ptr = file->Get<std::vector<std::vector<Double_t> > >("ModelUpper");
 	auto params = *params_ptr;
 	auto param_names = *param_names_ptr;
 	auto param_errs = *param_errs_ptr;
+	auto model_xs_ptr = file->Get<std::vector<std::vector<Double_t> > >("ModelX");
+	auto param_xs_ptr = file->Get<std::vector<std::vector<Double_t> > >("ParamsX");
 	auto axis_names = *axis_names_ptr;
+	auto model = *model_ptr;
+	auto model_lower = *model_lower_ptr;
+	auto model_upper = *model_upper_ptr;
+	auto model_xs = *model_xs_ptr;
+	auto param_xs = *param_xs_ptr;
+	std::vector<std::vector<Double_t> > model_err_lower;
+	std::vector<std::vector<Double_t> > model_err_upper;
+	for (std::size_t p = 0; p < model.size(); ++p) {
+		model_err_lower.push_back({});
+		model_err_upper.push_back({});
+		for (std::size_t idx = 0; idx < model[p].size(); ++idx) {
+			model_err_lower[p].push_back(model[p][idx] - model_lower[p][idx]);
+			model_err_upper[p].push_back(model_upper[p][idx] - model[p][idx]);
+		}
+	}
 	std::vector<TAxis> axes;
 	std::vector<Int_t> num_bins;
 	Int_t total_num_bins = 1;
@@ -95,45 +117,56 @@ void draw3(char const* file_name/*TString bru_dir="bruspin", TString minimizer_s
 	for (Int_t p = 0; p < num_params; ++p) {
 		// Make a plot for each parameter.
 		TCanvas* pad = new TCanvas(("Canvas" + param_names[p]).c_str());
-		pad->SetLogx();
-		pad->SetLogy();
 		pads.push_back(pad);
 
 		if (dim == 0) {
 			// For "0-d" case, no point plotting. Just output the parameter values.
 			std::cout << "Parameter " << p << ": " << params[p][0] << " ± " << param_errs[p][0] << std::endl;
 		} else if (dim == 1) {
+			pad->SetLogx();
 			// For 1-d plots, a TGraphError will work.
 			Int_t count = axes[0].GetNbins();
 			std::vector<Double_t> zeroes(0., count);
 			Double_t const* edges = axes[0].GetXbins()->GetArray();
-			std::vector<Double_t> centers;
+			std::vector<Double_t> xs;
 			for (Int_t iz = 0; iz < count; ++iz) {
-				centers.push_back(0.5 * (edges[iz + 1] + edges[iz]));
+				//xs.push_back(0.5 * (edges[iz + 1] + edges[iz]));
+				Int_t var_idx;
+				if (axes_names[0] == "x") {
+					var_idx = 0;
+				} else if (axes_names[0] == "Q sq.") {
+					var_idx = 1;
+				} else if (axes_names[0] == "z") {
+					var_idx = 2;
+				} else if (axes_names[0] == "pt") {
+					var_idx = 3;
+				}
+				xs.push_back(param_xs[var_idx][iz]);
 			}
-			Double_t const* xs = centers.data();
 			Double_t const* x_errs = zeroes.data();
 			Double_t const* ys = params[p].data();
 			Double_t const* y_errs = param_errs[p].data();
-			TGraphErrors* graph = new TGraphErrors(count, xs, ys, x_errs, y_errs);
+			TGraphErrors* graph = new TGraphErrors(count, xs.data(), ys, x_errs, y_errs);
 			graph->SetTitle("");
 			graph->GetXaxis()->SetTitle(axis_names[0].c_str());
 			graph->GetYaxis()->SetTitle(param_names[p].c_str());
 			graph->GetXaxis()->SetLimits(edges[0], edges[count]);
-			graph->GetYaxis()->SetRangeUser(-0.3, 0.3);
+			graph->GetYaxis()->SetRangeUser(-0.02, 0.04);
+			//graph->GetYaxis()->SetRangeUser(0., 0.1);
 			pad->cd();
-			graph->Draw("APE");
+			graph->Draw("APE0");
 			TLine* line_zero = new TLine(edges[0], 0., edges[count], 0.);
 			line_zero->SetLineStyle(2);
 			line_zero->Draw("SAME");
-			if (param_names[p] == "Sivers") {
-				TLine* line_target = new TLine(edges[0], 0.2, edges[count], 0.2);
-				line_target->SetLineStyle(1);
-				line_target->Draw("SAME");
-			}
+			TGraphAsymmErrors* graph_model = new TGraphAsymmErrors(count, xs.data(), model[p].data(), x_errs, x_errs, model_err_lower[p].data(), model_err_upper[p].data());
+			graph_model->SetFillColor(6);
+			graph_model->SetFillStyle(3003);
+			graph_model->Draw("CLP CF3 SAME");
 		} else if (dim == 2) {
 			// Don't know what to do in the 2D case.
 		} else if (dim == 3) {
+			pad->SetLogx();
+			pad->SetLogy();
 			// For 3-d plots, we need a number of TGraphErrors in an array.
 			TH2D* hist_axes = new TH2D(
 				("Axes" + param_names[p]).c_str(), "",
@@ -150,6 +183,7 @@ void draw3(char const* file_name/*TString bru_dir="bruspin", TString minimizer_s
 			Double_t height = pad->GetWh() * pad->GetAbsHNDC();
 			for (Int_t iy = 1; iy < axes[1].GetNbins() + 1; ++iy) {
 				for (Int_t ix = 1; ix < axes[0].GetNbins() + 1; ++ix) {
+					std::cout << "Producing pad " << ix << ", " << iy << std::endl;
 					std::string pad_name = "Pad" + std::to_string(ix) + "," + std::to_string(iy);
 					Double_t x_lo = axes[0].GetBinLowEdge(ix);
 					Double_t y_lo = axes[1].GetBinLowEdge(iy);
@@ -206,23 +240,37 @@ void draw3(char const* file_name/*TString bru_dir="bruspin", TString minimizer_s
 						Int_t count = axes[2].GetNbins();
 						std::vector<Double_t> zeroes(0., count);
 						Double_t const* edges = axes[2].GetXbins()->GetArray();
-						std::vector<Double_t> centers;
+						std::vector<Double_t> xs;
 						for (Int_t iz = 0; iz < count; ++iz) {
-							centers.push_back(0.5 * (edges[iz + 1] + edges[iz]));
+							//xs.push_back(0.5 * (edges[iz + 1] + edges[iz]));
+							Int_t var_idx;
+							if (axes_names[2] == "x") {
+								var_idx = 0;
+							} else if (axes_names[2] == "Q sq.") {
+								var_idx = 1;
+							} else if (axes_names[2] == "z") {
+								var_idx = 2;
+							} else if (axes_names[2] == "pt") {
+								var_idx = 3;
+							}
+							xs.push_back(param_xs[var_idx][iz]);
 						}
-						Double_t const* xs = centers.data();
 						Double_t const* x_errs = zeroes.data();
-						std::vector<Double_t> ys_vec;
-						std::vector<Double_t> y_errs_vec;
+						std::vector<Double_t> ys;
+						std::vector<Double_t> y_errs;
+						std::vector<Double_t> ys_model;
+						std::vector<Double_t> ys_model_lower;
+						std::vector<Double_t> ys_model_upper;
 						Int_t stride = axes[0].GetNbins() * axes[1].GetNbins();
 						Int_t offset = (ix - 1) + axes[0].GetNbins() * (iy - 1);
 						for (Int_t iz = 0; iz < count; ++iz) {
-							ys_vec.push_back(params[p][offset + iz * stride]);
-							y_errs_vec.push_back(param_errs[p][offset + iz * stride]);
+							ys.push_back(params[p][offset + iz * stride]);
+							y_errs.push_back(param_errs[p][offset + iz * stride]);
+							ys_model.push_back(model[p][offset + iz * stride]);
+							ys_model_lower.push_back(model_err_lower[p][offset + iz * stride]);
+							ys_model_upper.push_back(model_err_upper[p][offset + iz * stride]);
 						}
-						Double_t const* ys = ys_vec.data();
-						Double_t const* y_errs = y_errs_vec.data();
-						TGraphErrors* graph = new TGraphErrors(count, xs, ys, x_errs, y_errs);
+						TGraphErrors* graph = new TGraphErrors(count, xs.data(), ys.data(), x_errs, y_errs.data());
 						graph->SetTitle("");
 						graph->GetXaxis()->SetTickLength(0.);
 						graph->GetXaxis()->SetLabelOffset(999.);
@@ -231,17 +279,17 @@ void draw3(char const* file_name/*TString bru_dir="bruspin", TString minimizer_s
 						graph->GetYaxis()->SetLabelOffset(999.);
 						graph->GetYaxis()->SetLabelSize(0.);
 						graph->GetXaxis()->SetLimits(edges[0], edges[count]);
-						graph->GetYaxis()->SetRangeUser(-0.3, 0.3);
+						graph->GetYaxis()->SetRangeUser(-0.02, 0.04);
+						//graph->GetYaxis()->SetRangeUser(0., 0.1);
 						subpad->cd();
-						graph->Draw("APE");
+						graph->Draw("APE0");
 						TLine* line_zero = new TLine(edges[0], 0., edges[count], 0.);
 						line_zero->SetLineStyle(2);
 						line_zero->Draw("SAME");
-						if (param_names[p] == "Sivers") {
-							TLine* line_target = new TLine(edges[0], 0.2, edges[count], 0.2);
-							line_target->SetLineStyle(1);
-							line_target->Draw("SAME");
-						}
+						TGraphAsymmErrors* graph_model = new TGraphAsymmErrors(count, xs.data(), ys_model.data(), x_errs, x_errs, ys_model_lower.data(), ys_model_upper.data());
+						graph_model->SetFillColor(6);
+						graph_model->SetFillStyle(3003);
+						graph_model->Draw("CLP CF2 SAME");
 					} else {
 						std::cout << "Subplot off canvas." << std::endl;
 					}
@@ -249,10 +297,12 @@ void draw3(char const* file_name/*TString bru_dir="bruspin", TString minimizer_s
 			}
 		}
 
+		std::cout << "Drawing." << std::endl;
 		pad->Draw();
 		pad->Write();
 	}
 	file_out->Close();
 	file->Close();
+	std::cout << "Done" << std::endl;
 }
 

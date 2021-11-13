@@ -36,7 +36,7 @@ class WeightsSivers : public Weights
 {
   public:
     Double_t GetWeight(const Kinematics& kin) const override;
-    virtual Double_t Asymmetry(Double_t x, Double_t z, Double_t Q2, Double_t pt) const = 0;
+    virtual Double_t Asymmetry(Int_t h, Double_t x, Double_t z, Double_t Q2, Double_t pt) const = 0;
   private:
   ClassDefOverride(WeightsSivers,1);
 };
@@ -46,10 +46,20 @@ class WeightsCollins : public Weights
 {
   public:
     Double_t GetWeight(const Kinematics& kin) const override;
-    virtual Double_t Asymmetry(Double_t x, Double_t z, Double_t Q2, Double_t pt) const = 0;
+    virtual Double_t Asymmetry(Int_t h, Double_t x, Double_t z, Double_t Q2, Double_t pt) const = 0;
 
   private:
   ClassDefOverride(WeightsCollins,1);
+};
+
+// Inject a ALL asymmetry.
+class WeightsALL : public Weights
+{
+  public:
+    Double_t GetWeight(const Kinematics& kin) const override;
+    virtual Double_t Asymmetry(Int_t h, Double_t x, Double_t z, Double_t Q2, Double_t pt) const = 0;
+  private:
+  ClassDefOverride(WeightsALL,1);
 };
 
 // Product of weights. Useful for products of acceptances.
