@@ -7,10 +7,11 @@ using std::cerr;
 using std::endl;
 
 // constructor
-Node::Node(Int_t nodeType_, TString id_, CutDef *cut_)
+Node::Node(Int_t nodeType_, TString id_, CutDef *cut_, Int_t binNum_)
   : nodeType(nodeType_)
   , id(id_)
   , cut(cut_)
+  , binNum(binNum_)
   , active(true)
   , debug(false)
 {

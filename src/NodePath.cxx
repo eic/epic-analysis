@@ -7,11 +7,19 @@ NodePath::NodePath()
 {
 };
 
-// return a string of bin names
+// return a string of bin names -- for pretty print
 TString NodePath::BinListString() {
   TString ret = "[";
   for(auto it : GetSortedBins()) ret += " " + it->GetID();
   ret += " ]";
+  return ret;
+};
+
+// return a string of bin names -- for object names
+TString NodePath::BinListName() {
+  TString ret = "";
+  for(auto it : GetSortedBins()) ret += "_" + it->GetID();
+  ret(TRegexp("^_")) = "";
   return ret;
 };
 

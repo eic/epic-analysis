@@ -82,6 +82,17 @@ class Histos : public TNamed
         Bool_t logy = false,
         Bool_t logz = false
         );
+    void DefineHist2D(
+        TString varname,
+	TString vartitlex, TString vartitley,
+	TString unitsx, TString unitsy,
+	Int_t numBinsx, Double_t *xBins,
+	Int_t numBinsy, Double_t *yBins,
+	Bool_t logx = false,
+	Bool_t logy = false,
+	Bool_t logz = false
+	);
+
     void DefineHist3D(
         TString varname,
         TString vartitlex, TString vartitley, TString vartitlez,
