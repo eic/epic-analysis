@@ -46,20 +46,18 @@ jobs:
       options: --user root
     strategy:
       matrix:
-        mode: [fastsim, fullsim]
+        name: [ coverage, y-minima, resolutions ]
+        mode: [ fastsim, fullsim ]
         include:
           - name: coverage
-            mode: [fastsim, fullsim]
-            analysis: analysis_coverage.C
-            postprocess: postprocess_coverage.C
+            amacro: analysis_coverage.C
+            pmacro: postprocess_coverage.C
           - name: y-minima
-            mode: [fastsim]
-            analysis: analysis_yRatio.C
-            postprocess: postprocess_yRatio.C
+            amacro: analysis_yRatio.C
+            pmacro: postprocess_yRatio.C
           - name: resolutions
-            mode: [fastsim]
-            analysis: analysis_resolution.C
-            postprocess: postprocess_resolution.C
+            amacro: analysis_resolution.C
+            pmacro: postprocess_resolution.C
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -76,9 +74,9 @@ jobs:
         env:
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-        run: root -b -q macro/ci/${{ matrix.analysis }}'("macro/ci/files.config",5,41,25,"${{ matrix.mode }}.${{ matrix.name }}")'
+        run: root -b -q macro/ci/${{ matrix.amacro }}'("macro/ci/files.config",5,41,25,"${{ matrix.mode }}.${{ matrix.name }}")'
       - name: postprocess
-        run: root -b -q macro/ci/${{ matrix.postprocess }}'("out/${{ matrix.mode }}.${{ matrix.name }}.root")'
+        run: root -b -q macro/ci/${{ matrix.pmacro }}'("out/${{ matrix.mode }}.${{ matrix.name }}.root")'
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
