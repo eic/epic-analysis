@@ -10,13 +10,10 @@ void analysis_resolution(
 ) {
 
   // setup analysis ========================================
-  AnalysisDelphes *A = new AnalysisDelphes(
-      infiles,
-      eleBeamEn,
-      ionBeamEn,
-      crossingAngle,
-      outfilePrefix
-      );
+  Analysis *A;
+  if(outfilePrefix.Contains("fullsim"))
+       A = new AnalysisDD4hep(  infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+  else A = new AnalysisDelphes( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
 
   //A->maxEvents = 30000; // use this to limit the number of events
   A->SetReconMethod("Ele"); // set reconstruction method

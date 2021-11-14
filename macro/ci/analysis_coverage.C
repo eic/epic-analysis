@@ -7,14 +7,13 @@ void analysis_coverage(
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=25, /* crossing angle [mrad] */
     TString outfilePrefix="fullsim.coverage", /* output filename prefix*/
-    bool isFullSim=true /* true=fullsim, false=fastsim */
 ) {
 
   // setup analysis ========================================
-  // - define `AnalysisDD4hep` or `AnalysisDelphes`, depending on `isFullSim` setting
   Analysis *A;
-  if(isFullSim) A = new AnalysisDD4hep(  infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
-  else          A = new AnalysisDelphes( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+  if(outfilePrefix.Contains("fullsim"))
+       A = new AnalysisDD4hep(  infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+  else A = new AnalysisDelphes( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
 
   //A->maxEvents = 300000; // use this to limit the number of events
   A->writeSimpleTree = true;
