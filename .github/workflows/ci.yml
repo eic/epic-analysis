@@ -47,15 +47,17 @@ jobs:
     strategy:
       matrix:
         #mode: [fastsim, fullsim]
-        mode: [fastsim]
         include:
           - name: coverage
+            mode: [fastsim, fullsim]
             analysis: analysis_coverage.C
             postprocess: postprocess_coverage.C
           - name: y-minima
+            mode: [fastsim]
             analysis: analysis_yRatio.C
             postprocess: postprocess_yRatio.C
           - name: resolutions
+            mode: [fastsim]
             analysis: analysis_resolution.C
             postprocess: postprocess_resolution.C
     steps:
