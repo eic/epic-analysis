@@ -89,7 +89,7 @@ void AnalysisDD4hep::process_event()
   {
     if(nevt%10000==0) cout << nevt << " events..." << endl;
     nevt++;      
-    if(nevt>maxEvents) break;
+    if(nevt>maxEvents && maxEvents>0) break;
 
     // mcparticles loop
     std::vector<Particles> mcpart;

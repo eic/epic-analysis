@@ -18,7 +18,7 @@ if [ $# -ne 2 ]; then
                
    - [mode]:   s - make config file for streaming from S3
                d - download from S3, then make the local config file
-               c - just re-make the local config file (skip download)
+               c - just make the local config file, for files you have downloaded
    
    Examples: $0 5x41 d       # download
              $0 18x275 s     # stream
