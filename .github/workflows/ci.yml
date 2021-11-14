@@ -46,10 +46,17 @@ jobs:
       options: --user root
     strategy:
       matrix:
+        #mode: [fastsim, fullsim]
         include:
           - name: coverage
             analysis: analysis_coverage.C
-            postprocess: post_process_coverage.C
+            postprocess: postprocess_coverage.C
+          - name: y-minima
+            analysis: analysis_yRatio.C
+            postprocess: postprocess_yRatio.C
+          - name: resolutions
+            analysis: analysis_resolution.C
+            postprocess: postprocess_resolution.C
     steps:
       - name: checkout
         uses: actions/checkout@v2
