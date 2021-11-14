@@ -66,9 +66,9 @@ jobs:
         #env:
           #S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           #S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-        run: root -b -q macro/ci/${{ matrix.analysis }}'("macro/ci/files.config",5,41,25,"fastsim.'${{ matrix.name }}'",false)'
+        run: root -b -q macro/ci/${{ matrix.analysis }}'("macro/ci/files.config",5,41,25,"fastsim.${{ matrix.name }}",false)'
       - name: postprocess
-        run: root -b -q macro/ci/${{ matrix.postprocess }}'("out/fastsim.'${{ matrix.name }}'.root")'
+        run: root -b -q macro/ci/${{ matrix.postprocess }}'("out/fastsim.${{ matrix.name }}.root")'
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
