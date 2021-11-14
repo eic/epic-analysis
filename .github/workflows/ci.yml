@@ -46,7 +46,7 @@ jobs:
       options: --user root
     strategy:
       matrix:
-        #mode: [fastsim, fullsim]
+        mode: [fastsim, fullsim]
         include:
           - name: coverage
             mode: [fastsim, fullsim]
