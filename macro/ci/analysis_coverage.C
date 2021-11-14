@@ -1,23 +1,20 @@
 R__LOAD_LIBRARY(Largex)
 
-// full simulation (dd4hep) test
-void analysis_dd4hep(
+// coverage test
+void analysis_coverage(
     TString infiles="macro/ci/s3files.config", /* list of input files (S3 URLs, plus other columns) */ // TODO: UPDATE s3 LIST
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=25, /* crossing angle [mrad] */
-    TString outfilePrefix="fullsim.coverage" /* output filename prefix*/
+    TString outfilePrefix="fullsim.coverage", /* output filename prefix*/
+    bool isFullSim=true /* true=fullsim, false=fastsim */
 ) {
 
   // setup analysis ========================================
-  // - define `AnalysisDD4hep` instead of `AnalysisDelphes`
-  AnalysisDD4hep *A = new AnalysisDD4hep(
-      infiles,
-      eleBeamEn,
-      ionBeamEn,
-      crossingAngle,
-      outfilePrefix
-      );
+  // - define `AnalysisDD4hep` or `AnalysisDelphes`, depending on `isFullSim` setting
+  Analysis *A;
+  if(isFullSim) A = new AnalysisDD4hep(  infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+  else          A = new AnalysisDelphes( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
 
   //A->maxEvents = 300000; // use this to limit the number of events
   A->writeSimpleTree = true;
