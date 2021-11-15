@@ -101,7 +101,12 @@ jobs:
         with:
           path: results
       - name: cull
-        run: rm -rv results/build-artifacts
+        run: |
+          rm -rv results/build-artifacts
+          rm -v results/y-minima*/canv*.png
+          rm -v results/resolution*/*.pdf
+      - name: organize
+        run: macro/ci/organize-artifacts.sh results
       - name: upload
         uses: actions/upload-artifact@v2
         with:
