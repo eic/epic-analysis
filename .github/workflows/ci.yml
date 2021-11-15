@@ -12,6 +12,7 @@ defaults:
 
 jobs:
 
+# build test
   build:
     runs-on: [ ubuntu-latest ]
     container:
@@ -38,7 +39,8 @@ jobs:
             mstwpdf/*.so
             src/LargexDict.cxx
 
-  macro-tests:
+# run benchmark macros matrix for fast and full simulation
+  benchmarks:
     needs: [ build ]
     runs-on: [ ubuntu-latest ]
     container:
@@ -74,102 +76,32 @@ jobs:
         env:
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-        run: root -b -q macro/ci/${{ matrix.amacro }}'("macro/ci/files.config",5,41,25,"${{ matrix.mode }}.${{ matrix.name }}")'
+        run: root -b -q macro/ci/${{ matrix.amacro }}'("macro/ci/files.config",5,41,25,"${{ matrix.name }}.${{ matrix.mode }}")'
       - name: postprocess
-        run: root -b -q macro/ci/${{ matrix.pmacro }}'("out/${{ matrix.mode }}.${{ matrix.name }}.root")'
+        run: root -b -q macro/ci/${{ matrix.pmacro }}'("out/${{ matrix.name }}.${{ matrix.mode }}.root")'
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.mode }}-${{ matrix.name }}-plots
-          path: |
-            out/${{ matrix.mode }}.${{ matrix.name }}.images
+          name: ${{ matrix.name }}-${{ matrix.mode }}-plots
+          path: out/${{ matrix.name }}.${{ matrix.mode }}.images
 
-#  fastsim-y-minima:
-#    needs: [ build ]
-#    runs-on: [ ubuntu-latest ]
-#    container:
-#      image: cjdilks/largex-eic:dev
-#      options: --user root
-#    steps:
-#      - name: checkout
-#        uses: actions/checkout@v2
-#      - name: config
-#        run: |
-#          source env.sh
-#          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-#          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-#      - name: get-artifacts
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: build-artifacts
-#      - name: analysis
-#        run: root -b -q macro/ci/analysis_yRatio.C
-#      - name: postprocess
-#        run: root -b -q macro/ci/postprocess_yRatio.C
-#      - name: artifacts
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: fastsim-y-minima-ratio-plots
-#          path: |
-#            out/yRatio.images/yRatio*.png
-#
-#  fastsim-resolutions:
-#    needs: [ build ]
-#    runs-on: [ ubuntu-latest ]
-#    container:
-#      image: cjdilks/largex-eic:dev
-#      options: --user root
-#    steps:
-#      - name: checkout
-#        uses: actions/checkout@v2
-#      - name: config
-#        run: |
-#          source env.sh
-#          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-#          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-#      - name: get-artifacts
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: build-artifacts
-#      - name: analysis
-#        run: root -b -q macro/ci/analysis_resolution.C
-#      - name: postprocess
-#        run: root -b -q macro/ci/postprocess_resolution.C
-#      - name: artifacts
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: fastsim-resolution-plots
-#          path: |
-#            out/resolution.images/*.pdf
-#
-#  fullsim-coverage:
-#    needs: [ build ]
-#    runs-on: [ ubuntu-latest ]
-#    container:
-#      image: cjdilks/largex-eic:dev
-#      options: --user root
-#    steps:
-#      - name: checkout
-#        uses: actions/checkout@v2
-#      - name: config
-#        run: |
-#          source env.sh
-#          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-#          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-#      - name: get-artifacts
-#        uses: actions/download-artifact@v2
-#        with:
-#          name: build-artifacts
-#      - name: analysis
-#        env:
-#          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-#          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-#        run: root -b -q macro/ci/analysis_coverage.C'("macro/ci/s3files.config",5,41,25,"fullsim.coverage",true)'
-#      - name: postprocess
-#        run: root -b -q macro/ci/postprocess_coverage.C'("out/fullsim.coverage.root")'
-#      - name: artifacts
-#        uses: actions/upload-artifact@v2
-#        with:
-#          name: fullsim-coverage-plots
-#          path: |
-#            out/fullsim.coverage.images
+# collect artifacts into one directory
+  collect:
+    if: ${{ always() }}
+    needs: [ benchmarks ]
+    runs-on: [ ubuntu-latest ]
+    steps:
+      - name: download
+        uses: actions/download-artifact@v2
+        with:
+          path: results
+      - name: cull
+        run: |
+          ls
+          ls results
+          rm -rv results/build-artifacts
+      - name: upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: _FULL_RESULTS
+          path: results
