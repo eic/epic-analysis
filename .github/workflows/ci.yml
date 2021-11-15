@@ -56,15 +56,18 @@ jobs:
             config: files.config
           - mode: fullsim
             config: s3files.config
+          - name: bin-test
+            amacro: analysis_xq.C
+            pmacro: postprocess_bin_test.C
           - name: coverage
-            amacro: analysis_coverage.C
-            pmacro: postprocess_coverage.C
+            amacro: analysis_xq.C
+            pmacro: postprocess_xq.C
+          - name: resolution
+            amacro: analysis_xq.C
+            pmacro: postprocess_xq.C
           - name: y-minima
             amacro: analysis_yRatio.C
             pmacro: postprocess_yRatio.C
-          - name: resolutions
-            amacro: analysis_resolution.C
-            pmacro: postprocess_resolution.C
     steps:
       - name: checkout
         uses: actions/checkout@v2

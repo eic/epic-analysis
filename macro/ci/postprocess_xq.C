@@ -1,17 +1,47 @@
 R__LOAD_LIBRARY(Largex)
 
-// make resolution plots
-void postprocess_resolution(
-    TString infile="out/resolution.root"
-){
+// make grids of plots of (x,Q2) bins
+// - depending on infile, different histograms will be drawn
+void postprocess_resolution(TString infile) {
 
-  // cleanup old image files
-  gROOT->ProcessLine(".! rm -v out/resolution.images/*.png");
-  gROOT->ProcessLine(".! rm -v out/resolution.images/*.pdf");
+  // set histogram lists, based on infile name
+  std::vector<TString> histList;
+  if(infile.Contains("coverage")) {
+    histList.push_back("Q2vsX");
+    histList.push_back("Q");
+    histList.push_back("x");
+    histList.push_back("y");
+    histList.push_back("W");
+    histList.push_back("pLab");
+    histList.push_back("pTlab");
+    histList.push_back("etaLab");
+    histList.push_back("phiLab");
+    histList.push_back("z");
+    histList.push_back("pT");
+    histList.push_back("qT");
+    histList.push_back("qTq");
+    histList.push_back("mX");
+    histList.push_back("phiH");
+    histList.push_back("phiS");
+    histList.push_back("phiHvsPhiS");
+    histList.push_back("phiSivers");
+    histList.push_back("phiCollins");
+    histList.push_back("etaVsP");
+  }
+  else if(infile.Contains("resolution")) {
+    histList.push_back("x_Res");
+    histList.push_back("y_Res");
+    histList.push_back("pT_Res");
+    histList.push_back("Q2_Res");
+    histList.push_back("phiH_Res");
+    histList.push_back("phiS_Res");
+  } else {
+    fprintf(stderr,"ERROR: histList not defined for specified infile name\n");
+    return;
+  };
 
   // build DAG
   PostProcessor *P = new PostProcessor(infile);
-  //P->Op()->PrintBreadth("HistosDAG Initial Setup");
 
   // (x,Q2) binning
   auto xBins = P->Op()->GetBinSet("x");
@@ -38,7 +68,7 @@ void postprocess_resolution(
   // after subloop operator: draw array of plots in (x,Q2) bins
   auto drawHistosArr = [&histosArr, &P, &numXbins, &numQbins, &xMin, &xMax, &qMin, &qMax](NodePath *NP) {
     TString canvName = "xQ2cov_" + NP->BinListName();
-    for( TString histName : {"x_Res","y_Res","pT_Res","Q2_Res","phiH_Res","phiS_Res","phiHvsPhiS"} ) {
+    for( TString histName : histList ) {
       P->DrawInBins(
           canvName, histosArr, histName,
           "x", numXbins, xMin, xMax, true,

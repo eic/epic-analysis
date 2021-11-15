@@ -1,9 +1,7 @@
 R__LOAD_LIBRARY(Largex)
 
 // plot ratios of distributions for various y minima
-void postprocess_yRatio(
-    TString infile="out/yRatio.root"
-) {
+void postprocess_yRatio(TString infile) {
 
   // setup postprocessor ========================================
   PostProcessor *P = new PostProcessor(infile);
