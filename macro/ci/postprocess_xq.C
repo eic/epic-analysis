@@ -66,7 +66,7 @@ void postprocess_resolution(TString infile) {
   };
 
   // after subloop operator: draw array of plots in (x,Q2) bins
-  auto drawHistosArr = [&histosArr, &P, &numXbins, &numQbins, &xMin, &xMax, &qMin, &qMax](NodePath *NP) {
+  auto drawHistosArr = [&histosArr, &P, &histList, &numXbins, &numQbins, &xMin, &xMax, &qMin, &qMax](NodePath *NP) {
     TString canvName = "xQ2cov_" + NP->BinListName();
     for( TString histName : histList ) {
       P->DrawInBins(
