@@ -481,6 +481,11 @@ void Analysis::Finish() {
   if(writeSimpleTree) ST->WriteTree();
   HD->Payload([this](Histos *H){ H->WriteHists(outFile); }); HD->ExecuteAndClearOps();
   HD->Payload([this](Histos *H){ H->Write(); }); HD->ExecuteAndClearOps();
+  std::vector<Double_t> vec_wTrackTotal { wTrackTotal };
+  std::vector<Double_t> vec_wJetTotal { wJetTotal };
+  outFile->WriteObject(&Q2xsecsTot, "XsTotal");
+  outFile->WriteObject(&vec_wTrackTotal, "WeightTotal");
+  outFile->WriteObject(&vec_wJetTotal, "WeightJetTotal");
 
   // write binning schemes
   for(auto const &kv : binSchemes) {
