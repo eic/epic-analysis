@@ -52,9 +52,9 @@ jobs:
         name: [ coverage, y-minima, resolutions ]
         mode: [ fastsim, fullsim ]
         include:
-          - name: fastsim
+          - mode: fastsim
             config: files.config
-          - name: fullsim
+          - mode: fullsim
             config: s3files.config
           - name: coverage
             amacro: analysis_coverage.C
