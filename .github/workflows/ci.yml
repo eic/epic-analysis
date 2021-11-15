@@ -108,8 +108,9 @@ jobs:
       - name: cull
         run: |
           rm -rv results/build-artifacts
-          rm -v results/y-minima*/canv*.png
+          rm -v results/coverage*/*.pdf
           rm -v results/resolution*/*.pdf
+          rm -v results/y-minima*/canv*.png
       - name: organize
         run: macro/ci/organize-artifacts.sh results
       - name: upload
