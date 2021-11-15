@@ -49,7 +49,7 @@ jobs:
       options: --user root
     strategy:
       matrix:
-        name: [ coverage, y-minima, resolutions ]
+        name: [ bin-test, coverage, resolution, y-minima ]
         mode: [ fastsim, fullsim ]
         include:
           - mode: fastsim
