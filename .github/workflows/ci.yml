@@ -40,6 +40,7 @@ jobs:
             src/LargexDict.cxx
 
 # run benchmark macros matrix for fast and full simulation
+# - all files in matrix are w.r.t. path macro/ci/
   benchmarks:
     needs: [ build ]
     runs-on: [ ubuntu-latest ]
@@ -51,6 +52,10 @@ jobs:
         name: [ coverage, y-minima, resolutions ]
         mode: [ fastsim, fullsim ]
         include:
+          - name: fastsim
+            config: files.config
+          - name: fullsim
+            config: s3files.config
           - name: coverage
             amacro: analysis_coverage.C
             pmacro: postprocess_coverage.C
@@ -76,7 +81,7 @@ jobs:
         env:
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-        run: root -b -q macro/ci/${{ matrix.amacro }}'("macro/ci/files.config",5,41,25,"${{ matrix.name }}.${{ matrix.mode }}")'
+        run: root -b -q macro/ci/${{ matrix.amacro }}'("macro/ci/${{ matrix.config }}",5,41,25,"${{ matrix.name }}.${{ matrix.mode }}")'
       - name: postprocess
         run: root -b -q macro/ci/${{ matrix.pmacro }}'("out/${{ matrix.name }}.${{ matrix.mode }}.root")'
       - name: artifacts
@@ -96,10 +101,7 @@ jobs:
         with:
           path: results
       - name: cull
-        run: |
-          ls
-          ls results
-          rm -rv results/build-artifacts
+        run: rm -rv results/build-artifacts
       - name: upload
         uses: actions/upload-artifact@v2
         with:
