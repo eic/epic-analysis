@@ -2,11 +2,11 @@ R__LOAD_LIBRARY(Largex)
 
 // make resolution plots
 void analysis_resolution_SD(
-    TString infiles="datarec/test.config", /* list of input files */
+    TString infiles="datarec/dis-5x41.config", /* list of input files */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=0, /* crossing angle [mrad] */
-    TString outfilePrefix="resolution" /* output filename prefix*/
+    TString outfilePrefix="dis-5x41" /* output filename prefix*/
 ) {
 
   // setup analysis ========================================

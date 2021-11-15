@@ -161,12 +161,15 @@ void AnalysisDelphes::Execute() {
       // - check PID, to see if it's a final state we're interested in for
       //   histograms; if not, proceed to next track
       pid = trk->PID;
+      std::cout<<"DEBUGGING trk->PID        = "<<pid<<std::endl;//DEBUGGING
       auto kv = PIDtoFinalState.find(pid);
       if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
       if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
 
       // get parent particle, to check if pion is from vector meson
       GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
+      std::cout<<"DEBUGGING finalStateID = "<<finalStateID<<std::endl;//DEBUGGING
+      std::cout<<"          trkParticle->PID = \n"<<trkParticle->PID<<std::endl;//DEBUGGING
       TObjArray *brParticle = (TObjArray*)itParticle.GetCollection();
       GenParticle *parentParticle = (GenParticle*)brParticle->At(trkParticle->M1);
       int parentPID = (parentParticle->PID); // TODO: this is not used yet...

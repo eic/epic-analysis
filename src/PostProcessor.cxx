@@ -664,8 +664,8 @@ void PostProcessor::DrawSDInBinsTogether(
 
       THStack *hist = new THStack();
       TLegend *lg = new TLegend(0.1,0.1,0.9,0.9);
-      lg->SetTextSize(0.2);
-      lg->SetHeader(header);
+      lg->SetHeader(header,"C");
+      lg->SetTextSize(0.15);
       if (nNames>3) lg->SetNColumns(2);
 
       for (int k=0; k<nNames; k++) {
@@ -730,6 +730,7 @@ void PostProcessor::DrawSDInBinsTogether(
         hist->Draw(drawStr);
         TF1 *f1 = new TF1("f1","0",hist->GetXaxis()->GetXmin(),hist->GetXaxis()->GetXmax());
         f1->SetLineColor(1);
+        f1->SetLineWidth(1);
         f1->Draw("SAME");
         if (i==0 && j==0) {
           mainpad->cd(nvar1*nvar2);// Bottom right corner pad
