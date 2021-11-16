@@ -466,10 +466,10 @@ void Analysis::Finish() {
 
 
     // Convert to contamination plot since the y scale is better for plotting with stddevs
-    H->Hist("z_purity")->Add(H->Hist("z_true"),-1);
+    // H->Hist("z_purity")->Add(H->Hist("z_true"),-1);
     H->Hist("z_purity")->Divide(H->Hist("z_true"));
-    TF1 *f1 = new TF1("f1","1",0,1); //TODO: Set limits automatically
-    H->Hist("z_purity")->Multiply(f1,-1);
+    // TF1 *f1 = new TF1("f1","1",0,1); //TODO: Set limits automatically
+    // H->Hist("z_purity")->Multiply(f1,-1);
 
   });
 

@@ -447,16 +447,16 @@ void PostProcessor::DrawInBins(
       // //hist->GetYaxis()->SetTitle("");
       // //hist->GetXaxis()->SetLabelSize(0);
       // //hist->GetYaxis()->SetLabelSize(0);
-      hist->GetXaxis()->SetTitleSize(0.1);
-      hist->GetXaxis()->SetTitleOffset(0.5);
-      hist->GetXaxis()->SetNdivisions(8);
-      hist->GetXaxis()->SetLabelSize(0.06);
-      hist->GetXaxis()->CenterTitle();
-      hist->GetXaxis()->SetLabelOffset(0.02);
-      hist->GetYaxis()->SetRangeUser(0,0.05);//TODO: CHECK THIS IS REASONABLE ALSO WHAT ABOUT ERROR BARS???
-      hist->GetYaxis()->SetNdivisions(8);
-      hist->GetYaxis()->SetLabelSize(0.06);
-      hist->GetYaxis()->SetLabelOffset(0.02);
+      // hist->GetXaxis()->SetTitleSize(0.1);
+      // hist->GetXaxis()->SetTitleOffset(0.5);
+      // hist->GetXaxis()->SetNdivisions(8);
+      // hist->GetXaxis()->SetLabelSize(0.06);
+      // hist->GetXaxis()->CenterTitle();
+      // hist->GetXaxis()->SetLabelOffset(0.02);
+      // hist->GetYaxis()->SetRangeUser(0,0.05);//TODO: CHECK THIS IS REASONABLE ALSO WHAT ABOUT ERROR BARS???
+      // hist->GetYaxis()->SetNdivisions(8);
+      // hist->GetYaxis()->SetLabelSize(0.06);
+      // hist->GetYaxis()->SetLabelOffset(0.02);
       // // for(int k = 0; k < i; k++){
       // //   for(int l = 0; l < j; k++){
       // //     histArray[k][l]->GetYaxis()->SetRangeUser(TMath::Min(yMin,hist->GetYaxis()->GetMinimum(),TMath::Max(yMax,hist->GetYaxis()->GetMaximum())));
