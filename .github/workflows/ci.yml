@@ -12,6 +12,7 @@ defaults:
 
 jobs:
 
+# build test
   build:
     runs-on: [ ubuntu-latest ]
     container:
@@ -25,44 +26,48 @@ jobs:
           source env.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-          more $GITHUB_ENV
       - name: compile
         run: make
-
-  fastsim-coverage:
-    needs: [ build ]
-    runs-on: [ ubuntu-latest ]
-    container:
-      image: cjdilks/largex-eic:dev
-      options: --user root
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: config
-        run: |
-          source env.sh
-          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-          more $GITHUB_ENV
-      - name: compile
-        run: make
-      - name: analysis
-        run: root -b -q macro/ci/analysis_xqbins.C
-      - name: postprocess
-        run: root -b -q macro/ci/postprocess_xqbins_draw.C
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: fastsim-coverage-plots
+          name: build-artifacts
           path: |
-            out/coverage.images
+            LargexDict_rdict.pcm
+            libLargex.so
+            mstwpdf/*.o
+            mstwpdf/*.so
+            src/LargexDict.cxx
 
-  fastsim-y-minima:
+# run benchmark macros matrix for fast and full simulation
+# - all files in matrix are w.r.t. path macro/ci/
+  benchmarks:
     needs: [ build ]
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
       options: --user root
+    strategy:
+      matrix:
+        name: [ bin-test, coverage, resolution, y-minima ]
+        mode: [ fastsim, fullsim ]
+        include:
+          - mode: fastsim
+            config: files.config
+          - mode: fullsim
+            config: s3files.config
+          - name: bin-test
+            amacro: analysis_xq.C
+            pmacro: postprocess_bin_test.C
+          - name: coverage
+            amacro: analysis_xq.C
+            pmacro: postprocess_xq.C
+          - name: resolution
+            amacro: analysis_xq.C
+            pmacro: postprocess_xq.C
+          - name: y-minima
+            amacro: analysis_yRatio.C
+            pmacro: postprocess_yRatio.C
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -71,75 +76,45 @@ jobs:
           source env.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-          more $GITHUB_ENV
-      - name: compile
-        run: make
-      - name: analysis
-        run: root -b -q macro/ci/analysis_yRatio.C
-      - name: postprocess
-        run: root -b -q macro/ci/postprocess_yRatio.C
-      - name: artifacts
-        uses: actions/upload-artifact@v2
+      - name: get-artifacts
+        uses: actions/download-artifact@v2
         with:
-          name: fastsim-y-minima-ratio-plots
-          path: |
-            out/yRatio.images/yRatio*.png
-
-  fastsim-resolutions:
-    needs: [ build ]
-    runs-on: [ ubuntu-latest ]
-    container:
-      image: cjdilks/largex-eic:dev
-      options: --user root
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: config
-        run: |
-          source env.sh
-          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-          more $GITHUB_ENV
-      - name: compile
-        run: make
-      - name: analysis
-        run: root -b -q macro/ci/analysis_resolution.C
-      - name: postprocess
-        run: root -b -q macro/ci/postprocess_resolution.C
-      - name: artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: fastsim-resolution-plots
-          path: |
-            out/resolution.images/*.pdf
-
-  fullsim-coverage:
-    needs: [ build ]
-    runs-on: [ ubuntu-latest ]
-    container:
-      image: cjdilks/largex-eic:dev
-      options: --user root
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: config
-        run: |
-          source env.sh
-          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-          more $GITHUB_ENV
-      - name: compile
-        run: make
+          name: build-artifacts
       - name: analysis
         env:
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-        run: root -b -q macro/ci/analysis_dd4hep.C
+        run: root -b -q macro/ci/${{ matrix.amacro }}'("macro/ci/${{ matrix.config }}",5,41,25,"${{ matrix.name }}.${{ matrix.mode }}")'
       - name: postprocess
-        run: root -b -q macro/ci/postprocess_dd4hep_draw.C
+        run: root -b -q macro/ci/${{ matrix.pmacro }}'("out/${{ matrix.name }}.${{ matrix.mode }}.root")'
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: fullsim-coverage-plots
-          path: |
-            out/fullsim.coverage.images
+          name: ${{ matrix.name }}-${{ matrix.mode }}-plots
+          path: out/${{ matrix.name }}.${{ matrix.mode }}.images
+
+# collect artifacts into one directory
+  collect:
+    if: ${{ always() }}
+    needs: [ benchmarks ]
+    runs-on: [ ubuntu-latest ]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: download
+        uses: actions/download-artifact@v2
+        with:
+          path: results
+      - name: cull
+        run: |
+          rm -rv results/build-artifacts
+          rm -v results/coverage*/*.pdf
+          rm -v results/resolution*/*.pdf
+          rm -v results/y-minima*/canv*.png
+      - name: organize
+        run: macro/ci/organize-artifacts.sh results
+      - name: upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: _FULL_RESULTS
+          path: results
