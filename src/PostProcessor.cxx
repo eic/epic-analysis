@@ -350,7 +350,7 @@ void PostProcessor::DrawInBins(
     TString histName,
     TString var1name, int nvar1, double var1low, double var1high, bool var1log,
     TString var2name, int nvar2, double var2low, double var2high, bool var2log,
-    bool intlog1, bool intlog2, bool intgrid1, bool intgrid2 // log option for small plots
+    bool intgrid1, bool intgrid2 // grid option for small plots
     
 ){
   // default values set for nvar1==nvar2
@@ -406,8 +406,9 @@ void PostProcessor::DrawInBins(
       //hist->GetYaxis()->SetLabelSize(0);
 
       mainpad->cd((nvar2-j-1)*nvar1 + i + 1);
-      gPad->SetLogx(intlog1);
-      gPad->SetLogy(intlog2);
+      gPad->SetLogx(H->GetHistConfig(histName)->logx);
+      gPad->SetLogy(H->GetHistConfig(histName)->logy);
+      gPad->SetLogz(H->GetHistConfig(histName)->logz);
       gPad->SetGridy(intgrid2);
       gPad->SetGridx(intgrid1);
       TString drawStr = "";
