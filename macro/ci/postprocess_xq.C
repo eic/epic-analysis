@@ -2,7 +2,7 @@ R__LOAD_LIBRARY(Largex)
 
 // make grids of plots of (x,Q2) bins
 // - depending on infile, different histograms will be drawn
-void postprocess_xq(TString infile) {
+void postprocess_xq(TString infile="out/coverage.fullsim.root") {
 
   // set histogram lists, based on infile name
   std::vector<TString> histList;

@@ -354,8 +354,8 @@ void PostProcessor::DrawInBins(
     
 ){
   // default values set for nvar1==nvar2
-  int canvx = 700;
-  int canvy = 600;
+  int canvx = 1400;
+  int canvy = 1200;
   double botmargin = 0.2;
   double leftmargin = 0.2;
   double xaxisy = 0.04;
@@ -366,8 +366,8 @@ void PostProcessor::DrawInBins(
   double yaxisy2 = 0.97;
   if(nvar1 > nvar2){
     // different canvas sizing/axis position for unequal binning
-    canvx = 1100;
-    canvy = 700;
+    canvx = 2200;
+    canvy = 1400;
     xaxisx1 = 0.075;
     xaxisx2 = 0.975;
     yaxisy1 = 0.08;
@@ -414,7 +414,7 @@ void PostProcessor::DrawInBins(
       TString drawStr = "";
       switch(hist->GetDimension()) {
         case 1:
-          drawStr = "HIST";       
+          drawStr = "HIST MIN0";
           break;
         case 2:
           drawStr = "COLZ";
@@ -432,8 +432,17 @@ void PostProcessor::DrawInBins(
           lmRICH->Draw();
           lDRICH->Draw();
         }
+        hist->GetXaxis()->SetLabelSize(0.04);
+        hist->GetYaxis()->SetLabelSize(0.04);
+        hist->GetXaxis()->SetTitleSize(0.05);
+        hist->GetYaxis()->SetTitleSize(0.05);
+        hist->GetXaxis()->SetTitleOffset(0.9);
+        hist->GetXaxis()->SetLabelOffset(0.0005);
+        if(hist->GetDimension()==1) {
+          hist->GetYaxis()->SetLabelSize(0.00); // suppress y-axis labels (since each subplot has its own scale)
+        }
       }
-    };    
+    };
   };
   canv->cd();
 

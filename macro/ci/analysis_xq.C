@@ -2,11 +2,11 @@ R__LOAD_LIBRARY(Largex)
 
 // analysis in bins of (x,Q2)
 void analysis_xq(
-    TString infiles,
-    Double_t eleBeamEn,
-    Double_t ionBeamEn,
-    Double_t crossingAngle,
-    TString outfilePrefix
+    TString infiles="datarec/canyonlands/5x41/files.config",
+    Double_t eleBeamEn=5,
+    Double_t ionBeamEn=41,
+    Double_t crossingAngle=25,
+    TString outfilePrefix="coverage.fullsim"
 ) {
 
   // setup analysis ========================================

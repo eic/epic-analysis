@@ -265,7 +265,7 @@ void Analysis::Prepare() {
         );
     HS->DefineHist1D("Q","Q","GeV",NBINS,1.0,11.0,true,true);
     HS->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
-    HS->DefineHist1D("y","y","",NBINS,1e-5,1,true);
+    HS->DefineHist1D("y","y","",NBINS,1e-3,1,true);
     HS->DefineHist1D("W","W","GeV",NBINS,0,15);
     // -- hadron 4-momentum
     HS->DefineHist1D("pLab","p_{lab}","GeV",NBINS,0,10);
