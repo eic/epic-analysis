@@ -464,6 +464,7 @@ void Analysis::Finish() {
     // calculate cross sections
     H->Hist("Q_xsec")->Scale(1./lumi); // TODO: generalize (`if (name contains "xsec") ...`)
 
+
     // Convert to contamination plot since the y scale is better for plotting with stddevs
     H->Hist("z_purity")->Add(H->Hist("z_true"),-1);
     H->Hist("z_purity")->Divide(H->Hist("z_true"));
@@ -666,8 +667,8 @@ void Analysis::FillHistosTracks() {
     dynamic_cast<TH2*>(H->Hist("z_phiS_Res"))->Fill( kinTrue->z, Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wTrack );
 
     // purities
-    H->Hist("z_true")->Fill(kinTrue->z, wTrack );
-    if( (H->Hist("z_true"))->FindBin(kinTrue->z) == (H->Hist("z_true"))->FindBin(kin->z) ) H->Hist("z_purity")->Fill(kin->z,wTrack);
+    // H->Hist("z_true")->Fill(kinTrue->z, wTrack );
+    // if( (H->Hist("z_true"))->FindBin(kinTrue->z) == (H->Hist("z_true"))->FindBin(kin->z) ) H->Hist("z_purity")->Fill(kin->z,wTrack);
     H->Hist("pT_Res")->Fill( kin->pT - kinTrue->pT, wTrack );
     dynamic_cast<TH2*>(H->Hist("Q2vsXtrue"))->Fill(kinTrue->x,kinTrue->Q2,wTrack);
     if(kinTrue->z!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_zres"))->Fill(
@@ -687,6 +688,38 @@ void Analysis::FillHistosTracks() {
   // - save time and don't call `ClearOps` (next loop will overwrite lambda)
   // - called with `activeNodesOnly==true` since we only want to fill bins associated
   //   with this track
+  HD->ExecuteOps(true);
+};
+
+// jets
+void Analysis::FillHistosPurity(int recpid, int mcpid) {
+
+  // add kinematic values to `valueMap`
+  valueMap.clear();
+  activeEvent = false;
+  /* DIS */
+  valueMap.insert(std::pair<TString,Double_t>(  "x",      kin->x      ));
+  valueMap.insert(std::pair<TString,Double_t>(  "q2",     kin->Q2     ));
+  valueMap.insert(std::pair<TString,Double_t>(  "y",      kin->y      ));
+  valueMap.insert(std::pair<TString,Double_t>(  "z",      kin->z      ));
+
+  // check bins
+  // - activates HistosDAG bin nodes which contain this track
+  // - sets `activeEvent` if there is at least one multidimensional bin to fill
+  HD->TraverseBreadth(CheckBin());
+  if(!activeEvent) return;
+
+  // fill histograms, for activated bins only
+  HD->Payload([this,recpid,mcpid](Histos *H){
+    H->Hist("z_true")->Fill(kinTrue->z, wTrack );
+    if (recpid==mcpid) {
+      H->Hist("z_purity")->Fill(kinTrue->z,wTrack);
+    }//endif
+  });
+  // execute the payload
+  // - save time and don't call `ClearOps` (next loop will overwrite lambda)
+  // - called with `activeNodesOnly==true` since we only want to fill bins associated
+  //   with this jet
   HD->ExecuteOps(true);
 };
 

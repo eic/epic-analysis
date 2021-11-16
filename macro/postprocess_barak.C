@@ -2,13 +2,13 @@ R__LOAD_LIBRARY(Largex)
 
 // make resolution plots
 // - adapted from `postprocess_pTvsEta.C`
-void postprocess_resolution_SD(
-    TString infile="out/resolution.root"
-    TString header="resolution"
+void postprocess_barak(
+    TString infile="out/barak_dis-18x275.root"
+    TString header="18x275GeV"
 ){
 
-  gROOT->ProcessLine(".! rm -v out/resolution.images/*.png"); // cleanup old image files
-  gROOT->ProcessLine(".! rm -v out/resolution.images/*.pdf"); // cleanup old image files
+  gROOT->ProcessLine(".! rm -v out/barak_dis-18x275.images/*.png"); // cleanup old image files
+  gROOT->ProcessLine(".! rm -v out/barak_dis-18x275.images/*.pdf"); // cleanup old image files
   
   PostProcessor *P = new PostProcessor(infile);
   P->Op()->PrintBreadth("HistosDAG Initial Setup");
@@ -46,14 +46,14 @@ void postprocess_resolution_SD(
       }
     }
 
-    double xMin = 1e-4;
+    double xMin = 1e-5;
     double xMax = 1;
-    double q2Min = 0.99;
-    double q2Max = 1000;
+    double q2Min = 1e-1;
+    double q2Max = 1e4;
 
     // loop over resolution histograms (see ../src/Analysis.cxx `DefineHist*` calls 
     // for available histograms, or add your own there)
-    for( TString histname : {"x_Res","y_Res","Q2_Res","phiH_Res","phiS_Res","phiHvsPhiS","z_purity"} ) {
+    for( TString histname : {"y_Res"} ) {
       P->DrawInBins(
           canvname, histos_xQ2, histname,
           "x", nx, xMin, xMax, true,
@@ -61,10 +61,10 @@ void postprocess_resolution_SD(
           );
     };
 
-    const int nNames = 3;
+    const int nNames = 1;
     double yMin, yMax; yMin = -0.1; yMax = 0.5;//Adjust as needed
-    TString histNames[nNames] = {"z_Q2_Res","z_x_Res","z_y_Res","z_z_Res","z_pT_Res","z_purity"};
-    TString labels[nNames] = {"Q^{2}","x","y","z","p_{T}","1-purity"};
+    TString histNames[nNames] = {"z_y_Res"};
+    TString labels[nNames] = {"y"};
     P->DrawSDInBinsTogether(
           canvname, histos_xQ2, histNames, labels, nNames, yMin, yMax,
           "x", nx, xMin, xMax, true,

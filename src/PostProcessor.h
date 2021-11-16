@@ -3,6 +3,9 @@
 
 #include <map>
 #include <iomanip>
+#include <iostream>
+#include <fstream>
+#include <math.h>
 
 // root
 #include "TFile.h"
@@ -39,6 +42,8 @@ class PostProcessor : public TNamed
     const Int_t dimx=800;
     const Int_t dimy=700;
     static const int nsumMax=3; // number of summary plots with formatting
+
+    std::ofstream logFile;
 
 
     // DAG interfaces:

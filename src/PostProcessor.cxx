@@ -634,7 +634,8 @@ void PostProcessor::DrawSDInBinsTogether(
     xaxisx2 = 0.975;
     yaxisy1 = 0.08;
   };
-
+  logFile.open("out/barak_log.txt");//DEBUGGING: PRINTOUT FOR BARAK
+  logFile<<"x\tQ2\tyres\n";//DEBUGGING: PRINT OUT BIN BY BIN RESULTS FOR BARAK
   TString canvN = "canv_"+outName+"_all__";
   for (int k=0; k<nNames; k++){canvN += histNames[k]+"__";}
   TCanvas *canv = new TCanvas(canvN,canvN, canvx, canvy);
@@ -691,6 +692,16 @@ void PostProcessor::DrawSDInBinsTogether(
         subHist->GetYaxis()->SetNdivisions(8);
         subHist->GetYaxis()->SetLabelSize(0.06);
         subHist->GetYaxis()->SetLabelOffset(0.02);
+
+        //DEBUGGING: ALL BELOW FOR BARAK
+        double x_bw  = (log10(var1high)-log10(var1low))/nvar1;
+        double q2_bw = (log10(var2high)-log10(var2low))/nvar2;
+        double xBin  = log10(var1low)+(i+1/2)*x_bw;
+        double q2Bin = log10(var2low)+(j+1/2)*q2_bw;
+        double yres  = subHist->GetBinContent(1);
+        double yerr  = subHist->GetBinError(1);
+        logFile<<xBin<<"\t"<<q2Bin<<"\t"<<yres<<"\t"<<yerr<<"\n";//DEBUGGING: PRINT OUT BIN BY BIN RESULTS FOR BARAK
+        //DEBUGGING: ALL ABOVE FOR BARAK
 
         subHist->SetTitle(histNames[k]);
         subHist->SetMarkerStyle(k==0 ? 32 : k+25);
@@ -782,6 +793,7 @@ void PostProcessor::DrawSDInBinsTogether(
   newpad2->cd();
   xaxis->Draw();
 
+  logFile.close();
 
   //  canv->Write();
   canv->Print(pngDir+"/"+canvN+".png");

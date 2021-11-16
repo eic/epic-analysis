@@ -26,6 +26,41 @@ AnalysisDelphes::AnalysisDelphes(
   /* ... none defined yet ... */
 };
 
+// Borrowed this method from `Kinematics.cxx`
+// get PID information from PID systems tracks
+int getPID(Track *track, TObjArrayIter itParticle,
+		TObjArrayIter itmRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack){
+  itParticle.Reset();
+  itmRICHTrack.Reset();
+  itbarrelDIRCTrack.Reset();
+  itdualRICHagTrack.Reset();
+  itdualRICHcfTrack.Reset();
+  GenParticle *trackParticle = (GenParticle*)track->Particle.GetObject();
+  GenParticle *detectorParticle;
+  int pidOut = -1;
+  while(Track *detectorTrack = (Track*)itmRICHTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+  }
+  itParticle.Reset();
+  while(Track *detectorTrack = (Track*)itbarrelDIRCTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+  }
+  itParticle.Reset();
+  while(Track *detectorTrack = (Track*)itdualRICHagTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+  }
+  while(Track *detectorTrack = (Track*)itdualRICHcfTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+  }
+
+
+  return pidOut;
+}
+
 //=============================================
 // perform the analysis
 //=============================================
@@ -161,18 +196,21 @@ void AnalysisDelphes::Execute() {
       // - check PID, to see if it's a final state we're interested in for
       //   histograms; if not, proceed to next track
       pid = trk->PID;
-      std::cout<<"DEBUGGING trk->PID        = "<<pid<<std::endl;//DEBUGGING
       auto kv = PIDtoFinalState.find(pid);
       if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
       if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
 
       // get parent particle, to check if pion is from vector meson
       GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
-      std::cout<<"DEBUGGING finalStateID = "<<finalStateID<<std::endl;//DEBUGGING
-      std::cout<<"          trkParticle->PID = \n"<<trkParticle->PID<<std::endl;//DEBUGGING
       TObjArray *brParticle = (TObjArray*)itParticle.GetCollection();
       GenParticle *parentParticle = (GenParticle*)brParticle->At(trkParticle->M1);
       int parentPID = (parentParticle->PID); // TODO: this is not used yet...
+
+      // Get REC and MC particle PID
+      int recpid = getPID(trk, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
+      int mcpid  = trkParticle->PID;
+
+      FillHistosPurity(recpid,mcpid);
 
       // calculate hadron kinematics
       kin->hadPID = pid;
