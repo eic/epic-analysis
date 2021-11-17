@@ -4,7 +4,6 @@ R__LOAD_LIBRARY(Largex)
 // - adapted from `postprocess_pTvsEta.C`
 void postprocess_barak(
     TString infile="out/barak_dis-18x275.root"
-    TString header="18x275GeV"
 ){
 
   gROOT->ProcessLine(".! rm -v out/barak_dis-18x275.images/*.png"); // cleanup old image files
@@ -65,8 +64,9 @@ void postprocess_barak(
     double yMin, yMax; yMin = -0.1; yMax = 0.5;//Adjust as needed
     TString histNames[nNames] = {"z_y_Res"};
     TString labels[nNames] = {"y"};
+    TString header="18x275GeV";
     P->DrawSDInBinsTogether(
-          canvname, histos_xQ2, histNames, labels, nNames, yMin, yMax,
+          canvname, histos_xQ2, header, histNames, labels, nNames, yMin, yMax,
           "x", nx, xMin, xMax, true,
           "Q^{2}", nq2, q2Min, q2Max, true
     );

@@ -196,21 +196,36 @@ void AnalysisDelphes::Execute() {
       // - check PID, to see if it's a final state we're interested in for
       //   histograms; if not, proceed to next track
       pid = trk->PID;
+
+      // Purities
+      // Get REC and MC particle PID
+      GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
+      int recpid = getPID(trk, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
+      int mcpid  = trkParticle->PID;
+
+      //DEBUGGING
+      if (pid!=mcpid) {std::cout<<"DEBUGGING: "<<pid" != "<<mcpid<<std:endl;}
+
+      // Get total # of selected final state particles reconstructed
+      auto kv1 = PIDtoFinalState.find(recpid);
+      if(kv1!=PIDtoFinalState.end()) {
+        finalStateID = kv1->second;
+        if (activeFinalStates.find(finalStateID)!=activeFinalStates.end()) FillHistosPurity(true,false);
+      }
+      // Purities
+
       auto kv = PIDtoFinalState.find(pid);
       if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
       if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
 
+      // Get total # of final state particles correctly identified in reconstruction
+      if (recpid==mcpid) FillHistosPurity(false,true);
+
       // get parent particle, to check if pion is from vector meson
-      GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
+      // GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
       TObjArray *brParticle = (TObjArray*)itParticle.GetCollection();
       GenParticle *parentParticle = (GenParticle*)brParticle->At(trkParticle->M1);
       int parentPID = (parentParticle->PID); // TODO: this is not used yet...
-
-      // Get REC and MC particle PID
-      int recpid = getPID(trk, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
-      int mcpid  = trkParticle->PID;
-
-      FillHistosPurity(recpid,mcpid);
 
       // calculate hadron kinematics
       kin->hadPID = pid;

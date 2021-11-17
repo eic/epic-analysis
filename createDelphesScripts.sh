@@ -2,13 +2,13 @@
 
 # Create fast simulation resolutions plotting scripts and submit to ifarm
 
-script='/work/clas12/users/mfmce/largex-eic/macro/analysis_resolution_SD.C'
-postScript='/work/clas12/users/mfmce/largex-eic/macro/postprocess_resolution_SD.C'
-submitScript='/work/clas12/users/mfmce/largex-eic/submit.sh'
-jobScript='/work/clas12/users/mfmce/largex-eic/job.sh'
-out='/work/clas12/users/mfmce/largex-eic/macro/'
-cd /work/clas12/users/mfmce/largex-eic/datarec/
-for file in *.config
+script="$PWD/macro/analysis_resolution_SD.C"
+postScript="/$PWD/macro/postprocess_resolution_SD.C"
+submitScript="$PWD/submit.sh"
+jobScript="$PWD/job.sh"
+out="$PWD/macro/"
+cd datarec
+for file in *-xm25.config
 do
     config=`echo $file | sed "s;.config;;g"`
     mkdir -p $out/$config
@@ -25,32 +25,26 @@ do
     echo "beamIn=${beamIn}"
     echo "xAng=${xAng}"
     echo "xAngM=${xAngM}"
-    echo --------------------
 
     sed -i "s;dis-5x41;${config};g" $newscript
     sed -i "s;eleBeamEn=5;eleBeamEn=${eleIn};g" $newscript
     sed -i "s;ionBeamEn=41;ionBeamEn=${beamIn};g" $newscript
     if [ $xAng ]; then
-        sed -i "s;crossingAngle=0;crossingAngle=${xAng};g" $newscript
+        sed -i "s;crossingAngle=25;crossingAngle=-${xAng};g" $newscript
     fi
     if [ $xAngM ]; then
-        sed -i "s;icrossingAngle=0;crossingAngle=-${xAngM};g" $newscript
+        sed -i "s;icrossingAngle=25;crossingAngle=${xAngM};g" $newscript
     fi
     cp $postScript $out/$config
-    sed -i "s;out/resolution;out/${config};g" $out/$config/*.C
-    if [ $xAng ]; then
-	sed -i "s;testheader;${eleIn}x${beamIn} ${xAng};g" $out/$config/*.C
-    fi
-    if [ $xAngM ]; then
-        sed -i "s;testheader;${eleIn}x${beamIn} -${xAngM};g" $out/$config/*.C
-    fi
+    sed -i "s;datarec/dis-5x41;datarec/${config};g" $out/$config/*.C
+    sed -i "s;out/dis-5x41;out/${config};g" $out/$config/*.C
+	sed -i "s;testheader;${eleIn}x${beamIn}GeV;g" $out/$config/*.C
     cp $submitScript $out/$config
     cp $jobScript $out/$config
     sed -i "s;dis-5x41;${config};g" $out/$config/*.sh
-    if [ $xAngM ]; then #NOTE: Just use negative angle files
-	sbatch $out/$config/submit.sh
-    fi
-    
+	sbatch $out/$config/submit.sh 
+    echo --------------------
+ 
 done
 cd ..
 echo DONE

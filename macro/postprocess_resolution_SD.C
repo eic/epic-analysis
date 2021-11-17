@@ -3,12 +3,11 @@ R__LOAD_LIBRARY(Largex)
 // make resolution plots
 // - adapted from `postprocess_pTvsEta.C`
 void postprocess_resolution_SD(
-    TString infile="out/resolution.root"
-    TString header="resolution"
+    TString infile="out/dis-5x41.root"
 ){
 
-  gROOT->ProcessLine(".! rm -v out/resolution.images/*.png"); // cleanup old image files
-  gROOT->ProcessLine(".! rm -v out/resolution.images/*.pdf"); // cleanup old image files
+  gROOT->ProcessLine(".! rm -v out/dis-5x41.images/*.png"); // cleanup old image files
+  gROOT->ProcessLine(".! rm -v out/dis-5x41.images/*.pdf"); // cleanup old image files
   
   PostProcessor *P = new PostProcessor(infile);
   P->Op()->PrintBreadth("HistosDAG Initial Setup");
@@ -61,12 +60,13 @@ void postprocess_resolution_SD(
           );
     };
 
-    const int nNames = 3;
+    const int nNames = 6;
     double yMin, yMax; yMin = -0.1; yMax = 0.5;//Adjust as needed
     TString histNames[nNames] = {"z_Q2_Res","z_x_Res","z_y_Res","z_z_Res","z_pT_Res","z_purity"};
     TString labels[nNames] = {"Q^{2}","x","y","z","p_{T}","1-purity"};
+    TString header="testheader";
     P->DrawSDInBinsTogether(
-          canvname, histos_xQ2, histNames, labels, nNames, yMin, yMax,
+          canvname, histos_xQ2, header, histNames, labels, nNames, yMin, yMax,
           "x", nx, xMin, xMax, true,
           "Q^{2}", nq2, q2Min, q2Max, true
     );
