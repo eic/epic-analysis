@@ -15,6 +15,10 @@ One top-level script automates all the work:
     - the downloaded full simulation files, if you chose to download from S3
   - this script contains some settings such as directory paths to data on S3,
     for the convenience of SIDIS full simulation analysis
+  - you may have to run `add-host.sh` first, if you have not yet; set env vars
+    `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password beforehand:
+    - `export=S3_ACCESS_KEY=*****`
+    - `export=S3_SECRET_KEY=*****`
   - this script calls several other scripts in this directory; read on for their
     documentation
 - if you are not running in the Singularity/Docker container, download and install
@@ -27,8 +31,7 @@ One top-level script automates all the work:
   - if you are using the Singularity or Docker container, it is already installed
   - the main command is `mc`
 - next, setup your client to connect to our S3 host (ask someone for credentials):
-  - first set env vars `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password
-    (ask someone if you don't know):
+  - first set env vars `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password:
     - `export=S3_ACCESS_KEY=*****`
     - `export=S3_SECRET_KEY=*****`
   - then add our S3 host to MinIO client: `add-host.sh`
