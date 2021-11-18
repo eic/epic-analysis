@@ -34,13 +34,18 @@ for (path,dirs,files) in os.walk(xsecDir):
 
             with open(path+'/'+xsecFile) as xf:
                 print(f'  FILE = {xsecFile}')
-                for line in xf: pass # set `line` to be the last line
-                xsecVal = line.split()[3]
-                xsecErr = line.split()[4]
-                print(f'    xsec = {xsecVal} pb')
-                print(f'     err = {xsecErr} pb')
-                xsecDict[pathTrun]['val'].append(float(xsecVal))
-                xsecDict[pathTrun]['err'].append(float(xsecErr))
+                firstLine = ""
+                for line in xf:
+                  if firstLine=="": firstLine=line
+                  pass # sets `line` to be the last line
+                xsecVal = float(line.split()[3])
+                xsecErr = float(line.split()[4])
+                xsecDelta = xsecVal - float(firstLine.split()[3]) # difference between first and last line's xsec
+                print(f'     xsec = {xsecVal} pb')
+                print(f'      err = {xsecErr} pb')
+                print(f' delta/xsec = {xsecDelta/xsecVal}')
+                xsecDict[pathTrun]['val'].append(xsecVal)
+                xsecDict[pathTrun]['err'].append(xsecErr)
 
 print('\n')
 pprint.pprint(xsecDict)
@@ -51,11 +56,11 @@ tableFileName = xsecDir+"/xsec.dat"
 print(f'\nCROSS SECTION TABLE:  {tableFileName}\n'+'-'*60)
 tableFileTmpName = tableFileName+".tmp"
 tableFile = open(tableFileTmpName,'w+')
-tableFile.write('#label cross_section_[pb] uncertainty_[pb]\n')
+tableFile.write('#label cross_section_[pb] relative_uncertainty\n')
 for path,nums in xsecDict.items():
   xsecVal = mean(nums['val'])
   xsecErr = mean(nums['err'])
-  tableFile.write(f'{path} {xsecVal} {xsecErr}\n')
+  tableFile.write(f'{path} {xsecVal:.5g} {xsecErr/xsecVal:.3g}\n')
 tableFile.close()
 os.system(f'column -t {tableFileTmpName} | sort -n | tee {tableFileName}')
 os.remove(tableFileTmpName)

@@ -2,7 +2,7 @@
 # get generated cross section from all hepmc files found in specified directory
 
 # settings #########################
-limiter=5000
+limiter=50000
 evgenDir=S3/eictest/ATHENA/EVGEN/DIS/NC
 ####################################
 
