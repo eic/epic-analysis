@@ -5,7 +5,7 @@ void analysis_xq(
     TString infiles="datarec/canyonlands/5x41/files.config",
     Double_t eleBeamEn=5,
     Double_t ionBeamEn=41,
-    Double_t crossingAngle=25,
+    Double_t crossingAngle=-25,
     TString outfilePrefix="coverage.fullsim"
 ) {
 
