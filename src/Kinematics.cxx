@@ -10,13 +10,18 @@ Kinematics::Kinematics(
     )
 {
 
-  // convert crossing angle to rad
-  crossAng *= 1e-3;
-
   // set ion mass
   IonMass = ProtonMass();
 
+  // revise crossing angle
+  crossAng *= 1e-3; // mrad -> rad
+  crossAng = -1*TMath::Abs(crossAng); // take -1*abs(crossAng) to enforce the correct sign
+
   // set beam 4-momenta
+  // - electron beam points toward negative z
+  // - ion beam points toward positive z, negative x
+  // - crossing angle about y-axis is therefore negative, in right-handed coord. system
+  // - north is +x, east is +z
   Double_t momEleBeam = EMtoP(enEleBeam,ElectronMass());
   Double_t momIonBeam = EMtoP(enIonBeam,IonMass);
   vecEleBeam.SetPxPyPzE(
@@ -26,7 +31,7 @@ Kinematics::Kinematics(
       enEleBeam
       );
   vecIonBeam.SetPxPyPzE(
-      -momIonBeam * TMath::Sin(crossAng),
+      momIonBeam * TMath::Sin(crossAng),
       0,
       momIonBeam * TMath::Cos(crossAng),
       enIonBeam

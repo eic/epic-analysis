@@ -8,7 +8,7 @@ void analysis_template(
     TString infiles="datarec/tutorial.config", /* list of input files */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
-    Double_t crossingAngle=25, /* crossing angle [mrad] */
+    Double_t crossingAngle=-25, /* crossing angle [mrad] */
     TString outfilePrefix="tutorial.template" /* output filename prefix*/
 ) {
 
