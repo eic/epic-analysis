@@ -55,7 +55,7 @@ mkdir -p $targetDir
 configFile=$targetDir/files.config
 > $configFile
 for Q2min in ${Q2minima[@]}; do
-  crossSection=$(python -c "print(10000.0/$Q2min)") # TODO: fake cross section; need to get actual one ###############
+  crossSection=$(s3tools/read-xsec-table.sh $energy $Q2min)
   if [ "$mode" == "d" -o "$mode" == "c" ]
     then s3tools/generate-local-list.sh "$targetDir/minQ2=$Q2min" 0 $crossSection $Q2min | tee -a $configFile
     else s3tools/generate-s3-list.sh    "$sourceDir/minQ2=$Q2min" 0 $crossSection $Q2min | tee -a $configFile
