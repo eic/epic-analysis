@@ -10,7 +10,8 @@ out="$PWD/macro/"
 cd datarec
 for file in *-xm25.config
 do
-    config="${METHOD}_`echo $file | sed "s;.config;;g"`"
+    energies=`echo $file | sed "s;.config;;g"`
+    config="${METHOD}_${energies}"
     mkdir -p $out/$config
     cp $script $out/$config/
     newscript=${out}${config}/*.C
@@ -26,8 +27,9 @@ do
     echo "xAng=${xAng}"
     echo "xAngM=${xAngM}"
 
-    sed -i "s;Ele;${METHOD};g" $newscript
-    sed -i "s;dis-5x41;${config};g" $newscript
+    # Modify analysis script
+    sed -i "s;datarec/dis-5x41;${energies};g" $newscript
+    sed -i "s;Ele_dis-5x41;${config};g" $newscript
     sed -i "s;eleBeamEn=5;eleBeamEn=${eleIn};g" $newscript
     sed -i "s;ionBeamEn=41;ionBeamEn=${beamIn};g" $newscript
     if [ $xAng ]; then
@@ -36,12 +38,19 @@ do
     if [ $xAngM ]; then
         sed -i "s;crossingAngle=25;crossingAngle=${xAngM};g" $newscript
     fi
+    sed -i "s;Ele;${METHOD};g" $newscript
+
+    # Postprocessor
     cp $postScript $out/$config
     sed -i "s;dis-5x41;${config};g" $out/$config/*.C
 	sed -i "s;testheader;${eleIn}x${beamIn}GeV;g" $out/$config/*.C
+
+    # And job scripts
     cp $submitScript $out/$config
     cp $jobScript $out/$config
     sed -i "s;dis-5x41;${config};g" $out/$config/*.sh
+
+    # And submit
 	sbatch $out/$config/submit.sh 
     echo --------------------
  

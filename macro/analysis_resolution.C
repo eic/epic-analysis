@@ -6,7 +6,7 @@ void analysis_resolution(
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=25, /* crossing angle [mrad] */
-    TString outfilePrefix="dis-5x41" /* output filename prefix*/
+    TString outfilePrefix="Ele_dis-5x41" /* output filename prefix*/
 ) {
 
   // setup analysis ========================================
