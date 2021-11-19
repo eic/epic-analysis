@@ -93,7 +93,7 @@ chmod +x bin/mc
 ENV PATH=$PATH:/opt/bin
 
 # copy sample root file for tests (source path is w.r.t. Dockerfile)
-COPY datarec/example_5x41.root /data/
+COPY datarec/fromDuane/dis-10x100-xm25.trimmed.root /data/example_10x100.root
 
 # non-privileged user
 RUN \
