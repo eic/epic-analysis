@@ -84,7 +84,7 @@ jobs:
         env:
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-        run: root -b -q macro/ci/${{ matrix.amacro }}'("macro/ci/${{ matrix.config }}",5,41,-25,"${{ matrix.name }}.${{ matrix.mode }}")'
+        run: root -b -q macro/ci/${{ matrix.amacro }}'("macro/ci/${{ matrix.config }}",10,100,-25,"${{ matrix.name }}.${{ matrix.mode }}")'
       - name: postprocess
         run: root -b -q macro/ci/${{ matrix.pmacro }}'("out/${{ matrix.name }}.${{ matrix.mode }}.root")'
       - name: artifacts

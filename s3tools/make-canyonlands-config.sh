@@ -24,7 +24,9 @@ if [ $# -ne 2 ]; then
                
    - [mode]:   s - make config file for streaming from S3
                d - download from S3, then make the local config file
-               c - just make the local config file, for files you have downloaded
+               c - just make the local config file, for local files
+               i - make config file for streaming from S3, but limit the
+                   number of files included (e.g., for CI or tutorials)
    
    Examples: $0 5x41 d       # download
              $0 18x275 s     # stream
@@ -66,9 +68,15 @@ configFile=$targetDir/files.config
 > $configFile
 for Q2min in ${Q2minima[@]}; do
   crossSection=$(s3tools/read-xsec-table.sh $energy $Q2min)
-  if [ "$mode" == "d" -o "$mode" == "c" ]
-    then s3tools/generate-local-list.sh "$targetDir/minQ2=$Q2min" 0 $crossSection $Q2min | tee -a $configFile
-    else s3tools/generate-s3-list.sh    "$sourceDir/minQ2=$Q2min" 0 $crossSection $Q2min | tee -a $configFile
+  if [ "$mode" == "d" -o "$mode" == "c" ]; then
+    s3tools/generate-local-list.sh "$targetDir/minQ2=$Q2min" 0 $crossSection $Q2min | tee -a $configFile
+  elif [ "$mode" == "s" ]; then
+    s3tools/generate-s3-list.sh    "$sourceDir/minQ2=$Q2min" 0 $crossSection $Q2min | tee -a $configFile
+  elif [ "$mode" == "i" ]; then
+    s3tools/generate-s3-list.sh    "$sourceDir/minQ2=$Q2min" 0 $crossSection $Q2min | head -n8 | tee -a $configFile
+  else
+    echo "ERROR: unknown mode"
+    exit 1
   fi
 done
 
