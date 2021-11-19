@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Create fast simulation resolutions plotting scripts and submit to ifarm
-METHOD="ELE" # Switch this to select reconstruction method
+METHOD="Ele" # Switch this to select reconstruction method from {"Ele","JB","DA"}
 script="$PWD/macro/analysis_resolution.C"
 postScript="$PWD/macro/postprocess_resolution.C"
 submitScript="$PWD/submit.sh"
@@ -26,6 +26,7 @@ do
     echo "xAng=${xAng}"
     echo "xAngM=${xAngM}"
 
+    sed -i "s;Ele;${METHOD};g" $newscript
     sed -i "s;dis-5x41;${config};g" $newscript
     sed -i "s;eleBeamEn=5;eleBeamEn=${eleIn};g" $newscript
     sed -i "s;ionBeamEn=41;ionBeamEn=${beamIn};g" $newscript
