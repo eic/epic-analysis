@@ -93,3 +93,8 @@ status "done building config file at:"
 echo "     $configFile"
 status "run root macros with parameters:"
 echo "     '(\"$configFile\",$(echo $energy|sed 's/x/,/'))'"
+echo ""
+if [ -n "$(grep UNKNOWN $configFile)" ]; then
+  >&2 echo "ERROR: missing some cross sections"
+  exit 1
+fi

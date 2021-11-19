@@ -12,5 +12,16 @@ if [ $# -lt 2 ]; then echo """
   exit 2
 fi
 if [ $# -ge 3 ]; then table=$3; fi
+
+# grep for query ("label")
 query="$1/minQ2=$2" 
-grep -w $query $table | awk '{print $2}'
+xsec=$(grep -w $query $table | awk '{print $2}')
+
+# not found error
+if [ -z "$xsec" ]; then
+  >&2 echo "ERROR: cannot find cross section for $query in $table"
+  xsec="UNKNOWN"
+fi
+
+# return
+echo $xsec
