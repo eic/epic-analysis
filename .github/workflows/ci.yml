@@ -53,7 +53,7 @@ jobs:
         mode: [ fastsim, fullsim ]
         include:
           - mode: fastsim
-            config: files.config
+            config: delphes.config
           - mode: fullsim
             config: s3files.config
           - name: bin-test
