@@ -1,16 +1,16 @@
 #!/bin/bash
 
 # Create fast simulation resolutions plotting scripts and submit to ifarm
-
-script="$PWD/macro/analysis_resolution_ELE.C"
-postScript="/$PWD/macro/postprocess_resolution_ELE.C"
+METHOD="ELE" # Switch this to select reconstruction method
+script="$PWD/macro/analysis_resolution_${METHOD}.C"
+postScript="/$PWD/macro/postprocess_resolution_${METHOD}.C"
 submitScript="$PWD/submit.sh"
 jobScript="$PWD/job.sh"
 out="$PWD/macro/"
 cd datarec
 for file in *-xm25.config
 do
-    config=`echo $file | sed "s;.config;;g"`
+    config="${METHOD}_`echo $file | sed "s;.config;;g"`"
     mkdir -p $out/$config
     cp $script $out/$config/
     newscript=${out}${config}/*.C

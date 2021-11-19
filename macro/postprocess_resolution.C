@@ -2,12 +2,12 @@ R__LOAD_LIBRARY(Largex)
 
 // make resolution plots
 // - adapted from `postprocess_pTvsEta.C`
-void postprocess_resolution_SD(
-    TString infile="out/DA_dis-5x41.root"
+void postprocess_resolution(
+    TString infile="out/dis-5x41.root"
 ){
 
-  gROOT->ProcessLine(".! rm -v out/DA_dis-5x41.images/*.png"); // cleanup old image files
-  gROOT->ProcessLine(".! rm -v out/DA_dis-5x41.images/*.pdf"); // cleanup old image files
+  gROOT->ProcessLine(".! rm -v out/dis-5x41.images/*.png"); // cleanup old image files
+  gROOT->ProcessLine(".! rm -v out/dis-5x41.images/*.pdf"); // cleanup old image files
   
   PostProcessor *P = new PostProcessor(infile);
   P->Op()->PrintBreadth("HistosDAG Initial Setup");
