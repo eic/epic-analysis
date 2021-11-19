@@ -1,18 +1,24 @@
 #!/bin/bash
 
 ###################
-# TOP-LEVEL SCRIPT to automate the creation of canyonlands config file,
-# and streaming/downloading from S3
+# TOP-LEVEL SCRIPT to automate the creation of a config file for a specific release,
+# supporting streaming or downloading from S3
+# - the config file consists of file names (or URLs), with Q2 minima and cross sections
 ###################
+
+# RELEASE TAG AND RECO DIR: ###########################
+release="canyonlands-v2.0"
+releaseDir="S3/eictest/ATHENA/RECO/$release/DIS/NC"
+#######################################################
 
 # usage:
 if [ $# -ne 2 ]; then
   echo """
   USAGE: $0 [energy] [mode(d/s/c)]
 
-   - [energy]: 5x41
-               5x100
-               10x100
+   - [energy]: 5x41      | - see below for available datasets
+               5x100     | - data from different Q2minima are combined,
+               10x100    |   weighted by cross sections
                10x275
                18x275
                
@@ -27,7 +33,11 @@ if [ $# -ne 2 ]; then
    configured for a specific set of data, but you may want to change
    them.
 
+  CURRENT RELEASE: $release
+
+  AVAILABLE DATA ON S3 (press ^C to abort S3 query):
   """
+  mc tree $releaseDir
   exit 2
 fi
 energy=$1
@@ -35,8 +45,8 @@ mode=$2
 pushd $(dirname $(realpath $0))/..
 
 # settings #############################################################
-sourceDir="S3/eictest/ATHENA/RECO/canyonlands-v1.2/DIS/NC/$energy"
-targetDir="datarec/canyonlands/$energy"
+sourceDir="$releaseDir/$energy"
+targetDir="datarec/$release/$energy"
 Q2minima=( 1000 100 10 1 ) # should be decreasing order
 ########################################################################
 
