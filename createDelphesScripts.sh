@@ -20,6 +20,7 @@ do
     xAng=`echo $file | grep -Eo "[0-9][0-9]*x[0-9]*-x[0-9]*" | sed "s;.*-x;;g"`
     xAngM=`echo $file | grep -Eo "[0-9][0-9]*x[0-9]*-xm[0-9]*" | sed "s;.*-xm;;g"`
     echo "file=${file}"
+    echo "energies=${energies}"
     echo "config=${config}"
     echo "newscript=${newscript}"
     echo "eleIn=${eleIn}"
@@ -42,8 +43,8 @@ do
 
     # Postprocessor
     cp $postScript $out/$config
-    sed -i "s;dis-5x41;${config};g" $out/$config/*.C
-	sed -i "s;testheader;${eleIn}x${beamIn}GeV;g" $out/$config/*.C
+    sed -i "s;dis-5x41;${config};g" $out/$config/postprocess*.C
+	sed -i "s;testheader;${eleIn}x${beamIn}GeV;g" $out/$config/postprocess*.C
 
     # And job scripts
     cp $submitScript $out/$config
