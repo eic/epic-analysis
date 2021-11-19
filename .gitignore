@@ -15,9 +15,10 @@ external
 container/img
 get-files.sh
 results*
+*.xsec
 
 # users' custom ignores
 datagen/escalate
 datagen/arc
 datarec/arc
-datarec/canyonlands
+datarec/canyonlands*
