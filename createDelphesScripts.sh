@@ -2,8 +2,8 @@
 
 # Create fast simulation resolutions plotting scripts and submit to ifarm
 METHOD="ELE" # Switch this to select reconstruction method
-script="$PWD/macro/analysis_resolution_${METHOD}.C"
-postScript="/$PWD/macro/postprocess_resolution_${METHOD}.C"
+script="$PWD/macro/analysis_resolution.C"
+postScript="$PWD/macro/postprocess_resolution.C"
 submitScript="$PWD/submit.sh"
 jobScript="$PWD/job.sh"
 out="$PWD/macro/"
