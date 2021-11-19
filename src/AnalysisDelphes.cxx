@@ -197,29 +197,12 @@ void AnalysisDelphes::Execute() {
       //   histograms; if not, proceed to next track
       pid = trk->PID;
 
-      // Purities
-      // Get REC and MC particle PID
-      GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
-      int recpid = getPID(trk, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
-      int mcpid  = trkParticle->PID;
-
-      //DEBUGGING
-      if (pid!=mcpid) {std::cout<<"DEBUGGING: "<<pid" != "<<mcpid<<std:endl;}
-
-      // Get total # of selected final state particles reconstructed
-      auto kv1 = PIDtoFinalState.find(recpid);
-      if(kv1!=PIDtoFinalState.end()) {
-        finalStateID = kv1->second;
-        if (activeFinalStates.find(finalStateID)!=activeFinalStates.end()) FillHistosPurity(true,false);
-      }
-      // Purities
-
       auto kv = PIDtoFinalState.find(pid);
       if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
       if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
 
       // Get total # of final state particles correctly identified in reconstruction
-      if (recpid==mcpid) FillHistosPurity(false,true);
+      GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
 
       // get parent particle, to check if pion is from vector meson
       // GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
@@ -256,6 +239,13 @@ void AnalysisDelphes::Execute() {
       Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
       wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
       wTrackTotal += wTrack;
+
+      // Get total # of final state particles identified in selected final state
+      FillHistosPurity(true,false);
+
+      // And number correctly identified
+      int mcpid  = trkParticle->PID;
+      if (pid==mcpid) FillHistosPurity(false,true);
 
       // fill track histograms in activated bins
       FillHistosTracks();

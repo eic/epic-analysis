@@ -1,12 +1,12 @@
 R__LOAD_LIBRARY(Largex)
 
 // make resolution plots
-void analysis_resolution_SD(
+void analysis_resolution_JB(
     TString infiles="datarec/dis-5x41.config", /* list of input files */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=25, /* crossing angle [mrad] */
-    TString outfilePrefix="dis-5x41" /* output filename prefix*/
+    TString outfilePrefix="JB_dis-5x41" /* output filename prefix*/
 ) {
 
   // setup analysis ========================================
@@ -22,7 +22,7 @@ void analysis_resolution_SD(
   // A->RESHIGH = 1;
   // A->RESLOW = -1;
   //A->maxEvents = 30000; // use this to limit the number of events
-  A->SetReconMethod("Ele"); // set reconstruction method
+  A->SetReconMethod("JB"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
   A->AddFinalState("pimTrack"); // pion final state
   A->AddFinalState("KpTrack"); // pion final state

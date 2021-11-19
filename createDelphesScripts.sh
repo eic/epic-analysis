@@ -2,8 +2,8 @@
 
 # Create fast simulation resolutions plotting scripts and submit to ifarm
 
-script="$PWD/macro/analysis_resolution_SD.C"
-postScript="/$PWD/macro/postprocess_resolution_SD.C"
+script="$PWD/macro/analysis_resolution_ELE.C"
+postScript="/$PWD/macro/postprocess_resolution_ELE.C"
 submitScript="$PWD/submit.sh"
 jobScript="$PWD/job.sh"
 out="$PWD/macro/"
@@ -33,11 +33,10 @@ do
         sed -i "s;crossingAngle=25;crossingAngle=-${xAng};g" $newscript
     fi
     if [ $xAngM ]; then
-        sed -i "s;icrossingAngle=25;crossingAngle=${xAngM};g" $newscript
+        sed -i "s;crossingAngle=25;crossingAngle=${xAngM};g" $newscript
     fi
     cp $postScript $out/$config
-    sed -i "s;datarec/dis-5x41;datarec/${config};g" $out/$config/*.C
-    sed -i "s;out/dis-5x41;out/${config};g" $out/$config/*.C
+    sed -i "s;dis-5x41;${config};g" $out/$config/*.C
 	sed -i "s;testheader;${eleIn}x${beamIn}GeV;g" $out/$config/*.C
     cp $submitScript $out/$config
     cp $jobScript $out/$config

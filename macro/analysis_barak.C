@@ -3,8 +3,8 @@ R__LOAD_LIBRARY(Largex)
 // make resolution plots
 void analysis_barak(
     TString infiles="datarec/dis-18x275-xm25.config", /* list of input files */
-    Double_t eleBeamEn=5, /* electron beam energy [GeV] */
-    Double_t ionBeamEn=41, /* ion beam energy [GeV] */
+    Double_t eleBeamEn=18, /* electron beam energy [GeV] */
+    Double_t ionBeamEn=275, /* ion beam energy [GeV] */
     Double_t crossingAngle=25, /* crossing angle [mrad] */
     TString outfilePrefix="barak_dis-18x275-xm25" /* output filename prefix*/
 ) {

@@ -43,9 +43,6 @@ class PostProcessor : public TNamed
     const Int_t dimy=700;
     static const int nsumMax=3; // number of summary plots with formatting
 
-    std::ofstream logFile;
-
-
     // DAG interfaces:
     HistosDAG *GetHistosDAG() { return HD; };
     HistosDAG *Op() { return GetHistosDAG(); }; // syntactic sugar
