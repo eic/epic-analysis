@@ -39,20 +39,27 @@ int getPID(Track *track, TObjArrayIter itParticle,
   GenParticle *detectorParticle;
   int pidOut = -1;
   while(Track *detectorTrack = (Track*)itmRICHTrack() ){
+     if ((detectorTrack->Eta  < -3.5) || (-1.0 < detectorTrack->Eta)) continue;
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
   }
   itParticle.Reset();
   while(Track *detectorTrack = (Track*)itbarrelDIRCTrack() ){
+    if ((detectorTrack->Eta  < -1.0) || (1.0 < detectorTrack->Eta)) continue;
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
   }
   itParticle.Reset();
+  Double_t ag_p_threshold = 12.0;
   while(Track *detectorTrack = (Track*)itdualRICHagTrack() ){
+    Double_t p_track = detectorTrack->P4().Vect().Mag();
+    if (!((1.0 <= track->Eta) && (track->Eta <= 3.5)) || p_track>=ag_p_threshold) continue;
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
   }
   while(Track *detectorTrack = (Track*)itdualRICHcfTrack() ){
+    Double_t p_track = detectorTrack->P4().Vect().Mag();
+    if (!((1.0 <= track->Eta) && (track->Eta <= 3.5)) || p_track<ag_p_threshold) continue;
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
   }
@@ -195,7 +202,8 @@ void AnalysisDelphes::Execute() {
       // final state cut
       // - check PID, to see if it's a final state we're interested in for
       //   histograms; if not, proceed to next track
-      pid = trk->PID;
+      // pid = trk->PID;
+      pid = getPID(trk, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
 
       auto kv = PIDtoFinalState.find(pid);
       if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;

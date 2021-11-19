@@ -29,7 +29,7 @@ do
     echo "xAngM=${xAngM}"
 
     # Modify analysis script
-    sed -i "s;datarec/dis-5x41;${energies};g" $newscript
+    sed -i "s;datarec/dis-5x41;datarec/${energies};g" $newscript
     sed -i "s;Ele_dis-5x41;${config};g" $newscript
     sed -i "s;eleBeamEn=5;eleBeamEn=${eleIn};g" $newscript
     sed -i "s;ionBeamEn=41;ionBeamEn=${beamIn};g" $newscript
