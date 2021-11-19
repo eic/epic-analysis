@@ -260,7 +260,7 @@ void Analysis::Prepare() {
     // -- DIS kinematics
     HS->DefineHist2D("Q2vsX","x","Q^{2}","","GeV^{2}",
         NBINS,1e-3,1,
-        NBINS,1,100,
+        NBINS,1,3000,
         true,true
         );
     HS->DefineHist1D("Q","Q","GeV",NBINS,1.0,11.0,true,true);
