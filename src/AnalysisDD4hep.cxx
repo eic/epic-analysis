@@ -81,12 +81,13 @@ void AnalysisDD4hep::process_event()
 
   CalculateEventQ2Weights();
 
+  // counters
+  Long64_t nevt, numNoBeam, numEle, numProxMatched;
+  nevt = numNoBeam = numEle = numProxMatched = 0;
+
   // event loop =========================================================
   cout << "begin event loop..." << endl;
-  Long64_t nevt = 0;
   int errorCount=0;
-  Long64_t numNoBeam=0;
-  Long64_t numEle = 0;
   while(tr.Next())
   {
     if(nevt%10000==0) cout << nevt << " events..." << endl;
@@ -271,8 +272,9 @@ void AnalysisDD4hep::process_event()
         }
       }
       else{
-        // give it another shot
+        // give it another shot: proximity matching
         double mineta = 4.0;
+        numProxMatched++;
         for(int imc=0; imc<(int)mcpart.size(); imc++)
         {
           if(pid_ == mcpart[imc].pid)
@@ -319,7 +321,10 @@ void AnalysisDD4hep::process_event()
 
   // final printout
   cout << "Total number of scattered electrons found: " << numEle << endl;
-  if(numNoBeam>0) cerr << "WARNING: skipped " << numNoBeam << " events which had no beam particles" << endl;
+  if(numNoBeam>0)
+    cerr << "WARNING: skipped " << numNoBeam << " events which had no beam particles" << endl;
+  if(numProxMatched>0)
+    cerr << "WARNING: " << numProxMatched << " recon. electrons were proximity matched to truth (when mcID match failed)" << endl;
 
 }//execute
 
