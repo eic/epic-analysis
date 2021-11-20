@@ -2,7 +2,7 @@ R__LOAD_LIBRARY(Largex)
 
 // analysis in bins of (x,Q2)
 void analysis_xq(
-    TString infiles="datarec/canyonlands/5x41/files.config",
+    TString infiles="datarec/canyonlands-v1.2/5x41/files.config", // default, for manual local testing
     Double_t eleBeamEn=5,
     Double_t ionBeamEn=41,
     Double_t crossingAngle=-25,
