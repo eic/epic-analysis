@@ -101,6 +101,7 @@ class Analysis : public TNamed
     // FillHistos methods: fill histograms
     void FillHistosTracks();
     void FillHistosPurity(bool recMatch, bool mcMatch);
+    void FillHistosEfficiency(bool recMatch, bool mcMatch);
     void FillHistosJets();
 
     // lambda to check which bins an observable is in, during DAG breadth

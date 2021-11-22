@@ -331,7 +331,9 @@ void Analysis::Prepare() {
 
     // 1D z-binned counts and summed resolutions
     HS->DefineHist1D("z_true","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_trueMC","z","", NBINS, 0, 1);
     HS->DefineHist1D("z_purity","purity","", NBINS, 0, 1);
+    HS->DefineHist1D("z_efficiency","efficiency","", NBINS, 0, 1);
 
     // // 2D Q2 vs. x binned resolutions
     // HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -0.5, 0.5);
@@ -466,10 +468,11 @@ void Analysis::Finish() {
 
 
     // Convert to contamination plot since the y scale is better for plotting with stddevs
-    H->Hist("z_purity")->Add(H->Hist("z_true"),-1);
+    // H->Hist("z_purity")->Add(H->Hist("z_true"),-1);
     H->Hist("z_purity")->Divide(H->Hist("z_true"));
-    TF1 *f1 = new TF1("f1","1",0,1); //TODO: Set limits automatically
-    H->Hist("z_purity")->Multiply(f1,-1);
+    H->Hist("z_efficiency")->Divide(H->Hist("z_trueMC"));
+    // TF1 *f1 = new TF1("f1","1",0,1); //TODO: Set limits automatically
+    // H->Hist("z_purity")->Multiply(f1,-1);
 
   });
 
@@ -691,7 +694,7 @@ void Analysis::FillHistosTracks() {
   HD->ExecuteOps(true);
 };
 
-// jets
+// purity
 void Analysis::FillHistosPurity(bool recMatch, bool mcMatch) {
 
   // add kinematic values to `valueMap`
@@ -713,6 +716,36 @@ void Analysis::FillHistosPurity(bool recMatch, bool mcMatch) {
   HD->Payload([this,recMatch,mcMatch](Histos *H){
     if (recMatch) H->Hist("z_true")->Fill(kinTrue->z, wTrack );
     if (mcMatch) H->Hist("z_purity")->Fill(kinTrue->z,wTrack);
+  });
+  // execute the payload
+  // - save time and don't call `ClearOps` (next loop will overwrite lambda)
+  // - called with `activeNodesOnly==true` since we only want to fill bins associated
+  //   with this jet
+  HD->ExecuteOps(true);
+};
+
+// purity
+void Analysis::FillHistosEfficiency(bool recMatch, bool mcMatch) {
+
+  // add kinematic values to `valueMap`
+  valueMap.clear();
+  activeEvent = false;
+  /* DIS */
+  valueMap.insert(std::pair<TString,Double_t>(  "x",      kin->x      ));
+  valueMap.insert(std::pair<TString,Double_t>(  "q2",     kin->Q2     ));
+  valueMap.insert(std::pair<TString,Double_t>(  "y",      kin->y      ));
+  valueMap.insert(std::pair<TString,Double_t>(  "z",      kin->z      ));
+
+  // check bins
+  // - activates HistosDAG bin nodes which contain this track
+  // - sets `activeEvent` if there is at least one multidimensional bin to fill
+  HD->TraverseBreadth(CheckBin());
+  if(!activeEvent) return;
+
+  // fill histograms, for activated bins only
+  HD->Payload([this,recMatch,mcMatch](Histos *H){
+    if (recMatch) H->Hist("z_trueMC")->Fill(kinTrue->z, wTrack );
+    if (mcMatch) H->Hist("z_efficiency")->Fill(kinTrue->z,wTrack);
   });
   // execute the payload
   // - save time and don't call `ClearOps` (next loop will overwrite lambda)

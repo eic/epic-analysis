@@ -202,12 +202,14 @@ void AnalysisDelphes::Execute() {
       // final state cut
       // - check PID, to see if it's a final state we're interested in for
       //   histograms; if not, proceed to next track
-      // pid = trk->PID;
+      int mcpid = trk->PID;
       pid = getPID(trk, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
 
+      auto kvMC = PIDtoFinalState.find(mcpid);
       auto kv = PIDtoFinalState.find(pid);
-      if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
-      if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
+
+      if(kv!=PIDtoFinalState.end()) { finalStateID = kv->second;
+      if(activeFinalStates.find(finalStateID)!=activeFinalStates.end()) {
 
       // Get total # of final state particles correctly identified in reconstruction
       GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
@@ -252,8 +254,11 @@ void AnalysisDelphes::Execute() {
       FillHistosPurity(true,false);
 
       // And number correctly identified
-      int mcpid  = trkParticle->PID;
-      if (pid==mcpid) FillHistosPurity(false,true);
+      mcpid  = trkParticle->PID;
+      if (pid==mcpid) {
+        FillHistosPurity(false,true);
+        FillHistosEfficiency(true,true);
+      }
 
       // fill track histograms in activated bins
       FillHistosTracks();
@@ -266,6 +271,50 @@ void AnalysisDelphes::Execute() {
 
       // tests
       //kin->ValidateHeadOnFrame();
+
+      } // if(kv!=PIDtoFinalState.end())
+      } // if(activeFinalStates.find(finalStateID)!=activeFinalStates.end())
+      if (pid!=mcpid) {
+      if(kvMC!=PIDtoFinalState.end()) { finalStateID = kv->second;
+      if(activeFinalStates.find(finalStateID)!=activeFinalStates.end()) {
+
+      // calculate hadron kinematics
+      GenParticle* trkPart = (GenParticle*)trk->Particle.GetObject();
+      kinTrue->hadPID = mcpid;
+      kinTrue->vecHadron.SetPtEtaPhiM(
+          trkPart->PT,
+          trkPart->Eta,
+          trkPart->Phi,
+          trkPart->Mass /* TODO: do we use track mass here ?? */
+          );
+      
+      kinTrue->CalculateHadronKinematics();
+
+      // asymmetry injection
+      //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
+      //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
+      //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
+  
+      // Get index of file that the event comes from.
+      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
+      wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+      wTrackTotal += wTrack;
+
+      // Get total # of final state particles identified in selected final state
+      FillHistosEfficiency(true,false);
+
+      // fill simple tree
+      // - not binned
+      // - `activeEvent` is only true if at least one bin gets filled for this track
+      // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDD4hep)
+      if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
+
+      // tests
+      //kin->ValidateHeadOnFrame();
+    
+      } // if (activeFinalStates.find(finalStateID)!=activeFinalStates.end())
+      } // if (kv!=PIDtoFinalState.end())
+      } // if (pid!=mcpid)
 
     }; // end track loop
 
