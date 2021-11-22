@@ -57,14 +57,14 @@ jobs:
           - mode: fullsim
             config: s3files.config
           - name: bin-test
-            amacro: analysis_xq.C
+            amacro: analysis_x_q2.C
             pmacro: postprocess_bin_test.C
-          - name: coverage
-            amacro: analysis_xq.C
-            pmacro: postprocess_xq.C
-          - name: resolution
-            amacro: analysis_xq.C
-            pmacro: postprocess_xq.C
+          - name: coverage-x-q2
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_x_q2.C
+          - name: resolution-x-q2
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_x_q2.C
           - name: y-minima
             amacro: analysis_yRatio.C
             pmacro: postprocess_yRatio.C
