@@ -72,7 +72,7 @@ void postprocess_p_eta(TString infile="out/coverage.fullsim.root") {
       P->DrawInBins(
           canvName, histosArr, histName,
           "p",      numPbins, pMin, pMax, true,
-          "#eta",   numEbins, eMin, eMax, true
+          "#eta",   numEbins, eMin, eMax, false
           );
     };
   };

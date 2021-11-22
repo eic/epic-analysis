@@ -50,36 +50,36 @@ jobs:
     strategy:
       matrix:
         name:
-          # - bin-test
+          - bin-test
           - coverage-x-q2
           - coverage-p-eta
-          # - resolution-x-q2
-          # - resolution-p-eta
-          # - y-minima
+          - resolution-x-q2
+          - resolution-p-eta
+          - y-minima
         mode: [ fastsim, fullsim ]
         include:
           - mode: fastsim
             config: delphes.config
           - mode: fullsim
             config: s3files.config
-          # - name: bin-test
-          #   amacro: analysis_x_q2.C
-          #   pmacro: postprocess_bin_test.C
+          - name: bin-test
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_bin_test.C
           - name: coverage-x-q2
             amacro: analysis_x_q2.C
             pmacro: postprocess_x_q2.C
-          # - name: resolution-x-q2
-          #   amacro: analysis_x_q2.C
-          #   pmacro: postprocess_x_q2.C
+          - name: resolution-x-q2
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_x_q2.C
           - name: coverage-p-eta
             amacro: analysis_p_eta.C
             pmacro: postprocess_p_eta.C
-          # - name: resolution-p-eta
-          #   amacro: analysis_p_eta.C
-          #   pmacro: postprocess_p_eta.C
-          # - name: y-minima
-          #   amacro: analysis_yRatio.C
-          #   pmacro: postprocess_yRatio.C
+          - name: resolution-p-eta
+            amacro: analysis_p_eta.C
+            pmacro: postprocess_p_eta.C
+          - name: y-minima
+            amacro: analysis_yRatio.C
+            pmacro: postprocess_yRatio.C
     steps:
       - name: checkout
         uses: actions/checkout@v2
