@@ -698,7 +698,7 @@ void PostProcessor::DrawSDInBinsTogether(
         subHist->SetMarkerColor(k+2);
         if (k+2>=5) subHist->SetMarkerColor(k+3); //NOTE: 5 is yellow: very hard to see.
         subHist->SetMarkerSize(0.5);//NOTE: Remember these will be small plots so keep the binning small and the markers big
-        if ( subHist->GetEntries()>0 || (histNames[k]=="z_purity" && h1->GetMaximum()!=0)) {
+        if ( subHist->GetEntries()>0 || (histNames[k]=="z_purity" && H->Hist("z_z_Res")->GetMaximum()!=0)) {
           hist->Add(subHist);
 
           if (i==0 && j==0){
