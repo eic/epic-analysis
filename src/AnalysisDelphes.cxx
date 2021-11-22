@@ -98,7 +98,7 @@ void AnalysisDelphes::Execute() {
   TObjArrayIter itEFlowPhoton(tr->UseBranch("EFlowPhoton"));
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
   TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
-  TObjArrayIter itmRICHTrack(tr->UseBranch("mRICHTrack"));
+  TObjArrayIter itmRICHTrack(tr->UseBranch("mRICHTrack"));//TODO: Change to eRICHTrack or pfRICHTrack ?
   TObjArrayIter itbarrelDIRCTrack(tr->UseBranch("barrelDIRCTrack"));
   TObjArrayIter itdualRICHagTrack(tr->UseBranch("dualRICHagTrack"));
   TObjArrayIter itdualRICHcfTrack(tr->UseBranch("dualRICHcfTrack"));
