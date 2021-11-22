@@ -668,9 +668,6 @@ void PostProcessor::DrawSDInBinsTogether(
       if (nNames>3) lg->SetNColumns(2);
 
       for (int k=0; k<nNames; k++) {
-        TH2D *fitHist = (TH2D*)H->Hist(histNames[k])->Clone();
-        if ( fitHist->GetEntries() < 10 ) continue; // Filter out low filled hists that can't get good fits.
-        fitHist->SetTitle("");
 
         //subHist->GetXaxis()->SetTitle("");
         //subHist->GetYaxis()->SetTitle("");
@@ -678,17 +675,22 @@ void PostProcessor::DrawSDInBinsTogether(
         //subHist->GetYaxis()->SetLabelSize(0);
         TH1D *subHist;
         if (histNames[k]=="z_purity") subHist = (TH1D*)H->Hist(histNames[k])->Clone();
-        else subHist = this->GetSDs(fitHist);
+        else { 
+          TH2D *fitHist = (TH2D*)H->Hist(histNames[k])->Clone();
+          if ( fitHist->GetEntries() < 10 ) continue; // Filter out low filled hists that can't get good fits.
+          fitHist->SetTitle("");
+          subHist = this->GetSDs(fitHist);
+        }
 
         subHist->GetXaxis()->SetTitleSize(0.1);
         subHist->GetXaxis()->SetTitleOffset(0.5);
         subHist->GetXaxis()->SetNdivisions(8);
-        subHist->GetXaxis()->SetLabelSize(0.06);
+        subHist->GetXaxis()->SetLabelSize(0.1);
         subHist->GetXaxis()->CenterTitle();
         subHist->GetXaxis()->SetLabelOffset(0.02);
-        subHist->GetYaxis()->SetRangeUser(yMin,yMax);//TODO: CHECK THIS IS REASONABLE ALSO WHAT ABOUT ERROR BARS???
+        subHist->GetYaxis()->SetRangeUser(yMin,yMax);//TODO: CHECK THIS IS REASONABLE ALSO WHAT ABOUT ERROR BARS??
         subHist->GetYaxis()->SetNdivisions(8);
-        subHist->GetYaxis()->SetLabelSize(0.06);
+        subHist->GetYaxis()->SetLabelSize(0.1);
         subHist->GetYaxis()->SetLabelOffset(0.02);
 
         subHist->SetTitle(histNames[k]);
@@ -696,7 +698,7 @@ void PostProcessor::DrawSDInBinsTogether(
         subHist->SetMarkerColor(k+2);
         if (k+2>=5) subHist->SetMarkerColor(k+3); //NOTE: 5 is yellow: very hard to see.
         subHist->SetMarkerSize(0.5);//NOTE: Remember these will be small plots so keep the binning small and the markers big
-        if ( subHist->GetEntries()>0 ) {
+        if ( subHist->GetEntries()>0 || (histNames[k]=="z_purity" && h1->GetMaximum()!=0)) {
           hist->Add(subHist);
 
           if (i==0 && j==0){
@@ -724,7 +726,7 @@ void PostProcessor::DrawSDInBinsTogether(
           drawStr = "BOX";
           break;
       };
-      //hist->Write();
+      hist->Write();
       if( hist->GetNhists() > 0 ) {
         hist->Draw(drawStr);
         TF1 *f1 = new TF1("f1","0",hist->GetXaxis()->GetXmin(),hist->GetXaxis()->GetXmax());

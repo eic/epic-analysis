@@ -22,7 +22,8 @@ void analysis_barak(
   // A->RESHIGH = 1;
   // A->RESLOW = -1;
   //A->maxEvents = 30000; // use this to limit the number of events
-  A->SetReconMethod("JB"); // set reconstruction method
+  A->SetReconMethod("Ele"); // set reconstruction method
+  // A->SetReconMethod("JB"); // set reconstruction method
   //A->SetReconMethod("DA"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pi+ final state
   A->AddFinalState("pimTrack"); // pi- final state

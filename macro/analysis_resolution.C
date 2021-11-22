@@ -17,7 +17,7 @@ void analysis_resolution(
       crossingAngle,
       outfilePrefix
       );
-  A->NBINS = 5; // use this to set the number of bins along each axis, e.g., z binning (except resolution axes) for each overall bin in e.g. x and Q2
+  A->NBINS = 1; // use this to set the number of bins along each axis, e.g., z binning (except resolution axes) for each overall bin in e.g. x and Q2
   A->NBINSRES = 100; // use this to set the number of bins along the resolution axes for each overall bin in e.g. x and Q2
   // A->RESHIGH = 1;
   // A->RESLOW = -1;
@@ -32,7 +32,7 @@ void analysis_resolution(
   // define cuts ====================================
   A->AddBinScheme("w");  A->BinScheme("w")->BuildBin("Min",3.0); // W > 3 GeV
   A->AddBinScheme("y");  A->BinScheme("y")->BuildBin("Range",0.01,0.95); // 0.01 < y < 0.95
-  A->AddBinScheme("z");  A->BinScheme("z")->BuildBin("Range",0.2,0.9); // 0.2 < z < 0.9
+  A->AddBinScheme("z");  A->BinScheme("z")->BuildBin("Range",0.2,0.6); // 0.2 < z < 0.9
   A->AddBinScheme("xF"); A->BinScheme("xF")->BuildBin("Min",0.0); // xF > 0
   A->AddBinScheme("ptLab");  A->BinScheme("ptLab")->BuildBin("Min",0.1); // pT_lab > 0.1 GeV (tracking limit)
 
