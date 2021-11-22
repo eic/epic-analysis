@@ -205,8 +205,8 @@ void AnalysisDelphes::Execute() {
       // final state cut
       // - check PID, to see if it's a final state we're interested in for
       //   histograms; if not, proceed to next track
-      // pid = trk->PID; //NOTE: trk->PID is currently not smeared so it just returns the truth-level PID
-      pid = getPID(trk, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
+      pid = trk->PID; //NOTE: trk->PID is currently not smeared so it just returns the truth-level PID
+      // pid = getPID(trk, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
       auto kv = PIDtoFinalState.find(pid);
       if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
       if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
