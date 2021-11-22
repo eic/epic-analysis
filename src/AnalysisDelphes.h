@@ -50,6 +50,11 @@ class AnalysisDelphes : public Analysis
     void Execute() override;
 
   protected:
+    int getPID(
+        Track *track, TObjArrayIter itParticle,
+        TObjArrayIter itmRICHTrack, TObjArrayIter itbarrelDIRCTrack,
+        TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
+        );
 
   private:
 
