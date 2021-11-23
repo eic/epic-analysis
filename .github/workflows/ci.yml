@@ -56,7 +56,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        minq2: [ 1, 10, 100, 1000 ]
+        minq2:
+          - 1
+          - 10
+          # - 100 TODO - only vtxfix avail.
+          # - 1000 TODO - only vtxfix avail.
     steps:
       - name: checkout
         uses: actions/checkout@v2
