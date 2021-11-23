@@ -329,11 +329,17 @@ void Analysis::Prepare() {
     HS->DefineHist2D("z_phiH_Res","z","","#sigma_{#phi_{h}^{true}}","", NBINS, 0, 1, NBINSRES, -TMath::Pi(), TMath::Pi());
     HS->DefineHist2D("z_phiS_Res","z","","#sigma_{#phi_{S}^{true}}","", NBINS, 0, 1, NBINSRES, -TMath::Pi(), TMath::Pi());
 
-    // 1D z-binned counts and summed resolutions
+    // 1D z-binned purity and efficiency
     HS->DefineHist1D("z_true","z","", NBINS, 0, 1);
     HS->DefineHist1D("z_trueMC","z","", NBINS, 0, 1);
     HS->DefineHist1D("z_purity","purity","", NBINS, 0, 1);
     HS->DefineHist1D("z_efficiency","efficiency","", NBINS, 0, 1);
+
+    // 1D x-binned purity and efficiency
+    HS->DefineHist1D("z_true","z","", NBINS, 1e-5, 1, true);
+    HS->DefineHist1D("z_trueMC","z","", NBINS, 1e-5, 1, true);
+    HS->DefineHist1D("x_purity","purity","", NBINS, 1e-5, 1, true);
+    HS->DefineHist1D("x_efficiency","efficiency","", NBINS, 1e-5, 1, true);
 
     // // 2D Q2 vs. x binned resolutions
     // HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -0.5, 0.5);
@@ -471,6 +477,8 @@ void Analysis::Finish() {
     // H->Hist("z_purity")->Add(H->Hist("z_true"),-1);
     H->Hist("z_purity")->Divide(H->Hist("z_true"));
     H->Hist("z_efficiency")->Divide(H->Hist("z_trueMC"));
+    H->Hist("x_purity")->Divide(H->Hist("x_true"));
+    H->Hist("x_efficiency")->Divide(H->Hist("x_trueMC"));
     // TF1 *f1 = new TF1("f1","1",0,1); //TODO: Set limits automatically
     // H->Hist("z_purity")->Multiply(f1,-1);
 
@@ -716,6 +724,8 @@ void Analysis::FillHistosPurity(bool recMatch, bool mcMatch) {
   HD->Payload([this,recMatch,mcMatch](Histos *H){
     if (recMatch) H->Hist("z_true")->Fill(kinTrue->z, wTrack );
     if (mcMatch) H->Hist("z_purity")->Fill(kinTrue->z,wTrack);
+    if (recMatch) H->Hist("x_true")->Fill(kinTrue->x, wTrack );
+    if (mcMatch) H->Hist("x_purity")->Fill(kinTrue->x,wTrack);
   });
   // execute the payload
   // - save time and don't call `ClearOps` (next loop will overwrite lambda)
@@ -746,6 +756,8 @@ void Analysis::FillHistosEfficiency(bool recMatch, bool mcMatch) {
   HD->Payload([this,recMatch,mcMatch](Histos *H){
     if (recMatch) H->Hist("z_trueMC")->Fill(kinTrue->z, wTrack );
     if (mcMatch) H->Hist("z_efficiency")->Fill(kinTrue->z,wTrack);
+    if (recMatch) H->Hist("x_trueMC")->Fill(kinTrue->z, wTrack );
+    if (mcMatch) H->Hist("x_efficiency")->Fill(kinTrue->z,wTrack);
   });
   // execute the payload
   // - save time and don't call `ClearOps` (next loop will overwrite lambda)
