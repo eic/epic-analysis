@@ -64,7 +64,7 @@ jobs:
         run: |
           s3tools/add-host.sh
           echo "-- build list"
-          s3tools/generate-hepmc-list.sh | tee hepmc.list
+          s3tools/generate-hepmc-list.sh 10x100 1 ci | tee hepmc.list
           echo "-- download"
           # sed -i 's/^.* //g' hepmc.list
           # while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
