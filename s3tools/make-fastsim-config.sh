@@ -1,15 +1,8 @@
 #!/bin/bash
 
 ###################
-# TOP-LEVEL SCRIPT to automate the creation of a config file for a specific release,
-# supporting streaming or downloading from S3
-# - the config file consists of file names (or URLs), with Q2 minima and cross sections
+# TOP-LEVEL SCRIPT to automate the creation of a config file for fastsim files
 ###################
-
-# RELEASE TAG AND RECO DIR: ###########################
-release="canyonlands-v2.1"
-releaseDir="S3/eictest/ATHENA/RECO/$release/DIS/NC"
-#######################################################
 
 # usage:
 if [ $# -lt 4 ]; then
