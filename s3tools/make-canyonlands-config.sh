@@ -7,14 +7,14 @@
 ###################
 
 # RELEASE TAG AND RECO DIR: ###########################
-release="canyonlands-v2.0"
+release="canyonlands-v2.1"
 releaseDir="S3/eictest/ATHENA/RECO/$release/DIS/NC"
 #######################################################
 
 # usage:
-if [ $# -ne 2 ]; then
+if [ $# -lt 2 ]; then
   echo """
-  USAGE: $0 [energy] [mode(d/s/c)]
+  USAGE: $0 [energy] [mode(d/s/c)] [outputFile(optional)]
 
    - [energy]: 5x41      | - see below for available datasets
                5x100     | - data from different Q2minima are combined,
@@ -27,6 +27,10 @@ if [ $# -ne 2 ]; then
                c - just make the local config file, for local files
                i - make config file for streaming from S3, but limit the
                    number of files included (e.g., for CI or tutorials)
+   
+   - [outputFile]: output file name (optional)
+                   - default name is based on release version 
+                   - relative paths will be relative to main dir
    
    Examples: $0 5x41 d       # download
              $0 18x275 s     # stream
@@ -44,6 +48,10 @@ if [ $# -ne 2 ]; then
 fi
 energy=$1
 mode=$2
+outFile=""
+if [ $# -ge 3 ]; then outFile=$3; fi
+
+# cd to the main directory 
 pushd $(dirname $(realpath $0))/..
 
 # settings #############################################################
@@ -64,7 +72,8 @@ fi
 # build a config file
 status "build config file..."
 mkdir -p $targetDir
-configFile=$targetDir/files.config
+if [ -z "$outFile" ]; then configFile=$targetDir/files.config
+else configFile=$outFile; fi
 > $configFile
 for Q2min in ${Q2minima[@]}; do
   crossSection=$(s3tools/read-xsec-table.sh $energy $Q2min)
