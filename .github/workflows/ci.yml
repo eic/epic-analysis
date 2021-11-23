@@ -59,8 +59,8 @@ jobs:
         minq2:
           - 1
           - 10
-          # - 100 TODO - only vtxfix avail.
-          # - 1000 TODO - only vtxfix avail.
+          - 100
+          - 1000
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -71,7 +71,7 @@ jobs:
           source env.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-      - name: download-hepmc-files # TODO: vtxfix or not ??????????????????????????????????????????????????????????????????????????????????????????
+      - name: download-hepmc-files
         env:
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
@@ -190,10 +190,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: x_build
-      # - name: fullsim-get-config
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: x_config_fullsim
       - name: fastsim-get-delphes-files
         uses: actions/download-artifact@v2
         with:
@@ -214,9 +210,84 @@ jobs:
       - name: cat-config
         run: cat ${{ matrix.config }}
       - name: analysis
-        # env:
-        #   S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-        #   S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+        run: root -b -q macro/ci/${{ matrix.amacro }}'("${{ matrix.config }}",${{ env.ebeam-en }},${{ env.pbeam-en }},-25,"${{ matrix.name }}.${{ matrix.mode }}")'
+      - name: postprocess
+        run: root -b -q macro/ci/${{ matrix.pmacro }}'("out/${{ matrix.name }}.${{ matrix.mode }}.root")'
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.name }}-${{ matrix.mode }}-plots
+          path: out/${{ matrix.name }}.${{ matrix.mode }}.images
+
+# run benchmark macros matrix for fullsim
+  benchmark-fullsim:
+    needs: [ build, config-fullsim ]
+    runs-on: [ ubuntu-latest ]
+    container:
+      image: cjdilks/largex-eic:dev
+      options: --user root
+    strategy:
+      fail-fast: false
+      matrix:
+        name:
+          - bin-test
+          - coverage-x-q2
+          - coverage-p-eta
+          - resolution-x-q2
+          - resolution-p-eta
+          - y-minima
+        mode:
+          - fullsim
+        include:
+          - mode: fullsim
+            config: s3files.config
+          - name: bin-test
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_bin_test.C
+          - name: coverage-x-q2
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_x_q2.C
+          - name: resolution-x-q2
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_x_q2.C
+          - name: coverage-p-eta
+            amacro: analysis_p_eta.C
+            pmacro: postprocess_p_eta.C
+          - name: resolution-p-eta
+            amacro: analysis_p_eta.C
+            pmacro: postprocess_p_eta.C
+          - name: y-minima
+            amacro: analysis_yRatio.C
+            pmacro: postprocess_yRatio.C
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: env
+        run: |
+          source env.sh
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
+      - name: get-build-artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: x_build
+      - name: fullsim-get-config
+        uses: actions/download-artifact@v2
+        with:
+          name: x_config_fullsim
+      - name: echo-matrix
+        run: |
+          echo "name = ${{ matrix.name }}"
+          echo "mode = ${{ matrix.mode }}"
+          echo "config = ${{ matrix.config }}"
+          echo "analysis macro = ${{ matrix.amacro }}"
+          echo "postprocess macro = ${{ matrix.pmacro }}"
+      - name: cat-config
+        run: cat ${{ matrix.config }}
+      - name: analysis
+        env:
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
         run: root -b -q macro/ci/${{ matrix.amacro }}'("${{ matrix.config }}",${{ env.ebeam-en }},${{ env.pbeam-en }},-25,"${{ matrix.name }}.${{ matrix.mode }}")'
       - name: postprocess
         run: root -b -q macro/ci/${{ matrix.pmacro }}'("out/${{ matrix.name }}.${{ matrix.mode }}.root")'
@@ -233,7 +304,7 @@ jobs:
     if: ${{ always() }}
     needs: 
       - benchmark-fastsim
-      # - benchmark-fullsim
+      - benchmark-fullsim
     runs-on: [ ubuntu-latest ]
     steps:
       - name: checkout
