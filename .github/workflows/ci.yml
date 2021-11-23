@@ -81,6 +81,7 @@ jobs:
       image: cjdilks/largex-eic:dev
       options: --user root
     strategy:
+      fail-fast: false
       matrix:
         name:
           - bin-test
@@ -96,7 +97,7 @@ jobs:
           - mode: fullsim
             config: s3files.config # from upstream config job
           - name: bin-test
-            amacro: analysis_x_q2.C
+            amacro: aaaaaaaaaanalysis_x_q2.C
             pmacro: postprocess_bin_test.C
           - name: coverage-x-q2
             amacro: analysis_x_q2.C
