@@ -756,8 +756,8 @@ void Analysis::FillHistosEfficiency(bool noMatch, bool mcMatch) {
   HD->Payload([this,truthMatch,mcMatch](Histos *H){
     if (noMatch) H->Hist("z_trueMC")->Fill(kinTrue->z, wTrack );
     if (mcMatch) H->Hist("z_efficiency")->Fill(kinTrue->z,wTrack);
-    if (noMatch) H->Hist("x_trueMC")->Fill(kinTrue->z, wTrack );
-    if (mcMatch) H->Hist("x_efficiency")->Fill(kinTrue->z,wTrack);
+    if (noMatch) H->Hist("x_trueMC")->Fill(kinTrue->x, wTrack );
+    if (mcMatch) H->Hist("x_efficiency")->Fill(kinTrue->x,wTrack);
   });
   // execute the payload
   // - save time and don't call `ClearOps` (next loop will overwrite lambda)
