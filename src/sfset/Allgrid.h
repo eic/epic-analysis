@@ -22,6 +22,8 @@ public:
 
 	// Asymmetries.
 	Double_t ALL(Int_t hadPID, Double_t x, Double_t z, Double_t Q2, Double_t pT) const;
+	Double_t ALL_lower(Int_t hadPID, Double_t x, Double_t z, Double_t Q2, Double_t pT) const;
+	Double_t ALL_upper(Int_t hadPID, Double_t x, Double_t z, Double_t Q2, Double_t pT) const;
 };
 
 #endif
