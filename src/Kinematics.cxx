@@ -6,7 +6,10 @@ ClassImp(Kinematics)
 Kinematics::Kinematics(
     Double_t enEleBeam, /*GeV*/
     Double_t enIonBeam, /*GeV*/
-    Double_t crossAng /*mrad*/
+    Double_t crossAng, /*mrad*/
+    Double_t polT_,
+    Double_t polL_,
+    Double_t polBeam_
     )
 {
 
@@ -55,9 +58,9 @@ Kinematics::Kinematics(
   lSpin = 1;
 
   // default proton polarization
-  polT = 0.80;
-  polL = 0.;
-  polBeam = 0.;
+  polT = polT_;
+  polL = polL_;
+  polBeam = polBeam_;
 
   // random number generator (for asymmetry injection
   RNG = new TRandomMixMax(91874); // (TODO: fixed seed?)

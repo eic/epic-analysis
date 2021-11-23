@@ -36,7 +36,7 @@ using std::endl;
 class Kinematics : public TObject
 {
   public:
-    Kinematics(Double_t enEleBeam, Double_t enIonBeam, Double_t crossAng);
+    Kinematics(Double_t enEleBeam, Double_t enIonBeam, Double_t crossAng, Double_t polT=0.80, Double_t polL=0.0, Double_t polBeam=0.0);
     ~Kinematics();
 
     // SIDIS calculators

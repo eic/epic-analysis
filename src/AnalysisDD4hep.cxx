@@ -266,6 +266,9 @@ void AnalysisDD4hep::process_event()
 
       Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
       wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+      if (!TMath::Finite(wTrack) || wTrack < 0.) {
+        wTrack = 0.;
+      }
       wTrackTotal += wTrack;
 
       // fill track histograms in activated bins

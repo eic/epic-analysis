@@ -199,6 +199,9 @@ void AnalysisDelphes::Execute() {
       // Get index of file that the event comes from.
       Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
       wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+      if (!TMath::Finite(wTrack) || wTrack < 0.) {
+        wTrack = 0.;
+      }
       wTrackTotal += wTrack;
 
       // fill track histograms in activated bins
@@ -226,6 +229,9 @@ void AnalysisDelphes::Execute() {
 
       Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
       wJet = Q2weightFactor * weightJet->GetWeight(*kinTrue); // TODO: should we separate weights for breit and non-breit jets?
+      if (!TMath::Finite(wJet) || wJet < 0.) {
+        wJet = 0.;
+      }
       wJetTotal += wJet;
 
       Int_t nJets;

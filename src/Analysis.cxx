@@ -220,8 +220,8 @@ void Analysis::Prepare() {
   outFile = new TFile(outfileName,"RECREATE");
 
   // instantiate shared objects
-  kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
-  kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
+  kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle, polT, polL, polB);
+  kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle, polT, polL, polB);
   ST = new SimpleTree("tree",kin,kinTrue);
 
 

@@ -66,6 +66,10 @@ class Analysis : public TNamed
     // set kinematics reconstruction method; see constructor for available methods
     void SetReconMethod(TString reconMethod_) { reconMethod=reconMethod_; }; 
 
+    void SetPolT(Double_t polT_=0.80) { polT = polT_; }
+    void SetPolL(Double_t polL_=0.70) { polL = polL_; }
+    void SetPolB(Double_t polB_=0.70) { polB = polB_; }
+
     // add files to the TChain; this is called by `Prepare()`, but you can use these public
     // methods to add more files if you want
     // add single file `fileName` with given Q2 range and xs.
@@ -152,6 +156,10 @@ class Analysis : public TNamed
     std::map<TString, TString> finalStateToTitle;
     std::map<int, TString> PIDtoFinalState;
     std::set<TString> activeFinalStates;
+
+    Double_t polT = 0.8;
+    Double_t polL = 0.;
+    Double_t polB = 0.;
 
   ClassDef(Analysis,1);
 };
