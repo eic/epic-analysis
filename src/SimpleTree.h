@@ -27,7 +27,10 @@ class SimpleTree : public TObject
     TTree *GetTree() { return T; };
     Kinematics *GetKinematics() { return K; };
     Kinematics *GetKinematicsTrue() { return Ktrue; };
-    void FillTree(Double_t w) { weight = w; T->Fill(); };
+    void FillTree(Double_t w) {
+      weight = w;
+      T->Fill();
+    };
     void WriteTree() { T->Write(); };
 
   private:
