@@ -72,7 +72,7 @@ jobs:
       - name: delphes
         run: |
           echo "-- delphes"
-          for hepmc in datagen/*.hepmc.gz; do exeDelphes.sh $hepmc; done
+          for hepmc in datagen/*.hepmc.gz; do ./exeDelphes.sh $hepmc; done
           echo "-- list"
           ls -lh datarec
       - name: artifacts
