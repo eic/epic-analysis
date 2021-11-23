@@ -225,7 +225,9 @@ jobs:
 # collect artifacts into one directory
   collect:
     if: ${{ always() }}
-    needs: [ benchmark-fastsim, benchmark-fullsim ]
+    needs: 
+      - benchmark-fastsim
+      # - benchmark-fullsim
     runs-on: [ ubuntu-latest ]
     steps:
       - name: checkout
