@@ -735,7 +735,7 @@ void Analysis::FillHistosPurity(bool recMatch, bool mcMatch) {
 };
 
 // purity
-void Analysis::FillHistosEfficiency(bool recMatch, bool mcMatch) {
+void Analysis::FillHistosEfficiency(bool noMatch, bool mcMatch) {
 
   // add kinematic values to `valueMap`
   valueMap.clear();
@@ -753,10 +753,10 @@ void Analysis::FillHistosEfficiency(bool recMatch, bool mcMatch) {
   if(!activeEvent) return;
 
   // fill histograms, for activated bins only
-  HD->Payload([this,recMatch,mcMatch](Histos *H){
-    if (recMatch) H->Hist("z_trueMC")->Fill(kinTrue->z, wTrack );
+  HD->Payload([this,truthMatch,mcMatch](Histos *H){
+    if (noMatch) H->Hist("z_trueMC")->Fill(kinTrue->z, wTrack );
     if (mcMatch) H->Hist("z_efficiency")->Fill(kinTrue->z,wTrack);
-    if (recMatch) H->Hist("x_trueMC")->Fill(kinTrue->z, wTrack );
+    if (noMatch) H->Hist("x_trueMC")->Fill(kinTrue->z, wTrack );
     if (mcMatch) H->Hist("x_efficiency")->Fill(kinTrue->z,wTrack);
   });
   // execute the payload
