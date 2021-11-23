@@ -68,16 +68,16 @@ jobs:
           echo "survived"
           mc ls S3/eictest/ATHENA/EVGEN/DIS/NC/${{ env.ebeam-en }}x${{ env.pbeam-en }}/minQ2=10 | grep -E 'hepmc.gz$' | grep -v GiB | grep -v vtxfix | head -n10 | tee hepmc.list
           echo "-- download"
-          sed -i 's/^.* //g' hepmc.list
-          while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
-          echo "-- list"
-          ls -lh datagen
-      - name: delphes
-        run: |
-          echo "-- delphes"
-          for hepmc in datagen/*.hepmc.gz; do exeDelphes.sh $hepmc; done
-          echo "-- list"
-          ls -lh datarec
+          # sed -i 's/^.* //g' hepmc.list
+          # while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
+          # echo "-- list"
+          # ls -lh datagen
+      # - name: delphes
+      #   run: |
+      #     echo "-- delphes"
+      #     for hepmc in datagen/*.hepmc.gz; do exeDelphes.sh $hepmc; done
+      #     echo "-- list"
+      #     ls -lh datarec
       # - name: artifacts
       #   uses: actions/upload-artifact@v2
       #   with:
