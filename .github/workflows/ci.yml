@@ -234,13 +234,13 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           path: results
-          name:
-          - bin-test-fastsim-plots
-          - coverage-x-q2-fastsim-plots
-          - coverage-p-eta-fastsim-plots
-          - resolution-x-q2-fastsim-plots
-          - resolution-p-eta-fastsim-plots
-          - y-minima-fastsim-plots
+          name: |
+            bin-test-fastsim-plots
+            coverage-x-q2-fastsim-plots
+            coverage-p-eta-fastsim-plots
+            resolution-x-q2-fastsim-plots
+            resolution-p-eta-fastsim-plots
+            y-minima-fastsim-plots
       - name: cull
         run: |
           rm -v results/coverage*/*.pdf
