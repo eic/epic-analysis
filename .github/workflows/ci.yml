@@ -57,13 +57,15 @@ jobs:
           source env.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-      - name: config
+      - name: generate-config
         env:
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
         run: |
           s3tools/add-host.sh
           s3tools/make-canyonlands-config.sh ${{ env.ebeam-en }}x${{ env.pbeam-en }} i s3files.config
+      - name: cat-config
+        run: cat s3files.config
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -122,9 +124,7 @@ jobs:
       - name: get-artifacts
         uses: actions/download-artifact@v2
         with:
-          name: |
-            build-artifacts
-            config-artifacts
+          name: [ build-artifacts, config-artifacts ]
       - name: echo-matrix
         run: |
           echo "name = ${{ matrix.name }}"
