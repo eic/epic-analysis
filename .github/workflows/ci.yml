@@ -10,8 +10,13 @@ defaults:
   run:
     shell: bash
 
+env:
+  ebeam-en: 10
+  pbeam-en: 100
+
 jobs:
 
+# build test
   build:
     runs-on: [ ubuntu-latest ]
     container:
@@ -20,45 +25,26 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: config
+      - name: env
         run: |
           source env.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-          more $GITHUB_ENV
       - name: compile
         run: make
-
-  fastsim-coverage:
-    needs: [ build ]
-    runs-on: [ ubuntu-latest ]
-    container:
-      image: cjdilks/largex-eic:dev
-      options: --user root
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: config
-        run: |
-          source env.sh
-          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-          more $GITHUB_ENV
-      - name: compile
-        run: make
-      - name: analysis
-        run: root -b -q macro/ci/analysis_xqbins.C
-      - name: postprocess
-        run: root -b -q macro/ci/postprocess_xqbins_draw.C
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: fastsim-coverage-plots
+          name: build-artifacts
           path: |
-            out/coverage.images
+            LargexDict_rdict.pcm
+            libLargex.so
+            mstwpdf/*.o
+            mstwpdf/*.so
+            src/LargexDict.cxx
 
-  fastsim-y-minima:
-    needs: [ build ]
+# generate config file for full simulation, used in fullsim benchmarks
+  config:
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
@@ -66,80 +52,125 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: config
+      - name: env
         run: |
           source env.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-          more $GITHUB_ENV
-      - name: compile
-        run: make
-      - name: analysis
-        run: root -b -q macro/ci/analysis_yRatio.C
-      - name: postprocess
-        run: root -b -q macro/ci/postprocess_yRatio.C
+      - name: generate-config
+        env:
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+        run: |
+          s3tools/add-host.sh
+          s3tools/make-canyonlands-config.sh ${{ env.ebeam-en }}x${{ env.pbeam-en }} i s3files.config
+      - name: cat-config
+        run: cat s3files.config
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: fastsim-y-minima-ratio-plots
-          path: |
-            out/yRatio.images/yRatio*.png
+          name: config-artifacts
+          path: s3files.config
 
-  fastsim-resolutions:
-    needs: [ build ]
+# run benchmark macros matrix for fast and full simulation
+# - all files in matrix are w.r.t. path macro/ci/
+  benchmarks:
+    needs: [ build, config ]
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
       options: --user root
+    strategy:
+      matrix:
+        name:
+          - bin-test
+          - coverage-x-q2
+          - coverage-p-eta
+          - resolution-x-q2
+          - resolution-p-eta
+          - y-minima
+        mode: [ fastsim, fullsim ]
+        include:
+          - mode: fastsim
+            config: macro/ci/delphes.config
+          - mode: fullsim
+            config: s3files.config # from upstream config job
+          - name: bin-test
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_bin_test.C
+          - name: coverage-x-q2
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_x_q2.C
+          - name: resolution-x-q2
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_x_q2.C
+          - name: coverage-p-eta
+            amacro: analysis_p_eta.C
+            pmacro: postprocess_p_eta.C
+          - name: resolution-p-eta
+            amacro: analysis_p_eta.C
+            pmacro: postprocess_p_eta.C
+          - name: y-minima
+            amacro: analysis_yRatio.C
+            pmacro: postprocess_yRatio.C
     steps:
       - name: checkout
         uses: actions/checkout@v2
-      - name: config
+      - name: env
         run: |
           source env.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-          more $GITHUB_ENV
-      - name: compile
-        run: make
-      - name: analysis
-        run: root -b -q macro/ci/analysis_resolution.C
-      - name: postprocess
-        run: root -b -q macro/ci/postprocess_resolution.C
-      - name: artifacts
-        uses: actions/upload-artifact@v2
+      - name: get-build-artifacts
+        uses: actions/download-artifact@v2
         with:
-          name: fastsim-resolution-plots
-          path: |
-            out/resolution.images/*.pdf
-
-  fullsim-coverage:
-    needs: [ build ]
-    runs-on: [ ubuntu-latest ]
-    container:
-      image: cjdilks/largex-eic:dev
-      options: --user root
-    steps:
-      - name: checkout
-        uses: actions/checkout@v2
-      - name: config
+          name: build-artifacts
+      - name: get-config-artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: config-artifacts
+      - name: echo-matrix
         run: |
-          source env.sh
-          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-          more $GITHUB_ENV
-      - name: compile
-        run: make
+          echo "name = ${{ matrix.name }}"
+          echo "mode = ${{ matrix.mode }}"
+          echo "config = ${{ matrix.config }}"
+          echo "analysis macro = ${{ matrix.amacro }}"
+          echo "postprocess macro = ${{ matrix.pmacro }}"
       - name: analysis
         env:
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-        run: root -b -q macro/ci/analysis_dd4hep.C
+        run: root -b -q macro/ci/${{ matrix.amacro }}'("${{ matrix.config }}",${{ env.ebeam-en }},${{ env.pbeam-en }},-25,"${{ matrix.name }}.${{ matrix.mode }}")'
       - name: postprocess
-        run: root -b -q macro/ci/postprocess_dd4hep_draw.C
+        run: root -b -q macro/ci/${{ matrix.pmacro }}'("out/${{ matrix.name }}.${{ matrix.mode }}.root")'
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: fullsim-coverage-plots
-          path: |
-            out/fullsim.coverage.images
+          name: ${{ matrix.name }}-${{ matrix.mode }}-plots
+          path: out/${{ matrix.name }}.${{ matrix.mode }}.images
+
+# collect artifacts into one directory
+  collect:
+    if: ${{ always() }}
+    needs: [ benchmarks ]
+    runs-on: [ ubuntu-latest ]
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: download
+        uses: actions/download-artifact@v2
+        with:
+          path: results
+      - name: cull
+        run: |
+          rm -rv results/build-artifacts
+          rm -v results/coverage*/*.pdf
+          rm -v results/resolution*/*.pdf
+          rm -v results/y-minima*/canv*.png
+      - name: organize
+        run: macro/ci/organize-artifacts.sh results
+      - name: upload
+        uses: actions/upload-artifact@v2
+        with:
+          name: _FULL_RESULTS
+          path: results

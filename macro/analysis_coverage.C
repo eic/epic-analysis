@@ -8,7 +8,7 @@ void analysis_coverage(
     TString infiles="datarec/in.config", /* delphes tree(s) */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
-    Double_t crossingAngle=25, /* crossing angle [mrad] */
+    Double_t crossingAngle=-25, /* crossing angle [mrad] */
     TString outfilePrefix="coverage" /* output filename prefix*/
 ) {
 

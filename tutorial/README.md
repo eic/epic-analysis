@@ -43,9 +43,6 @@ this tutorial directory, e.g., `root -b -q tutorial/analysis_template.C`
   different Q2 regions together using relative weights); 
   see [documentation here](../s3tools/README.md) for the formatting of these
   files, as well as scripts to help generate them
-  - see files in `../datarec/*.config` for examples
-    - the tutorials below use `../datarec/tutorial.config`, which has a
-      single file, the aforementioned example ROOT file
 
 ## Examples:
 

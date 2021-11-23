@@ -15,6 +15,10 @@ One top-level script automates all the work:
     - the downloaded full simulation files, if you chose to download from S3
   - this script contains some settings such as directory paths to data on S3,
     for the convenience of SIDIS full simulation analysis
+  - you may have to run `add-host.sh` first, if you have not yet; set env vars
+    `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password beforehand:
+    - `export=S3_ACCESS_KEY=*****`
+    - `export=S3_SECRET_KEY=*****`
   - this script calls several other scripts in this directory; read on for their
     documentation
 - if you are not running in the Singularity/Docker container, download and install
@@ -27,8 +31,7 @@ One top-level script automates all the work:
   - if you are using the Singularity or Docker container, it is already installed
   - the main command is `mc`
 - next, setup your client to connect to our S3 host (ask someone for credentials):
-  - first set env vars `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password
-    (ask someone if you don't know):
+  - first set env vars `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password:
     - `export=S3_ACCESS_KEY=*****`
     - `export=S3_SECRET_KEY=*****`
   - then add our S3 host to MinIO client: `add-host.sh`
@@ -46,8 +49,8 @@ One top-level script automates all the work:
 
 ## Generating Config Files
 Next we need to make a "config file", which consists of the file name, and
-additional columns such as Q2min. Follow the next sections, whether you plan to
-stream from S3 or download.
+additional columns such as cross section and Q2min. Follow the next sections,
+whether you plan to stream from S3 or download.
 
 ### Config File Format
 The config files require the following columns, in this order:
@@ -66,6 +69,20 @@ above old format, we temporarily use the script `reformat-config.sh` to
 transform the above old format into the new format. See comments in
 `reformat-config.sh` for details. Execute:
   - `s3tools/reformat-config.sh files.config files.new.config`
+
+### Cross Sections
+- cross sections are stored in `datarec/xsec/xsec.dat`; use `read-xsec-table.sh`
+  to get the cross section for a particular beam energy setting and Q2 minimum
+- in case you want to update `xsec.dat`:
+  - the script `get-cross-section.sh` will read the cross section from
+    `GenCrossSection` in a `hepmc` file; use `get-cross-section-ALL.sh` to
+    automate running `get-cross-section.sh` over all `hepmc` files in a specific
+    directory tree; this will populate `datarec/xsec/*.xsec` files, one for each
+    `hepmc` file
+  - next use `tabulate-cross-section.py` to read the tree of `.xsec` files into
+    a table of cross sections, output to `datarec/xsec/xsec.dat`
+  - given the time it takes to run `get-cross-section.sh`, we try to store the
+    most up-to-date version of `xsec.dat` in this repository
 
 ### Stream from S3
 To stream, we need to make a list of URLs.
