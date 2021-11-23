@@ -25,6 +25,11 @@ One top-level script automates all the work:
   the [MinIO client](https://docs.min.io/docs/minio-client-complete-guide) first
   - (otherwise update your Singularity image)
 
+For fast simulations, one can use `make-fastsim-config.sh` to help in the creation
+of a config file for fast simulations. This script is used by the CI, but is also
+designed to be configurable to support any local organization of Delphes output
+files.
+
 
 ## Accessing S3 Files
 - first, download the [MinIO client](https://docs.min.io/docs/minio-client-complete-guide)
