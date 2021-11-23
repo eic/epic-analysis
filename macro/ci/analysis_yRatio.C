@@ -15,7 +15,7 @@ void analysis_yRatio(
        A = new AnalysisDD4hep(  infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
   else A = new AnalysisDelphes( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
 
-  A->SetReconMethod("Ele"); // set reconstruction method
+  A->SetReconMethod("JB"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
 
   // define cuts ===========================================
