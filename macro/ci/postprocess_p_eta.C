@@ -1,8 +1,8 @@
 R__LOAD_LIBRARY(Largex)
 
-// make grids of plots of (x,Q2) bins
+// make grids of plots of (p,eta) bins
 // - depending on infile, different histograms will be drawn
-void postprocess_xq(TString infile="out/coverage.fullsim.root") {
+void postprocess_p_eta(TString infile="out/coverage.fullsim.root") {
 
   // set histogram lists, based on infile name
   std::vector<TString> histList;
@@ -43,42 +43,42 @@ void postprocess_xq(TString infile="out/coverage.fullsim.root") {
   // build DAG
   PostProcessor *P = new PostProcessor(infile);
 
-  // (x,Q2) binning
-  auto xBins = P->Op()->GetBinSet("x");
-  auto qBins = P->Op()->GetBinSet("q2");
-  Int_t numXbins = xBins->GetNumBins();
-  Int_t numQbins = qBins->GetNumBins();
-  Double_t xMin = xBins->GetMin();
-  Double_t xMax = xBins->GetMax();
-  Double_t qMin = qBins->GetMin();
-  Double_t qMax = qBins->GetMax();
+  // (p,eta) binning
+  auto pBins     = P->Op()->GetBinSet("p");
+  auto eBins     = P->Op()->GetBinSet("eta");
+  Int_t numPbins = pBins->GetNumBins();
+  Int_t numEbins = eBins->GetNumBins();
+  Double_t pMin  = pBins->GetMin();
+  Double_t pMax  = pBins->GetMax();
+  Double_t eMin  = eBins->GetMin();
+  Double_t eMax  = eBins->GetMax();
 
   // 2D array of Histos pointers
-  std::vector<std::vector<Histos*>> histosArr(numXbins,std::vector<Histos*>(numQbins));
+  std::vector<std::vector<Histos*>> histosArr(numPbins,std::vector<Histos*>(numEbins));
 
-  // payload operator: find (x,Q2) bin, get (x,Q2) ranges, fill histosArr
+  // payload operator: find (p,eta) bin, get (p,eta) ranges, fill histosArr
   auto fillHistosArr = [&histosArr](NodePath *NP, Histos *H ) {
-    Int_t bx = NP->GetBinNode("x")->GetBinNum();
-    Int_t bq = NP->GetBinNode("q2")->GetBinNum();
-    printf("   bx, bq = %d, %d\n",bx,bq);
-    try { histosArr.at(bx).at(bq) = H; }
-    catch(const std::out_of_range &e) { cerr << "ERROR: (x,Q2) bin number (" << bx << "," << bq << ") invalid" << endl; };
+    Int_t bp = NP->GetBinNode("p")->GetBinNum();
+    Int_t be = NP->GetBinNode("eta")->GetBinNum();
+    printf("   bp, be = %d, %d\n",bp,be);
+    try { histosArr.at(bp).at(be) = H; }
+    catch(const std::out_of_range &e) { cerr << "ERROR: (p,eta) bin number (" << bp << "," << be << ") invalid" << endl; };
   };
 
-  // after subloop operator: draw array of plots in (x,Q2) bins
+  // after subloop operator: draw array of plots in (p,eta) bins
   auto drawHistosArr = [&](NodePath *NP) {
-    TString canvName = "xQ2cov_" + NP->BinListName();
+    TString canvName = "pEtaCov_" + NP->BinListName();
     for( TString histName : histList ) {
       P->DrawInBins(
           canvName, histosArr, histName,
-          "x", numXbins, xMin, xMax, true,
-          "Q^{2}", numQbins, qMin, qMax, true
+          "p",      numPbins, pMin, pMax, true,
+          "#eta",   numEbins, eMin, eMax, false
           );
     };
   };
 
   // staging and execution
-  P->Op()->AfterSubloop( {"x","q2"}, drawHistosArr );
+  P->Op()->AfterSubloop( {"p","eta"}, drawHistosArr );
   P->Op()->Payload(fillHistosArr);
   P->Execute();
   P->Finish();

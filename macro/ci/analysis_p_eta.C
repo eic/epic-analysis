@@ -1,7 +1,7 @@
 R__LOAD_LIBRARY(Largex)
 
-// analysis in bins of (x,Q2)
-void analysis_xq(
+// analysis in bins of (p,eta)
+void analysis_p_eta(
     TString infiles="datarec/canyonlands-v1.2/5x41/files.config", // default, for manual local testing
     Double_t eleBeamEn=5,
     Double_t ionBeamEn=41,
@@ -26,10 +26,8 @@ void analysis_xq(
   A->AddBinScheme("ptLab");  A->BinScheme("ptLab")->BuildBin("Min",0.1); // pT_lab > 0.1 GeV (tracking limit)
 
   // set binning scheme ====================================
-  Int_t nx, nq;
-  if(outfilePrefix.Contains("bin-test")) { nx=3; nq=3; } else { nx=6; nq=4; };
-  A->AddBinScheme("x");  A->BinScheme("x")->BuildBins(  nx, 0.001, 1,    true );
-  A->AddBinScheme("q2"); A->BinScheme("q2")->BuildBins( nq, 1,     3000,  true );
+  A->AddBinScheme("p");   A->BinScheme("p")->BuildBins( 6, 0.1, 100, true );
+  A->AddBinScheme("eta"); A->BinScheme("eta")->BuildBins( 4, -4, 4, false );
 
   // perform the analysis ==================================
   A->Execute();

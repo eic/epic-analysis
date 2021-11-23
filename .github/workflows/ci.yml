@@ -49,7 +49,13 @@ jobs:
       options: --user root
     strategy:
       matrix:
-        name: [ bin-test, coverage, resolution, y-minima ]
+        name:
+          - bin-test
+          - coverage-x-q2
+          - coverage-p-eta
+          - resolution-x-q2
+          - resolution-p-eta
+          - y-minima
         mode: [ fastsim, fullsim ]
         include:
           - mode: fastsim
@@ -57,14 +63,20 @@ jobs:
           - mode: fullsim
             config: s3files.config
           - name: bin-test
-            amacro: analysis_xq.C
+            amacro: analysis_x_q2.C
             pmacro: postprocess_bin_test.C
-          - name: coverage
-            amacro: analysis_xq.C
-            pmacro: postprocess_xq.C
-          - name: resolution
-            amacro: analysis_xq.C
-            pmacro: postprocess_xq.C
+          - name: coverage-x-q2
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_x_q2.C
+          - name: resolution-x-q2
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_x_q2.C
+          - name: coverage-p-eta
+            amacro: analysis_p_eta.C
+            pmacro: postprocess_p_eta.C
+          - name: resolution-p-eta
+            amacro: analysis_p_eta.C
+            pmacro: postprocess_p_eta.C
           - name: y-minima
             amacro: analysis_yRatio.C
             pmacro: postprocess_yRatio.C
@@ -80,6 +92,13 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: build-artifacts
+      - name: echo-matrix
+        run: |
+          echo "name = ${{ matrix.name }}"
+          echo "mode = ${{ matrix.mode }}"
+          echo "config = ${{ matrix.config }}"
+          echo "analysis macro = ${{ matrix.amacro }}"
+          echo "postprocess macro = ${{ matrix.pmacro }}"
       - name: analysis
         env:
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
