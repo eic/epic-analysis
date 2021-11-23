@@ -27,11 +27,14 @@ void analysis_asymmetry(
     new PaviaWeights()
   });
   A->SetWeights(weights);
+  A->SetPolT(0.7);
+  //A->SetPolL(0.7);
+  //A->SetPolB(0.8);
 
   A->writeSimpleTree = true; // write SimpleTree (for one bin)
   //A->maxEvents = 10000; // use this to limit the number of events
   //A->SetReconMethod("Ele"); // recon method (default is "Ele")
-  //A->AddFinalState("pipTrack"); // final states (default is "pipTrack" only)
+  A->AddFinalState("pipTrack"); // final states (default is "pipTrack" only)
 
   // define cuts ====================================
   A->AddBinScheme("w");  A->BinScheme("w")->BuildBin("Min",3.0); // W > 3 GeV
