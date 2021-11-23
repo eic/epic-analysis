@@ -336,8 +336,8 @@ void Analysis::Prepare() {
     HS->DefineHist1D("z_efficiency","efficiency","", NBINS, 0, 1);
 
     // 1D x-binned purity and efficiency
-    HS->DefineHist1D("z_true","z","", NBINS, 1e-5, 1, true);
-    HS->DefineHist1D("z_trueMC","z","", NBINS, 1e-5, 1, true);
+    HS->DefineHist1D("x_true","x","", NBINS, 1e-5, 1, true);
+    HS->DefineHist1D("x_trueMC","x","", NBINS, 1e-5, 1, true);
     HS->DefineHist1D("x_purity","purity","", NBINS, 1e-5, 1, true);
     HS->DefineHist1D("x_efficiency","efficiency","", NBINS, 1e-5, 1, true);
 
