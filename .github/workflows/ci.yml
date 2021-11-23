@@ -200,8 +200,9 @@ jobs:
           path: datarec
       - name: fastsim-organize-delphes-files
         run: |
-          mv -v datarec/delphes*/datarec/*.root daterec/
-          cat datarec/delphes*/delphes.config delphes.config
+          find datarec -name "*.root" -print | tee tmp.list
+          cat tmp.list | while read f; do mv -v $f daterec/; done
+          cat datarec/delphes*/delphes.config > delphes.config
       - name: echo-matrix
         run: |
           echo "name = ${{ matrix.name }}"
