@@ -28,7 +28,7 @@ AnalysisDelphes::AnalysisDelphes(
 
 // Borrowed this method from `Kinematics.cxx`
 // get PID information from PID systems tracks
-int getPID(Track *track, TObjArrayIter itParticle,
+int AnalysisDelphes::getPID(Track *track, TObjArrayIter itParticle,
 		TObjArrayIter itpfRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack){
   itParticle.Reset();
   itpfRICHTrack.Reset();
