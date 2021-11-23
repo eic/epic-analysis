@@ -201,7 +201,7 @@ jobs:
       - name: fastsim-organize-delphes-files
         run: |
           find datarec -name "*.root" -print | tee tmp.list
-          cat tmp.list | while read f; do mv -v $f daterec/; done
+          cat tmp.list | while read f; do mv -v $f datarec/; done
           cat datarec/delphes*/delphes.config > delphes.config
       - name: echo-matrix
         run: |
