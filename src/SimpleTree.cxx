@@ -17,6 +17,7 @@ SimpleTree::SimpleTree(TString treeName_, Kinematics *K_, Kinematics *Ktrue_)
   T->Branch("TruePhPerp",&(Ktrue->pT),    "TruePhPerp/D");
   T->Branch("TruePhiH",  &(Ktrue->phiH),  "TruePhiH/D");
   T->Branch("TruePhiS",  &(Ktrue->phiS),  "TruePhiS/D");
+  T->Branch("TrueHadPID",&(Ktrue->hadPID),"TrueHadPID/D");
   T->Branch("QSq",       &(K->Q2),        "QSq/D");
   T->Branch("X",         &(K->x),         "X/D");
   T->Branch("Y",         &(K->y),         "Y/D");
