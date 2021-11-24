@@ -318,37 +318,56 @@ void Kinematics::ValidateHeadOnFrame() {
 
 
 // get PID information from PID systems tracks
-int getTrackPID(Track *track, TObjArrayIter itParticle,
-		TObjArrayIter itmRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack){
-  itParticle.Reset();
-  itmRICHTrack.Reset();
-  itbarrelDIRCTrack.Reset();
-  itdualRICHagTrack.Reset();
-  itdualRICHcfTrack.Reset();
+int Kinematics::getTrackPID(
+    Track *track,
+    TObjArrayIter itpfRICHTrack,
+    TObjArrayIter itDIRCepidTrack, TObjArrayIter itDIRChpidTrack,
+    TObjArrayIter itBTOFepidTrack, TObjArrayIter itBTOFhpidTrack,
+    TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
+    ) {
+
+  itpfRICHTrack.Reset();
+  itDIRCepidTrack.Reset();   itDIRChpidTrack.Reset();
+  itBTOFepidTrack.Reset();   itBTOFhpidTrack.Reset();
+  itdualRICHagTrack.Reset(); itdualRICHcfTrack.Reset();
   GenParticle *trackParticle = (GenParticle*)track->Particle.GetObject();
   GenParticle *detectorParticle;
-  int pidOut = -1;
-  while(Track *detectorTrack = (Track*)itmRICHTrack() ){
+
+  // TODO: make this less repetitive:
+
+  while(Track *detectorTrack = (Track*)itpfRICHTrack() ){
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+    if( detectorParticle == trackParticle ) return detectorTrack->PID;
   }
-  itParticle.Reset();
-  while(Track *detectorTrack = (Track*)itbarrelDIRCTrack() ){
+
+  while(Track *detectorTrack = (Track*)itDIRCepidTrack() ){
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+    if( detectorParticle == trackParticle ) return detectorTrack->PID;
   }
-  itParticle.Reset();
+  while(Track *detectorTrack = (Track*)itDIRChpidTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) return detectorTrack->PID;
+  }
+
+  while(Track *detectorTrack = (Track*)itBTOFepidTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) return detectorTrack->PID;
+  }
+  while(Track *detectorTrack = (Track*)itBTOFhpidTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) return detectorTrack->PID;
+  }
+
   while(Track *detectorTrack = (Track*)itdualRICHagTrack() ){
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+    if( detectorParticle == trackParticle ) return detectorTrack->PID;
   }
   while(Track *detectorTrack = (Track*)itdualRICHcfTrack() ){
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+    if( detectorParticle == trackParticle ) return detectorTrack->PID;
   }
 
-
-  return pidOut;
+  return -1; // not found
 }
 
 
@@ -356,11 +375,16 @@ int getTrackPID(Track *track, TObjArrayIter itParticle,
 // expects 'vecElectron' set
 // - calculates `sigmah`, `Pxh`, and `Pyh` in the head-on frame
 void Kinematics::GetHadronicFinalState(
-    TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
-    TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle,
-    TObjArrayIter itmRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack,TObjArrayIter itdualRICHcfTrack
-    )
-{
+    TObjArrayIter itTrack,
+    TObjArrayIter itEFlowTrack,
+    TObjArrayIter itEFlowPhoton,
+    TObjArrayIter itEFlowNeutralHadron,
+    TObjArrayIter itParticle,
+    TObjArrayIter itpfRICHTrack,
+    TObjArrayIter itDIRCepidTrack,   TObjArrayIter itDIRChpidTrack,
+    TObjArrayIter itBTOFepidTrack,   TObjArrayIter itBTOFhpidTrack,
+    TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
+    ) {
   itTrack.Reset();
   itEFlowTrack.Reset();
   itEFlowPhoton.Reset();
@@ -383,7 +407,13 @@ void Kinematics::GetHadronicFinalState(
     TLorentzVector  trackp4 = track->P4();
     if(!isnan(trackp4.E())){
       if( std::abs(track->Eta) < 4.0  ){
-	int pid = getTrackPID(track, itParticle, itmRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
+        int pid = getTrackPID( // get smeared PID
+            track,
+            itpfRICHTrack,
+            itDIRCepidTrack, itDIRChpidTrack,
+            itBTOFepidTrack, itBTOFhpidTrack,
+            itdualRICHagTrack, itdualRICHcfTrack
+            );
 	if(pid != -1){
 	  trackp4.SetPtEtaPhiM(trackp4.Pt(),trackp4.Eta(),trackp4.Phi(),correctMass(pid));	  
 	}

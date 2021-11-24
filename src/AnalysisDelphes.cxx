@@ -26,43 +26,6 @@ AnalysisDelphes::AnalysisDelphes(
   /* ... none defined yet ... */
 };
 
-// Borrowed this method from `Kinematics.cxx`
-// get PID information from PID systems tracks
-int AnalysisDelphes::getPID(Track *track, TObjArrayIter itParticle,
-    TObjArrayIter itpfRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack){
-  itParticle.Reset();
-  itpfRICHTrack.Reset();
-  itbarrelDIRCTrack.Reset();
-  itdualRICHagTrack.Reset();
-  itdualRICHcfTrack.Reset();
-  GenParticle *trackParticle = (GenParticle*)track->Particle.GetObject();
-  GenParticle *detectorParticle;
-  int pidOut = -1;
-  while(Track *detectorTrack = (Track*)itpfRICHTrack() ){
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
-  }
-  itParticle.Reset();
-  while(Track *detectorTrack = (Track*)itbarrelDIRCTrack() ){
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
-  }
-  itParticle.Reset();
-  Double_t ag_p_threshold = 12.0;
-  while(Track *detectorTrack = (Track*)itdualRICHagTrack() ){
-    Double_t p_track = detectorTrack->P4().Vect().Mag();
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
-  }
-  while(Track *detectorTrack = (Track*)itdualRICHcfTrack() ){
-    Double_t p_track = detectorTrack->P4().Vect().Mag();
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
-  }
-
-
-  return pidOut;
-}
 
 //=============================================
 // perform the analysis
@@ -95,7 +58,10 @@ void AnalysisDelphes::Execute() {
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
   TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
   TObjArrayIter itpfRICHTrack(tr->UseBranch("pfRICHTrack"));
-  TObjArrayIter itbarrelDIRCTrack(tr->UseBranch("barrelDIRCTrack"));
+  TObjArrayIter itDIRCepidTrack(tr->UseBranch("barrelDIRC_epidTrack"));
+  TObjArrayIter itDIRChpidTrack(tr->UseBranch("barrelDIRC_hpidTrack"));
+  TObjArrayIter itBTOFepidTrack(tr->UseBranch("BTOF_eTrack"));
+  TObjArrayIter itBTOFhpidTrack(tr->UseBranch("BTOF_hTrack"));
   TObjArrayIter itdualRICHagTrack(tr->UseBranch("dualRICHagTrack"));
   TObjArrayIter itdualRICHcfTrack(tr->UseBranch("dualRICHcfTrack"));
 
@@ -180,7 +146,17 @@ void AnalysisDelphes::Execute() {
     if(errorCount>=100 && errorCount<1000) { cerr << "ERROR: .... suppressing beam finder errors ...." << endl; errorCount=1000; };
 
     // get hadronic final state variables
-    kin->GetHadronicFinalState(itTrack, itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle, itpfRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);    
+    kin->GetHadronicFinalState(
+        itTrack,
+        itEFlowTrack,
+        itEFlowPhoton,
+        itEFlowNeutralHadron,
+        itParticle,
+        itpfRICHTrack,
+        itDIRCepidTrack, itDIRChpidTrack,
+        itBTOFepidTrack, itBTOFhpidTrack,
+        itdualRICHagTrack, itdualRICHcfTrack
+        );
     kinTrue->GetHadronicFinalStateTrue(itParticle);
     // calculate DIS kinematics
     kin->CalculateDIS(reconMethod); // reconstructed
@@ -199,7 +175,13 @@ void AnalysisDelphes::Execute() {
       // - check PID, to see if it's a final state we're interested in for
       //   histograms; if not, proceed to next track
       // pid = trk->PID; //NOTE: trk->PID is currently not smeared so it just returns the truth-level PID
-      pid = getPID(trk, itParticle, itpfRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
+      pid = kin->getTrackPID( // get smeared PID
+          trk,
+          itpfRICHTrack,
+          itDIRCepidTrack, itDIRChpidTrack,
+          itBTOFepidTrack, itBTOFhpidTrack,
+          itdualRICHagTrack, itdualRICHcfTrack
+          );
       auto kv = PIDtoFinalState.find(pid);
       if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
       if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
