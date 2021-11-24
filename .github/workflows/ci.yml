@@ -16,6 +16,8 @@ env:
 
 jobs:
 
+# BUILD ---------------------------------------------------------------------------
+
 # build test
   build:
     runs-on: [ ubuntu-latest ]
@@ -35,7 +37,7 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: build-artifacts
+          name: x_build
           path: |
             LargexDict_rdict.pcm
             libLargex.so
@@ -43,8 +45,68 @@ jobs:
             mstwpdf/*.so
             src/LargexDict.cxx
 
-# generate config file for full simulation, used in fullsim benchmarks
-  config:
+# DELPHES ---------------------------------------------------------------------------
+
+# run delphes on a hepmc file
+  delphes-fastsim:
+    runs-on: [ ubuntu-latest ]
+    container:
+      image: cjdilks/largex-eic:dev
+      options: --user root
+    strategy:
+      fail-fast: false
+      matrix:
+        minq2:
+          - 1
+          - 10
+          - 100
+          - 1000
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: env
+        run: |
+          source env.sh
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
+      - name: download-hepmc-files
+        env:
+          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+        run: |
+          s3tools/add-host.sh
+          echo "-- build list"
+          s3tools/generate-hepmc-list.sh ${{ env.ebeam-en }}x${{ env.pbeam-en }} ${{ matrix.minq2 }} ci | tee hepmc.list
+          echo "-- download"
+          while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
+          echo "-- list datagen/"
+          ls -lh datagen
+      - name: delphes
+        run: |
+          echo "-- delphes"
+          for hepmc in datagen/*.hepmc.gz; do ./exeDelphes.sh $hepmc; done
+          echo "-- list datarec/"
+          ls -lh datarec
+      - name: config-fastsim
+        run: |
+          s3tools/make-fastsim-config.sh ${{ env.ebeam-en }}x${{ env.pbeam-en }} ${{ matrix.minq2 }} datarec delphes.config
+          echo "-- cat config"
+          cat delphes.config
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: delphes-${{ env.ebeam-en }}x${{ env.pbeam-en }}-q2min${{ matrix.minq2 }}-output
+          path: |
+            datarec/*.root
+            delphes.config
+
+
+# CONFIG ---------------------------------------------------------------------------
+
+# generate fullsim config file
+  config-fullsim:
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
@@ -69,18 +131,22 @@ jobs:
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: config-artifacts
+          name: x_config_fullsim
           path: s3files.config
 
-# run benchmark macros matrix for fast and full simulation
-# - all files in matrix are w.r.t. path macro/ci/
-  benchmarks:
-    needs: [ build, config ]
+# BENCHMARKS ---------------------------------------------------------------------------
+
+# - all macros in matrix are w.r.t. path macro/ci/
+
+# run benchmark macros matrix for fastsim
+  benchmark-fastsim:
+    needs: [ build, delphes-fastsim ]
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
       options: --user root
     strategy:
+      fail-fast: false
       matrix:
         name:
           - bin-test
@@ -89,12 +155,11 @@ jobs:
           - resolution-x-q2
           - resolution-p-eta
           - y-minima
-        mode: [ fastsim, fullsim ]
+        mode:
+          - fastsim
         include:
           - mode: fastsim
-            config: macro/ci/delphes.config
-          - mode: fullsim
-            config: s3files.config # from upstream config job
+            config: delphes.config
           - name: bin-test
             amacro: analysis_x_q2.C
             pmacro: postprocess_bin_test.C
@@ -124,11 +189,17 @@ jobs:
       - name: get-build-artifacts
         uses: actions/download-artifact@v2
         with:
-          name: build-artifacts
-      - name: get-config-artifacts
+          name: x_build
+      - name: fastsim-get-delphes-files
         uses: actions/download-artifact@v2
         with:
-          name: config-artifacts
+          path: datarec
+      - name: fastsim-organize-delphes-files
+        run: |
+          find datarec -name "*.root" -print | tee tmp.list
+          cat tmp.list | while read f; do mv -v $f datarec/; done
+          cat datarec/delphes*/delphes.config > delphes.config
+          sort -nr -o delphes.config{,}
       - name: echo-matrix
         run: |
           echo "name = ${{ matrix.name }}"
@@ -136,6 +207,83 @@ jobs:
           echo "config = ${{ matrix.config }}"
           echo "analysis macro = ${{ matrix.amacro }}"
           echo "postprocess macro = ${{ matrix.pmacro }}"
+      - name: cat-config
+        run: cat ${{ matrix.config }}
+      - name: analysis
+        run: root -b -q macro/ci/${{ matrix.amacro }}'("${{ matrix.config }}",${{ env.ebeam-en }},${{ env.pbeam-en }},-25,"${{ matrix.name }}.${{ matrix.mode }}")'
+      - name: postprocess
+        run: root -b -q macro/ci/${{ matrix.pmacro }}'("out/${{ matrix.name }}.${{ matrix.mode }}.root")'
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.name }}-${{ matrix.mode }}-plots
+          path: out/${{ matrix.name }}.${{ matrix.mode }}.images
+
+# run benchmark macros matrix for fullsim
+  benchmark-fullsim:
+    needs: [ build, config-fullsim ]
+    runs-on: [ ubuntu-latest ]
+    container:
+      image: cjdilks/largex-eic:dev
+      options: --user root
+    strategy:
+      fail-fast: false
+      matrix:
+        name:
+          - bin-test
+          - coverage-x-q2
+          - coverage-p-eta
+          - resolution-x-q2
+          - resolution-p-eta
+          - y-minima
+        mode:
+          - fullsim
+        include:
+          - mode: fullsim
+            config: s3files.config
+          - name: bin-test
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_bin_test.C
+          - name: coverage-x-q2
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_x_q2.C
+          - name: resolution-x-q2
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_x_q2.C
+          - name: coverage-p-eta
+            amacro: analysis_p_eta.C
+            pmacro: postprocess_p_eta.C
+          - name: resolution-p-eta
+            amacro: analysis_p_eta.C
+            pmacro: postprocess_p_eta.C
+          - name: y-minima
+            amacro: analysis_yRatio.C
+            pmacro: postprocess_yRatio.C
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: env
+        run: |
+          source env.sh
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
+      - name: get-build-artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: x_build
+      - name: fullsim-get-config
+        uses: actions/download-artifact@v2
+        with:
+          name: x_config_fullsim
+      - name: echo-matrix
+        run: |
+          echo "name = ${{ matrix.name }}"
+          echo "mode = ${{ matrix.mode }}"
+          echo "config = ${{ matrix.config }}"
+          echo "analysis macro = ${{ matrix.amacro }}"
+          echo "postprocess macro = ${{ matrix.pmacro }}"
+      - name: cat-config
+        run: cat ${{ matrix.config }}
       - name: analysis
         env:
           S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
@@ -149,10 +297,14 @@ jobs:
           name: ${{ matrix.name }}-${{ matrix.mode }}-plots
           path: out/${{ matrix.name }}.${{ matrix.mode }}.images
 
+# ARTIFACTS ---------------------------------------------------------------------------
+
 # collect artifacts into one directory
   collect:
     if: ${{ always() }}
-    needs: [ benchmarks ]
+    needs: 
+      - benchmark-fastsim
+      - benchmark-fullsim
     runs-on: [ ubuntu-latest ]
     steps:
       - name: checkout
@@ -163,7 +315,8 @@ jobs:
           path: results
       - name: cull
         run: |
-          rm -rv results/build-artifacts
+          rm -vr results/x_*
+          rm -vr results/delphes-*-output
           rm -v results/coverage*/*.pdf
           rm -v results/resolution*/*.pdf
           rm -v results/y-minima*/canv*.png
