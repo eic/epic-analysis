@@ -67,6 +67,7 @@ Kinematics::Kinematics(
   // random number generator (for asymmetry injection
   RNG = new TRandomMixMax(91874); // (TODO: fixed seed?)
 
+  countGood=countBad=0; // DEBUG /////////////////////
 };
 
 
@@ -416,14 +417,16 @@ void Kinematics::GetHadronicFinalState(
             );
 	if(pid != -1){
 	  trackp4.SetPtEtaPhiM(trackp4.Pt(),trackp4.Eta(),trackp4.Phi(),correctMass(pid));	  
+          countGood++; // DEBUG /////////////////////
+          sigmah += (trackp4.E() - trackp4.Pz());
+          Pxh += trackp4.Px();
+          Pyh +=trackp4.Py();	
+          this->TransformToHeadOnFrame(trackp4,trackp4);
+          Hsigmah += (trackp4.E() - trackp4.Pz());
+          HPxh += trackp4.Px();
+          HPyh +=trackp4.Py();
 	}
-	sigmah += (trackp4.E() - trackp4.Pz());
-        Pxh += trackp4.Px();
-        Pyh +=trackp4.Py();	
-        this->TransformToHeadOnFrame(trackp4,trackp4);
-        Hsigmah += (trackp4.E() - trackp4.Pz());
-        HPxh += trackp4.Px();
-        HPyh +=trackp4.Py();
+        else countBad++; // DEBUG /////////////////////
       }
     }    
   }

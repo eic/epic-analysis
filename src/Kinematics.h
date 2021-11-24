@@ -220,6 +220,8 @@ class Kinematics : public TObject
     // tests and validation
     void ValidateHeadOnFrame();
 
+    Long64_t countGood,countBad; // DEBUG /////////////////////
+     
   protected:
 
     // protected calculators (called by public calculators)
