@@ -42,18 +42,30 @@ class Kinematics : public TObject
     // SIDIS calculators
     void CalculateDIS(TString recmethod);
     void CalculateHadronKinematics();
-    void GetHadronicFinalState(
-        TObjArrayIter itTrack, TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
-        TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle,
-    TObjArrayIter itmRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack,TObjArrayIter itdualRICHcfTrack
 
+    // final state accessors
+    void GetHadronicFinalState(
+        TObjArrayIter itTrack,
+        TObjArrayIter itEFlowTrack,
+        TObjArrayIter itEFlowPhoton,
+        TObjArrayIter itEFlowNeutralHadron,
+        TObjArrayIter itParticle,
+        TObjArrayIter itpfRICHTrack,
+        TObjArrayIter itDIRCepidTrack,   TObjArrayIter itDIRChpidTrack,
+        TObjArrayIter itBTOFepidTrack,   TObjArrayIter itBTOFhpidTrack,
+        TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
         );
-    void GetHadronicFinalStateTrue(
-        TObjArrayIter itParticle
-    );
+    void GetHadronicFinalStateTrue(TObjArrayIter itParticle);
     void GetJets(
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
+        );
+    int getTrackPID(
+        Track *track,
+        TObjArrayIter itpfRICHTrack,
+        TObjArrayIter itDIRCepidTrack, TObjArrayIter itDIRChpidTrack,
+        TObjArrayIter itBTOFepidTrack, TObjArrayIter itBTOFhpidTrack,
+        TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
         );
 
     // jet calculators
