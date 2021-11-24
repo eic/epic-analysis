@@ -29,7 +29,7 @@ AnalysisDelphes::AnalysisDelphes(
 // Borrowed this method from `Kinematics.cxx`
 // get PID information from PID systems tracks
 int AnalysisDelphes::getPID(Track *track, TObjArrayIter itParticle,
-		TObjArrayIter itpfRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack){
+    TObjArrayIter itpfRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack){
   itParticle.Reset();
   itpfRICHTrack.Reset();
   itbarrelDIRCTrack.Reset();
@@ -39,13 +39,11 @@ int AnalysisDelphes::getPID(Track *track, TObjArrayIter itParticle,
   GenParticle *detectorParticle;
   int pidOut = -1;
   while(Track *detectorTrack = (Track*)itpfRICHTrack() ){
-     if ((detectorTrack->Eta  < -3.5) || (-1.0 < detectorTrack->Eta)) continue;
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
   }
   itParticle.Reset();
   while(Track *detectorTrack = (Track*)itbarrelDIRCTrack() ){
-    if ((detectorTrack->Eta  < -1.0) || (1.0 < detectorTrack->Eta)) continue;
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
   }
@@ -53,13 +51,11 @@ int AnalysisDelphes::getPID(Track *track, TObjArrayIter itParticle,
   Double_t ag_p_threshold = 12.0;
   while(Track *detectorTrack = (Track*)itdualRICHagTrack() ){
     Double_t p_track = detectorTrack->P4().Vect().Mag();
-    if (!((1.0 <= track->Eta) && (track->Eta <= 3.5)) || p_track>=ag_p_threshold) continue;
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
   }
   while(Track *detectorTrack = (Track*)itdualRICHcfTrack() ){
     Double_t p_track = detectorTrack->P4().Vect().Mag();
-    if (!((1.0 <= track->Eta) && (track->Eta <= 3.5)) || p_track<ag_p_threshold) continue;
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
   }
