@@ -197,19 +197,17 @@ void Kinematics::CalculateDISbyJB(){
   this->getqWQuadratic();
 };
 
-// calculate DIS kinematics using DA method                                                                                                                                                                                                  
+// calculate DIS kinematics using DA method
 // sets q, W using quadratic equation
 // requires 'vecElectron' set
 void Kinematics::CalculateDISbyDA(){
   float thetah = acos( (HPxh*HPxh+HPyh*HPyh - Hsigmah*Hsigmah)/(HPxh*HPxh+HPyh*HPyh+Hsigmah*Hsigmah) );
   float thetae = HvecElectron.Theta();
-  
-  Q2 = 4.0*vecEleBeam.E()*vecEleBeam.E()*sin(thetah)*(1+cos(thetae))/(sin(thetah)+sin(thetae)-sin(thetah+thetae));
+  Q2 = 4.0*HvecEleBeam.E()*HvecEleBeam.E()*sin(thetah)*(1+cos(thetae))/(sin(thetah)+sin(thetae)-sin(thetah+thetae)); // DEBUG/////
   y = (sin(thetae)*(1-cos(thetah)))/(sin(thetah)+sin(thetae)-sin(thetah+thetae));
   x = Q2/(s*y);
   this->getqWQuadratic();
 };
-
 
 // calculate DIS kinematics using mixed method
 // requires 'vecElectron' set
@@ -222,6 +220,7 @@ void Kinematics::CalculateDISbyMixed(){
   W = vecW.M();
   Nu = vecIonBeam.Dot(vecQ)/IonMass;
 };
+
 // calculate DIS kinematics using Sigma method
 // requires 'vecElectron' set
 void Kinematics::CalculateDISbySigma(){
@@ -230,8 +229,9 @@ void Kinematics::CalculateDISbySigma(){
   x = Q2/(s*y);
   this->getqWQuadratic();
 };
-// calculate DIS kinematics using eSigma method                                                                                                                       
-// requires 'vecElectron' set                                                                                                                                      
+
+// calculate DIS kinematics using eSigma method
+// requires 'vecElectron' set
 void Kinematics::CalculateDISbyeSigma(){
   vecQ = vecEleBeam - vecElectron; // `vecQ` must be in lab frame, for downstream calculations
   vecW = vecEleBeam + vecIonBeam - vecElectron; // `vecW` must be in lab frame, for downstream
@@ -244,6 +244,8 @@ void Kinematics::CalculateDISbyeSigma(){
   x = xsigma;
   this->getqWQuadratic();
 };
+
+
 
 // calculate hadron kinematics
 // - calculate DIS kinematics first, so we have `vecQ`, etc.
@@ -289,7 +291,6 @@ void Kinematics::CalculateHadronKinematics() {
   // qT
   qT = pT / z;
 };
-
 
 // validate transformations to the head-on frame
 void Kinematics::ValidateHeadOnFrame() {
@@ -380,34 +381,29 @@ void Kinematics::GetHadronicFinalState(
     TObjArrayIter itEFlowTrack,
     TObjArrayIter itEFlowPhoton,
     TObjArrayIter itEFlowNeutralHadron,
-    TObjArrayIter itParticle,
     TObjArrayIter itpfRICHTrack,
     TObjArrayIter itDIRCepidTrack,   TObjArrayIter itDIRChpidTrack,
     TObjArrayIter itBTOFepidTrack,   TObjArrayIter itBTOFhpidTrack,
     TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
     ) {
+
   itTrack.Reset();
   itEFlowTrack.Reset();
   itEFlowPhoton.Reset();
   itEFlowNeutralHadron.Reset();
-  itParticle.Reset();
 
-  // assuming these are mainly needed for hadronic final state methods,
-  // this is probably a fine place to make sure they're calculated
-  this->TransformToHeadOnFrame(vecEleBeam,HvecEleBeam);
-  this->TransformToHeadOnFrame(vecIonBeam,HvecIonBeam);
-  this->TransformToHeadOnFrame(vecElectron,HvecElectron);
-  
   sigmah = 0;
   Pxh = 0;
   Pyh = 0;
   Hsigmah = 0;
   HPxh = 0;
   HPyh = 0;
+
   while(Track *track = (Track*)itTrack() ){
     TLorentzVector  trackp4 = track->P4();
     if(!isnan(trackp4.E())){
       if( std::abs(track->Eta) < 4.0  ){
+
         int pid = getTrackPID( // get smeared PID
             track,
             itpfRICHTrack,
@@ -415,18 +411,19 @@ void Kinematics::GetHadronicFinalState(
             itBTOFepidTrack, itBTOFhpidTrack,
             itdualRICHagTrack, itdualRICHcfTrack
             );
-	if(pid != -1){
+	if(pid != -1){ // if PID determined, set mass of `trackp4` accordingly
 	  trackp4.SetPtEtaPhiM(trackp4.Pt(),trackp4.Eta(),trackp4.Phi(),correctMass(pid));	  
           countGood++; // DEBUG /////////////////////
-          sigmah += (trackp4.E() - trackp4.Pz());
-          Pxh += trackp4.Px();
-          Pyh +=trackp4.Py();	
-          this->TransformToHeadOnFrame(trackp4,trackp4);
-          Hsigmah += (trackp4.E() - trackp4.Pz());
-          HPxh += trackp4.Px();
-          HPyh +=trackp4.Py();
-	}
+        }
         else countBad++; // DEBUG /////////////////////
+
+        sigmah += (trackp4.E() - trackp4.Pz());
+        Pxh += trackp4.Px();
+        Pyh += trackp4.Py();	
+        this->TransformToHeadOnFrame(trackp4,trackp4);
+        Hsigmah += (trackp4.E() - trackp4.Pz());
+        HPxh += trackp4.Px();
+        HPyh += trackp4.Py();
       }
     }    
   }
@@ -478,7 +475,7 @@ void Kinematics::GetHadronicFinalState(
     sigmah -= (vecElectron.E() - vecElectron.Pz());
     Pxh -= vecElectron.Px();
     Pyh -= vecElectron.Py();
-
+    this->TransformToHeadOnFrame(vecElectron,HvecElectron);
     Hsigmah -= (HvecElectron.E() - HvecElectron.Pz());
     HPxh -= HvecElectron.Px();
     HPyh -= HvecElectron.Py();
@@ -488,16 +485,13 @@ void Kinematics::GetHadronicFinalState(
 void Kinematics::GetHadronicFinalStateTrue(TObjArrayIter itParticle){
   itParticle.Reset();
 
-  this->TransformToHeadOnFrame(vecEleBeam,HvecEleBeam);
-  this->TransformToHeadOnFrame(vecIonBeam,HvecIonBeam);
-  this->TransformToHeadOnFrame(vecElectron,HvecElectron);
-
   Hsigmah = 0;
   HPxh = 0;
   HPyh = 0;
   sigmah = 0;
   Pxh = 0;
   Pyh = 0;
+
   while(GenParticle *partTrue = (GenParticle*)itParticle() ){
     if(partTrue->Status == 1){
       TLorentzVector partp4 = partTrue->P4();
@@ -510,10 +504,11 @@ void Kinematics::GetHadronicFinalStateTrue(TObjArrayIter itParticle){
       HPyh += partp4.Py();
     }    
   }
+
   sigmah -= (vecElectron.E()-vecElectron.Pz());
   Pxh -= vecElectron.Px();
   Pyh -= vecElectron.Py();
-
+  this->TransformToHeadOnFrame(vecElectron,HvecElectron);
   Hsigmah -= (HvecElectron.E()-HvecElectron.Pz());
   HPxh -= HvecElectron.Px();
   HPyh -= HvecElectron.Py();

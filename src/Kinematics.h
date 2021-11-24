@@ -49,7 +49,6 @@ class Kinematics : public TObject
         TObjArrayIter itEFlowTrack,
         TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron,
-        TObjArrayIter itParticle,
         TObjArrayIter itpfRICHTrack,
         TObjArrayIter itDIRCepidTrack,   TObjArrayIter itDIRChpidTrack,
         TObjArrayIter itBTOFepidTrack,   TObjArrayIter itBTOFhpidTrack,

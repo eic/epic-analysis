@@ -56,7 +56,6 @@ void AnalysisDelphes::Execute() {
   TObjArrayIter itEFlowTrack(tr->UseBranch("EFlowTrack"));
   TObjArrayIter itEFlowPhoton(tr->UseBranch("EFlowPhoton"));
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
-  TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
   TObjArrayIter itpfRICHTrack(tr->UseBranch("pfRICHTrack"));
   TObjArrayIter itDIRCepidTrack(tr->UseBranch("barrelDIRC_epidTrack"));
   TObjArrayIter itDIRChpidTrack(tr->UseBranch("barrelDIRC_hpidTrack"));
@@ -151,13 +150,13 @@ void AnalysisDelphes::Execute() {
         itEFlowTrack,
         itEFlowPhoton,
         itEFlowNeutralHadron,
-        itParticle,
         itpfRICHTrack,
         itDIRCepidTrack, itDIRChpidTrack,
         itBTOFepidTrack, itBTOFhpidTrack,
         itdualRICHagTrack, itdualRICHcfTrack
         );
     kinTrue->GetHadronicFinalStateTrue(itParticle);
+
     // calculate DIS kinematics
     kin->CalculateDIS(reconMethod); // reconstructed
     kinTrue->CalculateDIS(reconMethod); // generated (truth)
