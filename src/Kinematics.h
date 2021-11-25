@@ -40,7 +40,7 @@ class Kinematics : public TObject
     ~Kinematics();
 
     // SIDIS calculators
-    void CalculateDIS(TString recmethod);
+    Bool_t CalculateDIS(TString recmethod); // return true if succeeded
     void CalculateHadronKinematics();
 
     // final state accessors
@@ -142,6 +142,8 @@ class Kinematics : public TObject
     void BoostToBeamComFrame(TLorentzVector Lvec, TLorentzVector &Bvec);
     // - tranform from Lab frame `Lvec` to Head-on frame `Hvec`
     void TransformToHeadOnFrame(TLorentzVector Lvec, TLorentzVector &Hvec);
+    // transform from Head-on frame `Hvec` back to Lab frame `Lvec`
+    void TransformBackToLabFrame(TLorentzVector Hvec, TLorentzVector &Lvec);
 
 
     // misc calculations
@@ -240,6 +242,7 @@ class Kinematics : public TObject
     Double_t asymInject;
     TRandom *RNG;
     Float_t RN;
+    Bool_t reconOK;
 
     // - c.o.m. frame of virtual photon and ion
     TLorentzVector CvecBoost;

@@ -314,7 +314,9 @@ void Analysis::Prepare() {
     // -- resolutions
     HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -0.5, 0.5);
     HS->DefineHist1D("y_Res","y-y_{true}","", NBINS, -0.2, 0.2);
-    HS->DefineHist1D("Q2_Res","Q2-Q2_{true}","GeV", NBINS, -0.5, 0.5);
+    HS->DefineHist1D("Q2_Res","Q2-Q2_{true}","GeV^{2}", NBINS, -0.5, 0.5);
+    HS->DefineHist1D("W_Res","W-W_{true}","GeV", NBINS, -5, 5);
+    HS->DefineHist1D("Nu_Res","#nu-#nu_{true}","GeV", NBINS, -50, 50);
     HS->DefineHist1D("phiH_Res","#phi_{h}-#phi_{h}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
     HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -0.1*TMath::Pi(), 0.1*TMath::Pi());
     HS->DefineHist1D("pT_Res","pT-pT^{true}","GeV", NBINS, -1.5, 1.5);
@@ -644,6 +646,8 @@ void Analysis::FillHistosTracks() {
     H->Hist("x_Res")->Fill( kin->x - kinTrue->x, wTrack );
     H->Hist("y_Res")->Fill( kin->y - kinTrue->y, wTrack );
     H->Hist("Q2_Res")->Fill( kin->Q2 - kinTrue->Q2, wTrack );
+    H->Hist("W_Res")->Fill( kin->W - kinTrue->W, wTrack );
+    H->Hist("Nu_Res")->Fill( kin->Nu - kinTrue->Nu, wTrack );
     H->Hist("phiH_Res")->Fill( Kinematics::AdjAngle(kin->phiH - kinTrue->phiH), wTrack );
     H->Hist("phiS_Res")->Fill( Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wTrack );
     H->Hist("pT_Res")->Fill( kin->pT - kinTrue->pT, wTrack );

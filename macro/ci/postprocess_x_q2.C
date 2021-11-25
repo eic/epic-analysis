@@ -33,6 +33,8 @@ void postprocess_x_q2(TString infile="out/resolution.fastsim.root") {
     histList.push_back("y_Res");
     histList.push_back("pT_Res");
     histList.push_back("Q2_Res");
+    histList.push_back("Nu_Res");
+    histList.push_back("W_Res");
     histList.push_back("phiH_Res");
     histList.push_back("phiS_Res");
   } else {

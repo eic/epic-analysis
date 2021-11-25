@@ -158,8 +158,8 @@ void AnalysisDelphes::Execute() {
     kinTrue->GetHadronicFinalStateTrue(itParticle);
 
     // calculate DIS kinematics
-    kin->CalculateDIS(reconMethod); // reconstructed
-    kinTrue->CalculateDIS(reconMethod); // generated (truth)
+    if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
+    if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
 
     // get vector of jets
     // TODO: should this have an option for clustering method?
