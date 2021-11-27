@@ -308,8 +308,8 @@ jobs:
       fail-fast: false
       matrix:
         name:
-          - coverage-x-q2
-          - resolution-x-q2
+          - recon-coverage
+          - recon-resolution
         mode:
           - fastsim
         recon:
