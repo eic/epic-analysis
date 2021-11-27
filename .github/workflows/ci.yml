@@ -297,6 +297,80 @@ jobs:
           name: ${{ matrix.name }}-${{ matrix.mode }}-plots
           path: out/${{ matrix.name }}.${{ matrix.mode }}.images
 
+# run reconstruction methods matrix for fastsim
+  benchmark-recon:
+    needs: [ build, delphes-fastsim ]
+    runs-on: [ ubuntu-latest ]
+    container:
+      image: cjdilks/largex-eic:dev
+      options: --user root
+    strategy:
+      fail-fast: false
+      matrix:
+        name:
+          - coverage-x-q2
+          - resolution-x-q2
+        mode:
+          - fastsim
+        recon:
+          - Ele
+          - DA
+          - JB
+          - Mixed
+          - Sigma
+          - eSigma
+        include:
+          - mode: fastsim
+            config: delphes.config
+          - name: recon-coverage
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_x_q2.C
+          - name: recon-resolution
+            amacro: analysis_x_q2.C
+            pmacro: postprocess_x_q2.C
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: env
+        run: |
+          source env.sh
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
+      - name: get-build-artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: x_build
+      - name: fastsim-get-delphes-files
+        uses: actions/download-artifact@v2
+        with:
+          path: datarec
+      - name: fastsim-organize-delphes-files
+        run: |
+          find datarec -name "*.root" -print | tee tmp.list
+          cat tmp.list | while read f; do mv -v $f datarec/; done
+          cat datarec/delphes*/delphes.config > delphes.config
+          sort -nr -o delphes.config{,}
+      - name: echo-matrix
+        run: |
+          echo "name = ${{ matrix.name }}"
+          echo "mode = ${{ matrix.mode }}"
+          echo "config = ${{ matrix.config }}"
+          echo "recon = ${{ matrix.recon }}"
+          echo "analysis macro = ${{ matrix.amacro }}"
+          echo "postprocess macro = ${{ matrix.pmacro }}"
+      - name: cat-config
+        run: cat ${{ matrix.config }}
+      - name: analysis
+        run: root -b -q macro/ci/${{ matrix.amacro }}'("${{ matrix.config }}",${{ env.ebeam-en }},${{ env.pbeam-en }},-25,"${{ matrix.name }}.${{ matrix.recon }}","${{ matrix.recon }}")'
+      - name: postprocess
+        run: root -b -q macro/ci/${{ matrix.pmacro }}'("out/${{ matrix.name }}.${{ matrix.recon }}.root")'
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.name }}-${{ matrix.recon }}-plots
+          path: out/${{ matrix.name }}.${{ matrix.recon }}.images
+
+
 # ARTIFACTS ---------------------------------------------------------------------------
 
 # collect artifacts into one directory
@@ -305,6 +379,7 @@ jobs:
     needs: 
       - benchmark-fastsim
       - benchmark-fullsim
+      - benchmark-recon
     runs-on: [ ubuntu-latest ]
     steps:
       - name: checkout
@@ -317,8 +392,7 @@ jobs:
         run: |
           rm -vr results/x_*
           rm -vr results/delphes-*-output
-          rm -v results/coverage*/*.pdf
-          rm -v results/resolution*/*.pdf
+          find results -name "*.pdf" -print | xargs rm -v
           rm -v results/y-minima*/canv*.png
       - name: organize
         run: macro/ci/organize-artifacts.sh results
