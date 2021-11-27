@@ -37,7 +37,7 @@ void analysis_resolution(
   A->AddBinScheme("ptLab");  A->BinScheme("ptLab")->BuildBin("Min",0.1); // pT_lab > 0.1 GeV (tracking limit)
 
   // set binning scheme ====================================
-  A->AddBinScheme("q2"); A->BinScheme("q2")->BuildBins( 4, 1,    100,  true );
+  A->AddBinScheme("q2"); A->BinScheme("q2")->BuildBins( 4, 1,    1000,  true );
   A->AddBinScheme("x");  A->BinScheme("x")->BuildBins(  6, 0.01, 1,    true );
 
   // perform the analysis ==================================
