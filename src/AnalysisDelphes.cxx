@@ -188,8 +188,9 @@ void AnalysisDelphes::Execute() {
           );
       auto kv = PIDtoFinalState.find(pid);
 
-      if(kv!=PIDtoFinalState.end()) { finalStateID = kv->second;
-      if(activeFinalStates.find(finalStateID)!=activeFinalStates.end()) {
+      // if(kv!=PIDtoFinalState.end()) { finalStateID = kv->second;
+      // if(activeFinalStates.find(finalStateID)!=activeFinalStates.end()) {
+        if (true) { finalStateID = "pipTrack"; if (pid==321 || pid==-321 || pid==211 || pid==-211) { //DEBUGGING: This  is just a temporary fix for not being able to select multiple final states in the same bin.
 
       // Get total # of final state particles correctly identified in reconstruction
       GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
@@ -231,17 +232,17 @@ void AnalysisDelphes::Execute() {
       wTrackTotal += wTrack;
 
       // Get total # of final state particles identified in selected final state
-      FillHistosPurity(true,false);
+      if (pid==321 || pid==-321) FillHistosPurity(true,false);
 
       // And number correctly identified
       mcpid  = trkParticle->PID;
-      if (pid==mcpid) {
+      if ((pid==321 || pid==-321) && pid==mcpid) {
         FillHistosPurity(false,true);
         FillHistosEfficiency(true,true);
       }
 
       // fill track histograms in activated bins
-      FillHistosTracks();
+      if (pid==211 || pid==-211) FillHistosTracks();
 
       // fill simple tree
       // - not binned
@@ -255,8 +256,9 @@ void AnalysisDelphes::Execute() {
       } // if(kv!=PIDtoFinalState.end())
       } // if(activeFinalStates.find(finalStateID)!=activeFinalStates.end())
       if (pid!=mcpid) {
-      if(kvMC!=PIDtoFinalState.end()) { finalStateID = kv->second;
-      if(activeFinalStates.find(finalStateID)!=activeFinalStates.end()) {
+      // if(kvMC!=PIDtoFinalState.end()) { finalStateID = kv->second;
+      // if(activeFinalStates.find(finalStateID)!=activeFinalStates.end()) {
+        if (true) { finalStateID = "pipTrack"; if (mcpid==321 || mcpid==-321 || mcpid==211 || mcpid==-211) {
 
       // calculate hadron kinematics
       GenParticle* trkPart = (GenParticle*)trk->Particle.GetObject();
@@ -281,7 +283,7 @@ void AnalysisDelphes::Execute() {
       wTrackTotal += wTrack;
 
       // Get total # of final state particles identified in selected final state
-      FillHistosEfficiency(true,false);
+      if (mcpid==321 || mcpid==-321) FillHistosEfficiency(true,false); //NOTE: DEBUGGING For now just quick fix since can't combine multiple final states in a bin.
 
       // fill simple tree
       // - not binned
