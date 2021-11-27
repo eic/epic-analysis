@@ -6,7 +6,7 @@
 cardfile=cards/ATHENA.tcl
 
 # delphes executable 
-exeDelphes=DelphesHepMC2
+exeDelphes=$DELPHES_HOME/DelphesHepMC3
 
 #####################################################
 

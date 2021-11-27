@@ -1,17 +1,14 @@
 R__LOAD_LIBRARY(Largex)
 
-// make kinematics coverage plots, such as eta vs. p in bins of (x,Q2)
-void postprocess_xqbins_draw(
-    TString infile="out/coverage.root"
-) {
-
+// test drawing some single (x,Q2) bin plots, as opposed to grids of plots in
+// (x,Q2) bins
+// - includes drawing Q2vsX plots, as a simple sanity check for the binning
+void postprocess_bin_test(TString infile) {
   PostProcessor *P = new PostProcessor(infile);
-
   P->Op()->Payload( [&P](Histos *H) {
       P->DrawSingle(H,"Q2vsX","COLZ");
       P->DrawSingle(H,"etaVsP","COLZ");
       });
-
   P->Execute();
   P->Finish(); 
 };

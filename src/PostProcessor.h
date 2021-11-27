@@ -80,7 +80,7 @@ class PostProcessor : public TNamed
         std::vector<std::vector<Histos*>>& histList, TString histName,
         TString var1name, int nvar1, double var1low, double var1high, bool var1log,
         TString var2name, int nvar2, double var2low, double var2high, bool var2log,
-        bool intlog1=false, bool intlog2=false, bool intgrid1=false, bool intgrid2=false
+        bool intgrid1=false, bool intgrid2=false
         );
 
     TH1D *GetSDs(TH2D* fitHist);

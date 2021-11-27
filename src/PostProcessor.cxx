@@ -390,12 +390,12 @@ void PostProcessor::DrawInBins(
     TString histName,
     TString var1name, int nvar1, double var1low, double var1high, bool var1log,
     TString var2name, int nvar2, double var2low, double var2high, bool var2log,
-    bool intlog1, bool intlog2, bool intgrid1, bool intgrid2 // log option for small plots
+    bool intgrid1, bool intgrid2 // grid option for small plots
     
 ){
   // default values set for nvar1==nvar2
-  int canvx = 700;
-  int canvy = 600;
+  int canvx = 1400;
+  int canvy = 1200;
   double botmargin = 0.2;
   double leftmargin = 0.2;
   double xaxisy = 0.04;
@@ -406,8 +406,8 @@ void PostProcessor::DrawInBins(
   double yaxisy2 = 0.97;
   if(nvar1 > nvar2){
     // different canvas sizing/axis position for unequal binning
-    canvx = 1100;
-    canvy = 700;
+    canvx = 2200;
+    canvy = 1400;
     xaxisx1 = 0.075;
     xaxisx2 = 0.975;
     yaxisy1 = 0.08;
@@ -464,14 +464,15 @@ void PostProcessor::DrawInBins(
       // // }
 
       mainpad->cd((nvar2-j-1)*nvar1 + i + 1);
-      gPad->SetLogx(intlog1);
-      gPad->SetLogy(intlog2);
+      gPad->SetLogx(H->GetHistConfig(histName)->logx);
+      gPad->SetLogy(H->GetHistConfig(histName)->logy);
+      gPad->SetLogz(H->GetHistConfig(histName)->logz);
       gPad->SetGridy(intgrid2);
       gPad->SetGridx(intgrid1);
       TString drawStr = "";
       switch(hist->GetDimension()) {
         case 1:
-          drawStr = "HIST";       
+          drawStr = "HIST MIN0";
           break;
         case 2:
           drawStr = "COLZ";
@@ -491,8 +492,17 @@ void PostProcessor::DrawInBins(
           lmRICH->Draw();
           lDRICH->Draw();
         }
+        hist->GetXaxis()->SetLabelSize(0.04);
+        hist->GetYaxis()->SetLabelSize(0.04);
+        hist->GetXaxis()->SetTitleSize(0.05);
+        hist->GetYaxis()->SetTitleSize(0.05);
+        hist->GetXaxis()->SetTitleOffset(0.9);
+        hist->GetXaxis()->SetLabelOffset(0.0005);
+        if(hist->GetDimension()==1) {
+          hist->GetYaxis()->SetLabelSize(0.00); // suppress y-axis labels (since each subplot has its own scale)
+        }
       }
-    };    
+    };
   };
   canv->cd();
 

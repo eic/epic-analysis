@@ -49,8 +49,6 @@ class AnalysisDelphes : public Analysis
     // perform the analysis
     void Execute() override;
 
-  protected:
-
   private:
 
   ClassDefOverride(AnalysisDelphes,1);

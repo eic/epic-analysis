@@ -260,13 +260,13 @@ void Analysis::Prepare() {
     // -- DIS kinematics
     HS->DefineHist2D("Q2vsX","x","Q^{2}","","GeV^{2}",
         NBINS,1e-3,1,
-        NBINS,1,100,
+        NBINS,1,3000,
         true,true
         );
-    HS->DefineHist1D("Q","Q","GeV",NBINS,1.0,11.0,true,true);
+    HS->DefineHist1D("Q","Q","GeV",NBINS,1.0,55.0,true,true);
     HS->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
-    HS->DefineHist1D("y","y","",NBINS,1e-5,1,true);
-    HS->DefineHist1D("W","W","GeV",NBINS,0,15);
+    HS->DefineHist1D("y","y","",NBINS,1e-3,1,true);
+    HS->DefineHist1D("W","W","GeV",NBINS,0,50);
     // -- hadron 4-momentum
     HS->DefineHist1D("pLab","p_{lab}","GeV",NBINS,0,10);
     HS->DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);

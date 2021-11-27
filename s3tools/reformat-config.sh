@@ -39,7 +39,7 @@ sort -nr -o $inFile.tmp{,}
 Q2minTmp="-1"
 while read Q2min xsec filename entries; do
   if [ "$Q2min" -eq "$Q2minTmp" ]; then
-    echo "  append $filename $entries"
+    #echo "  append $filename $entries"
     lineOut="$lineOut $filename $entries"
   else
     if [ "$Q2minTmp" -ne "-1" ]; then
@@ -47,7 +47,7 @@ while read Q2min xsec filename entries; do
       echo $lineOut >> $outFile
     fi
     Q2minTmp="$Q2min"
-    echo "  append $filename $entries"
+    #echo "  append $filename $entries"
     lineOut="$Q2min $xsec $filename $entries"
   fi
 done < $inFile.tmp
