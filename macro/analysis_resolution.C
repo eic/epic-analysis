@@ -24,15 +24,15 @@ void analysis_resolution(
   //A->maxEvents = 30000; // use this to limit the number of events
   A->SetReconMethod("Ele"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
-  A->AddFinalState("pimTrack"); // pion final state
-  A->AddFinalState("KpTrack"); // pion final state
-  A->AddFinalState("KmTrack"); // pion final state
-  A->AddFinalState("pTrack"); // pion final state
+  // A->AddFinalState("pimTrack"); // pion final state
+  // A->AddFinalState("KpTrack"); // pion final state
+  // A->AddFinalState("KmTrack"); // pion final state
+  // A->AddFinalState("pTrack"); // pion final state
 
   // define cuts ====================================
   A->AddBinScheme("w");  A->BinScheme("w")->BuildBin("Min",3.0); // W > 3 GeV
   A->AddBinScheme("y");  A->BinScheme("y")->BuildBin("Range",0.01,0.95); // 0.01 < y < 0.95
-  A->AddBinScheme("z");  A->BinScheme("z")->BuildBin("Range",0.2,1); // 0.2 < z < 0.9 (originally)
+  A->AddBinScheme("z");  A->BinScheme("z")->BuildBin("Range",0.2,0.9); // 0.2 < z < 0.9
   A->AddBinScheme("xF"); A->BinScheme("xF")->BuildBin("Min",0.0); // xF > 0
   A->AddBinScheme("ptLab");  A->BinScheme("ptLab")->BuildBin("Min",0.1); // pT_lab > 0.1 GeV (tracking limit)
 
