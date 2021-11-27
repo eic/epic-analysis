@@ -671,8 +671,7 @@ void PostProcessor::DrawSDInBinsTogether(
     for(int j = 0; j < nvar2; j++){
       //Histos *H = (Histos*) infile->Get(histList[i][j]);
       Histos *H = histList[i][j];
-      TString stackN; stackN.Form("stack__bin_%d_%d__",i,j);
-      THStack *hist = new THStack(stackN,stackN);
+      THStack *hist = new THStack();
       TLegend *lg = new TLegend(0.05,0.05,0.95,0.95);
       lg->SetHeader(header,"C");
       lg->SetTextSize(0.15);
@@ -690,6 +689,10 @@ void PostProcessor::DrawSDInBinsTogether(
           TH2D *fitHist = (TH2D*)H->Hist(histNames[k])->Clone();
           if ( fitHist->GetEntries() < 10 ) continue; //NOTE: Filter out low filled hists that can't get good fits.
           fitHist->SetTitle("");
+          //DEBUGGING
+          TString fithistname; fithistname.Form("fithist_"+histNames[k]+"_bin_%d_%d",i,j);
+          fitHist->SetName(fithistname); fitHist->Write();
+          //DEBUGGING
           subHist = this->GetSDs(fitHist);
         }
 
