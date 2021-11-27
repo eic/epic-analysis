@@ -81,7 +81,8 @@ class Kinematics : public TObject
     Double_t W,Q2,Nu,x,y,s; // DIS
     Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // hadron
     Double_t sigmah, Pxh, Pyh; // hadronic final state, lab frame
-    Double_t Hsigmah, HPxh, HPyh; // hadronic final state, lab frame                                                                                                 
+    Double_t Hsigmah, HPxh, HPyh; // hadronic final state, head-on frame
+    TLorentzVector hadronSumVec;
 
     // nucleon transverse spin; if you set this externally,
     // it must be done before calculating `phiS` (before
@@ -225,14 +226,19 @@ class Kinematics : public TObject
      
   protected:
 
-    // protected calculators (called by public calculators)
+    // reconstruction methods
     void CalculateDISbyElectron();
     void CalculateDISbyJB();
     void CalculateDISbyDA();
     void CalculateDISbyMixed();
     void CalculateDISbySigma();
     void CalculateDISbyeSigma();
-    void getqWQuadratic();
+
+    // calculate 4-momenta components of q and W (`vecQ` and `vecW`) as well as
+    // derived invariants `W` and `nu`
+    void GetQWNu_electronic();
+    void GetQWNu_hadronic();
+    void GetQWNu_quadratic();
 
 
   private:
