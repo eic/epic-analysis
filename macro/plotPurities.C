@@ -4,7 +4,7 @@ void plotPurities(){
     // Get purity and efficiency plots from different methods output files
     // And plot together
 
-    TString p1 = "out/JB_dis-10x275-xm25.canvas.root";
+    TString p1 = "out/JB_dis-1x275-xm25.canvas.root";
     TString p2 = "out/DA_dis-10x275-xm25.canvas.root";
     TString p3 = "out/Ele_dis-10x275-xm25.canvas.root";
 
@@ -421,8 +421,8 @@ void plotPurities(){
             TString drawStr = "";
             switch(1) {//TODO: figure out how to get THStack dimension? //can't use hist->GetHistogram()->GetDimension()
                 case 1:
-                if (i==0) drawStr = "nostack b p"; //NOTE: nostackb will just throw an error, don't use. /*"ex0 p nostack"*/
-                else drawStr = "nostack b p a";
+                if (i==0) drawStr = "nostack p"; //NOTE: nostackb will just throw an error, don't use. /*"ex0 p nostack"*/
+                else drawStr = "nostack p a";
                 break;
                 case 2:
                 drawStr = "COLZ";
