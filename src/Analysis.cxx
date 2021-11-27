@@ -326,8 +326,8 @@ void Analysis::Prepare() {
     HS->DefineHist2D("z_y_Res","z","","#sigma_{y}","", NBINS, 0, 1, NBINSRES, -0.5, 0.5);
     HS->DefineHist2D("z_z_Res","z","","#sigma_{z}","", NBINS, 0, 1, NBINSRES, -0.5, 0.5);
     HS->DefineHist2D("z_pT_Res","z","","#sigma_{pT}","", NBINS, 0, 1, NBINSRES, -0.5, 0.5);
-    HS->DefineHist2D("z_phiH_Res","z","","#sigma_{#phi_{h}^{true}}","", NBINS, 0, 1, NBINSRES, -0.5, 0.5);
-    HS->DefineHist2D("z_phiS_Res","z","","#sigma_{#phi_{S}^{true}}","", NBINS, 0, 1, NBINSRES, -0.5, 0.5);
+    HS->DefineHist2D("z_phiH_Res","z","","#sigma_{#phi_{h}^{true}}","", NBINS, 0, 1, NBINSRES, -TMath::Pi(), TMath::Pi());
+    HS->DefineHist2D("z_phiS_Res","z","","#sigma_{#phi_{S}^{true}}","", NBINS, 0, 1, NBINSRES, -TMath::Pi(), TMath::Pi();
 
     // 1D z-binned purity and efficiency
     HS->DefineHist1D("z_true","z","", NBINS, 0, 1);

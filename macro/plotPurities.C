@@ -4,9 +4,9 @@ void plotPurities(){
     // Get purity and efficiency plots from different methods output files
     // And plot together
 
-    TString p1 = "out/JB_dis-1x275-xm25.canvas.root";
-    TString p2 = "out/DA_dis-10x275-xm25.canvas.root";
-    TString p3 = "out/Ele_dis-10x275-xm25.canvas.root";
+    TString p1 = "out/1bin/JB_dis-18x275-xm25.canvas.root";
+    TString p2 = "out/1bin/DA_dis-18x275-xm25.canvas.root";
+    TString p3 = "out/1bin/Ele_dis-18x275-xm25.canvas.root";
 
     TFile *f1 = TFile::Open(p1);
     TFile *f2 = TFile::Open(p2);
@@ -18,11 +18,11 @@ void plotPurities(){
     double xMin = 1e-2; double xMax = 1;
     double qMin = 1; double qMax = 1000;
 
-    TString outName = "dis-10x275-xm25";
+    TString outName = "dis-18x275-xm25";
     const int nNames = 5;
     TString histNames[nNames] = {"z_efficiency","z_purity","z_phiH_Res","z_pT_Res","z_z_Res"};
     TString labels[nNames] = {"K^{#pm} efficiency","K^{#pm} purity","#phi_{H}","p_{T}","z"};
-    TString header = "10x275GeV (0.2 < z < 1.0)";
+    TString header = "18x275GeV (0.2 < z < 1.0)";
     double yMin = -0.1; double yMax=1.0;
 
     int nbinsz = 1; //Set manually...NOTE TODO
@@ -34,7 +34,7 @@ void plotPurities(){
     // used to be input args
     TString var1name="x"; int nvar1=nx; double var1low=xMin; double var1high=xMax; bool var1log=true;
     TString var2name="Q2"; int nvar2=nq; double var2low=qMin; double var2high=qMax; bool var2log=true;
-    bool intlog1=false; bool intlog2=false; bool intgrid1=true; bool intgrid2=false;
+    bool intlog1=false; bool intlog2=false; bool intgrid1=false; bool intgrid2=false;
 
 
     int canvx = 933;//700;
@@ -124,9 +124,9 @@ void plotPurities(){
                 if (h1_->GetBinContent(idx)<h2_->GetBinContent(idx) && h1_->GetBinContent(idx)<h3_->GetBinContent(idx) && (histNames[k]!="z_purity" && histNames[k]!="z_efficiency")) {
                     // std::cout<<"\tbin content: "<<h1->GetBinContent(1)<<" nbins: "<<h1->GetNbinsX()<<std::endl;
                     h1->SetBinContent(idx,h1_->GetBinContent(idx));
-                    if (histNames[k]=="z_z_Res") h1->SetMarkerStyle(71);
-                    if (histNames[k]=="z_pT_Res") h1->SetMarkerStyle(73);
-                    if (histNames[k]=="z_phiH_Res") h1->SetMarkerStyle(77);
+                    if (histNames[k]=="z_z_Res") h1->SetMarkerStyle(24);
+                    if (histNames[k]=="z_pT_Res") h1->SetMarkerStyle(26);
+                    if (histNames[k]=="z_phiH_Res") h1->SetMarkerStyle(32);
                     // std::cout<<"\th1: marker style, color: "<<h1->GetMarkerStyle()<<" "<<h1->GetMarkerColor()<<std::endl;//DEBUGGING
                     h1->SetMarkerColor(8);
                     h1->SetMarkerSize(1);
@@ -145,9 +145,9 @@ void plotPurities(){
                 if (h2_->GetBinContent(idx)<h1_->GetBinContent(1) && h2_->GetBinContent(idx)<h3_->GetBinContent(idx) && (histNames[k]!="z_purity" && histNames[k]!="z_efficiency")) {
                     // std::cout<<"\tbin content: "<<h2->GetBinContent(1)<<" nbins: "<<h2->GetNbinsX()<<std::endl;
                     h2->SetBinContent(idx,h2_->GetBinContent(idx));
-                    if (histNames[k]=="z_z_Res") h2->SetMarkerStyle(71);
-                    if (histNames[k]=="z_pT_Res") h2->SetMarkerStyle(73);
-                    if (histNames[k]=="z_phiH_Res") h2->SetMarkerStyle(77);
+                    if (histNames[k]=="z_z_Res") h2->SetMarkerStyle(24);
+                    if (histNames[k]=="z_pT_Res") h2->SetMarkerStyle(26);
+                    if (histNames[k]=="z_phiH_Res") h2->SetMarkerStyle(32);
                     // std::cout<<"\th2: marker style, color: "<<h2->GetMarkerStyle()<<" "<<h2->GetMarkerColor()<<std::endl;//DEBUGGING
                     h2->SetMarkerColor(4);
                     h2->SetMarkerSize(1);
@@ -165,9 +165,9 @@ void plotPurities(){
                 // else {
                     // std::cout<<"\tbin content: "<<h3->GetBinContent(1)<<" nbins: "<<h3->GetNbinsX()<<std::endl;
                     h3->SetBinContent(idx,h3_->GetBinContent(idx));
-                    if (histNames[k]=="z_z_Res") h3->SetMarkerStyle(71);
-                    if (histNames[k]=="z_pT_Res") h3->SetMarkerStyle(73);
-                    if (histNames[k]=="z_phiH_Res") h3->SetMarkerStyle(77);
+                    if (histNames[k]=="z_z_Res") h3->SetMarkerStyle(24);
+                    if (histNames[k]=="z_pT_Res") h3->SetMarkerStyle(26);
+                    if (histNames[k]=="z_phiH_Res") h3->SetMarkerStyle(32);
                     if (histNames[k]=="z_purity") h3->SetMarkerStyle(21);
                     if (histNames[k]=="z_efficiency") h3->SetMarkerStyle(34);
                     // std::cout<<"\th3: marker style, color: "<<h3->GetMarkerStyle()<<" "<<h3->GetMarkerColor()<<std::endl;//DEBUGGING
@@ -194,9 +194,9 @@ void plotPurities(){
                     // std::cout<<"\t"<<f1->Get(name)<<" "<<f2->Get(name)<<" "<<f3->Get(name)<<std::endl;
                 // if (h1->GetBinContent(1)<h2->GetBinContent(1) && h1->GetBinContent(1)<h3->GetBinContent(1) && histNames[k]!="z_purity") {
                 //     // std::cout<<"\tbin content: "<<h1->GetBinContent(1)<<" nbins: "<<h1->GetNbinsX()<<std::endl;
-                //     if (histNames[k]=="z_z_Res") h1->SetMarkerStyle(71);
-                //     if (histNames[k]=="z_pT_Res") h1->SetMarkerStyle(73);
-                //     if (histNames[k]=="z_phiH_Res") h1->SetMarkerStyle(77);
+                //     if (histNames[k]=="z_z_Res") h1->SetMarkerStyle(24);
+                //     if (histNames[k]=="z_pT_Res") h1->SetMarkerStyle(26);
+                //     if (histNames[k]=="z_phiH_Res") h1->SetMarkerStyle(32);
                 //     // std::cout<<"\th1: marker style, color: "<<h1->GetMarkerStyle()<<" "<<h1->GetMarkerColor()<<std::endl;//DEBUGGING
                 //     h1->SetMarkerColor(8);
                 //     h1->SetMarkerSize(1);
@@ -215,9 +215,9 @@ void plotPurities(){
                 if (h2_->GetBinContent(idx)<h3_->GetBinContent(idx) && (histNames[k]!="z_purity" && histNames[k]!="z_efficiency")) {
                     // std::cout<<"\tbin content: "<<h2->GetBinContent(1)<<" nbins: "<<h2->GetNbinsX()<<std::endl;
                     h2->SetBinContent(idx,h2_->GetBinContent(idx));
-                    if (histNames[k]=="z_z_Res") h2->SetMarkerStyle(71);
-                    if (histNames[k]=="z_pT_Res") h2->SetMarkerStyle(73);
-                    if (histNames[k]=="z_phiH_Res") h2->SetMarkerStyle(77);
+                    if (histNames[k]=="z_z_Res") h2->SetMarkerStyle(24);
+                    if (histNames[k]=="z_pT_Res") h2->SetMarkerStyle(26);
+                    if (histNames[k]=="z_phiH_Res") h2->SetMarkerStyle(32);
                     // std::cout<<"\th2: marker style, color: "<<h2->GetMarkerStyle()<<" "<<h2->GetMarkerColor()<<std::endl;//DEBUGGING
                     h2->SetMarkerColor(4);
                     h2->SetMarkerSize(1);
@@ -235,9 +235,9 @@ void plotPurities(){
                 // else {
                     // std::cout<<"\tbin content: "<<h3->GetBinContent(1)<<" nbins: "<<h3->GetNbinsX()<<std::endl;
                     h3->SetBinContent(idx,h3_->GetBinContent(idx));
-                    if (histNames[k]=="z_z_Res") h3->SetMarkerStyle(71);
-                    if (histNames[k]=="z_pT_Res") h3->SetMarkerStyle(73);
-                    if (histNames[k]=="z_phiH_Res") h3->SetMarkerStyle(77);
+                    if (histNames[k]=="z_z_Res") h3->SetMarkerStyle(24);
+                    if (histNames[k]=="z_pT_Res") h3->SetMarkerStyle(26);
+                    if (histNames[k]=="z_phiH_Res") h3->SetMarkerStyle(32);
                     if (histNames[k]=="z_purity") h3->SetMarkerStyle(21);
                     // std::cout<<"\th3: marker style, color: "<<h3->GetMarkerStyle()<<" "<<h3->GetMarkerColor()<<std::endl;//DEBUGGING
                     h3->SetMarkerColor(2); if (histNames[k]=="z_purity") h3->SetMarkerColor(8);
@@ -264,9 +264,9 @@ void plotPurities(){
                 if (h1_->GetBinContent(idx)<h3_->GetBinContent(idx) && (histNames[k]!="z_purity" && histNames[k]!="z_efficiency")) {
                     h1->SetBinContent(idx,h1_->GetBinContent(idx));
                     // std::cout<<"\tbin content: "<<h1->GetBinContent(1)<<" nbins: "<<h1->GetNbinsX()<<std::endl;
-                    if (histNames[k]=="z_z_Res") h1->SetMarkerStyle(71);
-                    if (histNames[k]=="z_pT_Res") h1->SetMarkerStyle(73);
-                    if (histNames[k]=="z_phiH_Res") h1->SetMarkerStyle(77);
+                    if (histNames[k]=="z_z_Res") h1->SetMarkerStyle(24);
+                    if (histNames[k]=="z_pT_Res") h1->SetMarkerStyle(26);
+                    if (histNames[k]=="z_phiH_Res") h1->SetMarkerStyle(32);
                     // std::cout<<"\th1: marker style, color: "<<h1->GetMarkerStyle()<<" "<<h1->GetMarkerColor()<<std::endl;//DEBUGGING
                     h1->SetMarkerColor(8);
                     h1->SetMarkerSize(1);
@@ -284,9 +284,9 @@ void plotPurities(){
                 }
                 // if (h2->GetBinContent(1)<h3->GetBinContent(1) && histNames[k]!="z_purity") {
                 //     // std::cout<<"\tbin content: "<<h2->GetBinContent(1)<<" nbins: "<<h2->GetNbinsX()<<std::endl;
-                //     if (histNames[k]=="z_z_Res") h2->SetMarkerStyle(71);
-                //     if (histNames[k]=="z_pT_Res") h2->SetMarkerStyle(73);
-                //     if (histNames[k]=="z_phiH_Res") h2->SetMarkerStyle(77);
+                //     if (histNames[k]=="z_z_Res") h2->SetMarkerStyle(24);
+                //     if (histNames[k]=="z_pT_Res") h2->SetMarkerStyle(26);
+                //     if (histNames[k]=="z_phiH_Res") h2->SetMarkerStyle(32);
                 //     // std::cout<<"\th2: marker style, color: "<<h2->GetMarkerStyle()<<" "<<h2->GetMarkerColor()<<std::endl;//DEBUGGING
                 //     h2->SetMarkerColor(4);
                 //     h2->SetMarkerSize(1);
@@ -304,9 +304,9 @@ void plotPurities(){
                 // else {
                     // std::cout<<"\tbin content: "<<h3->GetBinContent(1)<<" nbins: "<<h3->GetNbinsX()<<std::endl;
                     h3->SetBinContent(idx,h3_->GetBinContent(idx));
-                    if (histNames[k]=="z_z_Res") h3->SetMarkerStyle(71);
-                    if (histNames[k]=="z_pT_Res") h3->SetMarkerStyle(73);
-                    if (histNames[k]=="z_phiH_Res") h3->SetMarkerStyle(77);
+                    if (histNames[k]=="z_z_Res") h3->SetMarkerStyle(24);
+                    if (histNames[k]=="z_pT_Res") h3->SetMarkerStyle(26);
+                    if (histNames[k]=="z_phiH_Res") h3->SetMarkerStyle(32);
                     if (histNames[k]=="z_purity") h3->SetMarkerStyle(21);
                     // std::cout<<"\th3: marker style, color: "<<h3->GetMarkerStyle()<<" "<<h3->GetMarkerColor()<<std::endl;//DEBUGGING
                     h3->SetMarkerColor(2); if (histNames[k]=="z_purity") h3->SetMarkerColor(8); if (histNames[k]=="z_efficiency") h3->SetMarkerColor(8);
@@ -330,9 +330,9 @@ void plotPurities(){
                 //     // std::cout<<"\t"<<f1->Get(name)<<" "<<f2->Get(name)<<" "<<f3->Get(name)<<std::endl;
                 // if (h1->GetBinContent(1)<h2->GetBinContent(1) && histNames[k]!="z_purity") {
                 //     // std::cout<<"\tbin content: "<<h1->GetBinContent(1)<<" nbins: "<<h1->GetNbinsX()<<std::endl;
-                //     if (histNames[k]=="z_z_Res") h1->SetMarkerStyle(71);
-                //     if (histNames[k]=="z_pT_Res") h1->SetMarkerStyle(73);
-                //     if (histNames[k]=="z_phiH_Res") h1->SetMarkerStyle(77);
+                //     if (histNames[k]=="z_z_Res") h1->SetMarkerStyle(24);
+                //     if (histNames[k]=="z_pT_Res") h1->SetMarkerStyle(26);
+                //     if (histNames[k]=="z_phiH_Res") h1->SetMarkerStyle(32);
                 //     // std::cout<<"\th1: marker style, color: "<<h1->GetMarkerStyle()<<" "<<h1->GetMarkerColor()<<std::endl;//DEBUGGING
                 //     h1->SetMarkerColor(8);
                 //     h1->SetMarkerSize(1);
@@ -350,9 +350,9 @@ void plotPurities(){
                 // }
                 // if (h2->GetBinContent(1)<h1->GetBinContent(1) && histNames[k]!="z_purity") {
                 //     // std::cout<<"\tbin content: "<<h2->GetBinContent(1)<<" nbins: "<<h2->GetNbinsX()<<std::endl;
-                //     if (histNames[k]=="z_z_Res") h2->SetMarkerStyle(71);
-                //     if (histNames[k]=="z_pT_Res") h2->SetMarkerStyle(73);
-                //     if (histNames[k]=="z_phiH_Res") h2->SetMarkerStyle(77);
+                //     if (histNames[k]=="z_z_Res") h2->SetMarkerStyle(24);
+                //     if (histNames[k]=="z_pT_Res") h2->SetMarkerStyle(26);
+                //     if (histNames[k]=="z_phiH_Res") h2->SetMarkerStyle(32);
                 //     // std::cout<<"\th2: marker style, color: "<<h2->GetMarkerStyle()<<" "<<h2->GetMarkerColor()<<std::endl;//DEBUGGING
                 //     h2->SetMarkerColor(4);
                 //     h2->SetMarkerSize(1);
@@ -369,9 +369,9 @@ void plotPurities(){
                 // }
                 // // // else {
                 // //     // std::cout<<"\tbin content: "<<h3->GetBinContent(1)<<" nbins: "<<h3->GetNbinsX()<<std::endl;
-                // //     if (histNames[k]=="z_z_Res") h3->SetMarkerStyle(71);
-                // //     if (histNames[k]=="z_pT_Res") h3->SetMarkerStyle(73);
-                // //     if (histNames[k]=="z_phiH_Res") h3->SetMarkerStyle(77);
+                // //     if (histNames[k]=="z_z_Res") h3->SetMarkerStyle(24);
+                // //     if (histNames[k]=="z_pT_Res") h3->SetMarkerStyle(26);
+                // //     if (histNames[k]=="z_phiH_Res") h3->SetMarkerStyle(32);
                 // //     if (histNames[k]=="z_purity") h3->SetMarkerStyle(21);
                 // //     // std::cout<<"\th3: marker style, color: "<<h3->GetMarkerStyle()<<" "<<h3->GetMarkerColor()<<std::endl;//DEBUGGING
                 // //     h3->SetMarkerColor(2);
@@ -422,7 +422,7 @@ void plotPurities(){
             switch(1) {//TODO: figure out how to get THStack dimension? //can't use hist->GetHistogram()->GetDimension()
                 case 1:
                 if (i==0) drawStr = "nostack p"; //NOTE: nostackb will just throw an error, don't use. /*"ex0 p nostack"*/
-                else drawStr = "nostack p a";
+                else if (nbinsz==1) drawStr = "nostack p a";
                 break;
                 case 2:
                 drawStr = "COLZ";
@@ -437,7 +437,7 @@ void plotPurities(){
                 hist->GetHistogram()->GetYaxis()->SetNdivisions(10);
                 if (nbinsz==1) hist->GetHistogram()->GetXaxis()->SetNdivisions(0);
                 hist->GetHistogram()->GetYaxis()->SetLabelSize(0.09);
-                mainpad->SetGrid(0,10);
+                // mainpad->SetGrid(0,0);
                 // if (i!=0) {
                     // for (int idx=0; idx<5; idx++){
                         // TF1 *f5 = new TF1("f5","0.2",hist->GetXaxis()->GetXmin(),hist->GetXaxis()->GetXmax());
