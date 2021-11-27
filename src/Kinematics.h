@@ -80,8 +80,7 @@ class Kinematics : public TObject
     // kinematics (should be Double_t, if going in SimpleTree)
     Double_t W,Q2,Nu,x,y,s; // DIS
     Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // hadron
-    Double_t sigmah, Pxh, Pyh; // hadronic final state, lab frame
-    Double_t Hsigmah, HPxh, HPyh; // hadronic final state, head-on frame
+    Double_t sigmah, Pxh, Pyh; // hadronic final state variables
     TLorentzVector hadronSumVec;
 
     // nucleon transverse spin; if you set this externally,
@@ -222,7 +221,7 @@ class Kinematics : public TObject
     // tests and validation
     void ValidateHeadOnFrame();
 
-    Long64_t countGood,countBad; // DEBUG /////////////////////
+    Long64_t countPIDsmeared,countPIDtrue,countHadrons;
      
   protected:
 
@@ -273,6 +272,13 @@ class Kinematics : public TObject
     Double_t rotAboutX, rotAboutY;
     // other
     TLorentzVector vecSpin, IvecSpin;
+
+    // settings
+    Int_t mainFrame;
+    enum mainFrame_enum {fLab, fHeadOn};
+    Int_t qComponentsMethod;
+    enum qComponentsMethod_enum {qQuadratic, qHadronic, qElectronic};
+
 
 
   ClassDef(Kinematics,1);

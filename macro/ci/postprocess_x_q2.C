@@ -37,6 +37,7 @@ void postprocess_x_q2(TString infile="out/resolution.fastsim.root") {
     histList.push_back("W_Res");
     histList.push_back("phiH_Res");
     histList.push_back("phiS_Res");
+    histList.push_back("hadCount");
   } else {
     fprintf(stderr,"ERROR: histList not defined for specified infile name\n");
     return;

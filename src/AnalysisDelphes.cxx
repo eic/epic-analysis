@@ -276,8 +276,7 @@ void AnalysisDelphes::Execute() {
 
   // finish execution
   Finish();
-  cout << "DEBUG recon: good=" << kin->countGood << "  bad=" << kin->countBad << endl;  // DEBUG //////////////
-  cout << "DEBUG true:  good=" << kinTrue->countGood << "  bad=" << kinTrue->countBad << endl;  // DEBUG //////////////
+  cout << "DEBUG PID: nSmeared=" << kin->countPIDsmeared << "  nNotSmeared=" << kin->countPIDtrue << endl;
 };
 
 
