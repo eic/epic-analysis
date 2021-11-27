@@ -675,7 +675,7 @@ void PostProcessor::DrawSDInBinsTogether(
         //subHist->GetXaxis()->SetLabelSize(0);
         //subHist->GetYaxis()->SetLabelSize(0);
         TH1D *subHist;
-        if (histNames[k]=="z_purity" || histNames[k]=="z_effiency" || histNames[k]=="x_purity" || histNames[k]=="x_efficiency") subHist = (TH1D*)H->Hist(histNames[k])->Clone();
+        if (histNames[k]=="z_purity" || histNames[k]=="z_efficiency" || histNames[k]=="x_purity" || histNames[k]=="x_efficiency") subHist = (TH1D*)H->Hist(histNames[k])->Clone();
         else { 
           TH2D *fitHist = (TH2D*)H->Hist(histNames[k])->Clone();
           if ( fitHist->GetEntries() < 10 ) continue; //NOTE: Filter out low filled hists that can't get good fits.
@@ -699,8 +699,11 @@ void PostProcessor::DrawSDInBinsTogether(
         subHist->SetMarkerColor(k+2);
         if (k+2>=5) subHist->SetMarkerColor(k+3); //NOTE: 5 is yellow: very hard to see.
         subHist->SetMarkerSize(0.5);//NOTE: Remember these will be small plots so keep the binning small and the markers big
-        if ( subHist->GetEntries()>0 || ((histNames[k]=="z_purity" || histNames[k]=="z_effiency" || histNames[k]=="x_purity" || histNames[k]=="x_efficiency") && H->Hist("z_z_Res")->GetMaximum()!=0)) {
+        if ( subHist->GetEntries()>0 || ((histNames[k]=="z_purity" || histNames[k]=="z_efficiency" || histNames[k]=="x_purity" || histNames[k]=="x_efficiency") && H->Hist("z_z_Res")->GetMaximum()!=0)) {
           hist->Add(subHist);
+          TString myname; myname.Form("hist__"+histNames[k]+"__bin_%d_%d",i,j);
+          subHist->SetName(myname);
+          subHist->Write();
 
           if (i==0 && j==0){
             lg->AddEntry(subHist,labels[k],"p");//NOTE: Only grabs hists that are in 0,0 bin
