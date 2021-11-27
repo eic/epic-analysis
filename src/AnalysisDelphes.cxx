@@ -173,7 +173,12 @@ void AnalysisDelphes::Execute() {
       // final state cut
       // - check PID, to see if it's a final state we're interested in for
       //   histograms; if not, proceed to next track
+
+      // MC Truth PID
       int mcpid = trk->PID; //NOTE: trk->PID is currently not smeared so it just returns the truth-level PID
+      auto kvMC = PIDtoFinalState.find(mcpid);
+
+      // Reconstructed PID
       pid = kin->getTrackPID( // get smeared PID
           trk,
           itpfRICHTrack,
