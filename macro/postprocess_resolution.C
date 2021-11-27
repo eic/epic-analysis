@@ -52,7 +52,7 @@ void postprocess_resolution(
 
     // loop over resolution histograms (see ../src/Analysis.cxx `DefineHist*` calls 
     // for available histograms, or add your own there)
-    for( TString histname : {"x_Res","y_Res","Q2_Res","phiH_Res","phiS_Res","phiHvsPhiS","z_purity"} ) {
+    for( TString histname : {"x_Res","y_Res","Q2_Res","phiH_Res","phiS_Res","phiHvsPhiS","z_purity","z_efficiency"} ) {
       P->DrawInBins(
           canvname, histos_xQ2, histname,
           "x", nx, xMin, xMax, true,
@@ -62,8 +62,8 @@ void postprocess_resolution(
 
     const int nNames = 6;
     double yMin, yMax; yMin = -0.1; yMax = 0.5;//Adjust as needed
-    TString histNames[nNames] = {"z_Q2_Res","z_x_Res","z_y_Res","z_z_Res","z_pT_Res","z_purity"};
-    TString labels[nNames] = {"Q^{2}","x","y","z","p_{T}","1-purity"};
+    TString histNames[nNames] = {"z_z_Res","z_pT_Res","z_phiH_Res","z_purity","z_efficiency"};
+    TString labels[nNames] = {"z","p_{T}","#phi_{H}","purity","efficiency"};
     TString header="testheader";
     P->DrawSDInBinsTogether(
           canvname, histos_xQ2, header, histNames, labels, nNames, yMin, yMax,
