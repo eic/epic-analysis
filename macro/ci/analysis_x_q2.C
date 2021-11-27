@@ -6,7 +6,8 @@ void analysis_x_q2(
     Double_t eleBeamEn=5,
     Double_t ionBeamEn=41,
     Double_t crossingAngle=-25,
-    TString outfilePrefix="coverage.fullsim"
+    TString outfilePrefix="resolution.fastsim",
+    TString reconMethod="Ele"
 ) {
 
   // setup analysis ========================================
@@ -15,7 +16,7 @@ void analysis_x_q2(
        A = new AnalysisDD4hep(  infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
   else A = new AnalysisDelphes( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
 
-  A->SetReconMethod("Ele"); // set reconstruction method
+  A->SetReconMethod(reconMethod); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
 
   // define cuts ===========================================

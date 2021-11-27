@@ -1,6 +1,5 @@
 #!/bin/bash
-# organize artifacts by combining fast and full sim directories
-# - adds `.fastsim` or `.fullsim` suffixes to filenames
+# organize artifacts by combining directories
 # - execute in CI pipelines from top-level directory, after all artifacts
 #   have been collected into one directory, specified by argument
 
@@ -8,6 +7,11 @@
 if [ $# -ne 1 ]; then echo "USAGE: $0 [artifacts-dir]"; exit 2; fi
 pushd $1
 
+##########################
+# merge directories of fastsim and fullsim files, for comparison
+# - adds `.fastsim` or `.fullsim` suffixes to filenames
+##########################
+echo "------------- merge fastsim and fullsim -------------------"
 # loop through *fastsim* directories
 ls | grep fastsim |\
 while read dirFast; do
@@ -39,4 +43,27 @@ while read dirFast; do
   rm -rv $dirFast $dirFull
 
 done
+
+
+########################
+# merge recon-* directories, adding recon method to suffix
+########################
+echo "------------- merge recon methods -------------------"
+# loop through recon* directories
+ls | grep -E '^recon-' |\
+while read dirRecon; do
+  method=$(echo $dirRecon | sed 's/-plots$//g' | sed 's/^.*-//g')
+  dirOut=$(echo $dirRecon | sed "s/-$method//g" | sed 's/^recon-/&methods-/g')
+  echo "MOVE ARTIFACTS IN $dirRecon/ FOR METHOD \"$method\" TO $dirOut/"
+  mkdir -p $dirOut
+  pushd $dirRecon
+  for file in *; do
+    mv -v $file ../$dirOut/$(echo $file | sed "s/^.*\./&$method./g")
+  done
+  popd
+  rm -r $dirRecon
+done
+
+
+############
 popd
