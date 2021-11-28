@@ -21,7 +21,7 @@ Kinematics::Kinematics(
   // set main frame, used for calculations where there is ambiguity which frame is the correct frame to use
   mainFrame = fHeadOn; // fLab, fHeadOn
   // set method for determining `vecQ` 4-momentum components for certain recon methods (JB,DA,(e)Sigma)
-  qComponentsMethod = qQuadratic; // qQuadratic, qHadronic, qElectronic
+  qComponentsMethod = qHadronic; // qQuadratic, qHadronic, qElectronic
   /////////////////////////////////////////////////////////////
 
   // set beam 4-momenta
