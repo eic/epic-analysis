@@ -26,49 +26,6 @@ AnalysisDelphes::AnalysisDelphes(
   /* ... none defined yet ... */
 };
 
-// Borrowed this method from `Kinematics.cxx`
-// get PID information from PID systems tracks
-int getPID(Track *track, TObjArrayIter itParticle,
-		TObjArrayIter itmRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack){
-  itParticle.Reset();
-  itmRICHTrack.Reset();
-  itbarrelDIRCTrack.Reset();
-  itdualRICHagTrack.Reset();
-  itdualRICHcfTrack.Reset();
-  GenParticle *trackParticle = (GenParticle*)track->Particle.GetObject();
-  GenParticle *detectorParticle;
-  int pidOut = -1;
-  while(Track *detectorTrack = (Track*)itmRICHTrack() ){
-     if ((detectorTrack->Eta  < -3.5) || (-1.0 < detectorTrack->Eta)) continue;
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
-  }
-  itParticle.Reset();
-  while(Track *detectorTrack = (Track*)itbarrelDIRCTrack() ){
-    if ((detectorTrack->Eta  < -1.0) || (1.0 < detectorTrack->Eta)) continue;
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
-  }
-  itParticle.Reset();
-  Double_t ag_p_threshold = 12.0;
-  while(Track *detectorTrack = (Track*)itdualRICHagTrack() ){
-    Double_t p_track = detectorTrack->P4().Vect().Mag();
-    if (!((1.0 <= track->Eta) && (track->Eta <= 3.5)) || p_track>=ag_p_threshold) continue;
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
-  }
-  while(Track *detectorTrack = (Track*)itdualRICHcfTrack() ){
-    Double_t p_track = detectorTrack->P4().Vect().Mag();
-    if (!((1.0 <= track->Eta) && (track->Eta <= 3.5)) || p_track<ag_p_threshold) continue;
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
-  }
-
-
-  return pidOut;
-}
-
-
 //=============================================
 // perform the analysis
 //=============================================
@@ -91,23 +48,7 @@ void AnalysisDelphes::Execute() {
   // calculate cross section
   if(maxEvents>0) ENT = maxEvents; // limiter
 
-  // // branch iterators (NEW)
-  // TObjArrayIter itTrack(tr->UseBranch("Track"));
-  // TObjArrayIter itElectron(tr->UseBranch("Electron"));
-  // TObjArrayIter itParticle(tr->UseBranch("Particle"));
-  // TObjArrayIter itEFlowTrack(tr->UseBranch("EFlowTrack"));
-  // TObjArrayIter itEFlowPhoton(tr->UseBranch("EFlowPhoton"));
-  // TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
-  // TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
-  // TObjArrayIter itpfRICHTrack(tr->UseBranch("pfRICHTrack"));
-  // TObjArrayIter itDIRCepidTrack(tr->UseBranch("barrelDIRC_epidTrack"));
-  // TObjArrayIter itDIRChpidTrack(tr->UseBranch("barrelDIRC_hpidTrack"));
-  // TObjArrayIter itBTOFepidTrack(tr->UseBranch("BTOF_eTrack"));
-  // TObjArrayIter itBTOFhpidTrack(tr->UseBranch("BTOF_hTrack"));
-  // TObjArrayIter itdualRICHagTrack(tr->UseBranch("dualRICHagTrack"));
-  // TObjArrayIter itdualRICHcfTrack(tr->UseBranch("dualRICHcfTrack"));
-
-  // branch iterators (OLD)
+  // branch iterators (NEW)
   TObjArrayIter itTrack(tr->UseBranch("Track"));
   TObjArrayIter itElectron(tr->UseBranch("Electron"));
   TObjArrayIter itParticle(tr->UseBranch("Particle"));
@@ -115,8 +56,11 @@ void AnalysisDelphes::Execute() {
   TObjArrayIter itEFlowPhoton(tr->UseBranch("EFlowPhoton"));
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
   TObjArrayIter itPIDSystemsTrack(tr->UseBranch("PIDSystemsTrack"));
-  TObjArrayIter itmRICHTrack(tr->UseBranch("mRICHTrack"));//TODO: Change to eRICHTrack or pfRICHTrack ?
-  TObjArrayIter itbarrelDIRCTrack(tr->UseBranch("barrelDIRCTrack"));
+  TObjArrayIter itpfRICHTrack(tr->UseBranch("pfRICHTrack"));
+  TObjArrayIter itDIRCepidTrack(tr->UseBranch("barrelDIRC_epidTrack"));
+  TObjArrayIter itDIRChpidTrack(tr->UseBranch("barrelDIRC_hpidTrack"));
+  TObjArrayIter itBTOFepidTrack(tr->UseBranch("BTOF_eTrack"));
+  TObjArrayIter itBTOFhpidTrack(tr->UseBranch("BTOF_hTrack"));
   TObjArrayIter itdualRICHagTrack(tr->UseBranch("dualRICHagTrack"));
   TObjArrayIter itdualRICHcfTrack(tr->UseBranch("dualRICHcfTrack"));
 
@@ -235,18 +179,13 @@ void AnalysisDelphes::Execute() {
       auto kvMC = PIDtoFinalState.find(mcpid);
 
       // Reconstructed PID
-      pid = getPID(
-        trk, itParticle,
-        itmRICHTrack, itbarrelDIRCTrack,
-        itdualRICHagTrack, itdualRICHcfTrack
-      );
-      // pid = kin->getTrackPID( // get smeared PID
-      //     trk,
-      //     itpfRICHTrack,
-      //     itDIRCepidTrack, itDIRChpidTrack,
-      //     itBTOFepidTrack, itBTOFhpidTrack,
-      //     itdualRICHagTrack, itdualRICHcfTrack
-      //     );
+      pid = kin->getTrackPID( // get smeared PID
+          trk,
+          itpfRICHTrack,
+          itDIRCepidTrack, itDIRChpidTrack,
+          itBTOFepidTrack, itBTOFhpidTrack,
+          itdualRICHagTrack, itdualRICHcfTrack
+          );
       auto kv = PIDtoFinalState.find(pid);
 
       // if(kv!=PIDtoFinalState.end()) { finalStateID = kv->second;
