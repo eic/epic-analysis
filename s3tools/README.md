@@ -29,6 +29,15 @@ For fast simulations, one can use `make-fastsim-config.sh` to help in the creati
 of a config file for fast simulations. This script is used by the CI, but is also
 designed to be configurable to support any local organization of Delphes output
 files.
+- to download a set of `hepmc` files to the directory `datagen/10x100/Q2min1`, run
+  `s3tools/generate-hepmc-list.sh 10x100 1 | s3tools/download.sh datagen/10x100/Q2min1`
+  - run these scripts without arguments to print the usage guide
+  - limit the number of files downloaded by piping through `head` before `download.sh`
+- then run `delphes` on these files (a wrapper `./exeDelphes.sh` is provided, which
+  will use the configuration card stored in `cards/` by default)
+- finally, run `make-fastsim-config.sh`
+  - use `cat` to combine config files with differing Q2 minima
+
 
 
 ## Accessing S3 Files
