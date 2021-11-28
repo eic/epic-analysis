@@ -10,4 +10,4 @@
 #SBATCH --time=24:00:00
 ##SBATCH --mail-user=$USER@jlab.org
 
-/work/clas12/users/$USER/eic/largex-eic/macro/dis-5x41/job.sh
+/work/clas12/users/$USER/eic3/largex-eic/macro/dis-5x41/job.sh
