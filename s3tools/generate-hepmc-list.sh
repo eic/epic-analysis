@@ -21,5 +21,5 @@ evgenDir="S3/eictest/ATHENA/EVGEN/DIS/NC/$energy/minQ2=$minQ2"
 if [ "$mode" == "ci" ]; then
   mc ls $evgenDir | grep -E 'hepmc.gz$' | grep -v GiB | grep vtxfix | head -n4 | sed "s;^.* ;$evgenDir/;g"
 else
-  mc ls $evgenDir # TODO: grep filters, etc.
+  mc ls $evgenDir | grep -E 'hepmc.gz$' | grep -v GiB | grep vtxfix | sed "s;^.* ;$evgenDir/;g"
 fi
