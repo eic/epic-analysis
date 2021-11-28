@@ -359,8 +359,6 @@ void Analysis::Prepare() {
         NBINS,-TMath::Pi(),TMath::Pi(),
         NBINS,-TMath::Pi(),TMath::Pi()
         );
-    // -- other / debugging
-    HS->DefineHist1D("hadCount","nHadRec/nHadGen","", NBINS, 0, 3);
   });
   HD->ExecuteAndClearOps();
 
@@ -666,8 +664,6 @@ void Analysis::FillHistosTracks() {
     dynamic_cast<TH2*>(H->Hist("x_RvG"))->Fill(kinTrue->x,kin->x,wTrack);
     dynamic_cast<TH2*>(H->Hist("phiH_RvG"))->Fill(kinTrue->phiH,kin->phiH,wTrack);
     dynamic_cast<TH2*>(H->Hist("phiS_RvG"))->Fill(kinTrue->phiS,kin->phiS,wTrack);
-    // -- other / debugging
-    if(kinTrue->countHadrons>0) H->Hist("hadCount")->Fill(((double)kin->countHadrons)/((double)kinTrue->countHadrons),wTrack);
   });
   // execute the payload
   // - save time and don't call `ClearOps` (next loop will overwrite lambda)
