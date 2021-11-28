@@ -60,8 +60,8 @@ void postprocess_resolution(
           );
     };
 
-    const int nNames = 6;
-    double yMin, yMax; yMin = -0.1; yMax = 0.5;//Adjust as needed
+    const int nNames = 5;
+    double yMin, yMax; yMin = -0.1; yMax = 1.0;//Adjust as needed
     TString histNames[nNames] = {"z_z_Res","z_pT_Res","z_phiH_Res","z_purity","z_efficiency"};
     TString labels[nNames] = {"z","p_{T}","#phi_{H}","purity","efficiency"};
     TString header="testheader";
