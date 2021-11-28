@@ -7,7 +7,7 @@ void analysis_x_q2(
     Double_t ionBeamEn=100,
     Double_t crossingAngle=-25,
     TString outfilePrefix="resolution.fastsim",
-    TString reconMethod="JB"
+    TString reconMethod="Ele"
 ) {
 
   // setup analysis ========================================
