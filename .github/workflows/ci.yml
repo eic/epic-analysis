@@ -217,7 +217,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.name }}-${{ matrix.mode }}-plots
-          path: out/${{ matrix.name }}.${{ matrix.mode }}.images
+          path: |
+            out/*.images
+            out/*.root
 
 # run benchmark macros matrix for fullsim
   benchmark-fullsim:
@@ -295,7 +297,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.name }}-${{ matrix.mode }}-plots
-          path: out/${{ matrix.name }}.${{ matrix.mode }}.images
+          path: |
+            out/*.images
+            out/*.root
 
 # run reconstruction methods matrix for fastsim
   benchmark-recon:
@@ -368,7 +372,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ matrix.name }}-${{ matrix.recon }}-plots
-          path: out/${{ matrix.name }}.${{ matrix.recon }}.images
+          path: |
+            out/*.images
+            out/*.root
 
 
 # ARTIFACTS ---------------------------------------------------------------------------
@@ -393,6 +399,7 @@ jobs:
           rm -vr results/x_*
           rm -vr results/delphes-*-output
           find results -name "*.pdf" -print | xargs rm -v
+          find results -name "*.root" -print | xargs rm -v
           rm -v results/y-minima*/canv*.png
       - name: organize
         run: macro/ci/organize-artifacts.sh results

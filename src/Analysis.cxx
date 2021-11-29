@@ -320,6 +320,9 @@ void Analysis::Prepare() {
     HS->DefineHist1D("phiH_Res","#phi_{h}-#phi_{h}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
     HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
     HS->DefineHist1D("pT_Res","pT-pT^{true}","GeV", NBINS, -1.5, 1.5);
+    HS->DefineHist1D("z_Res","z-z^{true}","", NBINS, -1.5, 1.5);
+    HS->DefineHist1D("mX_Res","mX-mX^{true}","GeV", NBINS, -1.5, 1.5);
+    HS->DefineHist1D("xF_Res","xF-xF^{true}","", NBINS, -1.5, 1.5);
     HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
         20,1e-4,1,
         10,1,1e4,
@@ -651,6 +654,9 @@ void Analysis::FillHistosTracks() {
     H->Hist("phiH_Res")->Fill( Kinematics::AdjAngle(kin->phiH - kinTrue->phiH), wTrack );
     H->Hist("phiS_Res")->Fill( Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wTrack );
     H->Hist("pT_Res")->Fill( kin->pT - kinTrue->pT, wTrack );
+    H->Hist("z_Res")->Fill( kin->z - kinTrue->z, wTrack );
+    H->Hist("mX_Res")->Fill( kin->mX - kinTrue->mX, wTrack );
+    H->Hist("xF_Res")->Fill( kin->xF - kinTrue->xF, wTrack );
     dynamic_cast<TH2*>(H->Hist("Q2vsXtrue"))->Fill(kinTrue->x,kinTrue->Q2,wTrack);
     if(kinTrue->z!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_zres"))->Fill(
       kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->z - kin->z)/(kinTrue->z) ) );
