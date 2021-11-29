@@ -553,12 +553,24 @@ std::function<void(Node*)> Analysis::CheckBin() {
           active = true;
         };
       };
-      if(active) activeEvent=true;
       N->SetActiveState(active);
     };
   };
 };
 
+// payload operator to check if the event is 'active', i.e., there is at least
+// one full NodePath where all bin Nodes are active; it will set `activeEvent`
+//--------------------------------------------------------------------
+std::function<void(NodePath*)> Analysis::CheckActive() {
+  return [this](NodePath *P){
+    if(!activeEvent) { // only check if we don't yet know
+      for(Node *N : P->GetBinNodes()) {
+        if(N->IsActive()==false) return;
+      };
+      activeEvent = true;
+    };
+  };
+};
 
 // FillHistos methods: check bins and fill associated histograms
 // - checks which bins the track/jet/etc. falls in
@@ -569,7 +581,6 @@ void Analysis::FillHistosTracks() {
 
   // add kinematic values to `valueMap`
   valueMap.clear();
-  activeEvent = false;
   /* DIS */
   valueMap.insert(std::pair<TString,Double_t>( "x", kin->x ));
   valueMap.insert(std::pair<TString,Double_t>( "q2", kin->Q2 ));
@@ -592,8 +603,11 @@ void Analysis::FillHistosTracks() {
 
   // check bins
   // - activates HistosDAG bin nodes which contain this track
-  // - sets `activeEvent` if there is at least one multidimensional bin to fill
   HD->TraverseBreadth(CheckBin());
+  // - set `activeEvent` if there is at least one multidimensional bin to fill
+  activeEvent = false;
+  HD->Payload(CheckActive());
+  HD->ExecuteOps(true);
   if(!activeEvent) return;
   
   // fill histograms, for activated bins only
@@ -659,7 +673,6 @@ void Analysis::FillHistosJets() {
 
   // add kinematic values to `valueMap`
   valueMap.clear();
-  activeEvent = false;
   /* DIS */
   valueMap.insert(std::pair<TString,Double_t>(  "x",      kin->x      ));
   valueMap.insert(std::pair<TString,Double_t>(  "q2",     kin->Q2     ));
@@ -670,8 +683,11 @@ void Analysis::FillHistosJets() {
 
   // check bins
   // - activates HistosDAG bin nodes which contain this track
-  // - sets `activeEvent` if there is at least one multidimensional bin to fill
   HD->TraverseBreadth(CheckBin());
+  // - set `activeEvent` if there is at least one multidimensional bin to fill
+  activeEvent = false;
+  HD->Payload(CheckActive());
+  HD->ExecuteOps(true);
   if(!activeEvent) return;
 
   // fill histograms, for activated bins only
