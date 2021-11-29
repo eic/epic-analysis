@@ -401,7 +401,7 @@ jobs:
           rm -vr results/x_*
           rm -vr results/delphes-*-output
           find results -name "*.root" -print | xargs rm -v
-          rm -v results/y-minima*/canv*.png
+          rm -v results/y-minima*/*/canv*.png
       - name: tree
         run: tree results
       - name: organize
