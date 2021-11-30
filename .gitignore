@@ -16,6 +16,7 @@ container/img
 get-files.sh
 results*
 *.xsec
+tags
 
 # users' custom ignores
 datagen/escalate

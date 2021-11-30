@@ -134,7 +134,7 @@ void Kinematics::GetQWNu_quadratic(){
     Nu = vecIonBeam.Dot(vecQ)/IonMass;
 
   } else {
-    // DEBUG TODO: this happens a lot more often if mainFrame==fLab
+    // this happens a lot more often if mainFrame==fLab
     if(b*b<4*a*c) cerr << "ERROR: negative discriminant in Kinematics::GetQWNu_quadratic; skipping event" << endl;
     else cerr << "ERROR: zero denominator in Kinematics::GetQWNu_quadratic; skipping event" << endl;
     reconOK = false;
@@ -509,7 +509,7 @@ void Kinematics::GetHadronicFinalState(
         }
         else { // otherwise, assume true PID
           countPIDtrue++;
-          //continue; // drop events if PID not smeared // DEBUG TODO: this is more realistic, but resolutions are waaay worse...
+          //continue; // drop events if PID not smeared // TODO [critical]: this is more realistic, but resolutions are much worse
         }
 
         if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(trackp4,trackp4);
