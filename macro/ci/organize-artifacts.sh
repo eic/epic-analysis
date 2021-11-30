@@ -25,6 +25,7 @@ while read dirFast; do
   # move fastsim artifacts to output directory, and add suffix to file name
   echo "MOVE AND RENAME artifacts in $dirFast -> $dirOut"
   pushd $dirFast
+  mv -v *.images/* ./; rm -r *.images
   for file in *; do
     mv -v $file ../$dirOut/$(echo $file | sed 's/^.*\./&fastsim./g')
   done
@@ -33,6 +34,7 @@ while read dirFast; do
   # repeat for fullsim artifacts
   echo "MOVE AND RENAME artifacts in $dirFull -> $dirOut"
   pushd $dirFull
+  mv -v *.images/* ./; rm -r *.images
   for file in *; do
     mv -v $file ../$dirOut/$(echo $file | sed 's/^.*\./&fullsim./g')
   done
@@ -57,6 +59,7 @@ while read dirRecon; do
   echo "MOVE ARTIFACTS IN $dirRecon/ FOR METHOD \"$method\" TO $dirOut/"
   mkdir -p $dirOut
   pushd $dirRecon
+  mv -v *.images/* ./; rm -r *.images
   for file in *; do
     mv -v $file ../$dirOut/$(echo $file | sed "s/^.*\./&$method./g")
   done

@@ -167,7 +167,7 @@ void AnalysisDD4hep::process_event()
 
 
     // calculate true DIS kinematics
-    kinTrue->CalculateDIS(reconMethod); // generated (truth)
+    if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
 
     // collect reconstructed particles
     std::vector<Particles> recopart;
@@ -241,7 +241,7 @@ void AnalysisDD4hep::process_event()
     kin->Pyh = head_vecHadron.Py();
 
     // calculate DIS kinematics
-    kin->CalculateDIS(reconMethod); // reconstructed
+    if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
 
     // calculate hadron kinematics
     for(auto part : recopart)

@@ -40,7 +40,7 @@ class Kinematics : public TObject
     ~Kinematics();
 
     // SIDIS calculators
-    void CalculateDIS(TString recmethod);
+    Bool_t CalculateDIS(TString recmethod); // return true if succeeded
     void CalculateHadronKinematics();
 
     // final state accessors
@@ -49,7 +49,6 @@ class Kinematics : public TObject
         TObjArrayIter itEFlowTrack,
         TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron,
-        TObjArrayIter itParticle,
         TObjArrayIter itpfRICHTrack,
         TObjArrayIter itDIRCepidTrack,   TObjArrayIter itDIRChpidTrack,
         TObjArrayIter itBTOFepidTrack,   TObjArrayIter itBTOFhpidTrack,
@@ -81,8 +80,8 @@ class Kinematics : public TObject
     // kinematics (should be Double_t, if going in SimpleTree)
     Double_t W,Q2,Nu,x,y,s; // DIS
     Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // hadron
-    Double_t sigmah, Pxh, Pyh; // hadronic final state, lab frame
-    Double_t Hsigmah, HPxh, HPyh; // hadronic final state, lab frame                                                                                                 
+    Double_t sigmah, Pxh, Pyh; // hadronic final state variables
+    TLorentzVector hadronSumVec;
 
     // nucleon transverse spin; if you set this externally,
     // it must be done before calculating `phiS` (before
@@ -143,6 +142,8 @@ class Kinematics : public TObject
     void BoostToBeamComFrame(TLorentzVector Lvec, TLorentzVector &Bvec);
     // - tranform from Lab frame `Lvec` to Head-on frame `Hvec`
     void TransformToHeadOnFrame(TLorentzVector Lvec, TLorentzVector &Hvec);
+    // transform from Head-on frame `Hvec` back to Lab frame `Lvec`
+    void TransformBackToLabFrame(TLorentzVector Hvec, TLorentzVector &Lvec);
 
 
     // misc calculations
@@ -220,16 +221,23 @@ class Kinematics : public TObject
     // tests and validation
     void ValidateHeadOnFrame();
 
+    Long64_t countPIDsmeared,countPIDtrue,countHadrons;
+     
   protected:
 
-    // protected calculators (called by public calculators)
+    // reconstruction methods
     void CalculateDISbyElectron();
     void CalculateDISbyJB();
     void CalculateDISbyDA();
     void CalculateDISbyMixed();
     void CalculateDISbySigma();
     void CalculateDISbyeSigma();
-    void getqWQuadratic();
+
+    // calculate 4-momenta components of q and W (`vecQ` and `vecW`) as well as
+    // derived invariants `W` and `nu`
+    void GetQWNu_electronic();
+    void GetQWNu_hadronic();
+    void GetQWNu_quadratic();
 
 
   private:
@@ -239,6 +247,7 @@ class Kinematics : public TObject
     Double_t asymInject;
     TRandom *RNG;
     Float_t RN;
+    Bool_t reconOK;
 
     // - c.o.m. frame of virtual photon and ion
     TLorentzVector CvecBoost;
@@ -263,6 +272,13 @@ class Kinematics : public TObject
     Double_t rotAboutX, rotAboutY;
     // other
     TLorentzVector vecSpin, IvecSpin;
+
+    // settings
+    Int_t mainFrame;
+    enum mainFrame_enum {fLab, fHeadOn};
+    Int_t qComponentsMethod;
+    enum qComponentsMethod_enum {qQuadratic, qHadronic, qElectronic};
+
 
 
   ClassDef(Kinematics,1);

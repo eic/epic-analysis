@@ -2,7 +2,7 @@ R__LOAD_LIBRARY(Largex)
 
 // make grids of plots of (x,Q2) bins
 // - depending on infile, different histograms will be drawn
-void postprocess_x_q2(TString infile="out/coverage.fullsim.root") {
+void postprocess_x_q2(TString infile="out/resolution.fastsim.root") {
 
   // set histogram lists, based on infile name
   std::vector<TString> histList;
@@ -33,8 +33,13 @@ void postprocess_x_q2(TString infile="out/coverage.fullsim.root") {
     histList.push_back("y_Res");
     histList.push_back("pT_Res");
     histList.push_back("Q2_Res");
+    histList.push_back("Nu_Res");
+    histList.push_back("W_Res");
     histList.push_back("phiH_Res");
     histList.push_back("phiS_Res");
+    histList.push_back("z_Res");
+    histList.push_back("mX_Res");
+    histList.push_back("xF_Res");
   } else {
     fprintf(stderr,"ERROR: histList not defined for specified infile name\n");
     return;
