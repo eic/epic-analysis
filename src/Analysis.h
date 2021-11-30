@@ -104,6 +104,8 @@ class Analysis : public TNamed
     // traversal; it requires `finalStateID`, `valueMap`, and will
     // activate/deactivate bin nodes accoding to values in `valuMap`
     std::function<void(Node*)> CheckBin();
+    // payload operator to check if the event will appear in at least one bin
+    std::function<void(NodePath*)> CheckActive();
 
 
     // shared objects
