@@ -125,7 +125,7 @@ jobs:
           S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
         run: |
           s3tools/add-host.sh
-          s3tools/make-canyonlands-config.sh ${{ env.ebeam-en }}x${{ env.pbeam-en }} i s3files.config
+          s3tools/make-canyonlands-config.sh ${{ env.ebeam-en }}x${{ env.pbeam-en }} s 8 s3files.config
       - name: cat-config
         run: cat s3files.config
       - name: artifacts
