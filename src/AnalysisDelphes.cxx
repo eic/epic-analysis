@@ -145,7 +145,7 @@ void AnalysisDelphes::Execute() {
     if(errorCount>=100 && errorCount<1000) { cerr << "ERROR: .... suppressing beam finder errors ...." << endl; errorCount=1000; };
 
     // get hadronic final state variables
-    kin->GetHadronicFinalState(
+    kin->GetHFS(
         itTrack,
         itEFlowTrack,
         itEFlowPhoton,
@@ -155,7 +155,7 @@ void AnalysisDelphes::Execute() {
         itBTOFepidTrack, itBTOFhpidTrack,
         itdualRICHagTrack, itdualRICHcfTrack
         );
-    kinTrue->GetHadronicFinalStateTrue(itParticle);
+    kinTrue->GetTrueHFS(itParticle);
 
     // calculate DIS kinematics
     if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed

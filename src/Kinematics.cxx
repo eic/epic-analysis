@@ -466,10 +466,10 @@ int Kinematics::getTrackPID(
 }
 
 
-// calculates hadronic final state variables from DELPHES tree branches
+// calculates reconstructed hadronic final state variables from DELPHES tree branches
 // expects 'vecElectron' set
 // - calculates `sigmah`, `Pxh`, and `Pyh` in the lab and head-on frames
-void Kinematics::GetHadronicFinalState(
+void Kinematics::GetHFS(
     TObjArrayIter itTrack,
     TObjArrayIter itEFlowTrack,
     TObjArrayIter itEFlowPhoton,
@@ -481,13 +481,11 @@ void Kinematics::GetHadronicFinalState(
     ) {
 
   // resets
+  this->ResetHFS();
   itTrack.Reset();
   itEFlowTrack.Reset();
   itEFlowPhoton.Reset();
   itEFlowNeutralHadron.Reset();
-  sigmah = Pxh = Pyh = 0;
-  hadronSumVec.SetPxPyPzE(0,0,0,0);
-  countHadrons = 0;
 
   // track loop
   while(Track *track = (Track*)itTrack() ){
@@ -512,12 +510,7 @@ void Kinematics::GetHadronicFinalState(
           //continue; // drop events if PID not smeared // TODO [critical]: this is more realistic, but resolutions are much worse
         }
 
-        if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(trackp4,trackp4);
-        sigmah += (trackp4.E() - trackp4.Pz());
-        Pxh += trackp4.Px();
-        Pyh += trackp4.Py();
-        hadronSumVec += trackp4;
-        countHadrons++;
+        this->AddToHFS(trackp4);
       }
     }    
   }
@@ -527,12 +520,7 @@ void Kinematics::GetHadronicFinalState(
     TLorentzVector eflowTrackp4 = eflowTrack->P4();
     if(!isnan(eflowTrackp4.E())){
       if(std::abs(eflowTrack->Eta) >= 4.0){
-        if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(eflowTrackp4,eflowTrackp4);
-        sigmah += (eflowTrackp4.E() - eflowTrackp4.Pz());
-        Pxh += eflowTrackp4.Px();
-        Pyh += eflowTrackp4.Py();
-        hadronSumVec += eflowTrackp4;
-        countHadrons++;
+        this->AddToHFS(eflowTrackp4);
       }
     }
   }
@@ -542,12 +530,7 @@ void Kinematics::GetHadronicFinalState(
     TLorentzVector  towerPhotonp4 = towerPhoton->P4();
     if(!isnan(towerPhotonp4.E())){
       if( std::abs(towerPhoton->Eta) < 4.0  ){
-        if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(towerPhotonp4,towerPhotonp4);
-        sigmah += (towerPhotonp4.E() - towerPhotonp4.Pz());
-        Pxh += towerPhotonp4.Px();
-        Pyh += towerPhotonp4.Py();
-        hadronSumVec += towerPhotonp4;
-        countHadrons++;
+        this->AddToHFS(towerPhotonp4);
       }
     }
   }
@@ -557,16 +540,53 @@ void Kinematics::GetHadronicFinalState(
     TLorentzVector  towerNeutralHadronp4 = towerNeutralHadron->P4();
     if(!isnan(towerNeutralHadronp4.E())){
       if( std::abs(towerNeutralHadron->Eta) < 4.0 ){
-        if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(towerNeutralHadronp4,towerNeutralHadronp4);
-        sigmah += (towerNeutralHadronp4.E() - towerNeutralHadronp4.Pz());
-        Pxh += towerNeutralHadronp4.Px();
-        Pyh += towerNeutralHadronp4.Py();
-        hadronSumVec += towerNeutralHadronp4;
-        countHadrons++;
+        this->AddToHFS(towerNeutralHadronp4);
       }
     }
   }
   
+  // remove electron from hadronic final state
+  this->SubtractElectronFromHFS();
+};
+
+
+// calculates generated truth hadronic final state variables from DELPHES tree branches
+void Kinematics::GetTrueHFS(TObjArrayIter itParticle){
+
+  // resets
+  this->ResetHFS();
+  itParticle.Reset();
+
+  // truth loop
+  while(GenParticle *partTrue = (GenParticle*)itParticle() ) {
+    if(partTrue->Status == 1) this->AddToHFS(partTrue->P4());
+  }
+
+  // remove electron from hadronic final state
+  this->SubtractElectronFromHFS();
+};
+
+// reset some variables for the hadronic final state
+void Kinematics::ResetHFS() {
+  sigmah = Pxh = Pyh = 0;
+  hadronSumVec.SetPxPyPzE(0,0,0,0);
+  countHadrons = 0;
+};
+
+
+// add a 4-momentum to the hadronic final state
+void Kinematcis::AddToHFS(TLorentzVector p4_) {
+  TLorentzVector p4 = p4_;
+  if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(p4,p4);
+  sigmah += (p4.E() - p4.Pz());
+  Pxh += p4.Px();
+  Pyh += p4.Py();
+  hadronSumVec += p4;
+  countHadrons++;
+};
+
+// subtract electron from hadronic final state variables
+void Kinematics::SubtractElectronFromHFS() {
   if(!isnan(vecElectron.E())){
     switch(mainFrame) {
       case fLab:
@@ -584,46 +604,10 @@ void Kinematics::GetHadronicFinalState(
         break;
     }
     countHadrons--;
+  } else {
+    cerr << "ERROR: electron energy is NaN" << endl;
+    // TODO: kill event
   }
-};
-
-void Kinematics::GetHadronicFinalStateTrue(TObjArrayIter itParticle){
-
-  // resets
-  itParticle.Reset();
-  sigmah = Pxh = Pyh = 0;
-  hadronSumVec.SetPxPyPzE(0,0,0,0);
-  countHadrons=0;
-
-  // truth loop
-  while(GenParticle *partTrue = (GenParticle*)itParticle() ){
-    if(partTrue->Status == 1){
-      TLorentzVector partp4 = partTrue->P4();
-      if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(partp4,partp4);
-      sigmah += (partp4.E() - partp4.Pz());
-      Pxh += partp4.Px();
-      Pyh += partp4.Py();
-      hadronSumVec += partp4;
-      countHadrons++;
-    }    
-  }
-
-  switch(mainFrame) {
-    case fLab:
-      sigmah -= (vecElectron.E()-vecElectron.Pz());
-      Pxh -= vecElectron.Px();
-      Pyh -= vecElectron.Py();
-      hadronSumVec -= vecElectron;
-      break;
-    case fHeadOn:
-      this->TransformToHeadOnFrame(vecElectron,HvecElectron);
-      sigmah -= (HvecElectron.E()-HvecElectron.Pz());
-      Pxh -= HvecElectron.Px();
-      Pyh -= HvecElectron.Py();
-      hadronSumVec -= HvecElectron;
-      break;
-  }
-  countHadrons--;
 };
 
 
