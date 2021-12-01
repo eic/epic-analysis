@@ -125,15 +125,7 @@ void AnalysisDD4hep::Execute()
         mcpart.push_back(part);
 
         // add to hadronic final state sums
-        {
-          TLorentzVector p4 = part.vecPart;
-          if(kinTrue->mainFrame==Kinematics::fHeadOn) kinTrue->TransformToHeadOnFrame(p4,p4);
-          kinTrue->sigmah += (p4.E() - p4.Pz());
-          kinTrue->Pxh += p4.Px();
-          kinTrue->Pyh += p4.Py();
-          kinTrue->hadronSumVec += p4;
-          kinTrue->countHadrons++; // TODO: make this its own method
-        }
+        kinTrue->AddToHFS(part.vecPart);
 
         // identify scattered electron by max momentum
         if(pid_ == 11) {
@@ -192,17 +184,16 @@ void AnalysisDD4hep::Execute()
       double reco_mass = ReconstructedParticles_mass[ireco];
       double reco_p = sqrt(reco_px*reco_px + reco_py*reco_py + reco_pz*reco_pz);
       part.vecPart.SetPxPyPzE(reco_px, reco_py, reco_pz, sqrt(reco_p*reco_p + reco_mass*reco_mass));
-      recopart.push_back(part);
 
-      // add to hadronic final state sums
-      { // TODO: make this its own method
-        TLorentzVector p4 = part.vecPart;
-        if(kin->mainFrame==Kinematics::fHeadOn) kin->TransformToHeadOnFrame(p4,p4);
-        kin->sigmah += (p4.E() - p4.Pz());
-        kin->Pxh += p4.Px();
-        kin->Pyh += p4.Py();
-        kin->hadronSumVec += p4;
-        kin->countHadrons++;
+      // add to `recopart` and hadronic final state sums only if there is a matching truth particle
+      if(part.mcID > 0) {
+        for(auto imc : mcpart) {
+          if(part.mcID == imc.mcID) {
+            recopart.push_back(part);
+            kinTrue->AddToHFS(part.vecPart);
+            break;
+          }
+        }
       }
 
       // find scattered electron, by matching to truth // TODO: not realistic... is there an upstream electron finder?
@@ -226,9 +217,7 @@ void AnalysisDD4hep::Execute()
     kinTrue->SubtractElectronFromHFS();
     
     // calculate DIS kinematics
-    printf("DEBUG: RECON\n");
     if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
-    printf("DEBUG: TRUTH\n"); // if it's truth only, then the culprit may be the beams we found (E^2/pz^2==1 -> M=0 approximation?)
     if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
 
 
@@ -260,6 +249,7 @@ void AnalysisDD4hep::Execute()
           }
         }
       }
+      /* // deprecated, since existence of truth match is checked earlier; in practice prox matching was never called
       else {
         // give it another shot: proximity matching
         double mineta = 4.0;
@@ -274,6 +264,7 @@ void AnalysisDD4hep::Execute()
           }
         }
       }
+      */
       kinTrue->CalculateHadronKinematics();
 
       // asymmetry injection
@@ -311,6 +302,6 @@ void AnalysisDD4hep::Execute()
   if(numNoBeam>0)
     cerr << "WARNING: skipped " << numNoBeam << " events which had no beam particles" << endl;
   if(numProxMatched>0)
-    cerr << "WARNING: " << numProxMatched << " recon. electrons were proximity matched to truth (when mcID match failed)" << endl;
+    cerr << "WARNING: " << numProxMatched << " recon. particles were proximity matched to truth (when mcID match failed)" << endl;
 
 }

@@ -109,9 +109,10 @@ void Kinematics::GetQWNu_quadratic(){
   double a = 1.0 - (pE*pE)/(pz*pz);
   double b = (2*pE/(pz*pz))*(px*hx + py*hy + f);
   double c = Q2 - hx*hx - hy*hy - (1/(pz*pz))*pow( (f+px*hx+py*hy) ,2.0);
+  double disc = b*b - 4*a*c; // discriminant
 
   double qz1, qz2, qE1, qE2, qE, qz;
-  if(b*b>=4*a*c && a != 0){
+  if(disc>=0 && TMath::Abs(a)>1e-6) {
     qE1 = (-1*b+sqrt(b*b-4*a*c))/(2*a);
     qE2 = (-1*b-sqrt(b*b-4*a*c))/(2*a);
     qz1 = (-1*f + pE*qE1 - px*hx - py*hy)/(pz);
@@ -135,8 +136,13 @@ void Kinematics::GetQWNu_quadratic(){
 
   } else {
     // this happens a lot more often if mainFrame==fLab
-    if(b*b<4*a*c) cerr << "ERROR: negative discriminant in Kinematics::GetQWNu_quadratic; skipping event" << endl;
-    else cerr << "ERROR: zero denominator in Kinematics::GetQWNu_quadratic; skipping event" << endl;
+    if(disc<0) cerr << "ERROR: negative discriminant in Kinematics::GetQWNu_quadratic; skipping event" << endl;
+    else cerr << "ERROR: zero denominator in Kinematics::GetQWNu_quadratic; skipping event " << endl;
+    cerr << "       p=(" << px << "," << py << "," << pz << "," << pE << ") " << endl;
+    cerr << "       a=" << a << endl;
+    cerr << "       b=" << b << endl;
+    cerr << "       c=" << c << endl;
+    cerr << "       disc=" << disc << endl;
     reconOK = false;
   }
 };
@@ -575,7 +581,7 @@ void Kinematics::ResetHFS() {
 
 
 // add a 4-momentum to the hadronic final state
-void Kinematcis::AddToHFS(TLorentzVector p4_) {
+void Kinematics::AddToHFS(TLorentzVector p4_) {
   TLorentzVector p4 = p4_;
   if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(p4,p4);
   sigmah += (p4.E() - p4.Pz());
