@@ -159,7 +159,7 @@ void AnalysisDelphes::Execute() {
 
     // calculate DIS kinematics
     if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
-    if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
+    if(!(kinTrue->CalculateDIS("Ele"))) continue; // generated (truth)
 
     // get vector of jets
     // TODO: should this have an option for clustering method?
