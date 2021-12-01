@@ -136,13 +136,24 @@ void Kinematics::GetQWNu_quadratic(){
 
   } else {
     // this happens a lot more often if mainFrame==fLab
-    if(disc<0) cerr << "ERROR: negative discriminant in Kinematics::GetQWNu_quadratic; skipping event" << endl;
-    else cerr << "ERROR: zero denominator in Kinematics::GetQWNu_quadratic; skipping event " << endl;
-    cerr << "       p=(" << px << "," << py << "," << pz << "," << pE << ") " << endl;
-    cerr << "       a=" << a << endl;
-    cerr << "       b=" << b << endl;
-    cerr << "       c=" << c << endl;
-    cerr << "       disc=" << disc << endl;
+    cerr << "ERROR: in Kinematics::GetQWNu_quadratic, ";
+    if(isnan(disc))             cerr << "discriminant is NaN";
+    else if(disc<0)             cerr << "negative discriminant";
+    else if(TMath::Abs(a)<1e-6) cerr << "zero denominator";
+    else                        cerr << "unknown reason";
+    cerr << "; skipping event" << endl;
+    // cerr << "       p=(" << px << "," << py << "," << pz << "," << pE << ") " << endl;
+    // cerr << "       a=" << a << endl;
+    // cerr << "       b=" << b << endl;
+    // cerr << "       c=" << c << endl;
+    // cerr << "       disc=" << disc << endl;
+    // cerr << "       hx=" << hx << endl;
+    // cerr << "       hy=" << hy << endl;
+    // cerr << "       Pxh=" << Pxh << endl;
+    // cerr << "       Pyh=" << Pyh << endl;
+    // cerr << "       f=" << f << endl;
+    // cerr << "       y=" << y << endl;
+    // cerr << "       Q2=" << Q2 << endl;
     reconOK = false;
   }
 };

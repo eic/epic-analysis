@@ -80,8 +80,8 @@ void AnalysisDD4hep::Execute()
   CalculateEventQ2Weights();
 
   // counters
-  Long64_t nevt, numNoBeam, numEle, numNoEle, numProxMatched, errorCount;
-  nevt = numNoBeam = numEle = numNoEle = numProxMatched = errorCount = 0;
+  Long64_t nevt, numNoBeam, numEle, numNoEle, numNoHadrons, numProxMatched, errorCount;
+  nevt = numNoBeam = numEle = numNoEle = numNoHadrons = numProxMatched = errorCount = 0;
 
   // event loop =========================================================
   cout << "begin event loop..." << endl;
@@ -190,7 +190,7 @@ void AnalysisDD4hep::Execute()
         for(auto imc : mcpart) {
           if(part.mcID == imc.mcID) {
             recopart.push_back(part);
-            kinTrue->AddToHFS(part.vecPart);
+            kin->AddToHFS(part.vecPart);
             break;
           }
         }
@@ -215,6 +215,13 @@ void AnalysisDD4hep::Execute()
     // subtract electron from hadronic final state variables
     kin->SubtractElectronFromHFS();
     kinTrue->SubtractElectronFromHFS();
+
+    // skip the event if there are no reconstructed particles (other than the
+    // electron), otherwise hadronic recon methods will fail
+    if(kin->countHadrons == 0) {
+      numNoHadrons++;
+      continue;
+    };
     
     // calculate DIS kinematics
     if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
@@ -299,6 +306,8 @@ void AnalysisDD4hep::Execute()
   cout << "Total number of scattered electrons found: " << numEle << endl;
   if(numNoEle>0)
     cerr << "WARNING: skipped " << numNoEle << " events which had no reconstructed scattered electron" << endl;
+  if(numNoHadrons>0)
+    cerr << "WARNING: skipped " << numNoHadrons << " events which had no reconstructed hadrons" << endl;
   if(numNoBeam>0)
     cerr << "WARNING: skipped " << numNoBeam << " events which had no beam particles" << endl;
   if(numProxMatched>0)

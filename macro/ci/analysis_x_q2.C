@@ -11,7 +11,7 @@ void analysis_x_q2(
     TString outfilePrefix="resolution.fullsim",
     // TString outfilePrefix="coverage.fastsim",
     // TString outfilePrefix="coverage.fullsim",
-    TString reconMethod="DA"
+    TString reconMethod="Ele"
 ) {
 
   // setup analysis ========================================
