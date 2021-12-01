@@ -4,9 +4,13 @@ void plotPurities(){
     // Get purity and efficiency plots from different methods output files
     // And plot together
 
-    TString p1 = "out/1bin/JB_dis-18x275-xm25.canvas.root";
-    TString p2 = "out/1bin/DA_dis-18x275-xm25.canvas.root";
-    TString p3 = "out/1bin/Ele_dis-18x275-xm25.canvas.root";
+    // TString p1 = "out/1bin/JB_dis-18x275-xm25.canvas.root";
+    // TString p2 = "out/1bin/DA_dis-18x275-xm25.canvas.root";
+    // TString p3 = "out/1bin/Ele_dis-18x275-xm25.canvas.root";
+
+    TString p1 = "out/JB_dis-10x275-xm25.canvas.root";
+    TString p2 = "out/DA_dis-10x275-xm25.canvas.root";
+    TString p3 = "out/Ele_dis-10x275-xm25.canvas.root";
 
     TFile *f1 = TFile::Open(p1);
     TFile *f2 = TFile::Open(p2);
@@ -18,11 +22,13 @@ void plotPurities(){
     double xMin = 1e-2; double xMax = 1;
     double qMin = 1; double qMax = 1000;
 
-    TString outName = "dis-18x275-xm25";
+    TString outName = "dis-10x275-xm25";
+    // TString outName = "dis-18x275-xm25";
     const int nNames = 5;
-    TString histNames[nNames] = {"z_efficiency","z_purity","z_phiH_Res","z_pT_Res","z_z_Res"};
-    TString labels[nNames] = {"K^{#pm} efficiency","K^{#pm} purity","#phi_{H}","p_{T}","z"};
-    TString header = "18x275GeV (0.2 < z < 1.0)";
+    TString histNames[nNames] = {"z_efficiency","z_purity","z_phiH_Res","z_pT_Res","z_z_Res"};//,"z_phiH_Res",
+    TString labels[nNames] = {"K^{#pm} efficiency","K^{#pm} purity","#phi_{H}","p_{T}","z"};//"#phi_{H}",
+    TString header = "10x275GeV (0.2 < z < 1.0)";
+    // TString header = "18x275GeV (0.2 < z < 1.0)";
     double yMin = -0.1; double yMax=1.0;
 
     int nbinsz = 1; //Set manually...NOTE TODO
@@ -132,7 +138,7 @@ void plotPurities(){
                     h1->SetMarkerSize(1);
                     h1->GetYaxis()->SetRangeUser(-0.05,1);
                     hist->Add(h1);
-                    if ( ((i==4 && j==1) || (i==5 && j==2)) && ((histNames[k]=="z_z_Res" && !jbz) || (histNames[k]=="z_pT_Res" && !jbpt) || (histNames[k]=="z_phiH_Res" && !jbphi)) ) {//TODO: Find where these actually pop up
+                    if ( /*((i==4 && j==1) || (i==5 && j==2)) &&*/ ((histNames[k]=="z_z_Res" && !jbz) || (histNames[k]=="z_pT_Res" && !jbpt) || (histNames[k]=="z_phiH_Res" && !jbphi)) ) {//TODO: Find where these actually pop up
                         
                         if (histNames[k]=="z_z_Res") jbz=true;
                         if (histNames[k]=="z_pT_Res") jbpt=true;
@@ -168,7 +174,7 @@ void plotPurities(){
                     if (histNames[k]=="z_z_Res") h3->SetMarkerStyle(24);
                     if (histNames[k]=="z_pT_Res") h3->SetMarkerStyle(26);
                     if (histNames[k]=="z_phiH_Res") h3->SetMarkerStyle(32);
-                    if (histNames[k]=="z_purity") h3->SetMarkerStyle(21);
+                    if (histNames[k]=="z_purity") h3->SetMarkerStyle(25);
                     if (histNames[k]=="z_efficiency") h3->SetMarkerStyle(34);
                     // std::cout<<"\th3: marker style, color: "<<h3->GetMarkerStyle()<<" "<<h3->GetMarkerColor()<<std::endl;//DEBUGGING
                     h3->SetMarkerColor(2); if (histNames[k]=="z_purity") h3->SetMarkerColor(8);
@@ -180,11 +186,12 @@ void plotPurities(){
                         if (histNames[k]=="z_z_Res") elez=true;
                         if (histNames[k]=="z_pT_Res") elept=true;
                         if (histNames[k]=="z_phiH_Res") elephi=true;
-                        if (histNames[k]=="z_purity") purity=true;
-                        if (histNames[k]=="z_efficiency") efficiency=true;
+                        // if (histNames[k]=="z_purity") purity=true;
+                        // if (histNames[k]=="z_efficiency") efficiency=true;
                         std::cout<<"ADDING ENTRY "<<labels[k]<<std::endl;//DEBUGGING
                         if (histNames[k]!="z_purity" && histNames[k]!="z_efficiency") lg->AddEntry(h3,"Ele "+labels[k],"p");//NOTE: Only grabs hists that are in 0,0 bin
-                        else lg->AddEntry(h3,labels[k],"p");
+                        else if (!purity && histNames[k]=="z_purity") lg->AddEntry(h3,labels[k],"p"); if (histNames[k]=="z_purity") purity=true;
+                        else if (!efficiency && histNames[k]=="z_efficiency") lg->AddEntry(h3,labels[k],"p"); if (histNames[k]=="z_efficiency") efficiency=true;
                     // }
                 }
                 }// if (h1!=nullptr && h2!=nullptr)
@@ -238,7 +245,7 @@ void plotPurities(){
                     if (histNames[k]=="z_z_Res") h3->SetMarkerStyle(24);
                     if (histNames[k]=="z_pT_Res") h3->SetMarkerStyle(26);
                     if (histNames[k]=="z_phiH_Res") h3->SetMarkerStyle(32);
-                    if (histNames[k]=="z_purity") h3->SetMarkerStyle(21);
+                    if (histNames[k]=="z_purity") h3->SetMarkerStyle(25);
                     // std::cout<<"\th3: marker style, color: "<<h3->GetMarkerStyle()<<" "<<h3->GetMarkerColor()<<std::endl;//DEBUGGING
                     h3->SetMarkerColor(2); if (histNames[k]=="z_purity") h3->SetMarkerColor(8);
                     if (histNames[k]=="z_efficiency") h3->SetMarkerColor(9);
@@ -249,11 +256,12 @@ void plotPurities(){
                         if (histNames[k]=="z_z_Res") elez=true;
                         if (histNames[k]=="z_pT_Res") elept=true;
                         if (histNames[k]=="z_phiH_Res") elephi=true;
-                        if (histNames[k]=="z_purity") purity=true;
-                        if (histNames[k]=="z_efficiency") efficiency=true;
+                        // if (histNames[k]=="z_purity") purity=true;
+                        // if (histNames[k]=="z_efficiency") efficiency=true;
                         std::cout<<"ADDING ENTRY "<<labels[k]<<std::endl;//DEBUGGING
                         if (histNames[k]!="z_purity" && histNames[k]!="z_efficiency") lg->AddEntry(h3,"Ele "+labels[k],"p");//NOTE: Only grabs hists that are in 0,0 bin
-                        else lg->AddEntry(h3,labels[k],"p");
+                        else if (!purity && histNames[k]=="z_purity") lg->AddEntry(h3,labels[k],"p"); if (histNames[k]=="z_purity") purity=true;
+                        else if (!efficiency && histNames[k]=="z_efficiency") lg->AddEntry(h3,labels[k],"p"); if (histNames[k]=="z_efficiency") efficiency=true;
                     // }
                 }
                 }// if (h2!=nullptr && h3!=nullptr)
@@ -272,7 +280,7 @@ void plotPurities(){
                     h1->SetMarkerSize(1);
                     h1->GetYaxis()->SetRangeUser(-0.05,1);
                     hist->Add(h1);
-                    if ( ((i==4 && j==1) || (i==5 && j==2)) && ((histNames[k]=="z_z_Res" && !jbz) || (histNames[k]=="z_pT_Res" && !jbpt) || (histNames[k]=="z_phiH_Res" && !jbphi)) ) {//TODO: Find where these actually pop up
+                    if ( /*((i==4 && j==1) || (i==5 && j==2)) &&*/ ((histNames[k]=="z_z_Res" && !jbz) || (histNames[k]=="z_pT_Res" && !jbpt) || (histNames[k]=="z_phiH_Res" && !jbphi)) ) {//TODO: Find where these actually pop up
                         
                         if (histNames[k]=="z_z_Res") jbz=true;
                         if (histNames[k]=="z_pT_Res") jbpt=true;
@@ -307,20 +315,21 @@ void plotPurities(){
                     if (histNames[k]=="z_z_Res") h3->SetMarkerStyle(24);
                     if (histNames[k]=="z_pT_Res") h3->SetMarkerStyle(26);
                     if (histNames[k]=="z_phiH_Res") h3->SetMarkerStyle(32);
-                    if (histNames[k]=="z_purity") h3->SetMarkerStyle(21);
+                    if (histNames[k]=="z_purity") h3->SetMarkerStyle(25);
                     // std::cout<<"\th3: marker style, color: "<<h3->GetMarkerStyle()<<" "<<h3->GetMarkerColor()<<std::endl;//DEBUGGING
                     h3->SetMarkerColor(2); if (histNames[k]=="z_purity") h3->SetMarkerColor(8); if (histNames[k]=="z_efficiency") h3->SetMarkerColor(8);
                     h3->SetMarkerSize(1);
                     h3->GetYaxis()->SetRangeUser(-0.05,1);
                     hist->Add(h3);
-                    if ((histNames[k]=="z_z_Res" && !elez) || (histNames[k]=="z_pT_Res" && !elept) || (histNames[k]=="z_phiH_Res" && !elephi) || !purity){//TODO: Find where these actually pop up
+                    if ((histNames[k]=="z_z_Res" && !elez) || (histNames[k]=="z_pT_Res" && !elept) || (histNames[k]=="z_phiH_Res" && !elephi) || !purity || !efficiency){//TODO: Find where these actually pop up
                         if (histNames[k]=="z_z_Res") elez=true;
                         if (histNames[k]=="z_pT_Res") elept=true;
                         if (histNames[k]=="z_phiH_Res") elephi=true;
-                        if (histNames[k]=="z_purity") purity=true;
+                        
                         std::cout<<"ADDING ENTRY "<<labels[k]<<std::endl;//DEBUGGING
                         if (histNames[k]!="z_purity" && histNames[k]!="z_efficiency") lg->AddEntry(h3,"Ele "+labels[k],"p");//NOTE: Only grabs hists that are in 0,0 bin
-                        else lg->AddEntry(h3,labels[k],"p");
+                        else if (!purity && histNames[k]=="z_purity") lg->AddEntry(h3,labels[k],"p"); if (histNames[k]=="z_purity") purity=true;
+                        else if (!efficiency && histNames[k]=="z_efficiency") lg->AddEntry(h3,labels[k],"p"); if (histNames[k]=="z_efficiency") efficiency=true;
                     // }
                 }
                 }// if (h1!=nullptr && h3!=nullptr)
@@ -372,7 +381,7 @@ void plotPurities(){
                 // //     if (histNames[k]=="z_z_Res") h3->SetMarkerStyle(24);
                 // //     if (histNames[k]=="z_pT_Res") h3->SetMarkerStyle(26);
                 // //     if (histNames[k]=="z_phiH_Res") h3->SetMarkerStyle(32);
-                // //     if (histNames[k]=="z_purity") h3->SetMarkerStyle(21);
+                // //     if (histNames[k]=="z_purity") h3->SetMarkerStyle(25);
                 // //     // std::cout<<"\th3: marker style, color: "<<h3->GetMarkerStyle()<<" "<<h3->GetMarkerColor()<<std::endl;//DEBUGGING
                 // //     h3->SetMarkerColor(2);
                 // //     h3->SetMarkerSize(1);
@@ -421,8 +430,8 @@ void plotPurities(){
             TString drawStr = "";
             switch(1) {//TODO: figure out how to get THStack dimension? //can't use hist->GetHistogram()->GetDimension()
                 case 1:
-                if (i==0) drawStr = "nostack p"; //NOTE: nostackb will just throw an error, don't use. /*"ex0 p nostack"*/
-                else if (nbinsz==1) drawStr = "nostack p a";
+                if (i==0 || nbinsz!=1) drawStr = "nostack p"; //NOTE: nostackb will just throw an error, don't use. /*"ex0 p nostack"*/
+                else drawStr = "nostack p a";
                 break;
                 case 2:
                 drawStr = "COLZ";
