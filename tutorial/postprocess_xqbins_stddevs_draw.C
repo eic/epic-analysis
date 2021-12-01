@@ -1,8 +1,8 @@
 R__LOAD_LIBRARY(Largex)
 
 // make kinematics coverage plots, such as eta vs. p in bins of (x,Q2)
-void postprocess_xqbins_draw(
-    TString infile="out/tutorial.xqbins.root"
+void postprocess_xqbins_stddevs_draw(
+    TString infile="out/tutorial.xqbins.stddevs.root"
 ) {
 
   // setup postprocessor ========================================

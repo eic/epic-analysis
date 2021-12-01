@@ -3,6 +3,9 @@
 
 #include <map>
 #include <iomanip>
+#include <iostream>
+#include <fstream>
+#include <math.h>
 
 // root
 #include "TFile.h"
@@ -12,6 +15,12 @@
 #include "TROOT.h"
 #include "TStyle.h"
 #include "TGaxis.h"
+#include "THStack.h"
+#include "TLegend.h"
+#include "TF1.h"
+#include "TFitResult.h"
+#include "TFitResultPtr.h"
+#include "TMatrixDSym.h"
 
 // largex-eic
 #include "Histos.h"
@@ -33,7 +42,6 @@ class PostProcessor : public TNamed
     const Int_t dimx=800;
     const Int_t dimy=700;
     static const int nsumMax=3; // number of summary plots with formatting
-
 
     // DAG interfaces:
     HistosDAG *GetHistosDAG() { return HD; };
@@ -62,6 +70,7 @@ class PostProcessor : public TNamed
     void DumpHist(TString datFile, TString histSet, TString varName);
     void DumpAve(TString datFile, Histos *H, TString cutName);
     void DrawSingle(Histos *H, TString histName, TString drawFormat="");
+    void DrawSummary(Histos *H, TString histName, TString drawFormat="");
     void DrawSingle(TString histSet, TString histName);
     void DrawRatios(
         TString outName, Histos *numerSet, Histos *denomSet, Bool_t plotRatioOnly=false
@@ -72,6 +81,16 @@ class PostProcessor : public TNamed
         TString var1name, int nvar1, double var1low, double var1high, bool var1log,
         TString var2name, int nvar2, double var2low, double var2high, bool var2log,
         bool intgrid1=false, bool intgrid2=false
+        );
+
+    TH1D *GetSDs(TH2D* fitHist);
+
+    void DrawSDInBinsTogether(
+        TString outName,
+        std::vector<std::vector<Histos*>>& histList, TString header, TString histNames[], TString labels[], int nNames, double yMin, double yMax,
+        TString var1name, int nvar1, double var1low, double var1high, bool var1log,
+        TString var2name, int nvar2, double var2low, double var2high, bool var2log,
+        bool intlog1=false, bool intlog2=false, bool intgrid1=false, bool intgrid2=false
         );
 
     // algorithm finish methods; to be called after loops

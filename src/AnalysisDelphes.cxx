@@ -26,7 +26,6 @@ AnalysisDelphes::AnalysisDelphes(
   /* ... none defined yet ... */
 };
 
-
 //=============================================
 // perform the analysis
 //=============================================
@@ -49,7 +48,7 @@ void AnalysisDelphes::Execute() {
   // calculate cross section
   if(maxEvents>0) ENT = maxEvents; // limiter
 
-  // branch iterators
+  // branch iterators (NEW)
   TObjArrayIter itTrack(tr->UseBranch("Track"));
   TObjArrayIter itElectron(tr->UseBranch("Electron"));
   TObjArrayIter itParticle(tr->UseBranch("Particle"));
@@ -164,7 +163,7 @@ void AnalysisDelphes::Execute() {
     // get vector of jets
     // TODO: should this have an option for clustering method?
     kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
-   
+
     // track loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     itTrack.Reset();
     while(Track *trk = (Track*) itTrack()) {
@@ -173,7 +172,12 @@ void AnalysisDelphes::Execute() {
       // final state cut
       // - check PID, to see if it's a final state we're interested in for
       //   histograms; if not, proceed to next track
-      // pid = trk->PID; //NOTE: trk->PID is currently not smeared so it just returns the truth-level PID
+
+      // MC Truth PID
+      int mcpid = trk->PID; //NOTE: trk->PID is currently not smeared so it just returns the truth-level PID
+      auto kvMC = PIDtoFinalState.find(mcpid);
+
+      // Reconstructed PID
       pid = kin->getTrackPID( // get smeared PID
           trk,
           itpfRICHTrack,
@@ -182,11 +186,16 @@ void AnalysisDelphes::Execute() {
           itdualRICHagTrack, itdualRICHcfTrack
           );
       auto kv = PIDtoFinalState.find(pid);
-      if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
-      if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
+
+      // if(kv!=PIDtoFinalState.end()) { finalStateID = kv->second;
+      // if(activeFinalStates.find(finalStateID)!=activeFinalStates.end()) {
+        if (true) { finalStateID = "pipTrack"; if (pid==321 || pid==-321 || pid==211 || pid==-211) { //DEBUGGING: This  is just a temporary fix for not being able to select multiple final states in the same bin.
+
+      // Get total # of final state particles correctly identified in reconstruction
+      GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
 
       // get parent particle, to check if pion is from vector meson
-      GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
+      // GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
       TObjArray *brParticle = (TObjArray*)itParticle.GetCollection();
       GenParticle *parentParticle = (GenParticle*)brParticle->At(trkParticle->M1);
       int parentPID = (parentParticle->PID); // TODO: this is not used yet...
@@ -221,8 +230,18 @@ void AnalysisDelphes::Execute() {
       wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
       wTrackTotal += wTrack;
 
+      // Get total # of final state particles identified in selected final state
+      if (pid==321 || pid==-321) FillHistosPurity(true,false);
+
+      // And number correctly identified
+      mcpid  = trkParticle->PID;
+      if ((pid==321 || pid==-321) && pid==mcpid) {
+        FillHistosPurity(false,true);
+        FillHistosEfficiency(true,true);
+      }
+
       // fill track histograms in activated bins
-      FillHistosTracks();
+      if (pid==211 || pid==-211) FillHistosTracks();
 
       // fill simple tree
       // - not binned
@@ -231,6 +250,51 @@ void AnalysisDelphes::Execute() {
 
       // tests
       //kin->ValidateHeadOnFrame();
+
+      } // if(kv!=PIDtoFinalState.end())
+      } // if(activeFinalStates.find(finalStateID)!=activeFinalStates.end())
+      if (pid!=mcpid) {
+      // if(kvMC!=PIDtoFinalState.end()) { finalStateID = kv->second;
+      // if(activeFinalStates.find(finalStateID)!=activeFinalStates.end()) {
+        if (true) { finalStateID = "pipTrack"; if (mcpid==321 || mcpid==-321 || mcpid==211 || mcpid==-211) {
+
+      // calculate hadron kinematics
+      GenParticle* trkPart = (GenParticle*)trk->Particle.GetObject();
+      kinTrue->hadPID = mcpid;
+      kinTrue->vecHadron.SetPtEtaPhiM(
+          trkPart->PT,
+          trkPart->Eta,
+          trkPart->Phi,
+          trkPart->Mass /* TODO: do we use track mass here ?? */
+          );
+      
+      kinTrue->CalculateHadronKinematics();
+
+      // asymmetry injection
+      //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
+      //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
+      //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
+  
+      // Get index of file that the event comes from.
+      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
+      wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+      wTrackTotal += wTrack;
+
+      // Get total # of final state particles identified in selected final state
+      if (mcpid==321 || mcpid==-321) FillHistosEfficiency(true,false); //NOTE: DEBUGGING For now just quick fix since can't combine multiple final states in a bin.
+
+      // fill simple tree
+      // - not binned
+      // - `activeEvent` is only true if at least one bin gets filled for this track
+      // - TODO [critical]: add a `finalState` cut (also needed in AnalysisDD4hep)
+      if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
+
+      // tests
+      //kin->ValidateHeadOnFrame();
+    
+      } // if (activeFinalStates.find(finalStateID)!=activeFinalStates.end())
+      } // if (kv!=PIDtoFinalState.end())
+      } // if (pid!=mcpid)
 
     }; // end track loop
 
@@ -272,7 +336,6 @@ void AnalysisDelphes::Execute() {
   };
   cout << "end event loop" << endl;
   // event loop end =========================================================
-
 
   // finish execution
   Finish();

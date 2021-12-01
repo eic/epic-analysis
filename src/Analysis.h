@@ -17,6 +17,7 @@
 #include "TClonesArray.h"
 #include "TFile.h"
 #include "TRegexp.h"
+#include "TF1.h"
 
 // largex-eic
 #include "Histos.h"
@@ -46,7 +47,8 @@ class Analysis : public TNamed
     ~Analysis();
 
     // number of bins for histograms
-    const Int_t NBINS = 50;
+    Int_t NBINS    = 50;
+    Int_t NBINSRES = 50;
     const Int_t NBINS_FULL = 10;
 
     // bin schemes
@@ -98,6 +100,8 @@ class Analysis : public TNamed
 
     // FillHistos methods: fill histograms
     void FillHistosTracks();
+    void FillHistosPurity(bool recMatch, bool mcMatch);
+    void FillHistosEfficiency(bool noMatch, bool mcMatch);
     void FillHistosJets();
 
     // lambda to check which bins an observable is in, during DAG breadth

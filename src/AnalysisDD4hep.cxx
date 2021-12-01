@@ -266,6 +266,8 @@ void AnalysisDD4hep::process_event()
         {
           if(mcid_ == imc.mcID)
           {
+            bool mcMatch=(pid_==imc.pid);
+            FillHistosPurity(false,mcMatch);
             kinTrue->vecHadron = imc.vecPart;
             break;
           }
@@ -283,6 +285,7 @@ void AnalysisDD4hep::process_event()
             if( deta < mineta )
             {
               mineta = deta;
+              FillHistosPurity(pid_,mcpart[imc].pid);
               kinTrue->vecHadron = mcpart[imc].vecPart;
             }
           }

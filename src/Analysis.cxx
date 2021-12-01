@@ -323,6 +323,44 @@ void Analysis::Prepare() {
     HS->DefineHist1D("z_Res","z-z^{true}","", NBINS, -1.5, 1.5);
     HS->DefineHist1D("mX_Res","mX-mX^{true}","GeV", NBINS, -5, 5);
     HS->DefineHist1D("xF_Res","xF-xF^{true}","", NBINS, -1.5, 1.5);
+    // OLD
+    // HS->DefineHist1D("Q2_Res","Q2_{true}-Q2","GeV^{2}", NBINS, -2, 2);
+    // HS->DefineHist1D("x_Res","x_{true}-x","", NBINS, -2, 2);
+    // HS->DefineHist1D("y_Res","y_{true}-y","", NBINS, -2, 2);
+    // HS->DefineHist1D("z_Res","z_{true}-z","", NBINS, -2, 2);
+    // HS->DefineHist1D("pT_Res","pT_{true}-pT","GeV", NBINS, -2, 2);
+    // HS->DefineHist1D("phiH_Res","#phi_{h}^{true}-#phi_{h}","", NBINS, -TMath::Pi(), TMath::Pi());
+    // HS->DefineHist1D("phiS_Res","#phi_{S}^{true}-#phi_{S}","", NBINS, -TMath::Pi(), TMath::Pi());
+
+    // resolutions vs. z on x axis.
+    HS->DefineHist2D("z_Q2_Res","z","","#sigma_{Q2}","", NBINS, 0, 1, NBINSRES, -0.5, 0.5);//TODO: Fill these
+    HS->DefineHist2D("z_x_Res","z","","#sigma_{x}","", NBINS, 0, 1, NBINSRES, -0.5, 0.5);
+    HS->DefineHist2D("z_y_Res","z","","#sigma_{y}","", NBINS, 0, 1, NBINSRES, -0.5, 0.5);
+    HS->DefineHist2D("z_z_Res","z","","#sigma_{z}","", NBINS, 0, 1, NBINSRES, -0.5, 0.5);
+    HS->DefineHist2D("z_pT_Res","z","","#sigma_{pT}","", NBINS, 0, 1, NBINSRES, -0.5, 0.5);
+    HS->DefineHist2D("z_phiH_Res","z","","#sigma_{#phi_{h}^{true}}","", NBINS, 0, 1, NBINSRES, -TMath::Pi(), TMath::Pi());
+    HS->DefineHist2D("z_phiS_Res","z","","#sigma_{#phi_{S}^{true}}","", NBINS, 0, 1, NBINSRES, -TMath::Pi(), TMath::Pi());
+
+    // 1D z-binned purity and efficiency
+    HS->DefineHist1D("z_true","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_trueMC","z","", NBINS, 0, 1);
+    HS->DefineHist1D("z_purity","purity","", NBINS, 0, 1);
+    HS->DefineHist1D("z_efficiency","efficiency","", NBINS, 0, 1);
+
+    // 1D x-binned purity and efficiency
+    HS->DefineHist1D("x_true","x","", NBINS, 1e-5, 1, true);
+    HS->DefineHist1D("x_trueMC","x","", NBINS, 1e-5, 1, true);
+    HS->DefineHist1D("x_purity","purity","", NBINS, 1e-5, 1, true);
+    HS->DefineHist1D("x_efficiency","efficiency","", NBINS, 1e-5, 1, true);
+
+    // // 2D Q2 vs. x binned resolutions
+    // HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -0.5, 0.5);
+    // HS->DefineHist1D("y_Res","y-y_{true}","", NBINS, -0.2, 0.2);
+    // HS->DefineHist1D("Q2_Res","Q2-Q2_{true}","GeV", NBINS, -0.5, 0.5);
+    // HS->DefineHist1D("phiH_Res","#phi_{h}-#phi_{h}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
+    // HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -0.1*TMath::Pi(), 0.1*TMath::Pi());
+    // HS->DefineHist1D("pT_Res","pT-pT^{true}","GeV", NBINS, -1.5, 1.5);
+
     HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
         20,1e-4,1,
         10,1,1e4,
@@ -364,7 +402,6 @@ void Analysis::Prepare() {
         );
   });
   HD->ExecuteAndClearOps();
-
 
   // initialize total weights
   wTrackTotal = 0.;
@@ -425,7 +462,6 @@ Int_t Analysis::GetEventQ2Idx(Double_t Q2, Int_t guess) {
   }
 }
 
-
 // finish the analysis
 //-----------------------------------
 void Analysis::Finish() {
@@ -442,18 +478,25 @@ void Analysis::Finish() {
   // calculate cross sections, and print yields
   HD->Initial([this](){ cout << sep << endl << "Histogram Entries:" << endl; });
   HD->Final([this](){ cout << sep << endl; });
-  HD->Payload([&lumi](Histos *H){
+  HD->Payload([&lumi,this](Histos *H){
     cout << H->GetSetTitle() << " ::: "
          << H->Hist("Q2vsX")->GetEntries()
          << endl;
     // calculate cross sections
     H->Hist("Q_xsec")->Scale(1./lumi); // TODO: generalize (`if (name contains "xsec") ...`)
-    // divide resolution plots by true counts per x-Q2 bin
-    H->Hist("Q2vsXpurity")->Divide(H->Hist("Q2vsXtrue"));
-    H->Hist("Q2vsX_zres")->Divide(H->Hist("Q2vsXtrue"));
-    H->Hist("Q2vsX_pTres")->Divide(H->Hist("Q2vsXtrue"));
-    H->Hist("Q2vsX_phiHres")->Divide(H->Hist("Q2vsXtrue"));        
+
+
+    // Convert to contamination plot since the y scale is better for plotting with stddevs
+    // H->Hist("z_purity")->Add(H->Hist("z_true"),-1);
+    H->Hist("z_purity")->Divide(H->Hist("z_true"));
+    H->Hist("z_efficiency")->Divide(H->Hist("z_trueMC"));
+    H->Hist("x_purity")->Divide(H->Hist("x_true"));
+    H->Hist("x_efficiency")->Divide(H->Hist("x_trueMC"));
+    // TF1 *f1 = new TF1("f1","1",0,1); //TODO: Set limits automatically
+    // H->Hist("z_purity")->Multiply(f1,-1);
+
   });
+
   HD->ExecuteAndClearOps();
 
   // write histograms
@@ -653,6 +696,19 @@ void Analysis::FillHistosTracks() {
     H->Hist("Nu_Res")->Fill( kin->Nu - kinTrue->Nu, wTrack );
     H->Hist("phiH_Res")->Fill( Kinematics::AdjAngle(kin->phiH - kinTrue->phiH), wTrack );
     H->Hist("phiS_Res")->Fill( Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wTrack );
+
+    // z binned resolutions
+    if(kinTrue->Q2!=0) dynamic_cast<TH2*>(H->Hist("z_Q2_Res"))->Fill( kinTrue->z, (kinTrue->Q2 - kin->Q2)/kinTrue->Q2, wTrack );
+    if(kinTrue->z!=0)  dynamic_cast<TH2*>(H->Hist("z_x_Res"))->Fill( kinTrue->z, (kinTrue->x - kin->x)/kinTrue->x, wTrack );
+    if(kinTrue->y!=0)  dynamic_cast<TH2*>(H->Hist("z_y_Res"))->Fill( kinTrue->z, (kinTrue->y - kin->y)/kinTrue->y, wTrack );
+    if(kinTrue->z!=0)  dynamic_cast<TH2*>(H->Hist("z_z_Res"))->Fill( kinTrue->z, (kinTrue->z - kin->z)/kinTrue->z, wTrack );
+    if(kinTrue->pT!=0) dynamic_cast<TH2*>(H->Hist("z_pT_Res"))->Fill( kinTrue->z, (kinTrue->pT - kin->pT)/kinTrue->pT, wTrack );
+    dynamic_cast<TH2*>(H->Hist("z_phiH_Res"))->Fill( kinTrue->z, Kinematics::AdjAngle(kin->phiH - kinTrue->phiH), wTrack );
+    dynamic_cast<TH2*>(H->Hist("z_phiS_Res"))->Fill( kinTrue->z, Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wTrack );
+
+    // purities
+    // H->Hist("z_true")->Fill(kinTrue->z, wTrack );
+    // if( (H->Hist("z_true"))->FindBin(kinTrue->z) == (H->Hist("z_true"))->FindBin(kin->z) ) H->Hist("z_purity")->Fill(kin->z,wTrack);
     H->Hist("pT_Res")->Fill( kin->pT - kinTrue->pT, wTrack );
     H->Hist("z_Res")->Fill( kin->z - kinTrue->z, wTrack );
     H->Hist("mX_Res")->Fill( kin->mX - kinTrue->mX, wTrack );
@@ -675,6 +731,70 @@ void Analysis::FillHistosTracks() {
   // - save time and don't call `ClearOps` (next loop will overwrite lambda)
   // - called with `activeNodesOnly==true` since we only want to fill bins associated
   //   with this track
+  HD->ExecuteOps(true);
+};
+
+// purity
+void Analysis::FillHistosPurity(bool recMatch, bool mcMatch) {
+
+  // add kinematic values to `valueMap`
+  valueMap.clear();
+  activeEvent = false;
+  /* DIS */
+  valueMap.insert(std::pair<TString,Double_t>(  "x",      kin->x      ));
+  valueMap.insert(std::pair<TString,Double_t>(  "q2",     kin->Q2     ));
+  valueMap.insert(std::pair<TString,Double_t>(  "y",      kin->y      ));
+  valueMap.insert(std::pair<TString,Double_t>(  "z",      kin->z      ));
+
+  // check bins
+  // - activates HistosDAG bin nodes which contain this track
+  // - sets `activeEvent` if there is at least one multidimensional bin to fill
+  HD->TraverseBreadth(CheckBin());
+  if(!activeEvent) return;
+
+  // fill histograms, for activated bins only
+  HD->Payload([this,recMatch,mcMatch](Histos *H){
+    if (recMatch) H->Hist("z_true")->Fill(kinTrue->z, wTrack );
+    if (mcMatch) H->Hist("z_purity")->Fill(kinTrue->z,wTrack);
+    if (recMatch) H->Hist("x_true")->Fill(kinTrue->x, wTrack );
+    if (mcMatch) H->Hist("x_purity")->Fill(kinTrue->x,wTrack);
+  });
+  // execute the payload
+  // - save time and don't call `ClearOps` (next loop will overwrite lambda)
+  // - called with `activeNodesOnly==true` since we only want to fill bins associated
+  //   with this jet
+  HD->ExecuteOps(true);
+};
+
+// purity
+void Analysis::FillHistosEfficiency(bool noMatch, bool mcMatch) {
+
+  // add kinematic values to `valueMap`
+  valueMap.clear();
+  activeEvent = false;
+  /* DIS */
+  valueMap.insert(std::pair<TString,Double_t>(  "x",      kin->x      ));
+  valueMap.insert(std::pair<TString,Double_t>(  "q2",     kin->Q2     ));
+  valueMap.insert(std::pair<TString,Double_t>(  "y",      kin->y      ));
+  valueMap.insert(std::pair<TString,Double_t>(  "z",      kin->z      ));
+
+  // check bins
+  // - activates HistosDAG bin nodes which contain this track
+  // - sets `activeEvent` if there is at least one multidimensional bin to fill
+  HD->TraverseBreadth(CheckBin());
+  if(!activeEvent) return;
+
+  // fill histograms, for activated bins only
+  HD->Payload([this,noMatch,mcMatch](Histos *H){
+    if (noMatch) H->Hist("z_trueMC")->Fill(kinTrue->z, wTrack );
+    if (mcMatch) H->Hist("z_efficiency")->Fill(kinTrue->z,wTrack);
+    if (noMatch) H->Hist("x_trueMC")->Fill(kinTrue->x, wTrack );
+    if (mcMatch) H->Hist("x_efficiency")->Fill(kinTrue->x,wTrack);
+  });
+  // execute the payload
+  // - save time and don't call `ClearOps` (next loop will overwrite lambda)
+  // - called with `activeNodesOnly==true` since we only want to fill bins associated
+  //   with this jet
   HD->ExecuteOps(true);
 };
 
@@ -720,9 +840,6 @@ void Analysis::FillHistosJets() {
   //   with this jet
   HD->ExecuteOps(true);
 };
-
-
-
 
 // destructor
 Analysis::~Analysis() {
