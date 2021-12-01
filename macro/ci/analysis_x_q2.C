@@ -2,9 +2,9 @@ R__LOAD_LIBRARY(Largex)
 
 // analysis in bins of (x,Q2)
 void analysis_x_q2(
-    TString infiles="datarec/canyonlands-v1.2/5x41/files.config", // default, for manual local testing
-    Double_t eleBeamEn=5,
-    Double_t ionBeamEn=41,
+    TString infiles="datarec/delphes.config", // default, for manual local testing
+    Double_t eleBeamEn=10,
+    Double_t ionBeamEn=100,
     Double_t crossingAngle=-25,
     TString outfilePrefix="resolution.fastsim",
     TString reconMethod="Ele"
@@ -18,6 +18,7 @@ void analysis_x_q2(
 
   A->SetReconMethod(reconMethod); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
+  // A->writeSimpleTree = true;
 
   // define cuts ===========================================
   A->AddBinScheme("w");  A->BinScheme("w")->BuildBin("Min",3.0); // W > 3 GeV

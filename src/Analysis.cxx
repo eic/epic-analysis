@@ -312,13 +312,25 @@ void Analysis::Prepare() {
     HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
     HS->DefineHist1D("qTQ_jet","jet q_{T}/Q","", NBINS, 0, 3.0);
     // -- resolutions
-    HS->DefineHist1D("Q2_Res","Q2_{true}-Q2","GeV^{2}", NBINS, -2, 2);
-    HS->DefineHist1D("x_Res","x_{true}-x","", NBINS, -2, 2);
-    HS->DefineHist1D("y_Res","y_{true}-y","", NBINS, -2, 2);
-    HS->DefineHist1D("z_Res","z_{true}-z","", NBINS, -2, 2);
-    HS->DefineHist1D("pT_Res","pT_{true}-pT","GeV", NBINS, -2, 2);
-    HS->DefineHist1D("phiH_Res","#phi_{h}^{true}-#phi_{h}","", NBINS, -TMath::Pi(), TMath::Pi());
-    HS->DefineHist1D("phiS_Res","#phi_{S}^{true}-#phi_{S}","", NBINS, -TMath::Pi(), TMath::Pi());
+    HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -0.5, 0.5);
+    HS->DefineHist1D("y_Res","y-y_{true}","", NBINS, -0.2, 0.2);
+    HS->DefineHist1D("Q2_Res","Q2-Q2_{true}","GeV^{2}", NBINS, -20, 20);
+    HS->DefineHist1D("W_Res","W-W_{true}","GeV", NBINS, -20, 20);
+    HS->DefineHist1D("Nu_Res","#nu-#nu_{true}","GeV", NBINS, -100, 100);
+    HS->DefineHist1D("phiH_Res","#phi_{h}-#phi_{h}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
+    HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
+    HS->DefineHist1D("pT_Res","pT-pT^{true}","GeV", NBINS, -1.5, 1.5);
+    HS->DefineHist1D("z_Res","z-z^{true}","", NBINS, -1.5, 1.5);
+    HS->DefineHist1D("mX_Res","mX-mX^{true}","GeV", NBINS, -5, 5);
+    HS->DefineHist1D("xF_Res","xF-xF^{true}","", NBINS, -1.5, 1.5);
+    // OLD
+    // HS->DefineHist1D("Q2_Res","Q2_{true}-Q2","GeV^{2}", NBINS, -2, 2);
+    // HS->DefineHist1D("x_Res","x_{true}-x","", NBINS, -2, 2);
+    // HS->DefineHist1D("y_Res","y_{true}-y","", NBINS, -2, 2);
+    // HS->DefineHist1D("z_Res","z_{true}-z","", NBINS, -2, 2);
+    // HS->DefineHist1D("pT_Res","pT_{true}-pT","GeV", NBINS, -2, 2);
+    // HS->DefineHist1D("phiH_Res","#phi_{h}^{true}-#phi_{h}","", NBINS, -TMath::Pi(), TMath::Pi());
+    // HS->DefineHist1D("phiS_Res","#phi_{S}^{true}-#phi_{S}","", NBINS, -TMath::Pi(), TMath::Pi());
 
     // resolutions vs. z on x axis.
     HS->DefineHist2D("z_Q2_Res","z","","#sigma_{Q2}","", NBINS, 0, 1, NBINSRES, -0.5, 0.5);//TODO: Fill these
@@ -348,6 +360,7 @@ void Analysis::Prepare() {
     // HS->DefineHist1D("phiH_Res","#phi_{h}-#phi_{h}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
     // HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -0.1*TMath::Pi(), 0.1*TMath::Pi());
     // HS->DefineHist1D("pT_Res","pT-pT^{true}","GeV", NBINS, -1.5, 1.5);
+
     HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
         20,1e-4,1,
         10,1,1e4,
@@ -588,12 +601,24 @@ std::function<void(Node*)> Analysis::CheckBin() {
           active = true;
         };
       };
-      if(active) activeEvent=true;
       N->SetActiveState(active);
     };
   };
 };
 
+// payload operator to check if the event is 'active', i.e., there is at least
+// one full NodePath where all bin Nodes are active; it will set `activeEvent`
+//--------------------------------------------------------------------
+std::function<void(NodePath*)> Analysis::CheckActive() {
+  return [this](NodePath *P){
+    if(!activeEvent) { // only check if we don't yet know
+      for(Node *N : P->GetBinNodes()) {
+        if(N->IsActive()==false) return;
+      };
+      activeEvent = true;
+    };
+  };
+};
 
 // FillHistos methods: check bins and fill associated histograms
 // - checks which bins the track/jet/etc. falls in
@@ -604,7 +629,6 @@ void Analysis::FillHistosTracks() {
 
   // add kinematic values to `valueMap`
   valueMap.clear();
-  activeEvent = false;
   /* DIS */
   valueMap.insert(std::pair<TString,Double_t>( "x", kin->x ));
   valueMap.insert(std::pair<TString,Double_t>( "q2", kin->Q2 ));
@@ -627,8 +651,11 @@ void Analysis::FillHistosTracks() {
 
   // check bins
   // - activates HistosDAG bin nodes which contain this track
-  // - sets `activeEvent` if there is at least one multidimensional bin to fill
   HD->TraverseBreadth(CheckBin());
+  // - set `activeEvent` if there is at least one multidimensional bin to fill
+  activeEvent = false;
+  HD->Payload(CheckActive());
+  HD->ExecuteOps(true);
   if(!activeEvent) return;
   
   // fill histograms, for activated bins only
@@ -665,6 +692,8 @@ void Analysis::FillHistosTracks() {
     H->Hist("x_Res")->Fill( kin->x - kinTrue->x, wTrack );
     H->Hist("y_Res")->Fill( kin->y - kinTrue->y, wTrack );
     H->Hist("Q2_Res")->Fill( kin->Q2 - kinTrue->Q2, wTrack );
+    H->Hist("W_Res")->Fill( kin->W - kinTrue->W, wTrack );
+    H->Hist("Nu_Res")->Fill( kin->Nu - kinTrue->Nu, wTrack );
     H->Hist("phiH_Res")->Fill( Kinematics::AdjAngle(kin->phiH - kinTrue->phiH), wTrack );
     H->Hist("phiS_Res")->Fill( Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wTrack );
 
@@ -681,6 +710,9 @@ void Analysis::FillHistosTracks() {
     // H->Hist("z_true")->Fill(kinTrue->z, wTrack );
     // if( (H->Hist("z_true"))->FindBin(kinTrue->z) == (H->Hist("z_true"))->FindBin(kin->z) ) H->Hist("z_purity")->Fill(kin->z,wTrack);
     H->Hist("pT_Res")->Fill( kin->pT - kinTrue->pT, wTrack );
+    H->Hist("z_Res")->Fill( kin->z - kinTrue->z, wTrack );
+    H->Hist("mX_Res")->Fill( kin->mX - kinTrue->mX, wTrack );
+    H->Hist("xF_Res")->Fill( kin->xF - kinTrue->xF, wTrack );
     dynamic_cast<TH2*>(H->Hist("Q2vsXtrue"))->Fill(kinTrue->x,kinTrue->Q2,wTrack);
     if(kinTrue->z!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_zres"))->Fill(
       kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->z - kin->z)/(kinTrue->z) ) );
@@ -771,7 +803,6 @@ void Analysis::FillHistosJets() {
 
   // add kinematic values to `valueMap`
   valueMap.clear();
-  activeEvent = false;
   /* DIS */
   valueMap.insert(std::pair<TString,Double_t>(  "x",      kin->x      ));
   valueMap.insert(std::pair<TString,Double_t>(  "q2",     kin->Q2     ));
@@ -782,8 +813,11 @@ void Analysis::FillHistosJets() {
 
   // check bins
   // - activates HistosDAG bin nodes which contain this track
-  // - sets `activeEvent` if there is at least one multidimensional bin to fill
   HD->TraverseBreadth(CheckBin());
+  // - set `activeEvent` if there is at least one multidimensional bin to fill
+  activeEvent = false;
+  HD->Payload(CheckActive());
+  HD->ExecuteOps(true);
   if(!activeEvent) return;
 
   // fill histograms, for activated bins only

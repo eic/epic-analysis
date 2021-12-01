@@ -14,7 +14,7 @@ releaseDir="S3/eictest/ATHENA/RECO/$release/DIS/NC"
 # usage:
 if [ $# -lt 2 ]; then
   echo """
-  USAGE: $0 [energy] [mode(d/s/c)] [outputFile(optional)]
+  USAGE: $0 [energy] [mode(d/s/c)] [limit(optional)] [outputFile(optional)]
 
    - [energy]: 5x41      | - see below for available datasets
                5x100     | - data from different Q2minima are combined,
@@ -25,8 +25,9 @@ if [ $# -lt 2 ]; then
    - [mode]:   s - make config file for streaming from S3
                d - download from S3, then make the local config file
                c - just make the local config file, for local files
-               i - make config file for streaming from S3, but limit the
-                   number of files included (e.g., for CI or tutorials)
+   
+   - [limit]   integer>0 : only stream/download this many files per Q2 min
+               0         : stream/download all files (default)
    
    - [outputFile]: output file name (optional)
                    - default name is based on release version 
@@ -48,8 +49,10 @@ if [ $# -lt 2 ]; then
 fi
 energy=$1
 mode=$2
+limit=0
 outFile=""
-if [ $# -ge 3 ]; then outFile=$3; fi
+if [ $# -ge 3 ]; then limit=$3; fi
+if [ $# -ge 4 ]; then outFile=$4; fi
 
 # cd to the main directory 
 pushd $(dirname $(realpath $0))/..
@@ -65,7 +68,11 @@ function status { echo ""; echo "[+] $1"; }
 if [ "$mode" == "d" ]; then
   status "downloading files from S3..."
   for Q2min in ${Q2minima[@]}; do
-    s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" | s3tools/download.sh "$targetDir/minQ2=$Q2min"
+    if [ $limit -gt 0 ]; then
+      s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" | head -n$limit | s3tools/download.sh "$targetDir/minQ2=$Q2min"
+    else
+      s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" | s3tools/download.sh "$targetDir/minQ2=$Q2min"
+    fi
   done
 fi
 
@@ -80,9 +87,11 @@ for Q2min in ${Q2minima[@]}; do
   if [ "$mode" == "d" -o "$mode" == "c" ]; then
     s3tools/generate-local-list.sh "$targetDir/minQ2=$Q2min" 0 $crossSection $Q2min | tee -a $configFile
   elif [ "$mode" == "s" ]; then
-    s3tools/generate-s3-list.sh    "$sourceDir/minQ2=$Q2min" 0 $crossSection $Q2min | tee -a $configFile
-  elif [ "$mode" == "i" ]; then
-    s3tools/generate-s3-list.sh    "$sourceDir/minQ2=$Q2min" 0 $crossSection $Q2min | head -n8 | tee -a $configFile
+    if [ $limit -gt 0 ]; then
+      s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" 0 $crossSection $Q2min | head -n$limit | tee -a $configFile
+    else
+      s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" 0 $crossSection $Q2min | tee -a $configFile
+    fi
   else
     echo "ERROR: unknown mode"
     exit 1
