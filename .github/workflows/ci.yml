@@ -57,7 +57,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        minq2: [1, 10, 100, 1000]
+        # minq2: [1, 10, 100, 1000]
+        minq2: [1]
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -143,7 +144,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        aname: [x_q2, p_eta, y_minima]
+        aname: [x_q2, p_eta, yRatio]
         recon: [Ele, DA, JB, Mixed, Sigma, eSigma]
     steps:
       - name: checkout
@@ -193,7 +194,7 @@ jobs:
   #         - coverage_p_eta
   #         - resolution_x_q2
   #         - resolution_p_eta
-  #         - y_minima
+  #         - yRatio
   #       mode:
   #         - fullsim
   #       include:
@@ -214,7 +215,7 @@ jobs:
   #         - name: resolution_p_eta
   #           amacro: analysis_p_eta.C
   #           pmacro: postprocess_p_eta.C
-  #         - name: y_minima
+  #         - name: yRatio
   #           amacro: analysis_yRatio.C
   #           pmacro: postprocess_yRatio.C
   #   steps:
@@ -357,7 +358,7 @@ jobs:
           - coverage_p_eta
           - resolution_x_q2
           - resolution_p_eta
-          - y_minima
+          - yRatio
         recon: [Ele, DA, JB, Mixed, Sigma, eSigma]
         include:
           - pname: bin_test
@@ -375,13 +376,13 @@ jobs:
           - pname: resolution_p_eta
             aname: p_eta
             pmacro: postprocess_p_eta.C
-          - pname: y_minima
-            aname: y_minima
+          - pname: yRatio
+            aname: yRatio
             pmacro: postprocess_yRatio.C
         exclude:
           - pname: bin_test
             recon: [DA, JB, Mixed, Sigma, eSigma]
-          - pname: y_minima
+          - pname: yRatio
             recon: [DA, JB, Mixed, Sigma, eSigma]
     steps:
       - name: checkout
@@ -436,7 +437,7 @@ jobs:
   #         rm -vr results/x_*
   #         rm -vr results/delphes_*_output
   #         find results -name "*.root" -print | xargs rm -v
-  #         rm -v results/y_minima*/*/canv*.png
+  #         rm -v results/yRatio*/*/canv*.png
   #     - name: tree
   #       run: tree results
   #     - name: organize
