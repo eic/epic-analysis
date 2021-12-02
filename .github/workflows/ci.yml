@@ -355,11 +355,11 @@ jobs:
         mode: [fastsim]
         pname:
           - bin_test
-          - coverage_x_q2
-          - coverage_p_eta
+          # - coverage_x_q2
+          # - coverage_p_eta
           - resolution_x_q2
-          - resolution_p_eta
-          - y_minima
+          # - resolution_p_eta
+          # - y_minima
         recon: [Ele]
         include:
           - { pname: bin_test,        recon: Ele, aname: x_q2, pmacro: postprocess_bin_test.C }
