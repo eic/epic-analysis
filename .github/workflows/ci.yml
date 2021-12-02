@@ -346,9 +346,7 @@ jobs:
   collect:
     if: ${{always()}}
     needs: 
-      - analysis_fastsim
-      # - benchmark_fullsim
-      # - benchmark_recon
+      - postprocess
     runs-on: [ ubuntu-latest ]
     steps:
       - name: checkout
