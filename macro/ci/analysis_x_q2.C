@@ -32,10 +32,8 @@ void analysis_x_q2(
   A->AddBinScheme("ptLab");  A->BinScheme("ptLab")->BuildBin("Min",0.1); // pT_lab > 0.1 GeV (tracking limit)
 
   // set binning scheme ====================================
-  Int_t nx, nq;
-  if(outfilePrefix.Contains("bin-test")) { nx=3; nq=3; } else { nx=6; nq=4; };
-  A->AddBinScheme("x");  A->BinScheme("x")->BuildBins(  nx, 0.001, 1,    true );
-  A->AddBinScheme("q2"); A->BinScheme("q2")->BuildBins( nq, 1,     3000,  true );
+  A->AddBinScheme("x");  A->BinScheme("x")->BuildBins(  6, 0.001, 1,    true );
+  A->AddBinScheme("q2"); A->BinScheme("q2")->BuildBins( 4, 1,     3000, true );
 
   // perform the analysis ==================================
   A->Execute();
