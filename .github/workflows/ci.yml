@@ -229,8 +229,7 @@ jobs:
         with:
           name: x_fullsim
       - name: tree
-        shell: bash
-        run: tree datarec
+        run: bash -c "tree datarec"
       - name: cat_config
         run: cat s3files.config
       - name: analysis_macro
