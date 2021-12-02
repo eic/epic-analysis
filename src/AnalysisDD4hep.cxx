@@ -25,12 +25,6 @@ AnalysisDD4hep::AnalysisDD4hep(
       crossingAngle_,
       outfilePrefix_
       ) {
-      // dd4hep-specific settings defaults
-      /*// initialize scatt. electron cuts // DEPRECATED; TODO: remove?
-        fEThreshold = eleBeamEn_*0.1; // min energy cut
-        fIsoR = 1.0;                  // Isolation cone R
-        fIsoCut = 0.1;                // 10%
-        */
     };
 
 // destructor
@@ -38,7 +32,10 @@ AnalysisDD4hep::~AnalysisDD4hep() {
 };
 
 
-void AnalysisDD4hep::process_event()
+//=============================================
+// perform the analysis
+//=============================================
+void AnalysisDD4hep::Execute()
 {
   // setup
   Prepare();
@@ -79,173 +76,163 @@ void AnalysisDD4hep::process_event()
 
   TTreeReader::EEntryStatus entrystats = tr.SetEntry(0);
 
+  // calculate Q2 weights
   CalculateEventQ2Weights();
 
   // counters
-  Long64_t nevt, numNoBeam, numEle, numProxMatched;
-  nevt = numNoBeam = numEle = numProxMatched = 0;
+  Long64_t nevt, numNoBeam, numEle, numNoEle, numNoHadrons, numProxMatched, errorCount;
+  nevt = numNoBeam = numEle = numNoEle = numNoHadrons = numProxMatched = errorCount = 0;
 
   // event loop =========================================================
   cout << "begin event loop..." << endl;
-  int errorCount=0;
-  while(tr.Next())
-  {
+  while(tr.Next()) {
     if(nevt%10000==0) cout << nevt << " events..." << endl;
     nevt++;
     if(nevt>maxEvents && maxEvents>0) break;
 
-    // mcparticles loop (generated truth)
+    // resets
+    kin->ResetHFS();
+    kinTrue->ResetHFS();
+
+    // generated truth loop
+    /* - add truth particle to `mcpart`
+     * - add to hadronic final state sums (momentum, sigma, etc.)
+     * - find scattered electron
+     * - find beam particles
+     */
     std::vector<Particles> mcpart;
     double maxP = 0;
-    int electronID = 0;
+    int genEleID = -1;
     bool foundBeamElectron = false;
     bool foundBeamIon = false;
-    for(int imc=0; imc<mcparticles_pdgID.GetSize(); imc++)
-    {
+    for(int imc=0; imc<mcparticles_pdgID.GetSize(); imc++) {
+
       int pid_ = mcparticles_pdgID[imc];
-      int genStatus_ = mcparticles_genStatus[imc]; // genStatus 4: beam particle 1: final state
+      int genStatus_ = mcparticles_genStatus[imc]; // genStatus 4: beam particle,  1: final state
       double px_ = mcparticles_psx[imc];
       double py_ = mcparticles_psy[imc];
       double pz_ = mcparticles_psz[imc];
       double mass_ = mcparticles_mass[imc]; // in GeV
       double p_ = sqrt(pow(mcparticles_psx[imc],2) + pow(mcparticles_psy[imc],2) + pow(mcparticles_psz[imc],2));
 
-      if(genStatus_ == 1) // final state
-      {
+      if(genStatus_ == 1) { // final state
+
+        // add to `mcpart`
         Particles part;
         part.pid = pid_;
         part.vecPart.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
         part.mcID = mcparticles_ID[imc];
         mcpart.push_back(part);
 
-        if(pid_ == 11)
-        {
-          if(p_ > maxP)
-          {
+        // add to hadronic final state sums
+        kinTrue->AddToHFS(part.vecPart);
+
+        // identify scattered electron by max momentum
+        if(pid_ == 11) {
+          if(p_ > maxP) {
             maxP = p_;
-            kinTrue->vecElectron.SetPxPyPzE(
-                px_,
-                py_,
-                pz_,
-                sqrt(p_*p_ + mass_*mass_)
-                );
-            electronID = mcparticles_ID[imc];
+            kinTrue->vecElectron.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
+            genEleID = mcparticles_ID[imc];
           }
-        }// if electron
-      }//
+        }
+      }
 
       else if(genStatus_ == 4) { // beam particles
         if(pid_ == 11) { // electron beam
           if(!foundBeamElectron) {
             foundBeamElectron = true;
-            kinTrue->vecEleBeam.SetPxPyPzE(
-                px_,
-                py_,
-                pz_,
-                sqrt(p_*p_ + mass_*mass_)
-                );
+            kinTrue->vecEleBeam.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
           }
           else { if(++errorCount<100) cerr << "ERROR: Found two beam electrons in one event" << endl; }
         }
         else { // ion beam
           if(!foundBeamIon) {
             foundBeamIon = true;
-            kinTrue->vecIonBeam.SetPxPyPzE(
-                px_,
-                py_,
-                pz_,
-                sqrt(p_*p_ + mass_*mass_)
-                );
+            kinTrue->vecIonBeam.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
           }
           else { if(++errorCount<100) cerr << "ERROR: Found two beam ions in one event" << endl; }
         }
       }
-    }//mcparticles loop
+    } // end truth loop
 
+    // check beam finding
     if(!foundBeamElectron || !foundBeamIon) { numNoBeam++; continue; };
     if(errorCount>=100 && errorCount<1000) { cerr << "ERROR: .... suppressing beam finder errors ...." << endl; errorCount=1000; };
 
 
-    // calculate true DIS kinematics
-    if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
-
-    // collect reconstructed particles
+    // reconstructed particles loop
+    /* - add reconstructed particle to `recopart`
+     * - find the scattered electron
+     *
+     */
     std::vector<Particles> recopart;
-    double hpx=0;
-    double hpy=0;
-    double hpz=0;
-    double hE=0;
-    int foundElectron = 0;
-    for(int ireco=0; ireco<ReconstructedParticles_pid.GetSize(); ireco++)
-    {
+    int recEleFound = 0;
+    for(int ireco=0; ireco<ReconstructedParticles_pid.GetSize(); ireco++) {
+
       int pid_ = ReconstructedParticles_pid[ireco];
+      if(pid_ == 0) continue; // pid==0: reconstructed tracks with no matching truth pid
 
-      // pid==0: reconstructed tracks with no matching truth pid
-      if(pid_ == 0) continue;
-
-
+      // add reconstructed particle `part` to `recopart`
       Particles part;
       part.pid = pid_;
       part.mcID = ReconstructedParticles_mcID[ireco];
       part.charge = ReconstructedParticles_charge[ireco];
-
       double reco_E = ReconstructedParticles_energy[ireco];
       double reco_px = ReconstructedParticles_p_x[ireco];
       double reco_py = ReconstructedParticles_p_y[ireco];
       double reco_pz = ReconstructedParticles_p_z[ireco];
       double reco_mass = ReconstructedParticles_mass[ireco];
       double reco_p = sqrt(reco_px*reco_px + reco_py*reco_py + reco_pz*reco_pz);
+      part.vecPart.SetPxPyPzE(reco_px, reco_py, reco_pz, sqrt(reco_p*reco_p + reco_mass*reco_mass));
 
-      part.vecPart.SetPxPyPzE(
-          reco_px,
-          reco_py,
-          reco_pz,
-          sqrt(reco_p*reco_p + reco_mass*reco_mass));
-
-      recopart.push_back(part);
-
-      hpx += reco_px;
-      hpy += reco_py;
-      hpz += reco_pz;
-      hE += reco_E;
-
-      // find scattered electron
-      if(pid_ == 11 && part.mcID == electronID)
-      {
-        foundElectron = 1;
-        kin->vecElectron.SetPxPyPzE(reco_px,
-            reco_py,
-            reco_pz,
-            sqrt(reco_p*reco_p + reco_mass*reco_mass));
+      // add to `recopart` and hadronic final state sums only if there is a matching truth particle
+      if(part.mcID > 0) {
+        for(auto imc : mcpart) {
+          if(part.mcID == imc.mcID) {
+            recopart.push_back(part);
+            kin->AddToHFS(part.vecPart);
+            break;
+          }
+        }
       }
-    }//reco loop
 
-    // skip the event if the scattered electron is not found
-    // and we need it to calculate the DIS kinematics
-    if(foundElectron < 1){
-      numEle++;
-      if(reconMethod != "JB")
-        continue;
+      // find scattered electron, by matching to truth // TODO: not realistic... is there an upstream electron finder?
+      if(pid_ == 11 && part.mcID == genEleID) {
+        recEleFound++;
+        kin->vecElectron.SetPxPyPzE(reco_px, reco_py, reco_pz, sqrt(reco_p*reco_p + reco_mass*reco_mass));
+      }
+
+    } // end reco loop
+
+    // skip the event if the scattered electron is not found and we need it
+    if(recEleFound < 1) {
+      numNoEle++;
+      continue; // TODO: only need to skip if we are using a recon method that needs it (`if reconMethod==...`)
     }
+    else if(recEleFound>1) cerr << "WARNING: found more than 1 reconstructed scattered electron in an event" << endl;
+    else numEle++;
 
-    kin->vecHadron.SetPxPyPzE(hpx, hpy, hpz, hE);
-    kin->vecHadron -= kin->vecElectron;
+    // subtract electron from hadronic final state variables
+    kin->SubtractElectronFromHFS();
+    kinTrue->SubtractElectronFromHFS();
 
-    //Hadronic reconstruction
-    TLorentzVector head_vecElectron;
-    TLorentzVector head_vecHadron;
-    kin->TransformToHeadOnFrame(kin->vecElectron,head_vecElectron);
-    kin->TransformToHeadOnFrame(kin->vecHadron,head_vecHadron);
-    kin->sigmah = (head_vecHadron.E() - head_vecHadron.Pz());
-    kin->Pxh = head_vecHadron.Px();
-    kin->Pyh = head_vecHadron.Py();
-
+    // skip the event if there are no reconstructed particles (other than the
+    // electron), otherwise hadronic recon methods will fail
+    if(kin->countHadrons == 0) {
+      numNoHadrons++;
+      continue;
+    };
+    
     // calculate DIS kinematics
     if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
+    if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
 
-    // calculate hadron kinematics
-    for(auto part : recopart)
-    {
+
+    // loop over reconstructed particles again
+    /* - calculate hadron kinematics
+     * - fill output data structures (Histos, SimpleTree, etc.)
+     */
+    for(auto part : recopart) {
       int pid_ = part.pid;
       int mcid_ = part.mcID;
 
@@ -256,46 +243,43 @@ void AnalysisDD4hep::process_event()
       if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
       if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
 
+      // calculate reconstructed hadron kinematics
       kin->vecHadron = part.vecPart;
       kin->CalculateHadronKinematics();
 
-      // find the matching truth information
-      // using mcID
-      if(mcid_ > 0){
-        for(auto imc : mcpart)
-        {
-          if(mcid_ == imc.mcID)
-          {
+      // find the matching truth hadron using mcID, and calculate its kinematics
+      if(mcid_ > 0) {
+        for(auto imc : mcpart) {
+          if(mcid_ == imc.mcID) {
             kinTrue->vecHadron = imc.vecPart;
             break;
           }
         }
       }
-      else{
+      /* // deprecated, since existence of truth match is checked earlier; in practice prox matching was never called
+      else {
         // give it another shot: proximity matching
         double mineta = 4.0;
         numProxMatched++;
-        for(int imc=0; imc<(int)mcpart.size(); imc++)
-        {
-          if(pid_ == mcpart[imc].pid)
-          {
+        for(int imc=0; imc<(int)mcpart.size(); imc++) {
+          if(pid_ == mcpart[imc].pid) {
             double deta = abs(kin->vecHadron.Eta() - mcpart[imc].vecPart.Eta());
-            if( deta < mineta )
-            {
+            if(deta < mineta) {
               mineta = deta;
               kinTrue->vecHadron = mcpart[imc].vecPart;
             }
           }
         }
       }
-
+      */
       kinTrue->CalculateHadronKinematics();
 
       // asymmetry injection
-      //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
-      //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
-      //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
+      // kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
+      // kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
+      // kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
+      // weighting
       Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
       wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
       wTrackTotal += wTrack;
@@ -320,87 +304,13 @@ void AnalysisDD4hep::process_event()
 
   // final printout
   cout << "Total number of scattered electrons found: " << numEle << endl;
+  if(numNoEle>0)
+    cerr << "WARNING: skipped " << numNoEle << " events which had no reconstructed scattered electron" << endl;
+  if(numNoHadrons>0)
+    cerr << "WARNING: skipped " << numNoHadrons << " events which had no reconstructed hadrons" << endl;
   if(numNoBeam>0)
     cerr << "WARNING: skipped " << numNoBeam << " events which had no beam particles" << endl;
   if(numProxMatched>0)
-    cerr << "WARNING: " << numProxMatched << " recon. electrons were proximity matched to truth (when mcID match failed)" << endl;
+    cerr << "WARNING: " << numProxMatched << " recon. particles were proximity matched to truth (when mcID match failed)" << endl;
 
-}//execute
-
-
-
-
-// DEPRECATED electron finder methods; TODO: remove?
-/*
-double AnalysisDD4hep::isolation(double cone_theta, double cone_phi, std::vector<Clusters*> cluster_container, double E_threshold)
-{
-  double cone_eta = -log(tan(cone_theta/2.0));
-  double cone_iso = 0.0;
-
-  // loop over clusters
-  for(auto icl : cluster_container)
-    {
-      auto clusters = *icl;
-      double clus_e     = clusters.E;
-      double clus_phi   = clusters.phi;
-      double clus_theta = clusters.theta;
-      double clus_eta   = -log(tan(clus_theta/2.0));
-      double clus_pt    = clus_e*sin(clus_theta);
-      
-      double dphi = clus_phi - cone_phi;
-      if( dphi > TMath::Pi() ) dphi = dphi - 2*TMath::Pi();
-      double dr = sqrt( pow(dphi,2) + pow((clus_eta - cone_eta), 2) );
-
-      // get E_cone
-      if(dr < fIsoR)
-	{
-	  cone_iso += clus_e;
-	}
-    }// for loop
-
-  return cone_iso;
 }
-
-int AnalysisDD4hep::find_electron(std::vector<Clusters*> ecal_cluster, std::vector<Clusters*> hcal_cluster, double e_threshold)
-{
-
-  // init 
-  double ptmax = 0;
-  double electron_iso = 999;
-  int index_max = -999;
-  
-  int index = 0;
-  for(auto icl : ecal_cluster)
-    {
-      index++;
-      auto icluster = *icl;
-      double clus_E = icluster.E;
-      double clus_theta = icluster.theta;
-      double clus_phi   = icluster.phi;
-      double clus_eta   = -log(tan(clus_theta/2.0));
-      double clus_pt    = clus_E * sin(clus_theta);
-
-      if(clus_E < e_threshold)
-	continue;
-      if(icluster.theta * 180./TMath::Pi() < 2)
-	continue;
-
-      // FIXME hard-coded threshold (currently not used)
-      double clus_ecal_iso = isolation(clus_theta, clus_phi, ecal_cluster, 0.1);
-      double clus_hcal_iso = isolation(clus_theta, clus_phi, hcal_cluster, 0.1);
-      double clus_iso = clus_ecal_iso + clus_hcal_iso - clus_E; // subtract the electron energy
-
-      if(clus_iso > clus_E*fIsoCut)
-	continue;
-
-      if(clus_pt > ptmax)
-	{
-	  ptmax = clus_pt;
-	  electron_iso = clus_iso;
-	  index_max = index;
-	}
-      }// loop over ecal clusters
-  
-  return index_max-1;
-}
-*/

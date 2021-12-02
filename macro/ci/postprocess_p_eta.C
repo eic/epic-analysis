@@ -8,7 +8,6 @@ void postprocess_p_eta(TString infile="out/coverage.fullsim.root") {
   std::vector<TString> histList;
   if(infile.Contains("coverage")) {
     histList.push_back("Q2vsX");
-    histList.push_back("Q");
     histList.push_back("x");
     histList.push_back("y");
     histList.push_back("W");
@@ -24,8 +23,6 @@ void postprocess_p_eta(TString infile="out/coverage.fullsim.root") {
     histList.push_back("phiH");
     histList.push_back("phiS");
     histList.push_back("phiHvsPhiS");
-    histList.push_back("phiSivers");
-    histList.push_back("phiCollins");
     histList.push_back("etaVsP");
   }
   else if(infile.Contains("resolution")) {
@@ -33,8 +30,13 @@ void postprocess_p_eta(TString infile="out/coverage.fullsim.root") {
     histList.push_back("y_Res");
     histList.push_back("pT_Res");
     histList.push_back("Q2_Res");
+    histList.push_back("Nu_Res");
+    histList.push_back("W_Res");
     histList.push_back("phiH_Res");
     histList.push_back("phiS_Res");
+    histList.push_back("z_Res");
+    histList.push_back("mX_Res");
+    histList.push_back("xF_Res");
   } else {
     fprintf(stderr,"ERROR: histList not defined for specified infile name\n");
     return;

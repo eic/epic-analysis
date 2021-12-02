@@ -43,8 +43,8 @@ class Kinematics : public TObject
     Bool_t CalculateDIS(TString recmethod); // return true if succeeded
     void CalculateHadronKinematics();
 
-    // final state accessors
-    void GetHadronicFinalState(
+    // hadronic final state (HFS)
+    void GetHFS(
         TObjArrayIter itTrack,
         TObjArrayIter itEFlowTrack,
         TObjArrayIter itEFlowPhoton,
@@ -54,11 +54,12 @@ class Kinematics : public TObject
         TObjArrayIter itBTOFepidTrack,   TObjArrayIter itBTOFhpidTrack,
         TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
         );
-    void GetHadronicFinalStateTrue(TObjArrayIter itParticle);
-    void GetJets(
-        TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
-        TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
-        );
+    void GetTrueHFS(TObjArrayIter itParticle);
+    void ResetHFS();
+    void SubtractElectronFromHFS();
+    void AddToHFS(TLorentzVector p4_);
+
+    // PID
     int getTrackPID(
         Track *track,
         TObjArrayIter itpfRICHTrack,
@@ -68,6 +69,10 @@ class Kinematics : public TObject
         );
 
     // jet calculators
+    void GetJets(
+        TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
+        TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
+        );
     void CalculateJetKinematics(fastjet::PseudoJet jet);
     #if INCCENTAURO == 1
     void GetBreitFrameJets(
@@ -222,6 +227,13 @@ class Kinematics : public TObject
     void ValidateHeadOnFrame();
 
     Long64_t countPIDsmeared,countPIDtrue,countHadrons;
+
+
+    // settings
+    Int_t mainFrame;
+    enum mainFrame_enum {fLab, fHeadOn};
+    Int_t qComponentsMethod;
+    enum qComponentsMethod_enum {qQuadratic, qHadronic, qElectronic};
      
   protected:
 
@@ -238,7 +250,6 @@ class Kinematics : public TObject
     void GetQWNu_electronic();
     void GetQWNu_hadronic();
     void GetQWNu_quadratic();
-
 
   private:
     static const Int_t asymInjectN = 2;
@@ -272,13 +283,6 @@ class Kinematics : public TObject
     Double_t rotAboutX, rotAboutY;
     // other
     TLorentzVector vecSpin, IvecSpin;
-
-    // settings
-    Int_t mainFrame;
-    enum mainFrame_enum {fLab, fHeadOn};
-    Int_t qComponentsMethod;
-    enum qComponentsMethod_enum {qQuadratic, qHadronic, qElectronic};
-
 
 
   ClassDef(Kinematics,1);
