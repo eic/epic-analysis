@@ -11,14 +11,13 @@ defaults:
     shell: bash
 
 env:
-  ebeam-en: 10
-  pbeam-en: 100
+  ebeam_en: 10
+  pbeam_en: 100
+  cross_ang: -25
 
 jobs:
 
 # BUILD ---------------------------------------------------------------------------
-
-# build test
   build:
     runs-on: [ ubuntu-latest ]
     container:
@@ -45,10 +44,11 @@ jobs:
             mstwpdf/*.so
             src/LargexDict.cxx
 
+
 # DELPHES ---------------------------------------------------------------------------
 
 # run delphes on a hepmc file
-  delphes-fastsim:
+  delphes_fastsim:
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
@@ -56,11 +56,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        minq2:
-          - 1
-          - 10
-          - 100
-          - 1000
+        minq2: [1, 10, 100, 1000]
     steps:
       - name: checkout
         uses: actions/checkout@v2
@@ -71,14 +67,14 @@ jobs:
           source env.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-      - name: download-hepmc-files
+      - name: download_hepmc_files
         env:
-          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
+          S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
         run: |
           s3tools/add-host.sh
           echo "-- build list"
-          s3tools/generate-hepmc-list.sh ${{ env.ebeam-en }}x${{ env.pbeam-en }} ${{ matrix.minq2 }} ci | tee hepmc.list
+          s3tools/generate-hepmc-list.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} ci | tee hepmc.list
           echo "-- download"
           while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
           echo "-- list datagen/"
@@ -89,15 +85,15 @@ jobs:
           for hepmc in datagen/*.hepmc.gz; do ./exeDelphes.sh $hepmc; done
           echo "-- list datarec/"
           ls -lh datarec
-      - name: config-fastsim
+      - name: config_fastsim
         run: |
-          s3tools/make-fastsim-config.sh ${{ env.ebeam-en }}x${{ env.pbeam-en }} ${{ matrix.minq2 }} datarec delphes.config
+          s3tools/make-fastsim-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} datarec delphes.config
           echo "-- cat config"
           cat delphes.config
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: delphes-${{ env.ebeam-en }}x${{ env.pbeam-en }}-q2min${{ matrix.minq2 }}-output
+          name: delphes_${{env.ebeam_en}}x${{env.pbeam_en}}_q2min${{matrix.minq2}}_output
           path: |
             datarec/*.root
             delphes.config
@@ -106,7 +102,7 @@ jobs:
 # CONFIG ---------------------------------------------------------------------------
 
 # generate fullsim config file
-  config-fullsim:
+  config_fullsim:
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
@@ -119,14 +115,14 @@ jobs:
           source env.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-      - name: generate-config
+      - name: generate_config
         env:
-          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
+          S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
+          S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
         run: |
           s3tools/add-host.sh
-          s3tools/make-canyonlands-config.sh ${{ env.ebeam-en }}x${{ env.pbeam-en }} s 8 s3files.config
-      - name: cat-config
+          s3tools/make-canyonlands-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} s 8 s3files.config
+      - name: cat_config
         run: cat s3files.config
       - name: artifacts
         uses: actions/upload-artifact@v2
@@ -134,51 +130,32 @@ jobs:
           name: x_config_fullsim
           path: s3files.config
 
-# BENCHMARKS ---------------------------------------------------------------------------
 
-# - all macros in matrix are w.r.t. path macro/ci/
+# ANALYSIS ---------------------------------------------------------------------------
 
-# run benchmark macros matrix for fastsim
-  benchmark-fastsim:
-    needs: [ build, delphes-fastsim ]
+# run analysis macros matrix for fastsim
+  analysis_fastsim:
+    needs: [ build, delphes_fastsim ]
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
       options: --user root
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        name:
-          - bin-test
-          - coverage-x-q2
-          - coverage-p-eta
-          - resolution-x-q2
-          - resolution-p-eta
-          - y-minima
-        mode:
-          - fastsim
+        aname: [x_q2, p_eta, yRatio]
+        recon: [Ele]
         include:
-          - mode: fastsim
-            config: delphes.config
-          - name: bin-test
-            amacro: analysis_x_q2.C
-            pmacro: postprocess_bin_test.C
-          - name: coverage-x-q2
-            amacro: analysis_x_q2.C
-            pmacro: postprocess_x_q2.C
-          - name: resolution-x-q2
-            amacro: analysis_x_q2.C
-            pmacro: postprocess_x_q2.C
-          - name: coverage-p-eta
-            amacro: analysis_p_eta.C
-            pmacro: postprocess_p_eta.C
-          - name: resolution-p-eta
-            amacro: analysis_p_eta.C
-            pmacro: postprocess_p_eta.C
-          - name: y-minima
-            amacro: analysis_yRatio.C
-            pmacro: postprocess_yRatio.C
+          - { aname: x_q2, recon: Mixed }
+          - { aname: x_q2, recon: JB }
+          - { aname: x_q2, recon: DA }
+          - { aname: x_q2, recon: Sigma }
+          - { aname: x_q2, recon: eSigma }
     steps:
+      - name: echo_matrix
+        run: |
+          echo "aname = ${{matrix.aname}}"
+          echo "recon = ${{matrix.recon}}"
       - name: checkout
         uses: actions/checkout@v2
       - name: env
@@ -186,82 +163,54 @@ jobs:
           source env.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-      - name: get-build-artifacts
+      - name: get_build_artifacts
         uses: actions/download-artifact@v2
         with:
           name: x_build
-      - name: fastsim-get-delphes-files
+      - name: fastsim_get_delphes_files
         uses: actions/download-artifact@v2
         with:
           path: datarec
-      - name: fastsim-organize-delphes-files
+      - name: fastsim_organize_delphes_files
         run: |
           find datarec -name "*.root" -print | tee tmp.list
           cat tmp.list | while read f; do mv -v $f datarec/; done
           cat datarec/delphes*/delphes.config > delphes.config
           sort -nr -o delphes.config{,}
-      - name: echo-matrix
-        run: |
-          echo "name = ${{ matrix.name }}"
-          echo "mode = ${{ matrix.mode }}"
-          echo "config = ${{ matrix.config }}"
-          echo "analysis macro = ${{ matrix.amacro }}"
-          echo "postprocess macro = ${{ matrix.pmacro }}"
-      - name: cat-config
-        run: cat ${{ matrix.config }}
-      - name: analysis
-        run: root -b -q macro/ci/${{ matrix.amacro }}'("${{ matrix.config }}",${{ env.ebeam-en }},${{ env.pbeam-en }},-25,"${{ matrix.name }}.${{ matrix.mode }}")'
-      - name: postprocess
-        run: root -b -q macro/ci/${{ matrix.pmacro }}'("out/${{ matrix.name }}.${{ matrix.mode }}.root")'
+      - name: cat_config
+        run: cat delphes.config
+      - name: analysis_macro
+        run: root -b -q 'macro/ci/analysis_${{matrix.aname}}.C("delphes.config",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"fastsim.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.name }}-${{ matrix.mode }}-plots
-          path: |
-            out/*.images/*.png
-            out/*.root
+          name: root_analysis_fastsim_${{matrix.aname}}_${{matrix.recon}}
+          path: out
 
-# run benchmark macros matrix for fullsim
-  benchmark-fullsim:
-    needs: [ build, config-fullsim ]
+
+# run analysis macros matrix for fullsim
+  analysis_fullsim:
+    needs: [ build, config_fullsim ]
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
       options: --user root
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
-        name:
-          - bin-test
-          - coverage-x-q2
-          - coverage-p-eta
-          - resolution-x-q2
-          - resolution-p-eta
-          - y-minima
-        mode:
-          - fullsim
+        aname: [x_q2, p_eta, yRatio]
+        recon: [Ele]
         include:
-          - mode: fullsim
-            config: s3files.config
-          - name: bin-test
-            amacro: analysis_x_q2.C
-            pmacro: postprocess_bin_test.C
-          - name: coverage-x-q2
-            amacro: analysis_x_q2.C
-            pmacro: postprocess_x_q2.C
-          - name: resolution-x-q2
-            amacro: analysis_x_q2.C
-            pmacro: postprocess_x_q2.C
-          - name: coverage-p-eta
-            amacro: analysis_p_eta.C
-            pmacro: postprocess_p_eta.C
-          - name: resolution-p-eta
-            amacro: analysis_p_eta.C
-            pmacro: postprocess_p_eta.C
-          - name: y-minima
-            amacro: analysis_yRatio.C
-            pmacro: postprocess_yRatio.C
+          - { aname: x_q2, recon: Mixed }
+          - { aname: x_q2, recon: JB }
+          - { aname: x_q2, recon: DA }
+          - { aname: x_q2, recon: Sigma }
+          - { aname: x_q2, recon: eSigma }
     steps:
+      - name: echo_matrix
+        run: |
+          echo "aname = ${{matrix.aname}}"
+          echo "recon = ${{matrix.recon}}"
       - name: checkout
         uses: actions/checkout@v2
       - name: env
@@ -269,41 +218,37 @@ jobs:
           source env.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-      - name: get-build-artifacts
+      - name: get_build_artifacts
         uses: actions/download-artifact@v2
         with:
           name: x_build
-      - name: fullsim-get-config
+      - name: fullsim_get_config
         uses: actions/download-artifact@v2
         with:
           name: x_config_fullsim
-      - name: echo-matrix
-        run: |
-          echo "name = ${{ matrix.name }}"
-          echo "mode = ${{ matrix.mode }}"
-          echo "config = ${{ matrix.config }}"
-          echo "analysis macro = ${{ matrix.amacro }}"
-          echo "postprocess macro = ${{ matrix.pmacro }}"
-      - name: cat-config
-        run: cat ${{ matrix.config }}
-      - name: analysis
+      - name: cat_config
+        run: cat s3files.config
+      - name: analysis_macro
         env:
-          S3_ACCESS_KEY: ${{ secrets.S3_ACCESS_KEY }}
-          S3_SECRET_KEY: ${{ secrets.S3_SECRET_KEY }}
-        run: root -b -q macro/ci/${{ matrix.amacro }}'("${{ matrix.config }}",${{ env.ebeam-en }},${{ env.pbeam-en }},-25,"${{ matrix.name }}.${{ matrix.mode }}")'
-      - name: postprocess
-        run: root -b -q macro/ci/${{ matrix.pmacro }}'("out/${{ matrix.name }}.${{ matrix.mode }}.root")'
+          S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
+          S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
+        run: root -b -q 'macro/ci/analysis_${{matrix.aname}}.C("s3files.config",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"fullsim.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.name }}-${{ matrix.mode }}-plots
-          path: |
-            out/*.images/*.png
-            out/*.root
+          name: root_analysis_fullsim_${{matrix.aname}}_${{matrix.recon}}
+          path: out
 
-# run reconstruction methods matrix for fastsim
-  benchmark-recon:
-    needs: [ build, delphes-fastsim ]
+
+# POSTPROCESS ---------------------------------------------------------------------------
+
+# run postprocess macros matrix for fastsim and fullsim
+  postprocess:
+    if: ${{always()}}
+    needs: 
+      - build
+      - analysis_fastsim
+      - analysis_fullsim
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
@@ -311,28 +256,56 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        name:
-          - recon-coverage
-          - recon-resolution
         mode:
           - fastsim
-        recon:
-          - Ele
-          - DA
-          - JB
-          - Mixed
-          - Sigma
-          - eSigma
+          - fullsim
+        pname: # list only jobs which will only use one (primary) recon method
+          - bin_test
+          - coverage_p_eta
+          - resolution_p_eta
+          - y_minima
+        recon: [Ele] # primary recon method(s)
         include:
-          - mode: fastsim
-            config: delphes.config
-          - name: recon-coverage
-            amacro: analysis_x_q2.C
-            pmacro: postprocess_x_q2.C
-          - name: recon-resolution
-            amacro: analysis_x_q2.C
-            pmacro: postprocess_x_q2.C
+          # use only primary recon method
+          - { pname: bin_test,         aname: x_q2,   pmacro: postprocess_bin_test.C }
+          - { pname: coverage_p_eta,   aname: p_eta,  pmacro: postprocess_p_eta.C }
+          - { pname: resolution_p_eta, aname: p_eta,  pmacro: postprocess_p_eta.C }
+          - { pname: y_minima,         aname: yRatio, pmacro: postprocess_yRatio.C }
+          # use all reconstruction methods: (...seems like we really need to define every matrix element...) 
+          ## resolution
+          - { mode: fastsim, pname: resolution_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: resolution_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: resolution_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: resolution_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: resolution_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: resolution_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: resolution_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: resolution_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: resolution_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: resolution_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: resolution_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: resolution_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          ## coverage
+          - { mode: fastsim, pname: coverage_x_q2,   recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: coverage_x_q2,   recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage_x_q2,   recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: coverage_x_q2,   recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage_x_q2,   recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: coverage_x_q2,   recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage_x_q2,   recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: coverage_x_q2,   recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage_x_q2,   recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: coverage_x_q2,   recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage_x_q2,   recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: coverage_x_q2,   recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
     steps:
+      - name: echo_matrix
+        run: |
+          echo "aname = ${{matrix.aname}}"
+          echo "pname = ${{matrix.pname}}"
+          echo "mode = ${{matrix.mode}}"
+          echo "recon = ${{matrix.recon}}"
+          echo "pmacro = ${{matrix.pmacro}}"
       - name: checkout
         uses: actions/checkout@v2
       - name: env
@@ -340,38 +313,25 @@ jobs:
           source env.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-      - name: get-build-artifacts
+      - name: get_build_artifacts
         uses: actions/download-artifact@v2
         with:
           name: x_build
-      - name: fastsim-get-delphes-files
+      - name: get_analysis_artifacts
         uses: actions/download-artifact@v2
         with:
-          path: datarec
-      - name: fastsim-organize-delphes-files
+          name: root_analysis_${{matrix.mode}}_${{matrix.aname}}_${{matrix.recon}}
+          path: out
+      - name: postprocess_macro
         run: |
-          find datarec -name "*.root" -print | tee tmp.list
-          cat tmp.list | while read f; do mv -v $f datarec/; done
-          cat datarec/delphes*/delphes.config > delphes.config
-          sort -nr -o delphes.config{,}
-      - name: echo-matrix
-        run: |
-          echo "name = ${{ matrix.name }}"
-          echo "mode = ${{ matrix.mode }}"
-          echo "config = ${{ matrix.config }}"
-          echo "recon = ${{ matrix.recon }}"
-          echo "analysis macro = ${{ matrix.amacro }}"
-          echo "postprocess macro = ${{ matrix.pmacro }}"
-      - name: cat-config
-        run: cat ${{ matrix.config }}
-      - name: analysis
-        run: root -b -q macro/ci/${{ matrix.amacro }}'("${{ matrix.config }}",${{ env.ebeam-en }},${{ env.pbeam-en }},-25,"${{ matrix.name }}.${{ matrix.recon }}","${{ matrix.recon }}")'
-      - name: postprocess
-        run: root -b -q macro/ci/${{ matrix.pmacro }}'("out/${{ matrix.name }}.${{ matrix.recon }}.root")'
+          ls out
+          mv -v out/${{matrix.mode}}.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
+          root -b -q 'macro/ci/${{matrix.pmacro}}("out/${{matrix.mode}}.${{matrix.pname}}.${{matrix.recon}}.root")'
+          rm -v out/${{matrix.mode}}.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.name }}-${{ matrix.recon }}-plots
+          name: results_${{matrix.mode}}_${{matrix.pname}}_${{matrix.recon}}
           path: |
             out/*.images/*.png
             out/*.root
@@ -381,11 +341,9 @@ jobs:
 
 # collect artifacts into one directory
   collect:
-    if: ${{ always() }}
+    if: ${{always()}}
     needs: 
-      - benchmark-fastsim
-      - benchmark-fullsim
-      - benchmark-recon
+      - postprocess
     runs-on: [ ubuntu-latest ]
     steps:
       - name: checkout
@@ -394,20 +352,25 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           path: results
-      - name: tree
+      - name: tree_artifacts
         run: tree results
       - name: cull
         run: |
           rm -vr results/x_*
-          rm -vr results/delphes-*-output
+          rm -vr results/root_analysis_*
+          rm -vr results/delphes_*_output
           find results -name "*.root" -print | xargs rm -v
-          rm -v results/y-minima*/*/canv*.png
-      - name: tree
-        run: tree results
-      - name: organize
-        run: macro/ci/organize-artifacts.sh results
-      - name: tree
-        run: tree results
+          rm -v results/*y_minima*/*/canv*.png
+          tree results
+      - name: merge_recon
+        run: |
+          macro/ci/merge-recon.sh results resolution_x_q2
+          macro/ci/merge-recon.sh results coverage_x_q2
+          tree results
+      - name: merge_fastfull
+        run: |
+          macro/ci/merge-fastfull.sh results
+          tree results
       - name: upload
         uses: actions/upload-artifact@v2
         with:
