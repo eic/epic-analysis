@@ -19,7 +19,7 @@ if [ $# -ge 3 ]; then mode=$3; fi
 
 evgenDir="S3/eictest/ATHENA/EVGEN/DIS/NC/$energy/minQ2=$minQ2"
 if [ "$mode" == "ci" ]; then
-  mc ls $evgenDir | grep -E 'hepmc.gz$' | grep -v GiB | grep vtxfix | head -n4 | sed "s;^.* ;$evgenDir/;g"
+  mc ls $evgenDir | grep -E 'hepmc.gz$' | grep -v GiB | grep vtxfix | head -n1 | sed "s;^.* ;$evgenDir/;g"
 else
   mc ls $evgenDir | grep -E 'hepmc.gz$' | grep -v GiB | grep vtxfix | sed "s;^.* ;$evgenDir/;g"
 fi
