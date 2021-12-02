@@ -44,6 +44,7 @@ jobs:
             mstwpdf/*.so
             src/LargexDict.cxx
 
+
 # DELPHES ---------------------------------------------------------------------------
 
 # run delphes on a hepmc file
@@ -102,33 +103,34 @@ jobs:
 # CONFIG ---------------------------------------------------------------------------
 
 # generate fullsim config file
-  # config_fullsim:
-  #   runs-on: [ ubuntu-latest ]
-  #   container:
-  #     image: cjdilks/largex-eic:dev
-  #     options: --user root
-  #   steps:
-  #     - name: checkout
-  #       uses: actions/checkout@v2
-  #     - name: env
-  #       run: |
-  #         source env.sh
-  #         echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-  #         echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-  #     - name: generate_config
-  #       env:
-  #         S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
-  #         S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
-  #       run: |
-  #         s3tools/add-host.sh
-  #         s3tools/make-canyonlands-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} s 8 s3files.config
-  #     - name: cat_config
-  #       run: cat s3files.config
-  #     - name: artifacts
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: x_config_fullsim
-  #         path: s3files.config
+  config_fullsim:
+    runs-on: [ ubuntu-latest ]
+    container:
+      image: cjdilks/largex-eic:dev
+      options: --user root
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: env
+        run: |
+          source env.sh
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
+      - name: generate_config
+        env:
+          S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
+          S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
+        run: |
+          s3tools/add-host.sh
+          s3tools/make-canyonlands-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} s 8 s3files.config
+      - name: cat_config
+        run: cat s3files.config
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: x_config_fullsim
+          path: s3files.config
+
 
 # ANALYSIS ---------------------------------------------------------------------------
 
