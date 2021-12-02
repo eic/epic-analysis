@@ -362,9 +362,9 @@ jobs:
           # - y_minima
         recon: [Ele]
         include:
-          - { pname: bin_test,        recon: Ele, aname: x_q2, pmacro: postprocess_bin_test.C }
-          - { pname: resolution_x_q2, recon: Ele, aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { pname: resolution_x_q2, recon: DA,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { pname: bin_test,        aname: x_q2, pmacro: postprocess_bin_test.C }
+          - { pname: resolution_x_q2, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { recon: DA, pname: resolution_x_q2 }
           # - { pname: resolution_x_q2,  aname: x_q2,   pmacro: postprocess_x_q2.C,     recon: JB }
           # - { pname: resolution_x_q2,  aname: x_q2,   pmacro: postprocess_x_q2.C,     recon: Mixed }
           # - { pname: resolution_x_q2,  aname: x_q2,   pmacro: postprocess_x_q2.C,     recon: Sigma }
