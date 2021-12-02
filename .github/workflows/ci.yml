@@ -360,6 +360,7 @@ jobs:
           - resolution_x_q2
           - resolution_p_eta
           - y_minima
+        recon: [Ele]
         include:
           - { pname: bin_test,         aname: x_q2,   pmacro: postprocess_bin_test.C, recon: Ele }
           - { pname: coverage_x_q2,    aname: x_q2,   pmacro: postprocess_x_q2.C,     recon: Ele }
