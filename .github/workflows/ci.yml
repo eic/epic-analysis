@@ -339,10 +339,10 @@ jobs:
 # run postprocess macros matrix for fastsim and fullsim
   postprocess:
     if: ${{ always() }}
-    needs: 
-      - build
-      - analysis_fastsim
-      # - analysis_fullsim
+    # needs: 
+    #   - build
+    #   - analysis_fastsim
+    #   # - analysis_fullsim
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
@@ -358,7 +358,7 @@ jobs:
           - coverage_p_eta
           - resolution_x_q2
           - resolution_p_eta
-          - yRatio
+          - y_minima
         recon: [Ele]
         include:
           - { pname: bin_test,         aname: x_q2,   pmacro: postprocess_bin_test.C }
