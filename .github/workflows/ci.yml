@@ -99,10 +99,10 @@ jobs:
             delphes.config
 
 
-# CONFIG ---------------------------------------------------------------------------
+# DOWNLOAD FULLSIM ---------------------------------------------------------------------------
 
-# generate fullsim config file
-  config_fullsim:
+# download fullsim files and make config
+  download_fullsim:
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
@@ -115,20 +115,22 @@ jobs:
           source env.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-      - name: generate_config
+      - name: download_fullsim
         env:
           S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
           S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
         run: |
           s3tools/add-host.sh
-          s3tools/make-canyonlands-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} s 8 s3files.config
+          s3tools/make-canyonlands-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} d 8 s3files.config
       - name: cat_config
         run: cat s3files.config
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: x_config_fullsim
-          path: s3files.config
+          name: x_fullsim
+          path: |
+            s3files.config
+            datarec
 
 
 # ANALYSIS ---------------------------------------------------------------------------
@@ -190,7 +192,7 @@ jobs:
 
 # run analysis macros matrix for fullsim
   analysis_fullsim:
-    needs: [ build, config_fullsim ]
+    needs: [ build, download_fullsim ]
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
@@ -222,10 +224,10 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: x_build
-      - name: fullsim_get_config
+      - name: get_fullsim_artifacts
         uses: actions/download-artifact@v2
         with:
-          name: x_config_fullsim
+          name: x_fullsim
       - name: cat_config
         run: cat s3files.config
       - name: analysis_macro
