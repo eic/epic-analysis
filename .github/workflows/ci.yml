@@ -354,23 +354,21 @@ jobs:
         # mode: [fastsim]
         pname:
           - bin_test
-          - coverage_x_q2
-          - coverage_p_eta
+          # - coverage_x_q2
+          # - coverage_p_eta
           - resolution_x_q2
-          - resolution_p_eta
-          - y_minima
+          # - resolution_p_eta
+          # - y_minima
         # recon: [Ele, Mixed, JB, DA, Sigma, eSigma]
-        recon: [Ele, DA]
-        exclude:
-          - recon: DA
+        recon: [Ele]
         include:
-          - { pname: bin_test,         recon: Ele, aname: x_q2,   pmacro: postprocess_bin_test.C }
-          - { pname: coverage_x_q2,    recon: Ele, aname: x_q2,   pmacro: postprocess_x_q2.C }
-          - { pname: coverage_p_eta,   recon: Ele, aname: p_eta,  pmacro: postprocess_p_eta.C }
-          - { pname: resolution_x_q2,  recon: Ele, aname: x_q2,   pmacro: postprocess_x_q2.C }
-          - { pname: resolution_x_q2,  recon: DA, aname: x_q2,   pmacro: postprocess_x_q2.C }
-          - { pname: resolution_p_eta, recon: Ele, aname: p_eta,  pmacro: postprocess_p_eta.C }
-          - { pname: y_minima,         recon: Ele, aname: yRatio, pmacro: postprocess_yRatio.C }
+          - { pname: bin_test,         aname: x_q2,   pmacro: postprocess_bin_test.C }
+          # - { pname: coverage_x_q2,    aname: x_q2,   pmacro: postprocess_x_q2.C }
+          # - { pname: coverage_p_eta,   aname: p_eta,  pmacro: postprocess_p_eta.C }
+          - { mode: fastsim, pname: resolution_x_q2,  recon: DA, aname: x_q2,   pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: resolution_x_q2,  recon: DA, aname: x_q2,   pmacro: postprocess_x_q2.C }
+          # - { pname: resolution_p_eta, aname: p_eta,  pmacro: postprocess_p_eta.C }
+          # - { pname: y_minima,         aname: yRatio, pmacro: postprocess_yRatio.C }
         # exclude:
         #   - { pname: bin_test, recon: Mixed }
         #   - { pname: bin_test, recon: JB }
