@@ -14,7 +14,6 @@ env:
   ebeam_en: 10
   pbeam_en: 100
   cross_ang: -25
-  recon_method: Ele
 
 jobs:
 
@@ -349,10 +348,10 @@ jobs:
       image: cjdilks/largex-eic:dev
       options: --user root
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        # mode: [fastsim, fullsim]
-        mode: [fastsim]
+        mode: [fastsim, fullsim]
+        # mode: [fastsim]
         pname:
           - bin_test
           # - coverage_x_q2
@@ -365,6 +364,7 @@ jobs:
           - { pname: bin_test,        aname: x_q2, pmacro: postprocess_bin_test.C }
           - { pname: resolution_x_q2, aname: x_q2, pmacro: postprocess_x_q2.C }
           - { recon: DA, pname: resolution_x_q2 }
+          - { recon: JB, pname: resolution_x_q2 }
           # - { pname: resolution_x_q2,  aname: x_q2,   pmacro: postprocess_x_q2.C,     recon: JB }
           # - { pname: resolution_x_q2,  aname: x_q2,   pmacro: postprocess_x_q2.C,     recon: Mixed }
           # - { pname: resolution_x_q2,  aname: x_q2,   pmacro: postprocess_x_q2.C,     recon: Sigma }
