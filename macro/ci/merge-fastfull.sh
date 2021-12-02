@@ -7,10 +7,8 @@
 if [ $# -ne 1 ]; then echo "USAGE: $0 [artifacts-dir]"; exit 2; fi
 pushd $1
 
-##########################
 # merge directories of fastsim and fullsim files, for comparison
 # - adds `.fastsim` or `.fullsim` suffixes to filenames
-##########################
 echo "------------- merge fastsim and fullsim -------------------"
 # loop through *fastsim* directories
 ls | grep fastsim |\
@@ -19,7 +17,7 @@ while read dirFast; do
   # set fullsim and output directory names
   echo "--------------------"
   dirFull=$(echo $dirFast | sed 's/fastsim/fullsim/g')
-  dirOut=$(echo $dirFast | sed 's/fastsim//g' | sed 's/--/-/g')
+  dirOut=$(echo $dirFast | sed 's/fastsim//g' | sed 's/__/_/g')
   mkdir -p $dirOut
 
   # move fastsim artifacts to output directory, and add suffix to file name
@@ -45,28 +43,6 @@ while read dirFast; do
   rm -rv $dirFast $dirFull
 
 done
-
-
-########################
-# merge recon-* directories, adding recon method to suffix
-########################
-echo "------------- merge recon methods -------------------"
-# loop through recon* directories
-ls | grep -E '^recon-' |\
-while read dirRecon; do
-  method=$(echo $dirRecon | sed 's/-plots$//g' | sed 's/^.*-//g')
-  dirOut=$(echo $dirRecon | sed "s/-$method//g" | sed 's/^recon-/&methods-/g')
-  echo "MOVE ARTIFACTS IN $dirRecon/ FOR METHOD \"$method\" TO $dirOut/"
-  mkdir -p $dirOut
-  pushd $dirRecon
-  mv -v *.images/* ./; rm -r *.images
-  for file in *; do
-    mv -v $file ../$dirOut/$(echo $file | sed "s/^.*\./&$method./g")
-  done
-  popd
-  rm -r $dirRecon
-done
-
 
 ############
 popd
