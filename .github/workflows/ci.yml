@@ -372,11 +372,12 @@ jobs:
           # - { pname: resolution_p_eta, aname: p_eta,  pmacro: postprocess_p_eta.C }
           # - { pname: y_minima,         aname: yRatio, pmacro: postprocess_yRatio.C }
         exclude:
-          - { pname: bin_test, recon: Mixed }
-          - { pname: bin_test, recon: JB }
-          - { pname: bin_test, recon: DA }
-          - { pname: bin_test, recon: Sigma }
-          - { pname: bin_test, recon: eSigma }
+          - { pname: bin_test, recon: [Mixed, JB, DA, Sigma, eSigma] }
+          # - { pname: bin_test, recon: Mixed }
+          # - { pname: bin_test, recon: JB }
+          # - { pname: bin_test, recon: DA }
+          # - { pname: bin_test, recon: Sigma }
+          # - { pname: bin_test, recon: eSigma }
     steps:
       - name: echo_matrix
         run: |
