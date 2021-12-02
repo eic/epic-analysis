@@ -151,6 +151,10 @@ jobs:
           # - { aname: x_q2, recon: Sigma }
           # - { aname: x_q2, recon: eSigma }
     steps:
+      - name: echo_matrix
+        run: |
+          echo "aname = ${{matrix.aname}}"
+          echo "recon = ${{matrix.recon}}"
       - name: checkout
         uses: actions/checkout@v2
       - name: env
@@ -182,160 +186,57 @@ jobs:
           name: root_analysis_fastsim_${{matrix.aname}}_${{matrix.recon}}
           path: out
 
-# run benchmark macros matrix for fullsim #####OLD
-  # benchmark_fullsim:
-  #   needs: [ build, config_fullsim ]
-  #   runs-on: [ ubuntu-latest ]
-  #   container:
-  #     image: cjdilks/largex-eic:dev
-  #     options: --user root
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       name:
-  #         - bin_test
-  #         - coverage_x_q2
-  #         - coverage_p_eta
-  #         - resolution_x_q2
-  #         - resolution_p_eta
-  #         - yRatio
-  #       mode:
-  #         - fullsim
-  #       include:
-  #         - mode: fullsim
-  #           config: s3files.config
-  #         - name: bin_test
-  #           amacro: analysis_x_q2.C
-  #           pmacro: postprocess_bin_test.C
-  #         - name: coverage_x_q2
-  #           amacro: analysis_x_q2.C
-  #           pmacro: postprocess_x_q2.C
-  #         - name: resolution_x_q2
-  #           amacro: analysis_x_q2.C
-  #           pmacro: postprocess_x_q2.C
-  #         - name: coverage_p_eta
-  #           amacro: analysis_p_eta.C
-  #           pmacro: postprocess_p_eta.C
-  #         - name: resolution_p_eta
-  #           amacro: analysis_p_eta.C
-  #           pmacro: postprocess_p_eta.C
-  #         - name: yRatio
-  #           amacro: analysis_yRatio.C
-  #           pmacro: postprocess_yRatio.C
-  #   steps:
-  #     - name: checkout
-  #       uses: actions/checkout@v2
-  #     - name: env
-  #       run: |
-  #         source env.sh
-  #         echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-  #         echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-  #     - name: get_build_artifacts
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: x_build
-  #     - name: fullsim_get_config
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: x_config_fullsim
-  #     - name: echo_matrix
-  #       run: |
-  #         echo "name = ${{matrix.name}}"
-  #         echo "mode = ${{matrix.mode}}"
-  #         echo "config = ${{matrix.config}}"
-  #         echo "analysis macro = ${{matrix.amacro}}"
-  #         echo "postprocess macro = ${{matrix.pmacro}}"
-  #     - name: cat_config
-  #       run: cat ${{matrix.config}}
-  #     - name: analysis
-  #       env:
-  #         S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
-  #         S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
-  #       run: root -b -q macro/ci/${{matrix.amacro}}'("${{matrix.config}}",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"${{matrix.name}}.${{matrix.mode}}")'
-  #     - name: postprocess
-  #       run: root -b -q macro/ci/${{matrix.pmacro}}'("out/${{matrix.name}}.${{matrix.mode}}.root")'
-  #     - name: artifacts
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: ${{matrix.name}}_${{matrix.mode}}_plots
-  #         path: |
-  #           out/*.images/*.png
-  #           out/*.root
 
-# run reconstruction methods matrix for fastsim #####OLD
-  # benchmark_recon:
-  #   needs: [ build, delphes_fastsim ]
-  #   runs-on: [ ubuntu-latest ]
-  #   container:
-  #     image: cjdilks/largex-eic:dev
-  #     options: --user root
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       name:
-  #         - recon_coverage
-  #         - recon_resolution
-  #       mode:
-  #         - fastsim
-  #       recon:
-  #         - Ele
-  #         - DA
-  #         - JB
-  #         - Mixed
-  #         - Sigma
-  #         - eSigma
-  #       include:
-  #         - mode: fastsim
-  #           config: delphes.config
-  #         - name: recon_coverage
-  #           amacro: analysis_x_q2.C
-  #           pmacro: postprocess_x_q2.C
-  #         - name: recon_resolution
-  #           amacro: analysis_x_q2.C
-  #           pmacro: postprocess_x_q2.C
-  #   steps:
-  #     - name: checkout
-  #       uses: actions/checkout@v2
-  #     - name: env
-  #       run: |
-  #         source env.sh
-  #         echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-  #         echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-  #     - name: get_build_artifacts
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: x_build
-  #     - name: fastsim_get_delphes_files
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         path: datarec
-  #     - name: fastsim_organize_delphes_files
-  #       run: |
-  #         find datarec -name "*.root" -print | tee tmp.list
-  #         cat tmp.list | while read f; do mv -v $f datarec/; done
-  #         cat datarec/delphes*/delphes.config > delphes.config
-  #         sort -nr -o delphes.config{,}
-  #     - name: echo_matrix
-  #       run: |
-  #         echo "name = ${{matrix.name}}"
-  #         echo "mode = ${{matrix.mode}}"
-  #         echo "config = ${{matrix.config}}"
-  #         echo "recon = ${{matrix.recon}}"
-  #         echo "analysis macro = ${{matrix.amacro}}"
-  #         echo "postprocess macro = ${{matrix.pmacro}}"
-  #     - name: cat_config
-  #       run: cat ${{matrix.config}}
-  #     - name: analysis
-  #       run: root -b -q macro/ci/${{matrix.amacro}}'("${{matrix.config}}",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"${{matrix.name}}.${{matrix.recon}}","${{matrix.recon}}")'
-  #     - name: postprocess
-  #       run: root -b -q macro/ci/${{matrix.pmacro}}'("out/${{matrix.name}}.${{matrix.recon}}.root")'
-  #     - name: artifacts
-  #       uses: actions/upload-artifact@v2
-  #       with:
-  #         name: ${{matrix.name}}_${{matrix.recon}}_plots
-  #         path: |
-  #           out/*.images/*.png
-  #           out/*.root
+# run analysis macros matrix for fullsim
+  analysis_fullsim:
+    needs: [ build, config_fullsim ]
+    runs-on: [ ubuntu-latest ]
+    container:
+      image: cjdilks/largex-eic:dev
+      options: --user root
+    strategy:
+      fail-fast: true
+      matrix:
+        aname: [x_q2, p_eta, yRatio]
+        recon: [Ele]
+        include:
+          - { aname: x_q2, recon: Mixed }
+          # - { aname: x_q2, recon: JB }
+          # - { aname: x_q2, recon: DA }
+          # - { aname: x_q2, recon: Sigma }
+          # - { aname: x_q2, recon: eSigma }
+    steps:
+      - name: echo_matrix
+        run: |
+          echo "aname = ${{matrix.aname}}"
+          echo "recon = ${{matrix.recon}}"
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: env
+        run: |
+          source env.sh
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
+      - name: get_build_artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: x_build
+      - name: fullsim_get_config
+        uses: actions/download-artifact@v2
+        with:
+          name: x_config_fullsim
+      - name: cat_config
+        run: cat s3files.config
+      - name: analysis_macro
+        env:
+          S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
+          S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
+        run: root -b -q 'macro/ci/analysis_${{matrix.aname}}.C("s3files.config",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"fullsim.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: root_analysis_fullsim_${{matrix.aname}}_${{matrix.recon}}
+          path: out
 
 
 # POSTPROCESS ---------------------------------------------------------------------------
@@ -346,7 +247,7 @@ jobs:
     needs: 
       - build
       - analysis_fastsim
-      # - analysis_fullsim
+      - analysis_fullsim
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/largex-eic:dev
@@ -354,8 +255,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # mode: [fastsim, fullsim]
-        mode: [fastsim]
+        mode:
+          - fastsim
+          - fullsim
         pname:
           - bin_test
           # - coverage_x_q2
@@ -373,9 +275,9 @@ jobs:
           # use all reconstruction methods: (...seems like we really need to define every matrix element...) 
           ## resolution
           - { mode: fastsim, pname: resolution_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: fullsim, pname: resolution_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: resolution_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: fastsim, pname: resolution_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: fullsim, pname: resolution_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: resolution_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: fastsim, pname: resolution_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: fullsim, pname: resolution_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: fastsim, pname: resolution_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
@@ -424,14 +326,15 @@ jobs:
       - name: postprocess_macro
         run: |
           ls out
-          mv -v out/${{matrix.mode}}.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root
+          mv -v out/${{matrix.mode}}.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
           root -b -q 'macro/ci/${{matrix.pmacro}}("out/${{matrix.mode}}.${{matrix.pname}}.${{matrix.recon}}.root")'
-          rm -v out/${{matrix.mode}}.${{matrix.pname}}.${{matrix.recon}}.root
+          rm -v out/${{matrix.mode}}.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: fastsim_${{matrix.pname}}_${{matrix.recon}}
+          name: results_${{matrix.mode}}_${{matrix.pname}}_${{matrix.recon}}
           path: out
+
 
 # ARTIFACTS ---------------------------------------------------------------------------
 
