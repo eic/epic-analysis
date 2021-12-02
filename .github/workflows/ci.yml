@@ -37,6 +37,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: x_build
+          retention-days: 1
           path: |
             LargexDict_rdict.pcm
             libLargex.so
@@ -94,6 +95,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: delphes_${{env.ebeam_en}}x${{env.pbeam_en}}_q2min${{matrix.minq2}}_output
+          retention-days: 1
           path: |
             datarec/*.root
             delphes.config
@@ -128,6 +130,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: x_fullsim
+          retention-days: 1
           path: |
             s3files.config
             datarec
@@ -187,6 +190,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: root_analysis_fastsim_${{matrix.aname}}_${{matrix.recon}}
+          retention-days: 7
           path: out
 
 
@@ -239,6 +243,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: root_analysis_fullsim_${{matrix.aname}}_${{matrix.recon}}
+          retention-days: 7
           path: out
 
 
@@ -334,6 +339,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: results_${{matrix.mode}}_${{matrix.pname}}_${{matrix.recon}}
+          retention-days: 30
           path: |
             out/*.images/*.png
             out/*.root
@@ -376,5 +382,6 @@ jobs:
       - name: upload
         uses: actions/upload-artifact@v2
         with:
+          retention-days: 90
           name: _FULL_RESULTS
           path: results
