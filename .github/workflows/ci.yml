@@ -361,6 +361,8 @@ jobs:
           - y_minima
         # recon: [Ele, Mixed, JB, DA, Sigma, eSigma]
         recon: [Ele, DA]
+        exclude:
+          - recon: DA
         include:
           - { pname: bin_test,         recon: Ele, aname: x_q2,   pmacro: postprocess_bin_test.C }
           - { pname: coverage_x_q2,    recon: Ele, aname: x_q2,   pmacro: postprocess_x_q2.C }
