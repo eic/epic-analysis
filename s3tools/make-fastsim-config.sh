@@ -2,6 +2,7 @@
 
 ###################
 # TOP-LEVEL SCRIPT to automate the creation of a config file for fastsim files
+# - see also s3tools/make-fastsim-S3-config.sh, to automate S3 downloading and delphes execution
 ###################
 
 # usage:

@@ -276,7 +276,7 @@ void AnalysisDelphes::Execute() {
 
   // finish execution
   Finish();
-  cout << "DEBUG PID: nSmeared=" << kin->countPIDsmeared << "  nNotSmeared=" << kin->countPIDtrue << endl;
+  //cout << "DEBUG PID in HFS: nSmeared=" << kin->countPIDsmeared << "  nNotSmeared=" << kin->countPIDtrue << endl;
 };
 
 

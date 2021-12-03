@@ -6,6 +6,8 @@ repository
 For more details, see [S3 file storage documentation](https://doc.athena-eic.org/en/latest/howto/s3_file_storage.html)
 
 ## Quick Start
+
+### Full Simulations
 One top-level script automates all the work:
 - `s3tools/make-canyonlands-config.sh` (best to run from top-level directory)
   - running with no arguments will print the usage guide
@@ -25,20 +27,20 @@ One top-level script automates all the work:
   the [MinIO client](https://docs.min.io/docs/minio-client-complete-guide) first
   - (otherwise update your Singularity image)
 
-For fast simulations, one can use `make-fastsim-config.sh` to help in the creation
-of a config file for fast simulations. This script is used by the CI, but is also
-designed to be configurable to support any local organization of Delphes output
-files.
-- to download a set of `hepmc` files to the directory `datagen/10x100/Q2min1`, run
-  `s3tools/generate-hepmc-list.sh 10x100 1 | s3tools/download.sh datagen/10x100/Q2min1`
-  - run these scripts without arguments to print the usage guide
-  - limit the number of files downloaded by piping through `head` before `download.sh`
-- then run `delphes` on these files (a wrapper `./exeDelphes.sh` is provided, which
-  will use the configuration card stored in `cards/` by default)
-- finally, run `make-fastsim-config.sh`
-  - use `cat` to combine config files with differing Q2 minima
-
-
+### Fast Simulations
+Two options:
+- download `hepmc` files from S3 and run Delphes locally
+  - this is automated by `s3tools/make-fastsim-S3-config.sh`; run with no
+    arguments to print the usage guide, and note the arguments are a bit
+    different than those for the full simulation scripts
+  - this script can download `hepmc` files from S3, run Delphes on them, and
+    generate the config file
+    - Delphes will run using one thread per Q2 minimum; edit the script
+      to change this behavior
+  - similar to full simulations, you need to have the S3 access and secret
+    environment variables set in order to download `hepmc` files
+- alternatively, if you already have a directory of Delphes output ROOT files,
+  use use `make-fastsim-config.sh` to create a config file
 
 ## Accessing S3 Files
 - first, download the [MinIO client](https://docs.min.io/docs/minio-client-complete-guide)
