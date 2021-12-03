@@ -332,20 +332,11 @@ void Kinematics::CalculateDISbySigma(){
 // calculate DIS kinematics using eSigma method
 // requires 'vecElectron' set
 void Kinematics::CalculateDISbyeSigma(){
-  this->GetQWNu_electronic();
-  Q2 = -1*vecQ.M2();
-  double ysigma, Q2sigma;
-  switch(mainFrame) {
-    case fLab:
-      ysigma = sigmah/(sigmah + vecElectron.E()*(1-cos(vecElectron.Theta())));
-      Q2sigma = (vecElectron.Px()*vecElectron.Px() + vecElectron.Py()*vecElectron.Py())/(1-y);
-      break;
-    case fHeadOn:
-      ysigma = sigmah/(sigmah + HvecElectron.E()*(1-cos(HvecElectron.Theta())));
-      Q2sigma = (HvecElectron.Px()*HvecElectron.Px() + HvecElectron.Py()*HvecElectron.Py())/(1-y);
-      break;
-  }
-  double xsigma = Q2sigma/(s*ysigma);
+  this->CalculateDISbySigma();
+  Double_t xsigma = x;
+  Double_t ysigma = y; 
+  vecQ = vecEleBeam - vecElectron;
+  Q2 = -1 * vecQ.M2();
   y = Q2/(s*xsigma);
   x = xsigma;
   switch(qComponentsMethod) {
