@@ -111,6 +111,15 @@ Histos *HistosDAG::GetHistos(NodePath *P) {
   return ret;
 };
 
+// return Histos* associated with the given external NodePath, by ID-matching its Nodes to the local DAG's Nodes
+Histos *HistosDAG::GetHistosExternal(NodePath *extP) {
+  NodePath *intP = new NodePath();
+  for(auto extN : extP->nodes) {
+    auto intN = this->GetNode(extN->GetID(),true); // find internal node by ID-matching external node
+    if(intN!=nullptr) intP->nodes.insert(intN);
+  }
+  return this->GetHistos(intP);
+};
 
 HistosDAG::~HistosDAG() {
 };

@@ -344,14 +344,34 @@ void PostProcessor::DrawSingle(TString histSet, TString histName) {
 /* ALGORITHM: draw histograms from different bins in their respective bins
 on axis of bin variables, e.g. Q2 vs x.
 */
+// -- process one histArr
 void PostProcessor::DrawInBins(
     TString outName,    
-    std::vector<std::vector<Histos*>>& histList,
+    std::vector<std::vector<Histos*>>& histArr,
     TString histName,
     TString var1name, int nvar1, double var1low, double var1high, bool var1log,
     TString var2name, int nvar2, double var2low, double var2high, bool var2log,
     bool intgrid1, bool intgrid2 // grid option for small plots
-    
+){
+  std::vector<std::vector<std::vector<Histos*>>> histArrList;
+  histArrList.push_back(histArr); // build list of histArrs with the one histArr
+  this->DrawInBins( // call the main algo below, which uses histArrList
+      outName,    
+      histArrList,
+      histName,
+      var1name, nvar1, var1low, var1high, var1log,
+      var2name, nvar2, var2low, var2high, var2log,
+      intgrid1, intgrid2
+      );
+};
+// -- process list of histArrs
+void PostProcessor::DrawInBins(
+    TString outName,    
+    std::vector<std::vector<std::vector<Histos*>>>& histArrList,
+    TString histName,
+    TString var1name, int nvar1, double var1low, double var1high, bool var1log,
+    TString var2name, int nvar2, double var2low, double var2high, bool var2log,
+    bool intgrid1, bool intgrid2 // grid option for small plots
 ){
   // default values set for nvar1==nvar2
   int canvx = 1400;
@@ -388,60 +408,71 @@ void PostProcessor::DrawInBins(
   lDIRClow->SetLineColor(kRed);
   lmRICH->SetLineColor(kRed);
   lDRICH->SetLineColor(kRed);
-  TH1* histArray[nvar1][nvar2];
+  // TH1* histArray[nvar1][nvar2]; // TODO: re-enable
   int drawpid = 0;
   outfile->cd("/");
   canv->Write();
+
   // get histograms from Histos 2D vector
   for(int i = 0; i < nvar1; i++){
     for(int j = 0; j < nvar2; j++){
-      //Histos *H = (Histos*) infile->Get(histList[i][j]);
-      Histos *H = histList[i][j];
-      TH1 *hist = H->Hist(histName);
-      histArray[i][j] = hist;
-      hist->SetTitle("");
-      //hist->GetXaxis()->SetTitle("");
-      //hist->GetYaxis()->SetTitle("");
-      //hist->GetXaxis()->SetLabelSize(0);
-      //hist->GetYaxis()->SetLabelSize(0);
+      int count = 0;
+      for(auto histArr : histArrList) {
+        Histos *H = histArr[i][j];
+        TH1 *hist = H->Hist(histName);
+        // histArray[i][j] = hist;
+        hist->SetTitle("");
+        //hist->GetXaxis()->SetTitle("");
+        //hist->GetYaxis()->SetTitle("");
+        //hist->GetXaxis()->SetLabelSize(0);
+        //hist->GetYaxis()->SetLabelSize(0);
 
-      mainpad->cd((nvar2-j-1)*nvar1 + i + 1);
-      gPad->SetLogx(H->GetHistConfig(histName)->logx);
-      gPad->SetLogy(H->GetHistConfig(histName)->logy);
-      gPad->SetLogz(H->GetHistConfig(histName)->logz);
-      gPad->SetGridy(intgrid2);
-      gPad->SetGridx(intgrid1);
-      TString drawStr = "";
-      switch(hist->GetDimension()) {
-        case 1:
-          drawStr = "HIST MIN0";
-          break;
-        case 2:
-          drawStr = "COLZ";
-          break;
-        case 3:
-          drawStr = "BOX";
-          break;
-      };
-      //hist->Write();
-      if( hist->GetEntries() > 0 ) {	
-        hist->Draw(drawStr);
-        if(drawpid){
-          lDIRClow->Draw();
-          lDIRC->Draw();
-          lmRICH->Draw();
-          lDRICH->Draw();
+        hist->SetLineColor(count+1);
+        hist->SetLineWidth(3);
+
+        if(count==0) {
+          mainpad->cd((nvar2-j-1)*nvar1 + i + 1);
+          gPad->SetLogx(H->GetHistConfig(histName)->logx);
+          gPad->SetLogy(H->GetHistConfig(histName)->logy);
+          gPad->SetLogz(H->GetHistConfig(histName)->logz);
+          gPad->SetGridy(intgrid2);
+          gPad->SetGridx(intgrid1);
         }
-        hist->GetXaxis()->SetLabelSize(0.04);
-        hist->GetYaxis()->SetLabelSize(0.04);
-        hist->GetXaxis()->SetTitleSize(0.05);
-        hist->GetYaxis()->SetTitleSize(0.05);
-        hist->GetXaxis()->SetTitleOffset(0.9);
-        hist->GetXaxis()->SetLabelOffset(0.0005);
-        if(hist->GetDimension()==1) {
-          hist->GetYaxis()->SetLabelSize(0.00); // suppress y-axis labels (since each subplot has its own scale)
+
+        TString drawStr = "";
+        switch(hist->GetDimension()) {
+          case 1:
+            drawStr = "HIST MIN0";
+            break;
+          case 2:
+            drawStr = "COLZ";
+            break;
+          case 3:
+            drawStr = "BOX";
+            break;
+        };
+        if(count>0) drawStr += " SAME";
+
+        if( hist->GetEntries() > 0 ) {	
+          hist->Draw(drawStr);
+          if(drawpid){
+            lDIRClow->Draw();
+            lDIRC->Draw();
+            lmRICH->Draw();
+            lDRICH->Draw();
+          }
+          hist->GetXaxis()->SetLabelSize(0.04);
+          hist->GetYaxis()->SetLabelSize(0.04);
+          hist->GetXaxis()->SetTitleSize(0.05);
+          hist->GetYaxis()->SetTitleSize(0.05);
+          hist->GetXaxis()->SetTitleOffset(0.9);
+          hist->GetXaxis()->SetLabelOffset(0.0005);
+          if(hist->GetDimension()==1) {
+            hist->GetYaxis()->SetLabelSize(0.00); // suppress y-axis labels (since each subplot has its own scale)
+          }
         }
-      }
+        count++;
+      }; // end for(histArrList)
     };
   };
   canv->cd();
@@ -486,11 +517,11 @@ void PostProcessor::DrawInBins(
   canv->Print(pngDir+"/"+canvN+".pdf");
   outfile->cd("/");
   canv->Write();
-  for(int i = 0; i <nvar1; i++){
-    for(int j = 0; j < nvar2; j++){
-      histArray[i][j]->Write();
-    }
-  }
+  // for(int i = 0; i <nvar1; i++){
+  //   for(int j = 0; j < nvar2; j++){
+  //     histArray[i][j]->Write();
+  //   }
+  // }
 };
 
 //=========================================================================

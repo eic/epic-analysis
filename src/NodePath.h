@@ -53,7 +53,7 @@ class NodePath : public TObject
     // encapsulation of std::set<Node*>
     // - this is the internal data structure of NodePath; it is public to grant
     //   full access to std::set functionality
-    // - it is an unorderd set, since we want two NodePaths which contain the same set
+    // - it is an unordered set, since we want two NodePaths which contain the same set
     //   of nodes to be equivalent, even if the DAG connections are not (cf. `GetSortedPath()`)
     std::set<Node*> nodes;
 
