@@ -27,7 +27,8 @@ if [ $# -lt 2 ]; then
                c - just make the local config file, for local files
    
    - [limit]   integer>0 : only stream/download this many files per Q2 min
-               0         : stream/download all files (default)
+               0         : stream/download all files
+               default=5
    
    - [outputFile]: output file name (optional)
                    - default name is based on release version 
@@ -49,7 +50,7 @@ if [ $# -lt 2 ]; then
 fi
 energy=$1
 mode=$2
-limit=0
+limit=5
 outFile=""
 if [ $# -ge 3 ]; then limit=$3; fi
 if [ $# -ge 4 ]; then outFile=$4; fi
@@ -71,7 +72,7 @@ if [ "$mode" == "d" ]; then
     if [ $limit -gt 0 ]; then
       s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" | head -n$limit | s3tools/download.sh "$targetDir/minQ2=$Q2min"
     else
-      s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" | s3tools/download.sh "$targetDir/minQ2=$Q2min"
+      s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" |                 s3tools/download.sh "$targetDir/minQ2=$Q2min"
     fi
   done
 fi
