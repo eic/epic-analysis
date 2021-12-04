@@ -74,7 +74,7 @@ if [ "$mode" == "f" -o "$mode" == "a" ]; then
     echo "delphes log: " > $1/delphes.log
     for infile in $1/*.hepmc.gz; do 
       echo "RUN DELPHES ON $infile" >> $1/delphes.log
-      ./exeDelphes.sh $infile 2>&1 >> $1/delphes.log  # AQUI: seems to just be outputting to top-level datarec
+      ./exeDelphes.sh $infile 2>&1 >> $1/delphes.log
     done
     status "DONE running Delphes on directory $1"
   }
