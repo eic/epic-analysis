@@ -433,6 +433,7 @@ jobs:
     if: ${{always()}}
     needs: 
       - postprocess
+      - compare_fastfull
     runs-on: [ ubuntu-latest ]
     steps:
       - name: checkout
