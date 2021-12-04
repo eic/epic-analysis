@@ -253,7 +253,6 @@ jobs:
   postprocess:
     if: ${{always()}}
     needs: 
-      - build
       - analysis_fastsim
       - analysis_fullsim
     runs-on: [ ubuntu-latest ]
@@ -344,6 +343,88 @@ jobs:
             out/*.images/*.png
             out/*.root
 
+# COMPARATORS ---------------------------------------------------------------------------
+
+# run compare macros matrix for fastsim vs. fullsim
+  compare_fastfull:
+    needs:
+      - analysis_fastsim
+      - analysis_fullsim
+    runs-on: [ ubuntu-latest ]
+    container:
+      image: cjdilks/largex-eic:dev
+      options: --user root
+    strategy:
+      fail-fast: false
+      matrix:
+        pname: # list only jobs which will only use one (primary) recon method
+          - coverage_p_eta
+          - resolution_p_eta
+        recon: [Ele] # primary recon method(s)
+        include:
+          # use only primary recon method
+          - { pname: coverage_p_eta,   aname: p_eta, xvar: p, yvar: eta }
+          - { pname: resolution_p_eta, aname: p_eta, xvar: p, yvar: eta }
+          # use all reconstruction methods: (...seems like we really need to define every matrix element...) 
+          ## resolution
+          - { pname: resolution_x_q2, recon: Ele,    aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: resolution_x_q2, recon: Mixed,  aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: resolution_x_q2, recon: DA,     aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: resolution_x_q2, recon: JB,     aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: resolution_x_q2, recon: Sigma,  aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: resolution_x_q2, recon: eSigma, aname: x_q2, xvar: x, yvar: q2 }
+          ## coverage
+          - { pname: coverage_x_q2,   recon: Ele,    aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: coverage_x_q2,   recon: Mixed,  aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: coverage_x_q2,   recon: DA,     aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: coverage_x_q2,   recon: JB,     aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: coverage_x_q2,   recon: Sigma,  aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: coverage_x_q2,   recon: eSigma, aname: x_q2, xvar: x, yvar: q2 }
+    steps:
+      - name: echo_matrix
+        run: |
+          echo "aname = ${{matrix.aname}}"
+          echo "pname = ${{matrix.pname}}"
+          echo "recon = ${{matrix.recon}}"
+          echo "xvar = ${{matrix.xvar}}"
+          echo "yvar = ${{matrix.yvar}}"
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: env
+        run: |
+          source env.sh
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
+      - name: get_build_artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: x_build
+      - name: get_fastsim_analysis_artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: root_analysis_fastsim_${{matrix.aname}}_${{matrix.recon}}
+          path: out
+      - name: get_fullsim_analysis_artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: root_analysis_fullsim_${{matrix.aname}}_${{matrix.recon}}
+          path: out
+      - name: compare_macro
+        run: |
+          ls out
+          mv -v out/fastsim.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
+          mv -v out/fullsim.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
+          root -b -q 'macro/ci/comparator.C("out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root","out/fullsim.${{matrix.pname}}.${{matrix.recon}}.root","out/fastfull.${{matrix.pname}}.${{matrix.recon}}","${{matrix.xvar}}","${{matrix.yvar}}")'
+          rm -v out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
+          rm -v out/fullsim.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
+      - name: artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: results_fastfull_${{matrix.pname}}_${{matrix.recon}}
+          retention-days: 30
+          path: |
+            out/fastfull*.images/*.png
+            out/fastfull*.root
 
 # ARTIFACTS ---------------------------------------------------------------------------
 

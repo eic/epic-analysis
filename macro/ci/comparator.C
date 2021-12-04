@@ -2,10 +2,11 @@ R__LOAD_LIBRARY(Largex)
 
 // make grids of plots, comparing data from the infiles
 // - depending on infile, different histograms will be drawn
-void compare_x_q2(
+void comparator(
     TString infile0="out/resolution.fastsim.root",
     TString infile1="out/resolution.fullsim.root",
-    TString outfile="out/resolution.fastfull.root"
+    TString outfile="out/resolution.fastfull.root",
+    TString gx="x", TString gy="q2" // plotgrid vars
     ) {
 
   // histograms ==================================================
@@ -53,10 +54,22 @@ void compare_x_q2(
   // setup =======================================================
 
   // plot grid variables, titles, and settings
-  TString gx, gy, gxT, gyT;
+  TString gxT, gyT;
   Bool_t logx, logy;
-  gx="x";  gxT="x";     logx=true;
-  gy="q2"; gyT="Q^{2}"; logy=true;
+  gxT = gx;
+  gyT = gy;
+  logx = false;
+  logy = false;
+  //
+  if(gx=="x")   { gxT="x";     logx=true;  }
+  if(gx=="q2")  { gxT="Q^{2}"; logx=true;  }
+  if(gx=="eta") { gxT="#eta";  logx=false; }
+  if(gx=="p")   { gxT="p";     logx=true;  }
+  //
+  if(gy=="x")   { gyT="x";     logy=true;  }
+  if(gy=="q2")  { gyT="Q^{2}"; logy=true;  }
+  if(gy=="eta") { gyT="#eta";  logy=false; }
+  if(gy=="p")   { gyT="p";     logy=true;  }
 
   // file names and bin vars
   std::vector<TFile*> infiles;
