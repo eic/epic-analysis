@@ -50,7 +50,7 @@ if [ $# -lt 2 ]; then
 fi
 energy=$1
 mode=$2
-limit=0
+limit=5
 outFile=""
 if [ $# -ge 3 ]; then limit=$3; fi
 if [ $# -ge 4 ]; then outFile=$4; fi

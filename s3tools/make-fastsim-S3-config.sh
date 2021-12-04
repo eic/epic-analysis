@@ -46,8 +46,8 @@ if [ $# -ge 4 ]; then limit=$4; fi
 
 # settings
 Q2minima=( 1000 100 10 1 ) # should be decreasing order
-genDir=datagen/$locDir
-recDir=datarec/$locDir
+genDir=datagen/$locDir/$energy
+recDir=datarec/$locDir/$energy
 configFile=$recDir/delphes.config
 
 # download hepmc files from S3
@@ -56,9 +56,9 @@ if [ "$mode" == "d" -o "$mode" == "a" ]; then
   status "downloading files from S3..."
   for Q2min in ${Q2minima[@]}; do
     if [ $limit -gt 0 ]; then
-      s3tools/generate-hepmc-list.sh $energy $Q2min | head -n$limit | s3tools/download.sh "$genDir/$energy/minQ2=$Q2min"
+      s3tools/generate-hepmc-list.sh $energy $Q2min | head -n$limit | s3tools/download.sh "$genDir/minQ2=$Q2min"
     else
-      s3tools/generate-hepmc-list.sh $energy $Q2min |                 s3tools/download.sh "$genDir/$energy/minQ2=$Q2min"
+      s3tools/generate-hepmc-list.sh $energy $Q2min |                 s3tools/download.sh "$genDir/minQ2=$Q2min"
     fi
   done
 fi
@@ -67,7 +67,7 @@ fi
 if [ "$mode" == "f" -o "$mode" == "a" ]; then
   status "clean Delphes output directories"
   for Q2min in ${Q2minima[@]}; do
-    rm -rv $recDir/$energy/minQ2=$Q2min
+    rm -rv $recDir/minQ2=$Q2min
   done
   status "running Delphes (one thread per Q2min)"
   function runDelphes { 
@@ -80,7 +80,7 @@ if [ "$mode" == "f" -o "$mode" == "a" ]; then
   }
   for Q2min in ${Q2minima[@]}; do
     status "RUNNING DELPHES on energy=$1 Q2min=$Q2min..."
-    runDelphes "$genDir/$energy/minQ2=$Q2min" & # comment out `&` if you want to run single threaded
+    runDelphes "$genDir/minQ2=$Q2min" & # comment out `&` if you want to run single threaded
   done
   status "WAIT FOR DELPHES"
   echo "  - quit by running: while [ 1 ]; do pkill DelphesHepMC3; done"
@@ -93,13 +93,13 @@ fi
 # generate config file
 if [ "$mode" == "c" -o "$mode" == "a" ]; then
   for Q2min in ${Q2minima[@]}; do
-    status "make config file for $recDir/$energy/minQ2=$Q2min"
-    s3tools/make-fastsim-config.sh $energy $Q2min $recDir/$energy/minQ2=$Q2min{,/delphes.config}
+    status "make config file for $recDir/minQ2=$Q2min"
+    s3tools/make-fastsim-config.sh $energy $Q2min $recDir/minQ2=$Q2min{,/delphes.config}
   done
   status "concatenate config files to target config file: $configFile"
   > $configFile
   for Q2min in ${Q2minima[@]}; do
-    cat $recDir/$energy/minQ2=$Q2min/delphes.config >> $configFile
+    cat $recDir/minQ2=$Q2min/delphes.config >> $configFile
   done
 fi
 
@@ -110,6 +110,10 @@ status "run root macros with parameters:"
 echo "     '(\"$configFile\",$(echo $energy|sed 's/x/,/'))'"
 echo ""
 if [ -n "$(grep UNKNOWN $configFile)" ]; then
-  >&2 echo "ERROR: missing some cross sections"
+  >&2 echo "ERROR: missing some cross sections... removing these lines from config file:"
+  grep UNKNOWN $configFile
+  mv $configFile{,.tmp}
+  grep -v UNKNOWN $configFile.tmp > $configFile
+  rm $configFile.tmp
   exit 1
 fi
