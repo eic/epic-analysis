@@ -433,12 +433,13 @@ void PostProcessor::DrawInBins(
   canv->Write();
 
   // get histograms from Histos 2D vector
+  Histos *H;
   for(int i = 0; i < nvar1; i++){
     for(int j = 0; j < nvar2; j++){
       int count = 0;
       int dims;
       for(auto histArr : histArrList) {
-        Histos *H = histArr[i][j];
+        H = histArr[i][j];
         TH1 *hist = H->Hist(histName);
         dims = hist->GetDimension();
         // histArray[i][j] = hist;
@@ -511,7 +512,7 @@ void PostProcessor::DrawInBins(
 
       // some formatting for 1D plots drawn with "SAME"
       if(dims==1) {
-        UnzoomVertical(gPad,"",true); // allow all "SAME" plots to be visible; 3rd arg forces min to be 0
+        UnzoomVertical(gPad,"",true,H->GetHistConfig(histName)->logy); // allow all "SAME" plots to be visible; 3rd arg forces min to be 0
       }
     };
   };

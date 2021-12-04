@@ -13,7 +13,6 @@ void comparator(
   // - set histogram lists, based on infile name
   std::vector<TString> histList;
   if(infile0.Contains("coverage")) {
-    histList.push_back("Q2vsX");
     histList.push_back("x");
     histList.push_back("y");
     histList.push_back("W");
@@ -28,8 +27,6 @@ void comparator(
     histList.push_back("mX");
     histList.push_back("phiH");
     histList.push_back("phiS");
-    histList.push_back("phiHvsPhiS");
-    histList.push_back("etaVsP");
     histList.push_back("phiSivers");
     histList.push_back("phiCollins");
   }
