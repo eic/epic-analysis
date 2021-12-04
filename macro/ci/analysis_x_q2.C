@@ -2,14 +2,14 @@ R__LOAD_LIBRARY(Largex)
 
 // analysis in bins of (x,Q2)
 void analysis_x_q2(
-    // TString infiles="testconfig/delphes.config", // default, for manual local testing of fastsim
-    TString infiles="testconfig/s3files.config", // default, for manual local testing of fullsim
+    TString infiles="testconfig/delphes.config", // default, for manual local testing of fastsim
+    // TString infiles="testconfig/s3files.config", // default, for manual local testing of fullsim
     Double_t eleBeamEn=10,
     Double_t ionBeamEn=100,
     Double_t crossingAngle=-25,
-    // TString outfilePrefix="resolution.fastsim",
+    TString outfilePrefix="resolution.fastsim",
     // TString outfilePrefix="resolution.fullsim",
-    TString outfilePrefix="coverage.fastsim",
+    // TString outfilePrefix="coverage.fastsim",
     // TString outfilePrefix="coverage.fullsim",
     TString reconMethod="Ele"
 ) {

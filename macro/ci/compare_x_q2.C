@@ -1,13 +1,14 @@
 R__LOAD_LIBRARY(Largex)
 
-// make grids of plots of (x,Q2) bins, comparing data from the infiles
+// make grids of plots, comparing data from the infiles
 // - depending on infile, different histograms will be drawn
 void compare_x_q2(
-    TString infile0="out/resolution.fullsim.Ele.root",
-    TString infile1="out/resolution.fullsim.DA.root"
+    TString infile0="out/resolution.fastsim.root",
+    TString infile1="out/resolution.fullsim.root",
+    TString outfile="out/resolution.fastfull.root"
     ) {
 
-  // histograms ================================================================
+  // histograms ==================================================
   // - set histogram lists, based on infile name
   std::vector<TString> histList;
   if(infile0.Contains("coverage")) {
@@ -28,6 +29,8 @@ void compare_x_q2(
     histList.push_back("phiS");
     histList.push_back("phiHvsPhiS");
     histList.push_back("etaVsP");
+    histList.push_back("phiSivers");
+    histList.push_back("phiCollins");
   }
   else if(infile0.Contains("resolution")) {
     histList.push_back("x_Res");
@@ -47,87 +50,117 @@ void compare_x_q2(
   };
 
 
-  // setup ================================================================
+  // setup =======================================================
 
-  std::vector<TString> infiles;
-  infiles.push_back(infile0);
-  infiles.push_back(infile1);
+  // plot grid variables, titles, and settings
+  TString gx, gy, gxT, gyT;
+  Bool_t logx, logy;
+  gx="x";  gxT="x";     logx=true;
+  gy="q2"; gyT="Q^{2}"; logy=true;
+
+  // file names and bin vars
+  std::vector<TFile*> infiles;
+  infiles.push_back(new TFile(infile0));
+  infiles.push_back(new TFile(infile1));
   bool first=true;
-  Int_t numXbins, numQbins;
-  Double_t xMin, xMax, qMin, qMax;
+  Int_t numXbins, numYbins;
+  Double_t xMin, xMax, yMin, yMax;
 
-  PostProcessor *P0; // first dag
-  std::vector<PostProcessor*> procs; // additional dags
-  PostProcessor *P; // pointer
+  // PostProcessor and DAG pointers
+  // - `P0` stores the first infile's DAG, which will be used for execution
+  // - Dext will store the additional DAGs from other infiles
+  PostProcessor *P0;
+  HistosDAG *D;
+  std::vector<HistosDAG*> Dext; // additional DAGs
 
-  // get dags and binning
+  // get DAGs and binning
   for(auto infile : infiles) {
-    P = new PostProcessor(infile);
-    auto xBins = P->Op()->GetBinSet("x");
-    auto qBins = P->Op()->GetBinSet("q2");
+    D = new HistosDAG();
+    D->Build(infile);
+    auto xBins = D->GetBinSet(gx);
+    auto yBins = D->GetBinSet(gy);
     if(first) {
       first = false;
-      P0 = P;
+      P0 = new PostProcessor(infile->GetName(),outfile);
       numXbins = xBins->GetNumBins();
-      numQbins = qBins->GetNumBins();
+      numYbins = yBins->GetNumBins();
       xMin = xBins->GetMin();
       xMax = xBins->GetMax();
-      qMin = qBins->GetMin();
-      qMax = qBins->GetMax();
+      yMin = yBins->GetMin();
+      yMax = yBins->GetMax();
     } else {
-      procs.push_back(P);
-      if(numXbins != xBins->GetNumBins() || numQbins != qBins->GetNumBins()) {
+      Dext.push_back(D);
+      // check binning is the same for all DAGs
+      if(numXbins != xBins->GetNumBins() || numYbins != yBins->GetNumBins()) {
         cerr << "ERROR: files have differing bins" << endl;
         return;
       }
     }
   }
 
-  // list of 2D arrays of Histos pointers; each element of the list will be compared
+  // set legend labels
+  // - add "key" strings to `legendKeys`, so if the key is contained in the
+  //   infile name, the key string will be used in the legend label, rather than
+  //   the infile name
+  std::vector<TString> legendKeys;
+  legendKeys.push_back("fastsim");
+  legendKeys.push_back("fullsim");
+  for(auto infile : infiles) {
+    TString infileN = TString(infile->GetName());
+    TString key = infileN;
+    for(auto legendKey : legendKeys) {
+      if(infileN.Contains(legendKey)) key = legendKey;
+    }
+    P0->legendLabels.push_back(key);
+  };
+
+  // 3D array structure: list of 2D arrays of Histos pointers
+  // - each element of the list will be compared
+  // - the 2D dimensions are the plot grid dimensions
   int numFiles = infiles.size();
   std::vector<std::vector<std::vector<Histos*>>> histosArrList(
       numFiles,
       std::vector<std::vector<Histos*>>(
         numXbins,
-        std::vector<Histos*>(numQbins)
+        std::vector<Histos*>(numYbins)
         )
       );
 
 
-  // operators ================================================================
-  // - for P0 dag
+  // operators ====================================================
 
-  // payload: find (x,Q2) bin, and insert into histosArrList, for each infile
-  auto fillHistosArr = [&histosArrList,procs](NodePath *NP, Histos *H ) {
-    Int_t bx = NP->GetBinNode("x")->GetBinNum();
-    Int_t bq = NP->GetBinNode("q2")->GetBinNum();
+  // payload: find plot grid bin, and insert into histosArrList, for each infile
+  auto fillHistosArr = [&](NodePath *NP, Histos *H ) {
+    Int_t bx = NP->GetBinNode(gx)->GetBinNum();
+    Int_t by = NP->GetBinNode(gy)->GetBinNum();
     Int_t pc=0;
-    printf("   bx, bq = %d, %d\n",bx,bq);
+    printf("   bx, by = %d, %d\n",bx,by);
     try { 
-      histosArrList.at(0).at(bx).at(bq) = H; // first, insert the Histos* of P0
-      for(auto proc : procs) { // then insert the Histos* of each dag in procs
-        histosArrList.at(++pc).at(bx).at(bq) = proc->Op()->GetHistosExternal(NP);
+      histosArrList.at(0).at(bx).at(by) = H; // first, insert the Histos* of D0
+      for(auto De : Dext) { // then insert the Histos* of each DAG in Dext
+        histosArrList.at(++pc).at(bx).at(by) = De->GetHistosExternal(NP);
       }
     }
     catch(const std::out_of_range &e) { 
-      fprintf(stderr,"ERROR: invalid bin number (file,x,Q2) = (%d,%d,%d)\n",pc,bx,bq);
+      fprintf(stderr,"ERROR: invalid bin number (pc,bx,by) = (%d,%d,%d)\n",pc,bx,by);
     }
   };
 
-  // after subloop operator: draw array of plots in (x,Q2) bins
+  // after subloop operator: draw plot grid
   auto drawHistosArr = [&](NodePath *NP) {
-    TString canvName = "xQ2cov_" + NP->BinListName();
+    TString canvName = gx + "_" + gy + "_cov_" + NP->BinListName();
     for( TString histName : histList ) {
       P0->DrawInBins(
           canvName, histosArrList, histName,
-          "x",      numXbins,      xMin,     xMax, true,
-          "Q^{2}",  numQbins,      qMin,     qMax, true
+          gxT, numXbins, xMin, xMax, logx,
+          gyT, numYbins, yMin, yMax, logy,
+          true, true, true
           );
     };
   };
 
-  // staging and execution
-  P0->Op()->AfterSubloop( {"x","q2"}, drawHistosArr );
+  // staging and execution =========================================
+  P0->Op()->AfterSubloop({gx,gy},drawHistosArr);
   P0->Op()->Payload(fillHistosArr);
   P0->Execute();
   P0->Finish();

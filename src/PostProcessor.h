@@ -12,6 +12,7 @@
 #include "TROOT.h"
 #include "TStyle.h"
 #include "TGaxis.h"
+#include "TLegend.h"
 
 // largex-eic
 #include "Histos.h"
@@ -24,7 +25,8 @@ class PostProcessor : public TNamed
 {
   public:
     PostProcessor(
-        TString infileN_
+        TString infileN_,
+        TString outfileN_=""
         );
     ~PostProcessor();
 
@@ -71,19 +73,24 @@ class PostProcessor : public TNamed
         std::vector<std::vector<Histos*>>& histArr, TString histName,
         TString var1name, int nvar1, double var1low, double var1high, bool var1log,
         TString var2name, int nvar2, double var2low, double var2high, bool var2log,
-        bool intgrid1=false, bool intgrid2=false
+        bool intgrid1=false, bool intgrid2=false,
+        bool renormalize=false
         );
     void DrawInBins(
         TString outName,
         std::vector<std::vector<std::vector<Histos*>>>& histArrList, TString histName,
         TString var1name, int nvar1, double var1low, double var1high, bool var1log,
         TString var2name, int nvar2, double var2low, double var2high, bool var2log,
-        bool intgrid1=false, bool intgrid2=false
+        bool intgrid1=false, bool intgrid2=false,
+        bool renormalize=false
         );
 
     // algorithm finish methods; to be called after loops
     void FinishDumpAve(TString datFile);
     void FinishDrawRatios(TString summaryDir);
+
+    // vector of labels for a legend (push elements externally if you want to use this)
+    std::vector<TString> legendLabels;
 
     // accessors
     TString GetPngDir() { return pngDir; };
@@ -101,9 +108,41 @@ class PostProcessor : public TNamed
     // return true if the bin is "full" range, and it's not the only bin
     Bool_t SkipFull(TString varName, Int_t binNum);
 
-
     // reset algorithm-specific variables
     void ResetVars();
+
+    
+    // ------------
+    // zoom out the vertical scale for the case where multiple
+    // `TH1`s have been drawn with the "SAME" option, but the y-axis
+    // range is improperly zoomed
+    // - example: `UnzoomVertical(canvas->GetPad(3))`
+    // - optionally specify a new title 
+    // - set `min0` to true if you want to lock the minimum at zero
+    static void UnzoomVertical(TVirtualPad *pad, TString title="", Bool_t min0=false) {
+      Double_t max=-1e6;
+      Double_t min=1e6;
+      Double_t maxTmp,minTmp;
+      for(auto obj : *pad->GetListOfPrimitives()) {
+        if(obj->InheritsFrom(TH1::Class())) {
+          maxTmp = ((TH1*)obj)->GetMaximum();
+          minTmp = ((TH1*)obj)->GetMinimum();
+          max = maxTmp > max ? maxTmp : max;
+          min = minTmp < min ? minTmp : min;
+        };
+      };
+      max += 0.05*(max-min);
+      //min -= 0.05*(max-min);
+      for(auto obj : *pad->GetListOfPrimitives()) {
+        if(obj->InheritsFrom(TH1::Class())) {
+          ((TH1*)obj)->GetYaxis()->SetRangeUser(min0?0:min,max);
+          if(title!="") ((TH1*)obj)->SetTitle(title);
+        };
+      };
+    };
+    // ------------
+
+
 
   private:
 

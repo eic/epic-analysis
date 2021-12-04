@@ -8,9 +8,11 @@ using std::endl;
 
 // constructor
 PostProcessor::PostProcessor(
-  TString infileN_
+  TString infileN_,
+  TString outfileN_
 )
   : infileN(infileN_)
+  , outfileN(outfileN_)
 {
 
   // settings
@@ -25,7 +27,7 @@ PostProcessor::PostProcessor(
 
   // set up input and output files
   cout << "-- postprocess histograms from " << infileN << endl;
-  outfileN = infileN;
+  if(outfileN=="") outfileN = infileN; // default
   outfileN(TRegexp("\\.root$")) = "";
   pngDir = outfileN+".images";
   outfileN += ".canvas.root";
@@ -351,7 +353,8 @@ void PostProcessor::DrawInBins(
     TString histName,
     TString var1name, int nvar1, double var1low, double var1high, bool var1log,
     TString var2name, int nvar2, double var2low, double var2high, bool var2log,
-    bool intgrid1, bool intgrid2 // grid option for small plots
+    bool intgrid1, bool intgrid2, // grid option for small plots
+    bool renormalize // if true, normalize histograms
 ){
   std::vector<std::vector<std::vector<Histos*>>> histArrList;
   histArrList.push_back(histArr); // build list of histArrs with the one histArr
@@ -361,7 +364,8 @@ void PostProcessor::DrawInBins(
       histName,
       var1name, nvar1, var1low, var1high, var1log,
       var2name, nvar2, var2low, var2high, var2log,
-      intgrid1, intgrid2
+      intgrid1, intgrid2,
+      renormalize
       );
 };
 // -- process list of histArrs
@@ -371,7 +375,8 @@ void PostProcessor::DrawInBins(
     TString histName,
     TString var1name, int nvar1, double var1low, double var1high, bool var1log,
     TString var2name, int nvar2, double var2low, double var2high, bool var2log,
-    bool intgrid1, bool intgrid2 // grid option for small plots
+    bool intgrid1, bool intgrid2, // grid option for small plots
+    bool renormalize // if true, normalize histograms (useful for drawing 1D hists with "SAME")
 ){
   // default values set for nvar1==nvar2
   int canvx = 1400;
@@ -397,6 +402,20 @@ void PostProcessor::DrawInBins(
   TCanvas *canv = new TCanvas(canvN,canvN, canvx, canvy);
   TPad *mainpad = new TPad("mainpad", "mainpad", 0.07, 0.07, 0.98, 0.98);
 
+  TLegend *leg;
+  if(legendLabels.size()>0) {
+    double legX0 = 0.1;
+    double legY0 = 0.95;
+    double legWidth = 0.15;
+    double legRowHeight = 0.05;
+    leg = new TLegend(
+        legX0,
+        legY0,
+        legX0 + legWidth,
+        legY0 - legRowHeight*legendLabels.size()
+        );
+  };
+
   mainpad->SetFillStyle(4000);
   mainpad->Divide(nvar1,nvar2,0,0);
   mainpad->Draw();
@@ -417,9 +436,11 @@ void PostProcessor::DrawInBins(
   for(int i = 0; i < nvar1; i++){
     for(int j = 0; j < nvar2; j++){
       int count = 0;
+      int dims;
       for(auto histArr : histArrList) {
         Histos *H = histArr[i][j];
         TH1 *hist = H->Hist(histName);
+        dims = hist->GetDimension();
         // histArray[i][j] = hist;
         hist->SetTitle("");
         //hist->GetXaxis()->SetTitle("");
@@ -429,6 +450,14 @@ void PostProcessor::DrawInBins(
 
         hist->SetLineColor(count+1);
         hist->SetLineWidth(3);
+        if(count==0) hist->SetFillColor(kGray);
+
+        if(legendLabels.size()>0 && i==0 && j==0) {
+          try { leg->AddEntry(hist,legendLabels[count],"LF"); }
+          catch(const std::out_of_range &e) {
+            cerr << "ERROR: legendLabels not filled correctly" << endl;
+          };
+        };
 
         if(count==0) {
           mainpad->cd((nvar2-j-1)*nvar1 + i + 1);
@@ -439,8 +468,14 @@ void PostProcessor::DrawInBins(
           gPad->SetGridx(intgrid1);
         }
 
+        // renormalize
+        if(renormalize) {
+          // hist->Scale(1/hist->GetEntries());
+          hist->Scale(1/hist->GetMaximum());
+        }
+
         TString drawStr = "";
-        switch(hist->GetDimension()) {
+        switch(dims) {
           case 1:
             drawStr = "HIST MIN0";
             break;
@@ -467,12 +502,17 @@ void PostProcessor::DrawInBins(
           hist->GetYaxis()->SetTitleSize(0.05);
           hist->GetXaxis()->SetTitleOffset(0.9);
           hist->GetXaxis()->SetLabelOffset(0.0005);
-          if(hist->GetDimension()==1) {
+          if(dims==1) {
             hist->GetYaxis()->SetLabelSize(0.00); // suppress y-axis labels (since each subplot has its own scale)
           }
         }
         count++;
       }; // end for(histArrList)
+
+      // some formatting for 1D plots drawn with "SAME"
+      if(dims==1) {
+        UnzoomVertical(gPad,"",true); // allow all "SAME" plots to be visible; 3rd arg forces min to be 0
+      }
     };
   };
   canv->cd();
@@ -511,6 +551,7 @@ void PostProcessor::DrawInBins(
   newpad2->cd();
   xaxis->Draw();
 
+  if(legendLabels.size()>0) leg->Draw();
 
   //  canv->Write();
   canv->Print(pngDir+"/"+canvN+".png");
