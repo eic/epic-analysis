@@ -7,7 +7,7 @@
 ###################
 
 # RELEASE TAG AND RECO DIR: ###########################
-release="canyonlands-v2.1"
+release="deathvalley-v1.0"
 releaseDir="S3/eictest/ATHENA/RECO/$release/DIS/NC"
 #######################################################
 
