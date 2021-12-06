@@ -3,7 +3,7 @@
 ###################
 # TOP-LEVEL SCRIPT to automate the creation of a config file for fastsim files
 # - automates S3 downloading and delphes execution
-# - see also `s3tools/make-fastsim-config.sh` to generate a config file for
+# - see also `s3tools/make-fastsim-local-config.sh` to generate a config file for
 #   a specific directory of Delphes output root files
 ###################
 
@@ -94,7 +94,7 @@ fi
 if [ "$mode" == "c" -o "$mode" == "a" ]; then
   for Q2min in ${Q2minima[@]}; do
     status "make config file for $recDir/minQ2=$Q2min"
-    s3tools/make-fastsim-config.sh $energy $Q2min $recDir/minQ2=$Q2min{,/delphes.config}
+    s3tools/make-fastsim-local-config.sh $energy $Q2min $recDir/minQ2=$Q2min{,/delphes.config}
   done
   status "concatenate config files to target config file: $configFile"
   > $configFile

@@ -9,7 +9,7 @@ For more details, see [S3 file storage documentation](https://doc.athena-eic.org
 
 ### Full Simulations
 One top-level script automates all the work:
-- `s3tools/make-canyonlands-config.sh` (best to run from top-level directory)
+- `s3tools/make-fullsim-config.sh` (best to run from top-level directory)
   - running with no arguments will print the usage guide
   - output:
     - config file, with file names, Q2 minima, and cross sections; used as
@@ -40,7 +40,7 @@ Two options:
   - similar to full simulations, you need to have the S3 access and secret
     environment variables set in order to download `hepmc` files
 - alternatively, if you already have a directory of Delphes output ROOT files,
-  use use `make-fastsim-config.sh` to create a config file
+  use use `make-fastsim-local-config.sh` to create a config file
 
 ## Accessing S3 Files
 - first, download the [MinIO client](https://docs.min.io/docs/minio-client-complete-guide)
