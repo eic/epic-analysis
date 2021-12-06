@@ -452,6 +452,10 @@ jobs:
           find results -name "*.root" -print | xargs rm -v
           rm -v results/*y_minima*/*/canv*.png
           tree results
+      - name: flatten
+        run: |
+          macro/ci/flatten-artifacts.sh results
+          tree results
       - name: merge_recon
         run: |
           macro/ci/merge-recon.sh results resolution_x_q2

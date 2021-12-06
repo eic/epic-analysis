@@ -18,12 +18,6 @@ while read dirRecon; do
   echo "MOVE ARTIFACTS IN $dirRecon/ FOR METHOD \"$method\" TO $dirOut/"
   mkdir -p $dirOut
   pushd $dirRecon
-  if [ -n "$(ls -d */ | grep '\.images')" ]; then
-    echo "-- flatten directory:"
-    mv -v *.images/* ./
-    rm -r *.images
-  fi
-  echo "-- moving artifacts:"
   for file in *; do
     mv -v $file ../$dirOut/$(echo $file | sed "s/^.*\./&$method./g")
   done
