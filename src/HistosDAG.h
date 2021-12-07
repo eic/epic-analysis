@@ -79,6 +79,8 @@ class HistosDAG : public DAG
 
     // return Histos* associated with the given NodePath
     Histos *GetHistos(NodePath *P);
+    // if you have a NodePath from another DAG that has the same binning scheme, use GetHistosExternal instead
+    Histos *GetHistosExternal(NodePath *extP);
 
   private:
     Bool_t debug;
