@@ -12,7 +12,7 @@ void comparator(
   // histograms ==================================================
   // - set histogram lists, based on infile name
   std::vector<TString> histList;
-  if(infile0.Contains("coverage")) {
+  if(outfile.Contains("coverage")) {
     histList.push_back("x");
     histList.push_back("y");
     histList.push_back("W");
@@ -30,7 +30,7 @@ void comparator(
     histList.push_back("phiSivers");
     histList.push_back("phiCollins");
   }
-  else if(infile0.Contains("resolution")) {
+  else if(outfile.Contains("resolution")) {
     histList.push_back("x_Res");
     histList.push_back("y_Res");
     histList.push_back("pT_Res");

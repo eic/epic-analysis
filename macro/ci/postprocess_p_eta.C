@@ -24,6 +24,8 @@ void postprocess_p_eta(TString infile="out/coverage.fullsim.root") {
     histList.push_back("phiS");
     histList.push_back("phiHvsPhiS");
     histList.push_back("etaVsP");
+    histList.push_back("phiSivers");
+    histList.push_back("phiCollins");
   }
   else if(infile.Contains("resolution")) {
     histList.push_back("x_Res");

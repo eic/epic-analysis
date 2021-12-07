@@ -17,10 +17,12 @@ get-files.sh
 results*
 *.xsec
 tags
+*.zip
 
 # users' custom ignores
 datagen/escalate
 datagen/arc
 datarec/arc
 datarec/canyonlands*
+datarec/deathvalley*
 testconfig
