@@ -11,8 +11,8 @@ defaults:
     shell: bash
 
 env:
-  ebeam_en: 18
-  pbeam_en: 275
+  ebeam_en: 10
+  pbeam_en: 100
   cross_ang: -25
 
 jobs:
