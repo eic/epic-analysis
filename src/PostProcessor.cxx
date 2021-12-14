@@ -471,8 +471,9 @@ void PostProcessor::DrawInBins(
 
         // renormalize
         if(renormalize) {
+          // hist->Scale(1/hist->GetMaximum());
           // hist->Scale(1/hist->GetEntries());
-          hist->Scale(1/hist->GetMaximum());
+          hist->Scale(1/hist->Integral());
         }
 
         TString drawStr = "";
