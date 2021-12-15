@@ -15,7 +15,7 @@ Kinematics::Kinematics(
 
   // revise crossing angle
   crossAng *= 1e-3; // mrad -> rad
-  crossAng = -1*TMath::Abs(crossAng); // take -1*abs(crossAng) to enforce the correct sign
+  crossAng = 1*TMath::Abs(crossAng); // take -1*abs(crossAng) to enforce the correct sign
 
   // TEST SETTINGS - for debugging calculations ///////////////
   // set main frame, used for calculations where there is ambiguity which frame is the correct frame to use
