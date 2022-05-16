@@ -1,4 +1,4 @@
-R__LOAD_LIBRARY(Largex)
+R__LOAD_LIBRARY(Sidis-eic)
 
 /* full simulation (dd4hep) usage
  * - note the similarity of the macro to the fast simulation

@@ -1,4 +1,4 @@
-R__LOAD_LIBRARY(Largex)
+R__LOAD_LIBRARY(Sidis-eic)
 
 // ratios of histograms with y-cut enabled to those with y-cut disabled
 void analysis_yRatio(

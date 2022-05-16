@@ -16,7 +16,7 @@
 #include "TObjArray.h"
 
 
-// largex-eic
+// sidis-eic
 #include "CutDef.h"
 
 

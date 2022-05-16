@@ -15,7 +15,7 @@
 #include "TFile.h"
 #include "TKey.h"
 
-// largex-eic
+// sidis-eic
 #include "DAG.h"
 #include "Histos.h"
 #include "BinSet.h"

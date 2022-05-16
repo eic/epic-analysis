@@ -1,4 +1,4 @@
-# Largex-eic
+# SIDIS-eic
 
 General purpose analysis software for SIDIS at the EIC
 
@@ -103,7 +103,7 @@ repository (pull requests are also welcome).
   `delphes` on a given `hepmc` or `hepmc.gz` file, and sets the output file
   names and the appropriate configuration card
   - configuration cards are stored in the `cards/` directory as a submodule
-    - clone this `largex-eic` repository with `--recurse-submodules`, or
+    - clone this `sidis-eic` repository with `--recurse-submodules`, or
       if you already have cloned without submodules, execute
       `git submodule update --init` to obtain them
   - environment must be set first (`source env.sh`)
@@ -144,7 +144,7 @@ for now you can assume any macro named `analysis_*.C` or `postprocess_*.C` are
 respective macros for the stages.
 
 - **Note**: most macros stored in this repository must be executed from the
-  `largex-eic` top directory, not from within their subdirectory, e.g., run
+  `sidis-eic` top directory, not from within their subdirectory, e.g., run
   `root -b -q tutorial/analysis_template.C`; this is because certain library
   and data directory paths are given as relative paths
 
@@ -238,7 +238,7 @@ respective macros for the stages.
 - the `SimpleTree` output is compatible with [asymmetry
   code](https://github.com/c-dilks/largex-eic-asym), included here as a
   submodule in `asym/`
-  - clone this `largex-eic` repository with `--recurse-submodules`, to get
+  - clone this `sidis-eic` repository with `--recurse-submodules`, to get
     `largex-eic-asym` and its main dependency `brufit`
   - follow `asym/README.md`
 

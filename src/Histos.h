@@ -20,7 +20,7 @@
 #include "TH3.h"
 #include "TMath.h"
 
-// largex-eic
+// sidis-eic
 #include "BinSet.h"
 #include "CutDef.h"
 #include "Hist4D.h"

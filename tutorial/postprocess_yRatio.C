@@ -1,4 +1,4 @@
-R__LOAD_LIBRARY(Largex)
+R__LOAD_LIBRARY(Sidis-eic)
 
 // plot ratios of distributions for various y minima
 void postprocess_yRatio(

@@ -1,4 +1,4 @@
-R__LOAD_LIBRARY(Largex)
+R__LOAD_LIBRARY(Sidis-eic)
 
 void postprocess_phi_crosscheck(
     TString infile="out/phi.crosscheck.root"

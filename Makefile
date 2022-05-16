@@ -3,7 +3,7 @@ include config.mk
 
 # local dependencies
 DEPS += -Isrc
-#LIBS += -L. -l$(LARGEX)
+#LIBS += -L. -l$(SIDIS-EIC)
 
 
 # assume each .cpp file has main and build corresponding .exe executable
@@ -23,7 +23,7 @@ exe: $(EXES)
 
 %.exe: %.o
 	@echo "--- make executable $@"
-	$(CXX) -o $@ $< ./$(LARGEXOBJ) $(LIBS)
+	$(CXX) -o $@ $< ./$(SIDIS-EIC-OBJ) $(LIBS)
 
 %.o: %.cpp
 	@echo "----- build $@ -----"

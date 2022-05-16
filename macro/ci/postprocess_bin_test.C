@@ -1,4 +1,4 @@
-R__LOAD_LIBRARY(Largex)
+R__LOAD_LIBRARY(Sidis-eic)
 
 // test drawing some single (x,Q2) bin plots, as opposed to grids of plots in
 // (x,Q2) bins

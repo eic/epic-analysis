@@ -1,4 +1,4 @@
-R__LOAD_LIBRARY(Largex)
+R__LOAD_LIBRARY(Sidis-eic)
 
 // make grids of plots of (p,eta) bins
 // - depending on infile, different histograms will be drawn

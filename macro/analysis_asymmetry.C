@@ -1,4 +1,4 @@
-R__LOAD_LIBRARY(Largex)
+R__LOAD_LIBRARY(Sidis-eic)
 
 struct WeightsProkudin : public WeightsSivers {
   ProkudinSfSet sf_set;

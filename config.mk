@@ -34,5 +34,5 @@ endif
 FLAGS += -DINCCENTAURO=$(INCCENTAURO)
 
 # shared object name and source directory
-LARGEX = Largex
-LARGEXOBJ := lib$(LARGEX).so
+SIDIS-EIC = Sidis-eic
+SIDIS-EIC-OBJ := lib$(SIDIS-EIC).so
