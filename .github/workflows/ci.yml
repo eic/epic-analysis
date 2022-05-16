@@ -39,11 +39,11 @@ jobs:
           name: x_build
           retention-days: 1
           path: |
-            LargexDict_rdict.pcm
-            libLargex.so
+            Sidis-eicDict_rdict.pcm
+            libSidis-eic.so
             mstwpdf/*.o
             mstwpdf/*.so
-            src/LargexDict.cxx
+            src/Sidis-eicDict.cxx
 
 
 # DELPHES ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-R__LOAD_LIBRARY(Largex)
+R__LOAD_LIBRARY(Sidis-eic)
 
 // analysis in bins of (x,Q2)
 void analysis_x_q2(

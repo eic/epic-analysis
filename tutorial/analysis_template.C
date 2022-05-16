@@ -1,4 +1,4 @@
-R__LOAD_LIBRARY(Largex)
+R__LOAD_LIBRARY(Sidis-eic)
 
 /* template analysis macro
  * - runs an analysis and nothing more (e.g., it does not define bins)

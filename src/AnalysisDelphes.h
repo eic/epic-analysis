@@ -23,7 +23,7 @@
 //#include "fastjet/contrib/Centauro.hh"
 //#include "fastjet/plugins/Centauro/Centauro.hh"
 
-// largex-eic
+// sidis-eic
 #include "Analysis.h"
 #include "Histos.h"
 #include "HistosDAG.h"

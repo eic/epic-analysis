@@ -18,7 +18,7 @@
 #include "TFile.h"
 #include "TRegexp.h"
 
-// largex-eic
+// sidis-eic
 #include "Histos.h"
 #include "HistosDAG.h"
 #include "Kinematics.h"

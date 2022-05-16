@@ -1,4 +1,4 @@
-R__LOAD_LIBRARY(Largex)
+R__LOAD_LIBRARY(Sidis-eic)
 
 /* run in a grid of (x,Q2) 2D bins
  * - various ways to make a grid are demonstrated

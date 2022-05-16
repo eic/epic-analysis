@@ -1,4 +1,4 @@
-R__LOAD_LIBRARY(Largex)
+R__LOAD_LIBRARY(Sidis-eic)
 #include "PostProcessor.h"
 
 // dump counts and average kinematics in Q2 bins

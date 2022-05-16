@@ -14,7 +14,7 @@
 #include "TString.h"
 #include "TRegexp.h"
 
-// largex-eic
+// sidis-eic
 #include "CutDef.h"
 #include "Node.h"
 

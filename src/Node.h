@@ -15,7 +15,7 @@
 #include "TNamed.h"
 #include "TString.h"
 
-// largex-eic
+// sidis-eic
 #include "CutDef.h"
 #include "NodePath.h"
 

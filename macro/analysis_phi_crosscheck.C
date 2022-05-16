@@ -1,4 +1,4 @@
-R__LOAD_LIBRARY(Largex)
+R__LOAD_LIBRARY(Sidis-eic)
 
 void analysis_phi_crosscheck(
     TString infiles="datarec/tutorial.config", /* list of input files */

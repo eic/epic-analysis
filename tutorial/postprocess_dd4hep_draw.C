@@ -1,4 +1,4 @@
-R__LOAD_LIBRARY(Largex)
+R__LOAD_LIBRARY(Sidis-eic)
 
 // make kinematics coverage plots, such as eta vs. p in bins of (x,Q2)
 void postprocess_dd4hep_draw(

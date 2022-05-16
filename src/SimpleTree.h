@@ -12,7 +12,7 @@
 #include <iostream>
 #include <sstream>
 
-// largex-eic
+// sidis-eic
 #include "Kinematics.h"
 
 // ROOT

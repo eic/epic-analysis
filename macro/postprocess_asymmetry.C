@@ -1,4 +1,4 @@
-R__LOAD_LIBRARY(Largex)
+R__LOAD_LIBRARY(Sidis-eic)
 
 void postprocess_asymmetry(
     TString infile="out/asymmetry.dire_5x41.brian.hiDiv.root"

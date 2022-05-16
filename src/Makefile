@@ -1,8 +1,8 @@
 include ../config.mk
 
 # rootcling dictionary
-DICT := $(LARGEX)Dict.cxx
-PCM := $(LARGEX)Dict_rdict.pcm
+DICT := $(SIDIS-EIC)Dict.cxx
+PCM := $(SIDIS-EIC)Dict_rdict.pcm
 LINKDEF = LinkDef.h
 
 
@@ -14,7 +14,7 @@ HEADERS := $(filter-out $(LINKDEF), $(wildcard *.h) $(wildcard sfset/*.h) $(wild
 #-----------------------------------------------
 
 
-$(LARGEXOBJ): $(DICT) $(HEADERS) $(SOURCES)
+$(SIDIS-EIC-OBJ): $(DICT) $(HEADERS) $(SOURCES)
 	@echo "----- build $@ -----"
 	$(CXX) $(SOURCES) -shared -o ../$@ $(FLAGS) $(DEPS) $(LIBS)
 
@@ -24,4 +24,4 @@ $(DICT): $(HEADERS)
 	mv $(PCM) ../
 
 clean:
-	$(RM) ../$(LARGEXOBJ) $(DICT) ../$(PCM)
+	$(RM) ../$(SIDIS-EIC-OBJ) $(DICT) ../$(PCM)

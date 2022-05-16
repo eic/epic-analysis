@@ -14,7 +14,7 @@
 #include "TGaxis.h"
 #include "TLegend.h"
 
-// largex-eic
+// sidis-eic
 #include "Histos.h"
 #include "Kinematics.h"
 #include "CutDef.h"
