@@ -11,4 +11,4 @@ imgFile=$imgDir/largex-eic.sif
 
 # start shell
 args=$@
-singularity exec $imgFile bash -c "cd $topDir && source env.sh && bash $args"
+singularity exec $imgFile bash -c "cd $topDir && source environ.sh && bash $args"

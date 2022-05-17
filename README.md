@@ -37,7 +37,7 @@ repository (pull requests are also welcome).
     - Images are hosted on [Docker Hub](https://hub.docker.com/r/cjdilks/largex-eic)
       - (the Docker image is hosted, but Singularity can pull it too)
   - Then run `container/shell.sh` to start a shell in the container
-    - This will automatically call `source env.sh` upon shell startup, which
+    - This will automatically call `source environ.sh` upon shell startup, which
       sets environment variables
   - Proceed with the **Building** section below (just type `make`)
 
@@ -75,16 +75,16 @@ repository (pull requests are also welcome).
   - first, make sure you have a build of `delphes` somewhere, preferably in a
     separate directory
   - set environment variables before doing anything, so this repository knows where your
-    `delphes` build is: `source env.sh /path/to/delphes/repository`
+    `delphes` build is: `source environ.sh /path/to/delphes/repository`
     - if you do not specify a path to `delphes` repository, it will use a default
-      path given in `env.sh`; it is useful to edit this default path for your own
+      path given in `environ.sh`; it is useful to edit this default path for your own
       convenience
     - it will also symlink `delphes` external code, so analysis macros
       will not complain
 
 ## Building
 
-- First make sure environment variables are set by calling `source env.sh`
+- First make sure environment variables are set by calling `source environ.sh`
 - Build analysis code with `make`
   - It requires a `root` build as well as `delphes` (see above)
   - All classes are found in the `src/` directory
@@ -106,7 +106,7 @@ repository (pull requests are also welcome).
     - clone this `sidis-eic` repository with `--recurse-submodules`, or
       if you already have cloned without submodules, execute
       `git submodule update --init` to obtain them
-  - environment must be set first (`source env.sh`)
+  - environment must be set first (`source environ.sh`)
   - run `exeDelphes.sh` with no arguments for usage guide
   - in the script, you may need to change `exeDelphes` to the proper
     executable, e.g., `DelphesHepMC2` or `DelphesHepMC3`, depending

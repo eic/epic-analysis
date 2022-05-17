@@ -13,7 +13,7 @@ exeDelphes=$DELPHES_HOME/DelphesHepMC3
 
 # check environment
 if [ -z "$DELPHES_HOME" ]; then
-  echo "ERROR: you must source env.sh first"
+  echo "ERROR: you must source environ.sh first"
   exit 1
 fi
 
