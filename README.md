@@ -34,7 +34,7 @@ repository (pull requests are also welcome).
     - With no arguments, a usage guide will be printed
     - Default image file location is `container/img/`
     - Note that the image size is about 2 GB
-    - Images are hosted on [Docker Hub](https://hub.docker.com/r/cjdilks/largex-eic)
+    - Images are hosted on [Docker Hub](https://hub.docker.com/r/cjdilks/sidis-eic)
       - (the Docker image is hosted, but Singularity can pull it too)
   - Then run `container/shell.sh` to start a shell in the container
     - This will automatically call `source environ.sh` upon shell startup, which
@@ -42,7 +42,7 @@ repository (pull requests are also welcome).
   - Proceed with the **Building** section below (just type `make`)
 
 - **Alternatively** if you prefer to use Docker:
-  - obtain the image using `docker pull cjdilks/largex-eic:dev`
+  - obtain the image using `docker pull cjdilks/sidis-eic:latest`
   - start the container using a standard `docker run` command; you can also use
     the script `container/devscripts/dockerShell.sh`, if you find it useful
     - the Docker image was built assuming a default user ID (UID) of 1000; if your

@@ -55,7 +55,7 @@ if [ $# -ge 2 ]; then export TMPDIR=$2; fi
 
 
 # print settings
-imgFile=$imgDir/largex-eic.sif
+imgFile=$imgDir/sidis-eic.sif
 echo """
 image directory = $imgDir
 image file = $imgFile
@@ -64,6 +64,6 @@ temp directory = $([[ -z "$TMPDIR" ]] && echo "/tmp" || echo "$TMPDIR")
 
 
 # pull image from dockerhub
-singularity pull $imgFile docker://cjdilks/largex-eic:dev && \
+singularity pull $imgFile docker://cjdilks/sidis-eic:latest && \
 echo "SUCCESS!"
 

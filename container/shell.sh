@@ -7,7 +7,7 @@ else topDir=$(dirname $(realpath ${BASH_SOURCE[0]}))/..; fi
 
 # set image file
 imgDir=$topDir/container/img
-imgFile=$imgDir/largex-eic.sif
+imgFile=$imgDir/sidis-eic.sif
 
 # start shell
 args=$@

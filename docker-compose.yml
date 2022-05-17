@@ -2,4 +2,4 @@ version: '3'
 services:
   dev:
     build: ./container/dev
-    container_name: largex-eic-dev
+    container_name: sidis-eic-dev
