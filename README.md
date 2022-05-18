@@ -114,6 +114,8 @@ repository (pull requests are also welcome).
     on the format of your generator input
   - if reading a gunzipped file (`*.hepmc.gz`), this script will automatically
     stream it through `gunzip`, so there is no need to decompress beforehand
+  - there are some `hepmc` files on S3;  follow [s3tools documentation](s3tools/README.md)
+    for scripts and guidance
 - the output will be a `TTree` stored in a `root` file
   - output files will be placed in `datarec/`
   - input `hepmc(.gz)` files can be kept in `datagen/`
