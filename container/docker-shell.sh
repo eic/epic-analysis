@@ -1,8 +1,8 @@
 #!/bin/bash
 # start docker shell, for testing image builds
 
-image=sidiseic_dev:latest
-#image=cjdilks/sidis-eic:latest
+# image=sidiseic_dev:latest
+image=cjdilks/sidis-eic:latest
 
 homedir=/home/sidis
 swdir=$homedir/sidis-eic

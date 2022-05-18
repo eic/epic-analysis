@@ -1,32 +1,54 @@
 # Tutorials
 
-Here is a collection of tutoial macros. If you are learning this software,
-it is recommended to go through these tutorials in order given below.
+Here is a collection of tutorial macros. If you are learning this software,
+it is recommended to go through these tutorials in the numerical order given below.
 
 - **Note**: execute macros from the `sidis-eic` top directory, not from
 this tutorial directory, e.g., `root -b -q tutorial/analysis_template.C`
 
-- you need to generate or obtain ROOT files, from fast or full simulation
-  - the `datarec/` directory is provided for storage of these files,
-    but is not required to use
-  - if you are running in the Singularity container, there are sample
-    Delphes output files in `/data`
-    - the easiest way to run the tutorial macros is to make symbolic
-      links with `ln -sv /data/*.root datarec/`
-    - alternatively, pass the file names as parameters when running
-      the macros
-    - sample files are not up-to-date, and serve as examples only
-  - if you want to generate your own, run Pythia8 to produce a `hepmc`
-    file, then run Delphes
+## Generate or Obtain Simulation Output Trees 
 
-- many of these examples focus on fast simulations
-  - to switch between fast and full simulations, change the Analysis
-    class in the macro
-    - `AnalysisDelphes` is used for fast simulation
-    - `AnalysisDD4hep` is used for full simulation
-    - some extra settings and features differ between the two
+To run tutorials, you need to generate or obtain ROOT files, from fast or full simulation
+- the `datarec/` directory is provided for storage of these files,
+  but is not required to use
+- the following sub-sections describe how to obtain these files from the common
+  storage area
+  - this requires access to S3, the common storage area
+  - environment variables `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` must contain
+    the login and password; follow [s3tools documentation](../s3tools/README.md) for guidance
 
-- all tutorial examples have two macros:
+### Fast Simulation
+- run `tutorial/makeSampleDelphesFiles.sh` to download HEPMC files from S3,
+  and run them through Delphes
+  - edit the settings in this script, such as beam energy
+  - change the maximum number of files to process, to limit disk space
+    consumption
+
+### Full Simulation
+- full simulation files are streamed from S3 using `tutorial/s3files.config`
+
+
+## Introductory Notes
+
+### Switching between Fast and Full Simulations
+- many of these examples focus on fast simulations; to switch between fast and
+  full simulations, change the Analysis class in the macro:
+  - `AnalysisDelphes` is used for fast simulation
+  - `AnalysisDD4hep` is used for full simulation
+- note: some extra settings and features differ between these
+
+### Input File Lists (Config Files)
+- in the analysis macros, the input files are specified by a list, a "config
+  file", with the additional columns
+  - see [documentation here](../s3tools/README.md) for the formatting of these
+    files, as well as scripts to help generate them
+  - for example, this file allows one to combine different Q2 regions together
+    using relative weights 
+
+
+# Tutorials:
+
+Each of these examples has two macros:
   - analysis macro, to run an `Analysis` class, which will analyze 
     simulated data in an event loop, and generate a variety of output
     data structures
@@ -36,15 +58,6 @@ this tutorial directory, e.g., `root -b -q tutorial/analysis_template.C`
     the event loop; the postprocessor macro is typically fast, since
     it analyzes the resulting data structures
 
-## Input File Lists (Config Files)
-
-- in the analysis macros, the input files are specified by a list, a "config
-  file", with the additional columns for each file (so that we can combine
-  different Q2 regions together using relative weights); 
-  see [documentation here](../s3tools/README.md) for the formatting of these
-  files, as well as scripts to help generate them
-
-## Examples:
 
 1. Template
   - `analysis_template.C`: minimal analysis macro to demonstrate how
@@ -92,7 +105,3 @@ this tutorial directory, e.g., `root -b -q tutorial/analysis_template.C`
     certain bins to be "full-range", i.e., "integrated over"; in order
     to restrict the execution of certain subloops, conditional control
     functions are used
-
-More examples will be added eventually; for now you are encouraged to
-look at other existing analysis and postprocessor macros
-

@@ -36,7 +36,7 @@ repository (pull requests are also welcome).
     - Note that the image size is about 2 GB
     - Images are hosted on [Docker Hub](https://hub.docker.com/r/cjdilks/sidis-eic)
       - (the Docker image is hosted, but Singularity can pull it too)
-  - Then run `container/shell.sh` to start a shell in the container
+  - Then run `container/shell.sh` to start a shell in the Singularity container
     - This will automatically call `source environ.sh` upon shell startup, which
       sets environment variables
   - Proceed with the **Building** section below (just type `make`)
@@ -44,7 +44,7 @@ repository (pull requests are also welcome).
 - **Alternatively** if you prefer to use Docker:
   - obtain the image using `docker pull cjdilks/sidis-eic:latest`
   - start the container using a standard `docker run` command; you can also use
-    the script `container/devscripts/dockerShell.sh`, if you find it useful
+    the script `container/devscripts/docker-shell.sh`, if you find it useful
     - the Docker image was built assuming a default user ID (UID) of 1000; if your
       UID is different (check with the `id` command), your user name in the container
       may be `I have no name!`, but you should still have read/write permission for
@@ -55,6 +55,7 @@ repository (pull requests are also welcome).
       for instructions how to build your own image (which would allow you to change
       the default UID, or anything else you want)
   - once you are in the Docker container, proceed with the **Building** section below
+  - note: the Singularity container is likely more user-friendly
 
 ## Option 2: Setup your own environment
 

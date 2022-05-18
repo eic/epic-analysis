@@ -3,10 +3,10 @@
 
 # arguments and usage
 if [ $# -lt 2 ]; then echo """
-USAGE: $0 [energy] [Q2min] [mode]
+USAGE: $0 [energy] [Q2min] [limit]
 - [energy] is beam energies, e.g., 10x100
 - [Q2min] is the minimum Q2
-- [mode] is used for special modes, e.g., ci
+- [limit] is used to limit the number of files (default=0, take all)
 - output is to stdout, so you can either:
   - redirect it to a file
   - pipe through grep for further filtering
@@ -14,12 +14,12 @@ USAGE: $0 [energy] [Q2min] [mode]
 """; exit 2; fi
 energy=$1
 minQ2=$2
-mode=""
-if [ $# -ge 3 ]; then mode=$3; fi
+limit=0
+if [ $# -ge 3 ]; then limit=$3; fi
 
 evgenDir="S3/eictest/ATHENA/EVGEN/DIS/NC/$energy/minQ2=$minQ2"
-if [ "$mode" == "ci" ]; then
-  mc ls $evgenDir | grep -E 'hepmc.gz$' | grep -v GiB | grep vtxfix | head -n4 | sed "s;^.* ;$evgenDir/;g"
+if [ $limit -gt 0 ]; then
+  mc ls $evgenDir | grep -E 'hepmc.gz$' | grep -v GiB | grep vtxfix | head -n$limit | sed "s;^.* ;$evgenDir/;g"
 else
   mc ls $evgenDir | grep -E 'hepmc.gz$' | grep -v GiB | grep vtxfix | sed "s;^.* ;$evgenDir/;g"
 fi

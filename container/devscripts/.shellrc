@@ -1,2 +1,0 @@
-# general settings appended to ~/.bashrc
-export LS_COLORS="di=01;31"

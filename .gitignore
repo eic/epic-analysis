@@ -18,6 +18,8 @@ results*
 *.xsec
 tags
 *.zip
+tutorial/delphes.config
+tutorial/delphes.config.bak
 
 # users' custom ignores
 datagen/escalate

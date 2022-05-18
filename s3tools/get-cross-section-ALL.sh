@@ -36,4 +36,4 @@ while read hepmc; do
   s3tools/get-cross-section.sh $hepmc $limiter | tee $outFile
 done < evgenList.tmp
 rm evgenList.tmp
-tree datarec/xsec
+#tree datarec/xsec

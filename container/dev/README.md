@@ -7,11 +7,10 @@ development scripts for image maintenance
 - user must be in `docker` group, `pwd` must contain `docker-compose.yml`
 ```
 docker-compose build dev
-container/devscripts/dockerShell.sh   # for testing
+container/docker-shell.sh   # for testing
 ```
 
 ### pushing to dockerhub
-example for CI image: give it the dockerhub repo name, with the tag `dev`
 ```
 docker login
 docker images
