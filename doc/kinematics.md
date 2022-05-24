@@ -38,14 +38,14 @@ calculations, set the following:
 - `vecEleBeam` and `vecIonBeam`: beam 4-momenta (if taking into
   account beam effects (generator level))
 - Hadronic Final State (HFS)
-  - calculates HFS variables `sigmah`, `Pxh`, and `Pyh`, needed for
-    reconstruction methods that require the HFS
   - for Delphes, call `GetHFS` for reconstructed or `GetTrueHFS` for
     generated; both require several objects (see code)
     - note: `GetHFS` uses `getTrackPID` for smeared PID
   - for DD4hep/Juggler, use `AddToHFS` in particle loop, then at the
     end call `SubtractElectronFromHFS` to omit the scattered electron
     - don't forget to call `ResetHFS()` beforehand
+  - HFS variables `sigmah`, `Pxh`, and `Pyh`, are needed for
+    reconstruction methods that require the HFS
 
 #### For SIDIS Single-Hadron Calculators
 For each hadron, set `vecHadron`, the hadron 4-momentum
