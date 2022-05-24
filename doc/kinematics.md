@@ -194,7 +194,7 @@ void CalculateHadronKinematics();
   - qT
 
 
-### Calculate Jet Kinematics
+#### Calculate Jet Kinematics
 ```c
 void CalculateJetKinematics(fastjet::PseudoJet jet);
 void CalculateBreitJetKinematics(fastjet::PseudoJet jet);
