@@ -28,6 +28,8 @@ Kinematics(Double_t enEleBeam, Double_t enIonBeam, Double_t crossAng);
 - sets other miscellaneous variables, such as default spin and
   polarization
 
+---
+
 
 ### Preparation
 
@@ -55,6 +57,8 @@ For each hadron, set `vecHadron`, the hadron 4-momentum
 Currently implemented in `AnalysisDelphes` only!
 - call `GetJets`, which does the work
 - alternatively, call `GetBreitFrameJets` (requires Centauro)
+
+---
 
 
 ### Calculators
@@ -208,6 +212,8 @@ void CalculateBreitJetKinematics(fastjet::PseudoJet jet);
   - jperp
   - ...
 
+---
+
 
 ### Boosts
 
@@ -237,6 +243,8 @@ void TransformBackToLabFrame(TLorentzVector Hvec, TLorentzVector &Lvec);
 // tests and validation
 void ValidateHeadOnFrame(); // test head-on frame boost
 ```
+
+---
 
 
 ### Miscellaneous Methods
