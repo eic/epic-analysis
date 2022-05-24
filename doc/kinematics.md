@@ -182,6 +182,7 @@ void GetQWNu_quadratic();
 - requires HFS, along with Q2 and y
 - solves quadratic equation for vecQ, vecW, W and Nu
 
+---
 
 
 #### Calculate Single-Hadron SIDIS Kinematics
@@ -198,6 +199,8 @@ void CalculateHadronKinematics();
   - phiS (requires spin-up reference, set in constructor)
   - pT
   - qT
+
+---
 
 
 #### Calculate Jet Kinematics
