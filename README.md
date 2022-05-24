@@ -6,7 +6,7 @@ This repository provides a set of common tools for the analysis of both full and
 fast simulations, including the following features:
 
 - kinematics reconstruction methods (e.g., leptonic, hadronic, Jacquet-Blondel,
-  etc.)
+  etc.); see [Kinematics Documentation](doc/kinematics.md)
 - calculations of SIDIS variables, such as `PhiH` and `qT`, for single
   particles, as well as jet variables
 - application of common set of cuts
@@ -174,6 +174,14 @@ respective macros for the stages.
       `Histos` will also be streamed to `root` files, along with the binning
       scheme (handled by the `BinSet` class); downstream post processing code
       makes use of these streamed objects, rather than the `TObjArray`s
+  - derived classes are specific to upstream data structures:
+    - `AnalysisDelphes` for Delphes trees
+    - `AnalysisDD4hep` for trees from the DD4hep+Juggler stack
+  - the `Kinematics` class is used to calculate all kinematics
+    - one instance for generated variables, and another for reconstructed
+    - calculations are called by `Analysis`-derived classes, event-by-event or
+      particle-by-particle or jet-by-jet
+    - see [Kinematics Documentation](doc/kinematics.md) for details of `Kinematics`
 
 ### Bin Specification
 

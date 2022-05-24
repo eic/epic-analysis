@@ -1,3 +1,7 @@
+/* NOTE:
+ * if you make changes, MAINTAIN DOCUMENTATION IN ../doc/kinematics.md
+ */
+
 #ifndef Kinematics_
 #define Kinematics_
 
