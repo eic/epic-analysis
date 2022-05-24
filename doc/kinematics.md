@@ -94,6 +94,7 @@ One of the following methods will be called by `CalculateDIS`:
 ```c
 void CalculateDISbyElectron();
 ```
+- Electron method
 - requires electron 4-momentum
 - calls auxiliary method `GetQWNu_electronic()` to obtain `vecQ`,
   `vecW`, W, and Nu
