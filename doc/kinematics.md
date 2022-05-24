@@ -13,7 +13,8 @@ Kinematics(Double_t enEleBeam, Double_t enIonBeam, Double_t crossAng);
     when there is ambiguity which frame to use
     - in general, we try to use Lorentz invariant formulas where
       possible
-    - options:
+    - for frame-dependent formulas, we have these options (defined as
+      `mainFrame`):
       - lab frame
       - head-on frame (default)
   - `qComponentsMethod`: how to obtain the virtual photon 4-momentum
