@@ -21,7 +21,7 @@ jobs:
   build:
     runs-on: [ ubuntu-latest ]
     container:
-      image: cjdilks/sidis-eic:dev
+      image: cjdilks/sidis-eic:latest
       options: --user root
     steps:
       - name: checkout
@@ -52,7 +52,7 @@ jobs:
   delphes_fastsim:
     runs-on: [ ubuntu-latest ]
     container:
-      image: cjdilks/sidis-eic:dev
+      image: cjdilks/sidis-eic:latest
       options: --user root
     strategy:
       fail-fast: false
@@ -107,7 +107,7 @@ jobs:
   download_fullsim:
     runs-on: [ ubuntu-latest ]
     container:
-      image: cjdilks/sidis-eic:dev
+      image: cjdilks/sidis-eic:latest
       options: --user root
     steps:
       - name: checkout
@@ -143,7 +143,7 @@ jobs:
     needs: [ build, delphes_fastsim ]
     runs-on: [ ubuntu-latest ]
     container:
-      image: cjdilks/sidis-eic:dev
+      image: cjdilks/sidis-eic:latest
       options: --user root
     strategy:
       fail-fast: true
@@ -199,7 +199,7 @@ jobs:
     needs: [ build, download_fullsim ]
     runs-on: [ ubuntu-latest ]
     container:
-      image: cjdilks/sidis-eic:dev
+      image: cjdilks/sidis-eic:latest
       options: --user root
     strategy:
       fail-fast: true
@@ -257,7 +257,7 @@ jobs:
       - analysis_fullsim
     runs-on: [ ubuntu-latest ]
     container:
-      image: cjdilks/sidis-eic:dev
+      image: cjdilks/sidis-eic:latest
       options: --user root
     strategy:
       fail-fast: false
@@ -352,7 +352,7 @@ jobs:
       - analysis_fullsim
     runs-on: [ ubuntu-latest ]
     container:
-      image: cjdilks/sidis-eic:dev
+      image: cjdilks/sidis-eic:latest
       options: --user root
     strategy:
       fail-fast: false
