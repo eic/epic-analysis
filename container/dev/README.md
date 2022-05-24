@@ -18,4 +18,5 @@ docker tag sidiseic_dev:latest cjdilks/sidis-eic:latest
 docker scan cjdilks/sidis-eic:latest  2>&1 | tee vulnerabilities.txt
 docker push cjdilks/sidis-eic:latest
 docker logout
+# clean ~/.docker/config.json (if necessary)
 ```
