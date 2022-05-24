@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v2
       - name: env
         run: |
-          source env.sh
+          source environ.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: compile
@@ -65,7 +65,7 @@ jobs:
           submodules: true
       - name: env
         run: |
-          source env.sh
+          source environ.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: download_hepmc_files
@@ -114,7 +114,7 @@ jobs:
         uses: actions/checkout@v2
       - name: env
         run: |
-          source env.sh
+          source environ.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: download_fullsim
@@ -165,7 +165,7 @@ jobs:
         uses: actions/checkout@v2
       - name: env
         run: |
-          source env.sh
+          source environ.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: get_build_artifacts
@@ -221,7 +221,7 @@ jobs:
         uses: actions/checkout@v2
       - name: env
         run: |
-          source env.sh
+          source environ.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: get_build_artifacts
@@ -316,7 +316,7 @@ jobs:
         uses: actions/checkout@v2
       - name: env
         run: |
-          source env.sh
+          source environ.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: get_build_artifacts
@@ -392,7 +392,7 @@ jobs:
         uses: actions/checkout@v2
       - name: env
         run: |
-          source env.sh
+          source environ.sh
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: get_build_artifacts

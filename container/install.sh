@@ -18,12 +18,12 @@ if [ $# -lt 1 ]; then
       - run \"$0 .\" to use the default directory, which is:
         $imgDirDflt
       - otherwise specify your preferred directory
-      - note that the image size is of order 2 GB
+      - note that the image size is of order 3 GB
     
     - [(optional) temp directory]: temporary directory
       - used while building the SIF file, may need a few GB for a few minutes
       - your default directory is probably $([[ -z "$TMPDIR" ]] && echo "/tmp" || echo "$TMPDIR")
-        specify a different directory, if there is not enough space there
+        - specify a different directory, if there is not enough space there
   """
   exit 1
 fi
