@@ -21,7 +21,7 @@ hostURL_esc=$(echo $hostURL | sed 's/\//\\&/g')
 remoteDirURL=$(echo $dataDir | sed "s/^S3/s3$hostURL_esc/")
 
 # get file list from S3 ###################################
-mc ls $dataDir | sed 's/^.*] //' | awk '{print $2}' |\
+mc ls $dataDir | sed 's/^.*] //' | awk '{print $3}' |\
 grep -E '\.root$' |\
 grep -vE 'raw.root$|ecal.root$|hcal.root$' |\
 while read fileName; do
