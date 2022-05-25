@@ -19,8 +19,8 @@ One top-level script automates all the work:
     for the convenience of SIDIS full simulation analysis
   - you may have to run `add-host.sh` first, if you have not yet; set env vars
     `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password beforehand:
-    - `export=S3_ACCESS_KEY=*****`
-    - `export=S3_SECRET_KEY=*****`
+    - `export S3_ACCESS_KEY=*****`
+    - `export S3_SECRET_KEY=*****`
   - this script calls several other scripts in this directory; read on for their
     documentation
 - if you are not running in the Singularity/Docker container, download and install
