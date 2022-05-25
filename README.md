@@ -246,7 +246,7 @@ and follow the [README](tutorial/README.md).
   - As the name suggests, it is a flat tree with a minimal set of variables,
     specifically needed for SIDIS spin asymmetry analysis
   - The tree branches are configured to be compatible with 
-    [asymmetry analysis code](https://github.com/c-dilks/dispin),
+    [asymmetry analysis code](https://github.com/c-dilks/largex-eic-asym)
     built on the [BruFit](https://github.com/dglazier/brufit) framework
   - There is a switch in `Analysis` to enable/disable whether this tree is 
     written

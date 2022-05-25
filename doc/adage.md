@@ -19,7 +19,7 @@ There are two DAG traversal algorithms implemented:
 The last point is critical: every unique path from the root node to the leaf node represents a single multi-dimensional bin, because all the bin layers are included. For example, in the previous figure, the depth first traversal will first descend through `[root,x1,y1,Q1,z1,leaf]`. It then ascends (backtracks) through `z1`, then back to `q1`, then descends down the unexplored path to `z2`, and finally the leaf node. We now have the path `[root,x1,y1,Q1,z2,leaf]`, another multi-dimensional bin. Next the traversal ascends up to `y1`, since we've explored all paths stemming from `Q1`. Then we descend to `Q2`, which will give us the paths `[root,x1,y1,Q2,z1,leaf]` and `[root,x1,y1,Q2,z2,leaf]`. Eventually the traversal will find all the unique root-to-leaf paths, and will ascend back to the root node, where the traversal has nowhere unexplored to go and therefore stops. This traversal thus replicates the following
 behavior of nested for loops:
 
-```
+```c
 // at root node
 for(x in x-bins) {
   for(y in y-bins) {
@@ -35,7 +35,7 @@ for(x in x-bins) {
 
 Assuming the pointer to the `HistosDAG` object is `HD`, and `Payload_Operator` is a lambda expression, this pseudocode is implemented in Adage as:
 
-```
+```c
 HD->Payload( Payload_Operator );
 HD->ExecuteOps();
 ```
@@ -57,7 +57,7 @@ Two lambda expressions can be staged on each control node:
 
 An inbound lambda staged on the root node is executed before the traversal, while an outbound lambda on the root node is executed after the traversal; these are called `Initial` and `Final` operators. An inbound operator staged on the Q control node will be executed before the (Q,x) subloop, and an outbound operator will be executed after the subloop. There is no difference between inbound and outbound operators staged on the leaf node, since one will be immediately executed after the other. The figure above translates to the following pseudocode:
 
-```
+```c
 Initial_Operator();
 for(z in z-bins) {
   for(y in y-bins) {
@@ -77,7 +77,7 @@ Final_Operator();
 
 Assuming the names of the Q and x layers are `"q2"` and `"x"`, this pseudocode is implemented in Adage as:
 
-```
+```c
 HD->Initial( Initial_Operator );
 HD->Final( Final_Operator );
 HD->Subloop( {"q2","x"}, Inbound_Operator_Before_Subloop_Q_x, Outbound_Operator_After_Subloop_Q_x );
@@ -87,7 +87,7 @@ HD->ExecuteOps();
 
 You can nest subloops however you want. For example, if you want to have a subloop over x bins nested in the (Q,x) subloop, you can call:
 
-```
+```c
 HD->Subloop( {"q2","x"}, Inbound_Operator_Before_Subloop_Q_x, Outbound_Operator_After_Subloop_Q_x );
 HD->Subloop( {"x"}, Inbound_Operator_Before_Subloop_x, Outbound_Operator_After_Subloop_x );
 ```
@@ -113,7 +113,7 @@ through the right (Q,x) subloop.
 
 This figure corresponds to the following pseudocode:
 
-```
+```c
 Initial_Operator();
 for(z in z-bins) {
   for(y in y-bins) {
@@ -141,7 +141,7 @@ Final_Operator();
 
 Compare to the Adage implementation:
 
-```
+```c
 HD->Initial( Initial_Operator );
 HD->Final( Final_Operator );
 HD->MultiPayload( {"q2","x"}, Payload_1, Before_Subloop_1, After_Subloop_1 );
@@ -156,7 +156,7 @@ If you want to control whether or not a subloop executes, use a `ConditionalCont
 
 Implemented in pseudocode with nested for-loops, we have:
 
-```
+```c
 Initial_Operator();
 for(z in z-bins) {
   for(y in y-bins) {
@@ -181,7 +181,7 @@ Final_Operator();
 
 The code in Adage is:
 
-```
+```c
 HD->Initial( Initial_Operator );
 HD->Final( Final_Operator );
 
