@@ -6,6 +6,7 @@
 *.so
 *.o
 *.exe
+*.tmp
 out/*/*.png
 out/*/*.pdf
 *Dict.cxx
