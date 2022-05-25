@@ -5,14 +5,16 @@ General purpose analysis software for SIDIS at the EIC
 This repository provides a set of common tools for the analysis of both full and
 fast simulations, including the following features:
 
-- kinematics reconstruction methods (e.g., leptonic, hadronic, Jacquet-Blondel,
-  etc.); see [Kinematics Documentation](doc/kinematics.md)
-- calculations of SIDIS variables, such as `PhiH` and `qT`, for single
+- General event loops for reading upstream data structures; for example,
+  `src/AnalysisDelphes.cxx` for reading Delphes trees
+- Kinematics reconstruction methods (e.g., leptonic, hadronic, Jacquet-Blondel,
+  etc.); see [Kinematics Documentation](doc/kinematics.md) for more information
+- Calculations of SIDIS variables, such as `PhiH` and `qT`, for single
   particles, as well as jet variables
-- application of common set of cuts
-- ability to specify arbitrary multi-dimensional binning schemes
-- outputs include binned histograms, tables, and other data structures such as
-  `TTrees`
+- Ability to specify arbitrary multi-dimensional binning schemes and cuts; see
+  [Adage documentation](doc/adage.md) for more information
+- Output data structures include multi-dimensionally binned histogram sets,
+  tables, and `TTrees`
 - An analysis is primarily driven by macros, used to set up the binning and
   other settings
 
@@ -21,6 +23,13 @@ the common tools provided in this repository (e.g., kinematics reconstruction),
 this is also possible; you only need to stream the data structure you need, most
 likely within the event loop. In this situation, it is recommended you fork the
 repository (pull requests are also welcome).
+
+Here is a flowchart showing the main classes (underlined) and the connections to
+upstream simulation output:
+
+![fig1](doc/img/flowchart.png)
+
+---
 
 
 # Setup and Dependencies
@@ -52,8 +61,7 @@ repository (pull requests are also welcome).
       due to our preference for Singularity, however suggestions how to improve
       are welcome
     - Docker files are also provided, you can follow `container/dev/README.md`
-      for instructions how to build your own image (which would allow you to change
-      the default UID, or anything else you want)
+      for instructions how to build your own image
   - once you are in the Docker container, proceed with the **Building** section below
   - note: the Singularity container is likely more user-friendly
 
@@ -82,10 +90,13 @@ repository (pull requests are also welcome).
       convenience
     - it will also symlink `delphes` external code, so analysis macros
       will not complain
+- **MinIO Client**, if you will be accessing data from S3 (see 
+  [s3tools documentation](s3tools/README.md) for details)
 
 ## Building
 
 - First make sure environment variables are set by calling `source environ.sh`
+  - If you called `container/shell.sh`, this has already been done
 - Build analysis code with `make`
   - It requires a `root` build as well as `delphes` (see above)
   - All classes are found in the `src/` directory
@@ -95,11 +106,14 @@ repository (pull requests are also welcome).
 - If you're ready to try the software hands-on, follow the [tutorials](tutorial/README.md) in 
   the `tutorial/` directory
 
+---
+
 
 # Simulation
 
 ## Delphes Fast Simulation
 
+### Delphes Wrapper
 - for convenience, the wrapper script `exeDelphes.sh` is provided, which runs
   `delphes` on a given `hepmc` or `hepmc.gz` file, and sets the output file
   names and the appropriate configuration card
@@ -120,18 +134,29 @@ repository (pull requests are also welcome).
   - output files will be placed in `datarec/`
   - input `hepmc(.gz)` files can be kept in `datagen/`
 
+### AnalysisDelphes
+- The class `AnalysisDelphes` contains the event loop for reading Delphes trees
+  - There are several classes which derive from the base `Analysis` class;
+    `Analysis` handles common setup and final output, whereas the derived
+    classes are tuned to read the upstream data formats
+- See the event loop in `src/AnalysisDelphes.cxx` for details of how the full
+  simulation data are read
+
+
 ## ATHENA Full Simulation
 
-- full simulation files are stored on S3; follow [s3tools documentation](s3tools/README.md)
+- Full simulation files are stored on S3; follow [s3tools documentation](s3tools/README.md)
   for scripts and guidance
-- in general, everything that can be done in fast simulation can also be done in
+- In general, everything that can be done in fast simulation can also be done in
   full simulation; just replace your usage of `AnalysisDelphes` with
   `AnalysisDD4hep`
-  - in practice, implementations may sometimes be a bit out of sync, where some
+  - In practice, implementations may sometimes be a bit out of sync, where some
     features exist in fast simulation do not exist in full simulation, or vice
     versa
-- TODO: more details
+- See the event loop in `src/AnalysisDD4hep.cxx` for details of how the full
+  simulation data are read
 
+---
 
 
 # Analysis Procedure
@@ -140,30 +165,28 @@ After simulation, this repository separates the analysis procedure into two
 stages: (1) the *Analysis* stage includes the event loop, which processes either
 fast or full simulation output, kinematics reconstruction, and your specified
 binning scheme, while (2) the *Post-processing* stage includes histogram
-drawing, comparisons, table printouts, and any feature you would like to add
+drawing, comparisons, table printouts, and any feature you would like to add.
 
-The two stages are driven by macros. Example macros will eventually be added;
-for now you can assume any macro named `analysis_*.C` or `postprocess_*.C` are
-respective macros for the stages.
+The two stages are driven by macros. See examples in the `tutorial` directory,
+and follow the [README](tutorial/README.md).
 
 - **Note**: most macros stored in this repository must be executed from the
   `sidis-eic` top directory, not from within their subdirectory, e.g., run
   `root -b -q tutorial/analysis_template.C`; this is because certain library
   and data directory paths are given as relative paths
 
-## Analysis
+## Analysis Stage
 
 ### Analysis Macro and Class
 
 - the `Analysis` class is the main class that performs the analysis; it is 
   controlled at the macro level
   - a typical analysis macro must do the following:
-    - instantiate `Analysis` (with file names, beam energies, crossing angle)
+    - instantiate an `Analysis` derived class (e.g., `AnalysisDelphes`)
     - set up bin schemes and bins (arbitrary specification, see below)
     - set any other settings (e.g., a maximum number of events to process,
       useful for quick tests)
     - execute the analysis
-    - see `src/Analysis.h` for further documentation in comments
   - the output will be a `root` file, filled with `TObjArray`s of
     histograms
     - each `TObjArray` can be for a different subset of events (bin), e.g.,
@@ -178,7 +201,9 @@ respective macros for the stages.
     - `AnalysisDelphes` for Delphes trees
     - `AnalysisDD4hep` for trees from the DD4hep+Juggler stack
   - the `Kinematics` class is used to calculate all kinematics
-    - one instance for generated variables, and another for reconstructed
+    - `Analysis`-derived classes have one instance of `Kinematics` for generated
+      variables, and another for reconstructed variables, to allow quick
+      comparison (e.g., for resolutions)
     - calculations are called by `Analysis`-derived classes, event-by-event or
       particle-by-particle or jet-by-jet
     - see [Kinematics Documentation](doc/kinematics.md) for details of `Kinematics`
@@ -186,9 +211,8 @@ respective macros for the stages.
 ### Bin Specification
 
 - The bins may be specified arbitrarily, using the `BinSet` and `CutDef` classes
-  - see example `analysis_*C` macros
-  - `CutDef` can store and apply an arbitrary cut for a single variable, such
-    as:
+  - see example `analysis_*C` macros in `tutorial/`
+  - `CutDef` can store and apply an arbitrary cut for a single variable, such as:
     - ranges: `a<x<b` or `|x-a|<b`
     - minimum or maximum: `x>a` or `x<a`
     - no cut (useful for "full" bins)
@@ -214,15 +238,13 @@ respective macros for the stages.
   - See [Adage documentation](doc/adage.md) for more information on how multi-dimensional
     binning is handled, as well as the [Adage syntax reference](doc/syntax.md)
   - Be careful of the curse of dimensionality
-    - You can restrict the binning in certain dimensions by taking only diagonal
-      elements of a matrix of bins (see `diagonal` settings in `src/Analysis.h`)
 
 ### Simple Tree
 
-- The `Analysis` class is capable of producing a simple `TTree`, handled by the
+- The `Analysis` class is also capable of producing a simple `TTree`, handled by the
   `SimpleTree` class, which can also be useful for analysis
   - As the name suggests, it is a flat tree with a minimal set of variables,
-    specifically needed for asymmetry analysis
+    specifically needed for SIDIS spin asymmetry analysis
   - The tree branches are configured to be compatible with 
     [asymmetry analysis code](https://github.com/c-dilks/dispin),
     built on the [BruFit](https://github.com/dglazier/brufit) framework
@@ -230,7 +252,7 @@ respective macros for the stages.
     written
 
 
-# Post-Processing
+## Post-Processing Stage
 
 ### Post-Processing Macro and Class
 
@@ -238,29 +260,26 @@ respective macros for the stages.
   such as printing tables of average values, and drawing ratios of histograms
   - this class is steered by `postprocess_*.C` macros, which includes the
     following:
-    - instantiate `Analysis`, needed for bin loops and settings
     - instantiate `PostProcessor`, with the specified `root` file that contains
       output from the analysis macro
-    - loop over bins and perform actions
+    - loops over bins and perform actions, using Adage
 - see `src/PostProcessor.h` and `src/PostProcessor.cxx` for available
   post-processing routines; you are welcome to add your own
 
 ### Asymmetry Fitting
-- the `SimpleTree` output is compatible with [asymmetry
-  code](https://github.com/c-dilks/largex-eic-asym), included here as a
-  submodule in `asym/`
+- the `SimpleTree` output is compatible with [asymmetry code](https://github.com/c-dilks/largex-eic-asym),
+  included here as a submodule in `asym/`
   - clone this `sidis-eic` repository with `--recurse-submodules`, to get
     `largex-eic-asym` and its main dependency `brufit`
   - follow `asym/README.md`
 
+---
+
+
 # Contributions
 
-- This repository is in an early stage of development, so bugs and issues are
-  likely
-- Contributions are welcome via pull requests and issues reporting; you may also
-  find it useful to fork the repository for your own purposes, so that you do
-  not have to feel limited by existing code (you can still send pull requests
-  from a fork)
+- Contributions are welcome via pull requests and issues reporting; it is
+  recommended to fork this repository
 - Continuous Integration (CI) will trigger on pull requests, which will build
   and test your contribution; see `Actions` tab for workflows for details
 - It is recommended to keep up-to-date with developments by browsing the pull

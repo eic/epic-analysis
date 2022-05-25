@@ -17,7 +17,7 @@ We will refer to this set of lambdas as the "standard" lambdas. Use the `Node` p
 
 ### `template<class O> void Final(O op)`
 
-Oubound root lambda. Allowed `O` lambdas are standard (as listed above).
+Outbound root lambda. Allowed `O` lambdas are standard (as listed above).
 
 
 ## Leaf Operators
@@ -26,7 +26,7 @@ Oubound root lambda. Allowed `O` lambdas are standard (as listed above).
 
 Payload operator, staged on the leaf node. Since there is no difference between inbound and outbound lambdas on the leaf node, only one staging template function is provided. This `Payload` function is meant to be used on `HistosDAG` to act on the stored `Histos` objects.
 
-Allowed `O` lambas are of the form:
+Allowed `O` lambdas are of the form:
 - `std::function<void(Histos*)>` (implement in your code as `auto op = [/*captures*/](Histos *H){ /*body*/ }`; this is the most common use case)
 - `std::function<void(NodePath*)>`
 - `std::function<void(Histos*,NodePath*)>`

@@ -32,9 +32,9 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
 
 ### Switching between Fast and Full Simulations
 - many of these examples focus on fast simulations; to switch between fast and
-  full simulations, change the Analysis class in the macro:
+  full simulations, change the `Analysis`-derived class in the macro:
   - `AnalysisDelphes` is used for fast simulation
-  - `AnalysisDD4hep` is used for full simulation
+  - `AnalysisDD4hep` is used for full simulation from DD4hep+Juggler
 - note: some extra settings and features differ between these
 
 ### Input File Lists (Config Files)
@@ -49,7 +49,7 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
 # Tutorials:
 
 Each of these examples has two macros:
-  - analysis macro, to run an `Analysis` class, which will analyze 
+  - analysis macro, to run an `Analysis`-derived class, which will analyze 
     simulated data in an event loop, and generate a variety of output
     data structures
   - postprocessor macro, to process the output from the analysis macro,
