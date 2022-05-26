@@ -105,8 +105,8 @@ mv -v $configFile{,.bak}
 s3tools/reformat-config.sh $configFile{.bak,}
 
 # output some info
-status "files in target directory:"
-tree $targetDir
+#status "files in target directory:"
+#tree $targetDir
 popd
 status "done building config file at:"
 echo "     $configFile"

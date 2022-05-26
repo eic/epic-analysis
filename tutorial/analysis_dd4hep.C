@@ -18,8 +18,8 @@ R__LOAD_LIBRARY(Sidis-eic)
  */
 void analysis_dd4hep(
     TString infiles="tutorial/s3files.config", /* list of input files (S3 URLs, plus other columns) */
-    Double_t eleBeamEn=5, /* electron beam energy [GeV] */
-    Double_t ionBeamEn=41, /* ion beam energy [GeV] */
+    Double_t eleBeamEn=10, /* electron beam energy [GeV] */
+    Double_t ionBeamEn=100, /* ion beam energy [GeV] */
     Double_t crossingAngle=-25, /* crossing angle [mrad] */
     TString outfilePrefix="tutorial.dd4hep" /* output filename prefix*/)
 {

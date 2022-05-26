@@ -1,11 +1,11 @@
 #!/bin/bash
 # start docker shell, for testing image builds
 
-image=largexeic_dev:latest
-#image=cjdilks/largex-eic:dev
+# image=sidiseic_dev:latest
+image=cjdilks/sidis-eic:latest
 
-homedir=/home/athena
-swdir=$homedir/largex-eic
+homedir=/home/sidis
+swdir=$homedir/sidis-eic
 
 docker run \
   -it \

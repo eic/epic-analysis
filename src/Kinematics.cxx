@@ -1,3 +1,6 @@
+/* NOTE:
+ * if you make changes, MAINTAIN DOCUMENTATION IN ../doc/kinematics.md
+ */
 
 #include "Kinematics.h"
 

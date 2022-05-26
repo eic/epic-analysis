@@ -6,6 +6,7 @@
 *.so
 *.o
 *.exe
+*.tmp
 out/*/*.png
 out/*/*.pdf
 *Dict.cxx
@@ -18,6 +19,8 @@ results*
 *.xsec
 tags
 *.zip
+tutorial/delphes.config
+tutorial/delphes.config.bak
 
 # users' custom ignores
 datagen/escalate

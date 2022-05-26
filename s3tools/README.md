@@ -19,13 +19,12 @@ One top-level script automates all the work:
     for the convenience of SIDIS full simulation analysis
   - you may have to run `add-host.sh` first, if you have not yet; set env vars
     `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password beforehand:
-    - `export=S3_ACCESS_KEY=*****`
-    - `export=S3_SECRET_KEY=*****`
+    - `export S3_ACCESS_KEY=*****`
+    - `export S3_SECRET_KEY=*****`
   - this script calls several other scripts in this directory; read on for their
     documentation
 - if you are not running in the Singularity/Docker container, download and install
   the [MinIO client](https://docs.min.io/docs/minio-client-complete-guide) first
-  - (otherwise update your Singularity image)
 
 ### Fast Simulations
 Two options:
@@ -65,7 +64,7 @@ Two options:
 
 ## Generating Config Files
 Next we need to make a "config file", which consists of the file name, and
-additional columns such as cross section and Q2min. Follow the next sections,
+additional columns such as cross section and minimum Q2. Follow the next sections,
 whether you plan to stream from S3 or download.
 
 ### Config File Format
@@ -79,7 +78,7 @@ The config files require the following columns, in this order:
 - cross section (can be obtained from Pythia output logs, for example)
 - minimum Q2
 
-**Patch**: the above format is the original format, however, the current Q2min
+**Patch**: the above format is the original format, however, the current minimum Q2
 weighting implementation requires a new format. In case we revert to using the
 above old format, we temporarily use the script `reformat-config.sh` to
 transform the above old format into the new format. See comments in
@@ -107,7 +106,7 @@ To stream, we need to make a list of URLs.
   - the file list should appear in `stdout`; pipe the output somewhere, for example:
     - directly to a text file:
       `generate-s3-list.sh S3/.../... > files.txt`
-    - add columns for numEvents (0, for all events), cross section (3e-4), and
+    - add columns for `numEvents` (0, for all events), cross section (3e-4), and
       Q2min (1), to build a "config" file for an analysis:
       `generate-s3-list.sh S3/.../... 0 3e-4 1 > files.config`
     - use `grep` to remove files that have `"OLD"` in their filename:

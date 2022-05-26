@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# run `source env.sh /path/to/delphes/repo`, otherwise pass no
+# run `source environ.sh /path/to/delphes/repo`, otherwise pass no
 # argument to use the default location
 # - it may be useful to set your own default location (hard-coded)
 # - if you are in a container, environment may already be set
