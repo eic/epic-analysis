@@ -9,7 +9,7 @@ For more details, see [S3 file storage documentation](https://doc.athena-eic.org
 
 ### Full Simulations
 One top-level script automates all the work:
-- `s3tools/make-fullsim-config.sh` (best to run from top-level directory)
+- `s3tools/make-athena-config.sh` or `s3tools/make-ecce-config.sh` (best to run from top-level directory)
   - running with no arguments will print the usage guide
   - output:
     - config file, with file names, Q2 minima, and cross sections; used as

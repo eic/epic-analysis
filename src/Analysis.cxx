@@ -191,6 +191,7 @@ void Analysis::Prepare() {
         }
         TTree* tree = file->Get<TTree>("Delphes");
         if (tree == nullptr) tree = file->Get<TTree>("events");
+        if (tree == nullptr) tree = file->Get<TTree>("T"); // FIXME: should be `event_tree`?
         if (tree == nullptr) {
           cerr << "ERROR: Couldn't find Delphes or events tree in file '" << fileNames[idx] << "'" << endl;
           return;

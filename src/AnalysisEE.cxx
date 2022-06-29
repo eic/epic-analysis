@@ -40,7 +40,7 @@ void AnalysisEE::Execute()
   // setup
   Prepare();
 
-  // read dd4hep tree
+  // read EventEvaluator tree
   TChain *chain = new TChain("event_tree");
   for(Int_t idx=0; idx<infiles.size(); ++idx) {
     for(std::size_t idxF=0; idxF<infiles[idx].size(); ++idxF) {

@@ -25,7 +25,7 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
     consumption
 
 ### Full Simulation
-- full simulation files are streamed from S3 using `tutorial/s3files.config`
+- full simulation files are streamed from S3 using `tutorial/s3files.*.config`
 
 
 ## Introductory Notes
@@ -80,6 +80,8 @@ Each of these examples has two macros:
     is using `AnalysisDD4hep` instead of `AnalysisDelphes`
   - `postprocess_dd4hep_draw.C`: clone of `postprocess_xqbins_draw.C`,
     specific for this example
+  - see also `analysis_eventEvaluator.C` and `postprocess_eventEvaluator_draw.C`
+    for similar full simulation scripts using the `EventEvaluator` output
 
 4. Average kinematics table
   - `analysis_qbins.C`: bin the analysis in several Q2 bins, for a couple
