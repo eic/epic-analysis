@@ -33,8 +33,9 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
 ### Switching between Fast and Full Simulations
 - many of these examples focus on fast simulations; to switch between fast and
   full simulations, change the `Analysis`-derived class in the macro:
-  - `AnalysisDelphes` is used for fast simulation
-  - `AnalysisDD4hep` is used for full simulation from DD4hep+Juggler
+  - `AnalysisDelphes` for Delphes trees (fast simulations)
+  - `AnalysisDD4hep` for trees from the DD4hep+Juggler stack (ATHENA full simulations)
+  - `AnalysisEE` for trees from the Fun4all+EventEvaluator stack (ECCE full simulations)
 - note: some extra settings and features differ between these
 
 ### Input File Lists (Config Files)
