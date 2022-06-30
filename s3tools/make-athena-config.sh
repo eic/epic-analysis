@@ -60,7 +60,7 @@ pushd $(dirname $(realpath $0))/..
 
 # settings #############################################################
 sourceDir="$releaseDir/$energy"
-targetDir="datarec/$release/$energy"
+targetDir="datarec/athena/$release/$energy"
 Q2minima=( 1000 100 10 1 ) # should be decreasing order
 ########################################################################
 

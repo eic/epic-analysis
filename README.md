@@ -156,6 +156,11 @@ upstream simulation output:
 - See the event loop in `src/AnalysisDD4hep.cxx` for details of how the full
   simulation data are read
 
+## ECCE Full Simulation
+
+- Similar implementation as ATHENA full simulation, but use `AnalysisEE` to
+  read `EventEvaluator` output files
+
 ---
 
 
@@ -198,8 +203,9 @@ and follow the [README](tutorial/README.md).
       scheme (handled by the `BinSet` class); downstream post processing code
       makes use of these streamed objects, rather than the `TObjArray`s
   - derived classes are specific to upstream data structures:
-    - `AnalysisDelphes` for Delphes trees
-    - `AnalysisDD4hep` for trees from the DD4hep+Juggler stack
+    - `AnalysisDelphes` for Delphes trees (fast simulations)
+    - `AnalysisDD4hep` for trees from the DD4hep+Juggler stack (ATHENA full simulations)
+    - `AnalysisEE` for trees from the Fun4all+EventEvaluator stack (ECCE full simulations)
   - the `Kinematics` class is used to calculate all kinematics
     - `Analysis`-derived classes have one instance of `Kinematics` for generated
       variables, and another for reconstructed variables, to allow quick
