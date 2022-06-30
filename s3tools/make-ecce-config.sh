@@ -6,10 +6,14 @@
 # - the config file consists of file names (or URLs), with Q2 minima and cross sections
 ###################
 
-# RELEASE TAG AND RECO DIR: ###########################
-release="prop.6/prop.6.0"
-releaseDir="S3/eictest/ECCE/MC/$release/SIDIS/pythia6"
-#######################################################
+#### RELEASE TAG AND RECO DIR: ###########################
+release="prop.5/prop.5.1/AI";
+# release="prop.6/prop.6.0/SIDIS"; # event evaluator output empty?
+releaseDir="S3/eictest/ECCE/MC/$release/pythia6"
+#### references for EventEvaluator files
+eventEvalDir="eval_00000"
+eventEvalFileRegex='.*g4event_eval.root'
+##########################################################
 
 # usage:
 if [ $# -lt 2 ]; then
@@ -21,8 +25,13 @@ if [ $# -lt 2 ]; then
                10x100
                10x275
                18x275
+       - NOTES: 
+             - for release 'prop.6/prop.6.0', only 5x41 and 18x275 are available,
+               with varying Q2 ranges
+             - note that in some cases, there is a 'suffix' specifying the Q2 range;
+               to use those, just include it in [energy], for example:
 
-       - NOTE: for release 'prop.6/prop.6.0', only 5x41 and 18x275 are available
+                 $0 18x275-q2-low
                
    - [mode]:   s - make config file for streaming from S3
                d - download from S3, then make the local config file
@@ -50,19 +59,23 @@ if [ $# -lt 2 ]; then
   mc tree $releaseDir
   exit 2
 fi
-energy=$1
+energyArg=$1
 mode=$2
 limit=5
 outFile=""
 if [ $# -ge 3 ]; then limit=$3; fi
 if [ $# -ge 4 ]; then outFile=$4; fi
 
+# split energyArg to energy and suffix
+energy=$(echo $energyArg | sed 's/-.*//')
+suffix=$(echo $energyArg | sed 's/[^-]*//')
+
 # cd to the main directory 
 pushd $(dirname $(realpath $0))/..
 
 # settings #############################################################
-sourceDir="$releaseDir/ep-$energy"
-targetDir="datarec/ecce/$release/$energy"
+sourceDir="$releaseDir/ep-$energyArg/$eventEvalDir"
+targetDir="datarec/ecce/$release/$energyArg"
 Q2min=1 # FIXME: assumed, so far this script only looks at the general Q2 
         # production, and it doesn't matter if this is the *correct* Q2min;
         # this Q2min only matters when you want to combine datasets with
@@ -74,9 +87,9 @@ function status { echo ""; echo "[+] $1"; }
 if [ "$mode" == "d" ]; then
   status "downloading files from S3..."
   if [ $limit -gt 0 ]; then
-    s3tools/generate-s3-list.sh "$sourceDir" | head -n$limit | s3tools/download.sh "$targetDir"
+    s3tools/generate-s3-list.sh "$sourceDir" | grep -E $eventEvalFileRegex | head -n$limit | s3tools/download.sh "$targetDir"
   else
-    s3tools/generate-s3-list.sh "$sourceDir" |                 s3tools/download.sh "$targetDir"
+    s3tools/generate-s3-list.sh "$sourceDir" | grep -E $eventEvalFileRegex | s3tools/download.sh "$targetDir"
   fi
 fi
 
@@ -91,9 +104,9 @@ if [ "$mode" == "d" -o "$mode" == "c" ]; then
   s3tools/generate-local-list.sh "$targetDir" 0 $crossSection $Q2min | tee -a $configFile
 elif [ "$mode" == "s" ]; then
   if [ $limit -gt 0 ]; then
-    s3tools/generate-s3-list.sh "$sourceDir" 0 $crossSection $Q2min | head -n$limit | tee -a $configFile
+    s3tools/generate-s3-list.sh "$sourceDir" 0 $crossSection $Q2min | grep -E $eventEvalFileRegex | head -n$limit | tee -a $configFile
   else
-    s3tools/generate-s3-list.sh "$sourceDir" 0 $crossSection $Q2min | tee -a $configFile
+    s3tools/generate-s3-list.sh "$sourceDir" 0 $crossSection $Q2min | grep -E $eventEvalFileRegex | tee -a $configFile
   fi
 else
   echo "ERROR: unknown mode"
