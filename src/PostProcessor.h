@@ -13,6 +13,7 @@
 #include "TStyle.h"
 #include "TGaxis.h"
 #include "TLegend.h"
+#include "TProfile.h"
 
 // sidis-eic
 #include "Histos.h"
@@ -63,7 +64,7 @@ class PostProcessor : public TNamed
     // - you are welcome to add your own algorithms
     void DumpHist(TString datFile, TString histSet, TString varName);
     void DumpAve(TString datFile, Histos *H, TString cutName);
-    void DrawSingle(Histos *H, TString histName, TString drawFormat="");
+    void DrawSingle(Histos *H, TString histName, TString drawFormat="", Int_t profileAxis=0, Bool_t profileOnly=false);
     void DrawSingle(TString histSet, TString histName);
     void DrawRatios(
         TString outName, Histos *numerSet, Histos *denomSet, Bool_t plotRatioOnly=false
