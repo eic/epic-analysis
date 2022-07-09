@@ -298,6 +298,27 @@ void Analysis::Prepare() {
         3, etabinsCoarse,
         true,false
         );
+    // -- depolarization
+    HS->DefineHist2D("epsilonVsQ2","Q^{2}","#epsilon","GeV^{2}","",
+        NBINS,1,3000,
+        NBINS,0,1.5,
+        true,false
+        );
+    HS->DefineHist2D("depolCAvsQ2","Q^{2}","C/A","GeV^{2}","",
+        NBINS,1,3000,
+        NBINS,0,2.5,
+        true,false
+        );
+    HS->DefineHist2D("depolVAvsQ2","Q^{2}","V/A","GeV^{2}","",
+        NBINS,1,3000,
+        NBINS,0,2.5,
+        true,false
+        );
+    HS->DefineHist2D("depolWAvsQ2","Q^{2}","W/A","GeV^{2}","",
+        NBINS,1,3000,
+        NBINS,0,2.5,
+        true,false
+        );
 
      
     // -- single-hadron cross sections
@@ -644,6 +665,11 @@ void Analysis::FillHistosTracks() {
     H->Hist("phiCollins")->Fill(Kinematics::AdjAngle(kin->phiH + kin->phiS),wTrack);
     dynamic_cast<TH2*>(H->Hist("etaVsP"))->Fill(kin->pLab,kin->etaLab,wTrack); // TODO: lab-frame p, or some other frame?
     dynamic_cast<TH2*>(H->Hist("etaVsPcoarse"))->Fill(kin->pLab,kin->etaLab,wTrack); 
+    // depolarization
+    dynamic_cast<TH2*>(H->Hist("epsilonVsQ2"))->Fill(kin->Q2,kin->epsilon,wTrack); 
+    dynamic_cast<TH2*>(H->Hist("depolCAvsQ2"))->Fill(kin->Q2,kin->depolP2,wTrack); 
+    dynamic_cast<TH2*>(H->Hist("depolVAvsQ2"))->Fill(kin->Q2,kin->depolP3,wTrack); 
+    dynamic_cast<TH2*>(H->Hist("depolWAvsQ2"))->Fill(kin->Q2,kin->depolP4,wTrack); 
     // cross sections (divide by lumi after all events processed)
     H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),wTrack);
     // resolutions

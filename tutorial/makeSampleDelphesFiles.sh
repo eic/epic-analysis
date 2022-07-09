@@ -3,12 +3,17 @@
 
 # SETTINGS --------------------------------------------------------------------
 minQ2=1                            # minimum Q2
-ebeamEn=10                         # electron energy
-pbeamEn=100                        # proton energy
-maxNumFiles=10                     # maximum number of hepmc files to process
-genDir=datagen/forTutorial         # directory of pythia output hepmc files
-recDir=datarec/forTutorial         # directory of delphes output trees
-configFile=tutorial/delphes.config # config file location
+#***
+# ebeamEn=5                          # electron energy
+# pbeamEn=41                         # proton energy
+#***
+ebeamEn=18                         # electron energy
+pbeamEn=275                        # proton energy
+#***
+maxNumFiles=20                     # maximum number of hepmc files to process
+genDir=datagen/forTutorial.${ebeamEn}x${pbeamEn}         # directory of pythia output hepmc files
+recDir=datarec/forTutorial.${ebeamEn}x${pbeamEn}         # directory of delphes output trees
+configFile=datarec/delphes.${ebeamEn}x${pbeamEn}.config  # config file location
 # -----------------------------------------------------------------------------
 
 if [ -z "$S3_SECRET_KEY" -o -z "$S3_ACCESS_KEY" ]; then
