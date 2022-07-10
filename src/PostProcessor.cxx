@@ -253,9 +253,13 @@ void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat, 
       prof->GetYaxis()->SetRangeUser(hist->GetYaxis()->GetXmin(),hist->GetYaxis()->GetXmax());
       prof->Draw();
     } else prof->Draw("same");
+    outfile->cd("/");
+    prof->Write();
   }
 
   canv->Print(pngDir+"/"+canvN+".png");
+  outfile->cd("/");
+  canv->Write();
 };
 
 // OLD VERSION: 
