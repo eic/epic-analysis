@@ -57,10 +57,12 @@ void AnalysisDelphes::Execute() {
   TObjArrayIter itEFlowPhoton(tr->UseBranch("EFlowPhoton"));
   TObjArrayIter itEFlowNeutralHadron(tr->UseBranch("EFlowNeutralHadron"));
   TObjArrayIter itpfRICHTrack(tr->UseBranch("pfRICHTrack"));
-  TObjArrayIter itDIRCepidTrack(tr->UseBranch("barrelDIRC_epidTrack"));
-  TObjArrayIter itDIRChpidTrack(tr->UseBranch("barrelDIRC_hpidTrack"));
-  TObjArrayIter itBTOFepidTrack(tr->UseBranch("BTOF_eTrack"));
-  TObjArrayIter itBTOFhpidTrack(tr->UseBranch("BTOF_hTrack"));
+  TObjArrayIter itbarrelDIRCTrack(tr->UseBranch("barrelDIRCTrack"));
+
+  //  TObjArrayIter itDIRCepidTrack();
+  //  TObjArrayIter itDIRChpidTrack();
+  //  TObjArrayIter itBTOFepidTrack();
+  //  TObjArrayIter itBTOFhpidTrack();
   TObjArrayIter itdualRICHagTrack(tr->UseBranch("dualRICHagTrack"));
   TObjArrayIter itdualRICHcfTrack(tr->UseBranch("dualRICHcfTrack"));
 
@@ -151,10 +153,9 @@ void AnalysisDelphes::Execute() {
         itEFlowPhoton,
         itEFlowNeutralHadron,
         itpfRICHTrack,
-        itDIRCepidTrack, itDIRChpidTrack,
-        itBTOFepidTrack, itBTOFhpidTrack,
         itdualRICHagTrack, itdualRICHcfTrack
         );
+    //    kin->GetHFS(itTrack);
     kinTrue->GetTrueHFS(itParticle);
 
     // calculate DIS kinematics
@@ -174,13 +175,13 @@ void AnalysisDelphes::Execute() {
       // - check PID, to see if it's a final state we're interested in for
       //   histograms; if not, proceed to next track
       // pid = trk->PID; //NOTE: trk->PID is currently not smeared so it just returns the truth-level PID
-      pid = kin->getTrackPID( // get smeared PID
+      /*      pid = kin->getTrackPID( // get smeared PID
           trk,
           itpfRICHTrack,
-          itDIRCepidTrack, itDIRChpidTrack,
-          itBTOFepidTrack, itBTOFhpidTrack,
+	  itbarrelDIRCTrack,
           itdualRICHagTrack, itdualRICHcfTrack
-          );
+          );*/
+      pid = kin->getTrackPID(trk, itParticle, itpfRICHTrack, itbarrelDIRCTrack, itdualRICHagTrack, itdualRICHcfTrack);
       auto kv = PIDtoFinalState.find(pid);
       if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
       if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;

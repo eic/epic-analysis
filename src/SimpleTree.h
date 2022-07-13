@@ -21,7 +21,7 @@
 class SimpleTree : public TObject
 {
   public:
-    SimpleTree(TString treeName_, Kinematics *K_, Kinematics *Ktrue_);
+  SimpleTree(TString treeName_, Kinematics *K_, Kinematics *Ktrue_, int);
     ~SimpleTree();
 
     TTree *GetTree() { return T; };

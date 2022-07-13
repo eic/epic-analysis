@@ -1,7 +1,3 @@
-/* NOTE:
- * if you make changes, MAINTAIN DOCUMENTATION IN ../doc/kinematics.md
- */
-
 #ifndef Kinematics_
 #define Kinematics_
 
@@ -54,8 +50,6 @@ class Kinematics : public TObject
         TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron,
         TObjArrayIter itpfRICHTrack,
-        TObjArrayIter itDIRCepidTrack,   TObjArrayIter itDIRChpidTrack,
-        TObjArrayIter itBTOFepidTrack,   TObjArrayIter itBTOFhpidTrack,
         TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
         );
     void GetTrueHFS(TObjArrayIter itParticle);
@@ -66,12 +60,13 @@ class Kinematics : public TObject
     // PID
     int getTrackPID(
         Track *track,
+	TObjArrayIter itParticle,
         TObjArrayIter itpfRICHTrack,
-        TObjArrayIter itDIRCepidTrack, TObjArrayIter itDIRChpidTrack,
-        TObjArrayIter itBTOFepidTrack, TObjArrayIter itBTOFhpidTrack,
+	TObjArrayIter itbarrelDIRCTrack,
         TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
         );
-
+  
+  
     // jet calculators
     void GetJets(
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
@@ -91,6 +86,24 @@ class Kinematics : public TObject
     Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // hadron
     Double_t sigmah, Pxh, Pyh; // hadronic final state variables
     TLorentzVector hadronSumVec;
+
+
+    // ADDED BY GREGORY MATOUSEK
+    // June 06 2022
+    // ---------------------------------------------------------
+    Double_t W_e,Q2_e,Nu_e,x_e,y_e,s_e; // Ele DIS
+    Double_t W_JB,Q2_JB,Nu_JB,x_JB,y_JB,s_JB; // JB  DIS
+    Double_t W_DA,Q2_DA,Nu_DA,x_DA,y_DA,s_DA; // DA  DIS
+    
+    // Ele DIS params
+    Double_t e_Ei,e_Ef,e_th;   
+    // DA DIS params
+    Double_t thetah,thetae;
+   
+
+
+    // ---------------------------------------------------------
+
 
     // nucleon transverse spin; if you set this externally,
     // it must be done before calculating `phiS` (before

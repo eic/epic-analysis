@@ -1,6 +1,3 @@
-/* NOTE:
- * if you make changes, MAINTAIN DOCUMENTATION IN ../doc/kinematics.md
- */
 
 #include "Kinematics.h"
 
@@ -24,7 +21,8 @@ Kinematics::Kinematics(
   // set main frame, used for calculations where there is ambiguity which frame is the correct frame to use
   mainFrame = fHeadOn; // fLab, fHeadOn
   // set method for determining `vecQ` 4-momentum components for certain recon methods (JB,DA,(e)Sigma)
-  qComponentsMethod = qQuadratic; // qQuadratic, qHadronic, qElectronic
+  //  qComponentsMethod = qQuadratic; // qQuadratic, qHadronic, qElectronic
+  qComponentsMethod = qElectronic; // qQuadratic, qHadronic, qElectronic
   /////////////////////////////////////////////////////////////
 
   // set beam 4-momenta
@@ -211,6 +209,15 @@ Bool_t Kinematics::CalculateDIS(TString recmethod){
   if     (recmethod.CompareTo( "Ele", TString::kIgnoreCase)==0)    { this->CalculateDISbyElectron(); }
   else if(recmethod.CompareTo( "DA", TString::kIgnoreCase)==0)     { this->CalculateDISbyDA(); }
   else if(recmethod.CompareTo( "JB", TString::kIgnoreCase)==0)     { this->CalculateDISbyJB(); }
+  else if(recmethod.CompareTo( "All", TString::kIgnoreCase)==0)     
+    { 
+      this->CalculateDISbyElectron();
+      this->CalculateDISbyDA();
+      this->CalculateDISbyJB(); 
+      e_Ei = vecEleBeam.E();
+      e_Ef = vecElectron.E();
+      e_th = vecElectron.Theta();
+    }
   else if(recmethod.CompareTo( "Mixed", TString::kIgnoreCase)==0)  { this->CalculateDISbyMixed(); }
   else if(recmethod.CompareTo( "Sigma", TString::kIgnoreCase)==0)  { this->CalculateDISbySigma(); }
   else if(recmethod.CompareTo( "eSigma", TString::kIgnoreCase)==0) { this->CalculateDISbyeSigma(); }
@@ -258,6 +265,11 @@ void Kinematics::CalculateDISbyElectron() {
   Q2 = -1 * vecQ.M2();
   x = Q2 / ( 2 * vecQ.Dot(vecIonBeam) );
   y = vecIonBeam.Dot(vecQ) / vecIonBeam.Dot(vecEleBeam);
+  
+  Q2_e=Q2;
+  x_e=x;
+  y_e=y;
+
 };
 
 // calculate DIS kinematics using JB method
@@ -273,13 +285,15 @@ void Kinematics::CalculateDISbyJB(){
     case qHadronic:   this->GetQWNu_hadronic(); break;
     case qElectronic: this->GetQWNu_electronic(); break;
   }
+  y_JB=y;
+  Q2_JB=Q2;
+  x_JB=x;
 };
 
 // calculate DIS kinematics using DA method
 // requires 'vecElectron' set
 void Kinematics::CalculateDISbyDA(){
-  float thetah = acos( (Pxh*Pxh+Pyh*Pyh - sigmah*sigmah)/(Pxh*Pxh+Pyh*Pyh+sigmah*sigmah) );
-  float thetae;
+  thetah = acos( (Pxh*Pxh+Pyh*Pyh - sigmah*sigmah)/(Pxh*Pxh+Pyh*Pyh+sigmah*sigmah) );
   switch(mainFrame) {
     case fLab:
       thetae = vecElectron.Theta();
@@ -297,6 +311,9 @@ void Kinematics::CalculateDISbyDA(){
     case qHadronic:   this->GetQWNu_hadronic(); break;
     case qElectronic: this->GetQWNu_electronic(); break;
   }
+  Q2_DA=Q2;
+  y_DA=y;
+  x_DA=x;
 };
 
 // calculate DIS kinematics using mixed method
@@ -424,29 +441,30 @@ void Kinematics::ValidateHeadOnFrame() {
 
 
 // get PID information from PID systems tracks
-int Kinematics::getTrackPID(
-    Track *track,
+int Kinematics::getTrackPID(Track *track, TObjArrayIter itParticle,TObjArrayIter itpfRICHTrack, TObjArrayIter itbarrelDIRCTrack, TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack){
+			    /*Track *track,
     TObjArrayIter itpfRICHTrack,
     TObjArrayIter itDIRCepidTrack, TObjArrayIter itDIRChpidTrack,
     TObjArrayIter itBTOFepidTrack, TObjArrayIter itBTOFhpidTrack,
-    TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
-    ) {
+    TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack*/
+			
+			    //    ) {
 
-  itpfRICHTrack.Reset();
+  /*  itpfRICHTrack.Reset();
   itDIRCepidTrack.Reset();   itDIRChpidTrack.Reset();
   itBTOFepidTrack.Reset();   itBTOFhpidTrack.Reset();
   itdualRICHagTrack.Reset(); itdualRICHcfTrack.Reset();
   GenParticle *trackParticle = (GenParticle*)track->Particle.GetObject();
-  GenParticle *detectorParticle;
+  GenParticle *detectorParticle;*/
 
   // TODO: make this less repetitive:
-
+  /*
   while(Track *detectorTrack = (Track*)itpfRICHTrack() ){
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) return detectorTrack->PID;
   }
 
-  while(Track *detectorTrack = (Track*)itDIRCepidTrack() ){
+  /*  while(Track *detectorTrack = (Track*)itDIRCepidTrack() ){
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) return detectorTrack->PID;
   }
@@ -463,6 +481,7 @@ int Kinematics::getTrackPID(
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) return detectorTrack->PID;
   }
+  
 
   while(Track *detectorTrack = (Track*)itdualRICHagTrack() ){
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
@@ -472,8 +491,53 @@ int Kinematics::getTrackPID(
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) return detectorTrack->PID;
   }
+  */
+  itParticle.Reset();
+  itpfRICHTrack.Reset();
+  itbarrelDIRCTrack.Reset();
+  itdualRICHagTrack.Reset();
+  itdualRICHcfTrack.Reset();
+  int i = 0;
+  cout << i++ << endl; // 0
+  GenParticle *trackParticle = (GenParticle*)track->Particle.GetObject();
+  cout << i++ << endl; // 1
+  GenParticle *detectorParticle;
+  cout << i++ << endl; // 2
+  int pidOut = -1;
+  cout << i++ << endl; // 3
+  while(Track *detectorTrack = (Track*)itpfRICHTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+  }
+  cout << i++ << endl; // 4
+  itParticle.Reset();
+  cout << i++ << endl; // 5
+  /* Added July 13th 2022 | Remove DIRC track
+  while(Track *detectorTrack = (Track*)itbarrelDIRCTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+  }
+  */
+  cout << i++ << endl; //
+  itParticle.Reset();
+  cout << i++ << endl;
+  Double_t ag_p_threshold = 12.0;
+  while(Track *detectorTrack = (Track*)itdualRICHagTrack() ){
+    Double_t p_track = detectorTrack->P4().Vect().Mag();
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+  }
+  cout << i++ << endl;
+  while(Track *detectorTrack = (Track*)itdualRICHcfTrack() ){
+    Double_t p_track = detectorTrack->P4().Vect().Mag();
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
+  }
+  cout << i++ << endl;
 
-  return -1; // not found
+
+  return pidOut;
+  // return -1; //not found
 }
 
 
@@ -486,8 +550,6 @@ void Kinematics::GetHFS(
     TObjArrayIter itEFlowPhoton,
     TObjArrayIter itEFlowNeutralHadron,
     TObjArrayIter itpfRICHTrack,
-    TObjArrayIter itDIRCepidTrack,   TObjArrayIter itDIRChpidTrack,
-    TObjArrayIter itBTOFepidTrack,   TObjArrayIter itBTOFhpidTrack,
     TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
     ) {
 
@@ -504,14 +566,15 @@ void Kinematics::GetHFS(
     if(!isnan(trackp4.E())){
       if( std::abs(track->Eta) < 4.0  ){
 
-        int pid = getTrackPID( // get smeared PID
+	/*        int pid = getTrackPID( // get smeared PID
             track,
             itpfRICHTrack,
             itDIRCepidTrack, itDIRChpidTrack,
             itBTOFepidTrack, itBTOFhpidTrack,
             itdualRICHagTrack, itdualRICHcfTrack
             );
-
+	*/
+	int pid = -1;
         if(pid != -1){ // if smeared PID determined, set mass of `trackp4` accordingly
           trackp4.SetPtEtaPhiM(trackp4.Pt(),trackp4.Eta(),trackp4.Phi(),correctMass(pid));
           countPIDsmeared++;
