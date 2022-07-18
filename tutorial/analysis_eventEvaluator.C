@@ -1,8 +1,8 @@
 R__LOAD_LIBRARY(Sidis-eic)
 
-/* full simulation (dd4hep) usage
+/* full simulation (EventEvaluator/Fun4all) usage
  * - note the similarity of the macro to the fast simulation
- * - you only need to swap `AnalysisDelphes` with `AnalysisDD4hep` to switch
+ * - you only need to swap `AnalysisDelphes` with `AnalysisEE` to switch
  *   between fast and full simulations
  * - some settings are specific to the full simulations, e.g. electron
  *   energy threshold
@@ -11,22 +11,22 @@ R__LOAD_LIBRARY(Sidis-eic)
  *   - for S3, you must know the username and password, and have them in your environment:
  *     - `export S3_ACCESS_KEY=<login>`
  *     - `export S3_SECRET_KEY=<password>`
- *   - a sample list of files is in `s3files.athena.config`, but if these files are moved on S3,
+ *   - a sample list of files is in `s3files.ecce.config`, but if these files are moved on S3,
  *     then this list becomes out of date; in that case, use this list as a template
  *     (and if you want to replace it for the sake of keeping a working tutorial 
  *     example, send a pull request with the new list)
  */
-void analysis_dd4hep(
-    TString infiles="tutorial/s3files.athena.config", /* list of input files (S3 URLs, plus other columns) */
-    Double_t eleBeamEn=10, /* electron beam energy [GeV] */
-    Double_t ionBeamEn=100, /* ion beam energy [GeV] */
+void analysis_eventEvaluator(
+    TString infiles="tutorial/s3files.ecce.config", /* list of input files (S3 URLs, plus other columns) */
+    Double_t eleBeamEn=18, /* electron beam energy [GeV] */
+    Double_t ionBeamEn=275, /* ion beam energy [GeV] */
     Double_t crossingAngle=-25, /* crossing angle [mrad] */
-    TString outfilePrefix="tutorial.dd4hep" /* output filename prefix*/)
+    TString outfilePrefix="tutorial.eventEvaluator" /* output filename prefix*/)
 {
 
   // setup analysis ========================================
-  // - define `AnalysisDD4hep` instead of `AnalysisDelphes`
-  AnalysisDD4hep *A = new AnalysisDD4hep(
+  // - define `AnalysisEE` instead of `AnalysisDelphes`
+  AnalysisEE *A = new AnalysisEE(
       infiles,
       eleBeamEn,
       ionBeamEn,

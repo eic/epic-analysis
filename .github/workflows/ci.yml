@@ -123,7 +123,7 @@ jobs:
           S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
         run: |
           s3tools/add-host.sh
-          s3tools/make-fullsim-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} d 8 s3files.config
+          s3tools/make-athena-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} d 8 s3files.config
       - name: cat_config
         run: cat s3files.config
       - name: artifacts

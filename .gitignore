@@ -26,6 +26,6 @@ tutorial/delphes.config.bak
 datagen/escalate
 datagen/arc
 datarec/arc
-datarec/canyonlands*
-datarec/deathvalley*
+datarec/athena/*
+datarec/ecce/*
 testconfig
