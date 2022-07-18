@@ -497,44 +497,32 @@ int Kinematics::getTrackPID(Track *track, TObjArrayIter itParticle,TObjArrayIter
   itbarrelDIRCTrack.Reset();
   itdualRICHagTrack.Reset();
   itdualRICHcfTrack.Reset();
-  int i = 0;
-  cout << i++ << endl; // 0
   GenParticle *trackParticle = (GenParticle*)track->Particle.GetObject();
-  cout << i++ << endl; // 1
   GenParticle *detectorParticle;
-  cout << i++ << endl; // 2
   int pidOut = -1;
-  cout << i++ << endl; // 3
   while(Track *detectorTrack = (Track*)itpfRICHTrack() ){
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
   }
-  cout << i++ << endl; // 4
   itParticle.Reset();
-  cout << i++ << endl; // 5
   /* Added July 13th 2022 | Remove DIRC track
   while(Track *detectorTrack = (Track*)itbarrelDIRCTrack() ){
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
   }
   */
-  cout << i++ << endl; //
   itParticle.Reset();
-  cout << i++ << endl;
   Double_t ag_p_threshold = 12.0;
   while(Track *detectorTrack = (Track*)itdualRICHagTrack() ){
     Double_t p_track = detectorTrack->P4().Vect().Mag();
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
   }
-  cout << i++ << endl;
   while(Track *detectorTrack = (Track*)itdualRICHcfTrack() ){
     Double_t p_track = detectorTrack->P4().Vect().Mag();
     detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
     if( detectorParticle == trackParticle ) pidOut = detectorTrack->PID;
   }
-  cout << i++ << endl;
-
 
   return pidOut;
   // return -1; //not found

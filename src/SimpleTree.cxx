@@ -55,16 +55,14 @@ SimpleTree::SimpleTree(TString treeName_, Kinematics *K_, Kinematics *Ktrue_, in
       T->Branch("X_DA",         &(K->x_DA),         "X_DA/D");
       T->Branch("Y_DA",         &(K->y_DA),         "Y_DA/D");
 
-      T->Branch("e_Ei",         &(K->e_Ei),         "e_Ei/D");
-      T->Branch("e_Ef",         &(K->e_Ef),         "e_Ef/D");
-      T->Branch("e_th",         &(K->e_th),         "e_th/D");
+      T->Branch("Ee_i",         &(K->e_Ei),         "e_Ei/D");
+      T->Branch("Ee_f",         &(K->e_Ef),         "e_Ef/D");
+      T->Branch("thetae",         &(K->e_th),         "e_th/D");
 
-      T->Branch("sigmah",         &(K->sigmah),         "sigmah/D");
-      T->Branch("Pxh",         &(K->Pxh),         "Pxh/D");
-      T->Branch("Pyh",         &(K->Pyh),         "Pyh/D");
-
-      T->Branch("thetah",       &(K->thetah),       "thetah/D");
-      T->Branch("thetae",       &(K->thetae),       "thetae/D");
+      T->Branch("deltah",         &(K->sigmah),         "deltah/D");
+      T->Branch("pxh",         &(K->Pxh),         "Pxh/D");
+      T->Branch("pyh",         &(K->Pyh),         "Pyh/D");
+      T->Branch("gammah",       &(K->thetah),       "h_th/D");
     }
 };
   

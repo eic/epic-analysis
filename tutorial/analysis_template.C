@@ -21,7 +21,7 @@ void analysis_template(
       crossingAngle,
       outfilePrefix
       );
-  A->maxEvents = 10; // use this to limit the number of events
+  A->maxEvents = -1; // use this to limit the number of events
   /* this `maxEvents` limit should only be applied for quick tests;
    * you should not set it if you are using the number of events
    * column in `infiles` (the input files table)

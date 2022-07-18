@@ -168,6 +168,7 @@ void AnalysisDelphes::Execute() {
    
     // track loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     itTrack.Reset();
+    int trk_idx = 0;
     while(Track *trk = (Track*) itTrack()) {
       //cout << e << " " << trk->PID << endl;
 
@@ -228,8 +229,11 @@ void AnalysisDelphes::Execute() {
       // fill simple tree
       // - not binned
       // - `activeEvent` is only true if at least one bin gets filled for this track
-      if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
 
+      /* EDIT 7/13/2022. Only write to TTree once per event */
+      //      if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
+      if( writeSimpleTree && activeEvent && trk_idx == 0) ST->FillTree(wTrack);
+      trk_idx++;
       // tests
       //kin->ValidateHeadOnFrame();
 
