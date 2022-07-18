@@ -10,9 +10,12 @@ void postprocess_depolarization(
 
   P->Op()->Payload(
       [&P](Histos *H) {
+        P->DrawSingle(H,"depolAvsQ2","COLZ",1,true);
+        P->DrawSingle(H,"depolBAvsQ2","COLZ",1,true);
         P->DrawSingle(H,"depolCAvsQ2","COLZ",1,true);
         P->DrawSingle(H,"depolVAvsQ2","COLZ",1,true);
         P->DrawSingle(H,"depolWAvsQ2","COLZ",1,true);
+        P->DrawSingle(H,"epsilonVsQ2","COLZ",1,true);
       }
       );
 

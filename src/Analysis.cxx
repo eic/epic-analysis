@@ -304,6 +304,16 @@ void Analysis::Prepare() {
         NBINS,0,1.5,
         true,false
         );
+    HS->DefineHist2D("depolAvsQ2","Q^{2}","A","GeV^{2}","",
+        NBINS,1,3000,
+        NBINS,0,2.5,
+        true,false
+        );
+    HS->DefineHist2D("depolBAvsQ2","Q^{2}","B/A","GeV^{2}","",
+        NBINS,1,3000,
+        NBINS,0,2.5,
+        true,false
+        );
     HS->DefineHist2D("depolCAvsQ2","Q^{2}","C/A","GeV^{2}","",
         NBINS,1,3000,
         NBINS,0,2.5,
@@ -667,6 +677,8 @@ void Analysis::FillHistosTracks() {
     dynamic_cast<TH2*>(H->Hist("etaVsPcoarse"))->Fill(kin->pLab,kin->etaLab,wTrack); 
     // depolarization
     dynamic_cast<TH2*>(H->Hist("epsilonVsQ2"))->Fill(kin->Q2,kin->epsilon,wTrack); 
+    dynamic_cast<TH2*>(H->Hist("depolAvsQ2"))->Fill(kin->Q2,kin->depolA,wTrack); 
+    dynamic_cast<TH2*>(H->Hist("depolBAvsQ2"))->Fill(kin->Q2,kin->depolP1,wTrack); 
     dynamic_cast<TH2*>(H->Hist("depolCAvsQ2"))->Fill(kin->Q2,kin->depolP2,wTrack); 
     dynamic_cast<TH2*>(H->Hist("depolVAvsQ2"))->Fill(kin->Q2,kin->depolP3,wTrack); 
     dynamic_cast<TH2*>(H->Hist("depolWAvsQ2"))->Fill(kin->Q2,kin->depolP4,wTrack); 

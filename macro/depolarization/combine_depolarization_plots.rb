@@ -21,7 +21,7 @@ energyHash.keys.each do |energy|
   plotList = Array.new
   PyCall.iterable(rootFile.GetListOfKeys).each do |key|
     if key.GetName.match? /^histos/
-      plotName = key.GetName.split('_').find{|tok|tok.match?(/^depol/)}
+      plotName = key.GetName.split('_').find{|tok|tok.match?(/^depol|^epsilon/)}
       plots[plotName] = Hash.new if plots[plotName].nil?
       plots[plotName][energy] = key.ReadObj
     end
@@ -37,9 +37,13 @@ plots.each do |plotName,energies|
   energies.each do |energy,plot|
     plot.SetLineColor energyHash[energy][:color]
     plot.SetTitle plot.GetTitle.split(',').first.sub(' distribution','')
-    plot.GetXaxis.SetRangeUser 1, 1000
+    plot.GetXaxis.SetRangeUser 1, 1200
     plot.GetYaxis.SetRangeUser 0, 1.2 if plot.GetName.match?(/WA|CA/)
+    plot.GetXaxis.SetLabelSize 0.05
+    plot.GetYaxis.SetLabelSize 0.05
+    plot.GetXaxis.SetTitleOffset 1.5
     plot.Draw 'SAME'
   end
+  canv.SetBottomMargin 2.5
   canv.Print "out/#{canvName}.png"
 end
