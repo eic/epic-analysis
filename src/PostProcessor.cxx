@@ -216,8 +216,11 @@ void PostProcessor::FinishDumpAve(TString datFile) {
 /* ALGORITHM: draw a single histogram to a canvas, and write it
  * - `histName` is the name of the histogram given in Histos
  * - `drawFormat` is the formatting string passed to TH1::Draw()
+ * - `profileAxis` will draw a TProfile on the specified axis, for 2D dists
+ *   - 0=disabled(default), 1=x-axis, 2=y-axis
+ * - `profileOnly` draw only the TProfile, for 2D dists
  */
-void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat) {
+void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat, Int_t profileAxis, Bool_t profileOnly) {
   cout << "draw single plot " << histName << "..." << endl;
   TH1 *hist = H->Hist(histName);
   if(hist==nullptr) {
@@ -229,13 +232,34 @@ void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat) 
   hist->Draw(drawFormat);
   if(hist->GetMinimum()>=0 && hist->GetDimension()==1)
     hist->GetYaxis()->SetRangeUser(0,hist->GetMaximum()*1.1); // do not suppress zero
+
   canv->SetGrid(1,1);
   canv->SetLogx(H->GetHistConfig(histName)->logx);
   canv->SetLogy(H->GetHistConfig(histName)->logy);
   canv->SetLogz(H->GetHistConfig(histName)->logz);
   canv->SetBottomMargin(0.15);
   canv->SetLeftMargin(0.15);
+
+  TProfile *prof;
+  if(profileAxis>0 && hist->GetDimension()==2) {
+    switch(profileAxis) {
+      case 1: prof = ((TH2*)hist)->ProfileX(); break;
+      case 2: prof = ((TH2*)hist)->ProfileY(); break;
+    };
+    prof->SetLineColor(kBlack);
+    prof->SetLineWidth(3);
+    if(profileOnly) {
+      prof->GetXaxis()->SetRangeUser(hist->GetXaxis()->GetXmin(),hist->GetXaxis()->GetXmax());
+      prof->GetYaxis()->SetRangeUser(hist->GetYaxis()->GetXmin(),hist->GetYaxis()->GetXmax());
+      prof->Draw();
+    } else prof->Draw("same");
+    outfile->cd("/");
+    prof->Write();
+  }
+
   canv->Print(pngDir+"/"+canvN+".png");
+  outfile->cd("/");
+  canv->Write();
 };
 
 // OLD VERSION: 

@@ -284,10 +284,20 @@ and follow the [README](tutorial/README.md).
 
 # Contributions
 
-- Contributions are welcome via pull requests and issues reporting; it is
-  recommended to fork this repository
-- Continuous Integration (CI) will trigger on pull requests, which will build
-  and test your contribution; see `Actions` tab for workflows for details
-- It is recommended to keep up-to-date with developments by browsing the pull
-  requests, issues, and viewing the latest commits by going to the `Insights`
-  tab, and clicking `Network` to show the branch topology
+- Add your own analysis scripts (macros, etc.) in `macro/`, either in the main
+  directory or in a subdirectory of `macro/`.
+  - The `macro/ci` directory is for scripts used by the CI (see `.github/workflows/ci.yml`);
+    you are welcome to add new analysis scripts to the CI
+  - Make changes in classes such as `PostProcessor` as needed
+
+- Git workflow:
+  - Contributions are welcome via pull requests and issues reporting; it is
+    recommended to fork this repository or ask to be a contributor
+  - Continuous Integration (CI) will trigger on pull requests, which will build
+    and test your contribution
+    - see `Actions` tab for workflows for details
+    - many CI jobs will not work properly from forks (for security), but you
+      may ask to be a contributor
+  - It is recommended to keep up-to-date with developments by browsing the pull
+    requests, issues, and viewing the latest commits by going to the `Insights`
+    tab, and clicking `Network` to show the commit graph
