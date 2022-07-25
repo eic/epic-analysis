@@ -40,8 +40,8 @@ struct WeightsTest : public WeightsSivers {
   }
 };
 
-void analysis_asymmetry(
-    TString infiles="datarec/in.config", /* delphes tree(s) */
+void analysisEE_asymmetry(
+    TString infiles="datarec/ecce/prop.4/prop.4.0/SIDIS/10x100-q2-low/files.config", /* EventEvaluator tree(s) */
     Double_t eleBeamEn=5, /* electron beam energy [GeV] */
     Double_t ionBeamEn=41, /* ion beam energy [GeV] */
     Double_t crossingAngle=-25, /* crossing angle [mrad] */
@@ -49,7 +49,7 @@ void analysis_asymmetry(
 ) {
 
   // setup analysis ========================================
-  AnalysisDelphes *A = new AnalysisDelphes(
+  AnalysisEE *A = new AnalysisEE(
       infiles,
       eleBeamEn,
       ionBeamEn,
@@ -60,10 +60,11 @@ void analysis_asymmetry(
     new WeightsUniform(),
     new WeightsTest()
   });
-  //A->SetWeights(weights);
+
+  A->SetWeights(weights);
 
   A->writeSimpleTree = true; // write SimpleTree (for one bin)
-  //A->maxEvents = 10000; // use this to limit the number of events
+  A->maxEvents = 40; // use this to limit the number of events
   //A->SetReconMethod("Ele"); // recon method (default is "Ele")
   //A->AddFinalState("pipTrack"); // final states (default is "pipTrack" only)
 
