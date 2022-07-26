@@ -7,7 +7,8 @@
 ###################
 
 #### RELEASE TAG AND RECO DIR: ###########################
-release="prop.5/prop.5.1/AI";
+#release="prop.5/prop.5.1/AI";
+release="prop.4/prop.4.0/SIDIS";
 # release="prop.6/prop.6.0/SIDIS"; # event evaluator output empty?
 releaseDir="S3/eictest/ECCE/MC/$release/pythia6"
 #### references for EventEvaluator files
@@ -63,8 +64,10 @@ energyArg=$1
 mode=$2
 limit=5
 outFile=""
+loc="datarec"
 if [ $# -ge 3 ]; then limit=$3; fi
-if [ $# -ge 4 ]; then outFile=$4; fi
+if [ $# -ge 4 ]; then loc=$4; fi
+if [ $# -ge 5 ]; then outFile=$5; fi
 
 # split energyArg to energy and suffix
 energy=$(echo $energyArg | sed 's/-.*//')
@@ -75,7 +78,7 @@ pushd $(dirname $(realpath $0))/..
 
 # settings #############################################################
 sourceDir="$releaseDir/ep-$energyArg/$eventEvalDir"
-targetDir="datarec/ecce/$release/$energyArg"
+targetDir="$loc/ecce/$release/$energyArg"
 Q2min=1 # FIXME: assumed, so far this script only looks at the general Q2 
         # production, and it doesn't matter if this is the *correct* Q2min;
         # this Q2min only matters when you want to combine datasets with
