@@ -1,6 +1,6 @@
 #!/bin/bash
 # start an interactive shell in the singularity container
-module load singularity
+
 # determine top-level directory
 if [ -z "${BASH_SOURCE[0]}" ]; then topDir=$(dirname $(realpath $0))/..
 else topDir=$(dirname $(realpath ${BASH_SOURCE[0]}))/..; fi
