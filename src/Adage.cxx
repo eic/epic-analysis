@@ -95,25 +95,23 @@ TString CreatePayloadTitle(TString keyName, NodePath *P) {
 };
 
 // return payload object associated with the given NodePath
-PL *Adage::GetPayloadData(NodePath *P) {
+PL *Adage::GetPayloadData(NodePath *P,  bool NodePath_is_external) {
   PL *ret;
-  try { ret = payloadHash.at(P->GetBinNodes()); }
+  NodePath *intP;
+  if(NodePath_is_external) {
+    intP = new NodePath();
+    for(auto extN : P->nodes) {
+      auto intN = this->GetNode(extN->GetID(),true); // find internal node by ID-matching external node
+      if(intN!=nullptr) intP->nodes.insert(intN);
+    }
+  } else intP=P;
+  try { ret = payloadHash.at(intP->GetBinNodes()); }
   catch(const std::out_of_range &ex) {
     std::cerr << "ERROR: no Payload Object associated with NodePath "
-              << P->PathString() << std::endl;
+              << intP->PathString() << std::endl;
     return nullptr;
   };
   return ret;
-};
-
-// return payload object associated with the given external NodePath, by ID-matching its Nodes to the local DAG's Nodes
-PL *Adage::GetPayloadDataViaID(NodePath *extP) {
-  NodePath *intP = new NodePath();
-  for(auto extN : extP->nodes) {
-    auto intN = this->GetNode(extN->GetID(),true); // find internal node by ID-matching external node
-    if(intN!=nullptr) intP->nodes.insert(intN);
-  }
-  return this->GetPayloadData(intP);
 };
 
 Adage::~Adage() {

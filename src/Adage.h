@@ -116,9 +116,8 @@ class Adage : public DAG
       };
 
     // return payload data `PL` associated with the given NodePath
-    template<class PL> PL *GetPayloadData(NodePath *P);
-    // if you have a NodePath from another DAG that has the same binning scheme, use GetPayloadDataViaID instead
-    template<class PL> PL *GetPayloadDataViaID(NodePath *extP);
+    // - if you have a NodePath from another DAG that has the same binning scheme, set `NodePath_is_external=true`
+    template<class PL> PL *GetPayloadData(NodePath *P, bool NodePath_is_external=false);
 
   private:
     Bool_t debug;
