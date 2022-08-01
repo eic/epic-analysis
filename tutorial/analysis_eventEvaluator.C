@@ -2,7 +2,7 @@ R__LOAD_LIBRARY(Sidis-eic)
 
 /* full simulation (EventEvaluator/Fun4all) usage
  * - note the similarity of the macro to the fast simulation
- * - you only need to swap `AnalysisDelphes` with `AnalysisEE` to switch
+ * - you only need to swap `AnalysisDelphes` with `AnalysisEcce` to switch
  *   between fast and full simulations
  * - some settings are specific to the full simulations, e.g. electron
  *   energy threshold
@@ -25,8 +25,8 @@ void analysis_eventEvaluator(
 {
 
   // setup analysis ========================================
-  // - define `AnalysisEE` instead of `AnalysisDelphes`
-  AnalysisEE *A = new AnalysisEE(
+  // - define `AnalysisEcce` instead of `AnalysisDelphes`
+  AnalysisEcce *A = new AnalysisEcce(
       infiles,
       eleBeamEn,
       ionBeamEn,

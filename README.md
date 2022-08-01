@@ -158,7 +158,7 @@ upstream simulation output:
 
 ## ECCE Full Simulation
 
-- Similar implementation as ATHENA full simulation, but use `AnalysisEE` to
+- Similar implementation as ATHENA full simulation, but use `AnalysisEcce` to
   read `EventEvaluator` output files
 
 ---
@@ -205,7 +205,7 @@ and follow the [README](tutorial/README.md).
   - derived classes are specific to upstream data structures:
     - `AnalysisDelphes` for Delphes trees (fast simulations)
     - `AnalysisAthena` for trees from the DD4hep+Juggler stack (ATHENA full simulations)
-    - `AnalysisEE` for trees from the Fun4all+EventEvaluator stack (ECCE full simulations)
+    - `AnalysisEcce` for trees from the Fun4all+EventEvaluator stack (ECCE full simulations)
   - the `Kinematics` class is used to calculate all kinematics
     - `Analysis`-derived classes have one instance of `Kinematics` for generated
       variables, and another for reconstructed variables, to allow quick

@@ -35,7 +35,7 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
   full simulations, change the `Analysis`-derived class in the macro:
   - `AnalysisDelphes` for Delphes trees (fast simulations)
   - `AnalysisAthena` for trees from the DD4hep+Juggler stack (ATHENA full simulations)
-  - `AnalysisEE` for trees from the Fun4all+EventEvaluator stack (ECCE full simulations)
+  - `AnalysisEcce` for trees from the Fun4all+EventEvaluator stack (ECCE full simulations)
 - note: some extra settings and features differ between these
 
 ### Input File Lists (Config Files)

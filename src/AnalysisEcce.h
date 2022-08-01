@@ -1,5 +1,5 @@
-#ifndef AnalysisEE_
-#define AnalysisEE_
+#ifndef AnalysisEcce_
+#define AnalysisEcce_
 
 #include <vector>
 #include <fstream>
@@ -36,21 +36,21 @@ class ParticlesEE
     TLorentzVector vecPart;
 };
 
-class AnalysisEE : public Analysis
+class AnalysisEcce : public Analysis
 {
   public:
-    AnalysisEE(
+    AnalysisEcce(
         TString infileName_="",
         Double_t eleBeamEn_=5,
         Double_t ionBeamEn_=41,
         Double_t crossingAngle_=0,
         TString outfilePrefix_=""
         );
-    ~AnalysisEE();
+    ~AnalysisEcce();
 
     void Execute() override;
 
-    ClassDefOverride(AnalysisEE,1);
+    ClassDefOverride(AnalysisEcce,1);
 };
 
 

@@ -4,7 +4,7 @@
 #include <TLorentzVector.h>
 #include <TMath.h>
 
-#include "AnalysisEE.h"
+#include "AnalysisEcce.h"
 
 using std::map;
 using std::vector;
@@ -12,7 +12,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-AnalysisEE::AnalysisEE(
+AnalysisEcce::AnalysisEcce(
 		       TString infileName_,
 		       Double_t eleBeamEn_,
 		       Double_t ionBeamEn_,
@@ -28,14 +28,14 @@ AnalysisEE::AnalysisEE(
 };
 
 // destructor
-AnalysisEE::~AnalysisEE() {
+AnalysisEcce::~AnalysisEcce() {
 };
 
 
 //=============================================
 // perform the analysis
 //=============================================
-void AnalysisEE::Execute()
+void AnalysisEcce::Execute()
 {
   // setup
   Prepare();
