@@ -17,7 +17,7 @@ void analysis_x_q2(
   // setup analysis ========================================
   Analysis *A;
   if(outfilePrefix.Contains("fullsim"))
-       A = new AnalysisDD4hep(  infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+       A = new AnalysisAthena(  infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
   else A = new AnalysisDelphes( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
 
   A->SetReconMethod(reconMethod); // set reconstruction method

@@ -4,7 +4,7 @@
 #include <TLorentzVector.h>
 #include <TMath.h>
 
-#include "AnalysisDD4hep.h"
+#include "AnalysisEcce.h"
 
 using std::map;
 using std::vector;
@@ -12,36 +12,36 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-AnalysisDD4hep::AnalysisDD4hep(
-    TString infileName_,
-    Double_t eleBeamEn_,
-    Double_t ionBeamEn_,
-    Double_t crossingAngle_,
-    TString outfilePrefix_
-    ) : Analysis(
-      infileName_,
-      eleBeamEn_,
-      ionBeamEn_,
-      crossingAngle_,
-      outfilePrefix_
-      ) {
-    };
+AnalysisEcce::AnalysisEcce(
+		       TString infileName_,
+		       Double_t eleBeamEn_,
+		       Double_t ionBeamEn_,
+		       Double_t crossingAngle_,
+		       TString outfilePrefix_
+		       ) : Analysis(
+				    infileName_,
+				    eleBeamEn_,
+				    ionBeamEn_,
+				    crossingAngle_,
+				    outfilePrefix_
+				    ) {
+};
 
 // destructor
-AnalysisDD4hep::~AnalysisDD4hep() {
+AnalysisEcce::~AnalysisEcce() {
 };
 
 
 //=============================================
 // perform the analysis
 //=============================================
-void AnalysisDD4hep::Execute()
+void AnalysisEcce::Execute()
 {
   // setup
   Prepare();
 
-  // read dd4hep tree
-  TChain *chain = new TChain("events");
+  // read EventEvaluator tree
+  TChain *chain = new TChain("event_tree");
   for(Int_t idx=0; idx<infiles.size(); ++idx) {
     for(std::size_t idxF=0; idxF<infiles[idx].size(); ++idxF) {
       std::cout << "Adding " << infiles[idx][idxF] << " with " << inEntries[idx][idxF] << std::endl;
@@ -52,27 +52,38 @@ void AnalysisDD4hep::Execute()
   TTreeReader tr(chain);
 
   // Truth
-  TTreeReaderArray<Int_t>    mcparticles_ID(tr,        "mcparticles.ID");
-  TTreeReaderArray<Int_t>    mcparticles_pdgID(tr,     "mcparticles.pdgID");
-  TTreeReaderArray<Double_t> mcparticles_psx(tr,       "mcparticles.ps.x");
-  TTreeReaderArray<Double_t> mcparticles_psy(tr,       "mcparticles.ps.y");
-  TTreeReaderArray<Double_t> mcparticles_psz(tr,       "mcparticles.ps.z");
-  TTreeReaderArray<Int_t>    mcparticles_status(tr,    "mcparticles.status");
-  TTreeReaderArray<Int_t>    mcparticles_genStatus(tr, "mcparticles.genStatus");
-  TTreeReaderArray<Double_t> mcparticles_mass(tr,      "mcparticles.mass");
 
-  // Reco
-  TTreeReaderArray<Int_t> ReconstructedParticles_pid(tr,   "ReconstructedParticles.pid");
-  TTreeReaderArray<float> ReconstructedParticles_energy(tr,  "ReconstructedParticles.energy");
-  TTreeReaderArray<float> ReconstructedParticles_p_x(tr,     "ReconstructedParticles.p.x");
-  TTreeReaderArray<float> ReconstructedParticles_p_y(tr,     "ReconstructedParticles.p.y");
-  TTreeReaderArray<float> ReconstructedParticles_p_z(tr,     "ReconstructedParticles.p.z");
-  TTreeReaderArray<float> ReconstructedParticles_p(tr,       "ReconstructedParticles.momentum");
-  TTreeReaderArray<float> ReconstructedParticles_th(tr,      "ReconstructedParticles.direction.theta");
-  TTreeReaderArray<float> ReconstructedParticles_phi(tr,     "ReconstructedParticles.direction.phi");
-  TTreeReaderArray<float> ReconstructedParticles_mass(tr,    "ReconstructedParticles.mass");
-  TTreeReaderArray<short> ReconstructedParticles_charge(tr,  "ReconstructedParticles.charge");
-  TTreeReaderArray<int>   ReconstructedParticles_mcID(tr,    "ReconstructedParticles.mcID.value");
+  TTreeReaderArray<Int_t> hepmcp_status(tr, "hepmcp_status");
+  TTreeReaderArray<Int_t> hepmcp_PDG(tr,    "hepmcp_PDG");
+  TTreeReaderArray<float> hepmcp_E(tr,      "hepmcp_E");
+  TTreeReaderArray<float> hepmcp_psx(tr,    "hepmcp_px");
+  TTreeReaderArray<float> hepmcp_psy(tr,    "hepmcp_py");
+  TTreeReaderArray<float> hepmcp_psz(tr,    "hepmcp_pz");
+
+  TTreeReaderArray<Int_t> hepmcp_BCID(tr, "hepmcp_BCID");
+  TTreeReaderArray<Int_t> hepmcp_m1(tr, "hepmcp_m1"); 
+  TTreeReaderArray<Int_t> hepmcp_m2(tr, "hepmcp_m2"); 
+
+
+  // All true particles (including secondaries, etc)
+  TTreeReaderArray<Int_t> mcpart_ID(tr,        "mcpart_ID");
+  TTreeReaderArray<Int_t> mcpart_ID_parent(tr, "mcpart_ID_parent"); 
+  TTreeReaderArray<Int_t> mcpart_PDG(tr,       "mcpart_PDG");
+  TTreeReaderArray<float> mcpart_E(tr,         "mcpart_E");
+  TTreeReaderArray<float> mcpart_psx(tr,       "mcpart_px");
+  TTreeReaderArray<float> mcpart_psy(tr,       "mcpart_py");
+  TTreeReaderArray<float> mcpart_psz(tr,       "mcpart_pz");
+  TTreeReaderArray<Int_t> mcpart_BCID(tr,      "mcpart_BCID");
+
+
+  // Reco tracks
+  TTreeReaderArray<float> tracks_id(tr,  "tracks_ID"); // needs to be made an int eventually in actual EE code
+  TTreeReaderArray<float> tracks_p_x(tr, "tracks_px");
+  TTreeReaderArray<float> tracks_p_y(tr, "tracks_py");
+  TTreeReaderArray<float> tracks_p_z(tr,  "tracks_pz");
+  TTreeReaderArray<float> tracks_trueID(tr,  "tracks_trueID");
+  //  TTreeReaderArray<short> tracks_charge(tr,  "tracks_charge");
+
 
   TTreeReader::EEntryStatus entrystats = tr.SetEntry(0);
 
@@ -87,6 +98,7 @@ void AnalysisDD4hep::Execute()
   cout << "begin event loop..." << endl;
   while(tr.Next()) {
     if(nevt%10000==0) cout << nevt << " events..." << endl;
+  
     nevt++;
     if(nevt>maxEvents && maxEvents>0) break;
 
@@ -94,47 +106,99 @@ void AnalysisDD4hep::Execute()
     kin->ResetHFS();
     kinTrue->ResetHFS();
 
+
+
+
+    // a few maps needed to get the associated info between tracks, true particles, etec
+
+    std::map <int,int> mcidmap;
+    std::map <int,int> mcbcidmap;
+    std::map <int,int> mcbcidmap2;    
+    std::map <int,int> trackmap; // mapping of all the tracks
+        
+    for (int imc =0; imc < mcpart_ID.GetSize(); imc++){
+      if (mcpart_E[imc]<0.1) continue;       
+      int id = (int)mcpart_ID[imc];
+      int bcid = (int)mcpart_BCID[imc];
+      mcidmap.insert({id,imc});
+      mcbcidmap.insert({bcid,imc});       
+    }    
+    
+    for(int itrack=0; itrack<tracks_id.GetSize(); itrack++) {
+      trackmap.insert({tracks_trueID[itrack],itrack});
+    }
+    
+
+
+
+
     // generated truth loop
     /* - add truth particle to `mcpart`
      * - add to hadronic final state sums (momentum, sigma, etc.)
      * - find scattered electron
      * - find beam particles
      */
-    std::vector<Particles> mcpart;
+    std::vector<ParticlesEE> mcpart;
     double maxP = 0;
     int genEleID = -1;
     bool foundBeamElectron = false;
     bool foundBeamIon = false;
-    for(int imc=0; imc<mcparticles_pdgID.GetSize(); imc++) {
 
-      int pid_ = mcparticles_pdgID[imc];
-      int genStatus_ = mcparticles_genStatus[imc]; // genStatus 4: beam particle,  1: final state
-      double px_ = mcparticles_psx[imc];
-      double py_ = mcparticles_psy[imc];
-      double pz_ = mcparticles_psz[imc];
-      double mass_ = mcparticles_mass[imc]; // in GeV
-      double p_ = sqrt(pow(mcparticles_psx[imc],2) + pow(mcparticles_psy[imc],2) + pow(mcparticles_psz[imc],2));
+    for(int imc=0; imc<hepmcp_PDG.GetSize(); imc++) {
 
+      int pid_ = hepmcp_PDG[imc];
+
+      
+      int genStatus_ = hepmcp_status[imc]; // genStatus 4: beam particle,  1: final state
+      
+      double px_ = hepmcp_psx[imc];
+      double py_ = hepmcp_psy[imc];
+      double pz_ = hepmcp_psz[imc];
+      double e_  = hepmcp_E[imc];
+      
+      double p_ = sqrt(pow(hepmcp_psx[imc],2) + pow(hepmcp_psy[imc],2) + pow(hepmcp_psz[imc],2));
+      double mass_ = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;
+      
+      // add to `mcpart`
+      ParticlesEE part;
+      
       if(genStatus_ == 1) { // final state
+	
+	int imcpart = -1;// matched truthtrack
+	auto search = mcbcidmap.find((int)(hepmcp_BCID[imc]));
+	if (search != mcbcidmap.end()) {
+	  imcpart = search->second;
+	}
 
-        // add to `mcpart`
-        Particles part;
-        part.pid = pid_;
-        part.vecPart.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
-        part.mcID = mcparticles_ID[imc];
-        mcpart.push_back(part);
+	if (imcpart >-1){
+	  px_ = mcpart_psx[imcpart];
+	  py_ = mcpart_psy[imcpart];
+	  pz_ = mcpart_psz[imcpart];
+	  e_  = mcpart_E[imcpart];	  
+	  p_ = sqrt(pow(mcpart_psx[imcpart],2) + pow(mcpart_psy[imcpart],2) + pow(mcpart_psz[imcpart],2));
+	  part.mcID = mcpart_ID[imcpart];
+	}
+	  else
+	    part.mcID = -1;
+	  	
+	  part.pid = pid_;
+	  part.vecPart.SetPxPyPzE(px_, py_, pz_, e_);
+        
+	  mcpart.push_back(part);
+	
+	  // add to hadronic final state sums
+	  kinTrue->AddToHFS(part.vecPart);
 
-        // add to hadronic final state sums
-        kinTrue->AddToHFS(part.vecPart);
 
-        // identify scattered electron by max momentum
-        if(pid_ == 11) {
-          if(p_ > maxP) {
-            maxP = p_;
-            kinTrue->vecElectron.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
-            genEleID = mcparticles_ID[imc];
-          }
-        }
+	  // identify scattered electron by max momentum
+	  if(pid_ == 11) {
+	    if(p_ > maxP) {
+	      maxP = p_;
+	      kinTrue->vecElectron.SetPxPyPzE(px_, py_, pz_, e_);
+	      genEleID = part.mcID; //mcpart_ID[imc];
+	      //	      cout  << "\t\t\t found scattered electron  " << Form(" %6.2f %6.2f %6.2f %6.2f %6.2f  %5.3f %6.2f %6.2f id %3d\n",px_,py_,pz_, sqrt(p_*p_ + mass_*mass_),p_,mass_,hepmcp_E[imc],mcpart_E[imcpart],genEleID);
+	    }
+	  }
       }
 
       else if(genStatus_ == 4) { // beam particles
@@ -142,6 +206,7 @@ void AnalysisDD4hep::Execute()
           if(!foundBeamElectron) {
             foundBeamElectron = true;
             kinTrue->vecEleBeam.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
+	    //	    cout  << "\t\t\t found beam electron  " << Form(" %4.2f %4.2f %4.2f \n",px_,py_,pz_);
           }
           else { if(++errorCount<100) cerr << "ERROR: Found two beam electrons in one event" << endl; }
         }
@@ -149,6 +214,7 @@ void AnalysisDD4hep::Execute()
           if(!foundBeamIon) {
             foundBeamIon = true;
             kinTrue->vecIonBeam.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
+	    //	    cout  << "\t\t\t found beam ion  " << Form(" %4.2f %4.2f %4.2f \n",px_,py_,pz_);
           }
           else { if(++errorCount<100) cerr << "ERROR: Found two beam ions in one event" << endl; }
         }
@@ -165,40 +231,57 @@ void AnalysisDD4hep::Execute()
      * - find the scattered electron
      *
      */
-    std::vector<Particles> recopart;
+    std::vector<ParticlesEE> recopart;
     int recEleFound = 0;
-    for(int ireco=0; ireco<ReconstructedParticles_pid.GetSize(); ireco++) {
+    for(int ireco=0; ireco<tracks_id.GetSize(); ireco++) {
 
-      int pid_ = ReconstructedParticles_pid[ireco];
+
+
+      int pid_ = 0; //tracks_pid[ireco];
+      double reco_mass = 0.;
+      int imc = -1;// matched truthtrack
+      auto search = mcidmap.find((int)(tracks_trueID[ireco]));
+      if (search != mcidmap.end()) {
+	imc = search->second;
+	pid_ = (int)(mcpart_PDG[imc]);
+      }
+      // later also use the likelihoods instead for pid
+      //      cout  << "\t\t track " << ireco << " PDG  " << pid_ << " mcpart imc " << imc << endl;
       if(pid_ == 0) continue; // pid==0: reconstructed tracks with no matching truth pid
 
       // add reconstructed particle `part` to `recopart`
-      Particles part;
+      ParticlesEE part;
       part.pid = pid_;
-      part.mcID = ReconstructedParticles_mcID[ireco];
-      part.charge = ReconstructedParticles_charge[ireco];
-      double reco_E = ReconstructedParticles_energy[ireco];
-      double reco_px = ReconstructedParticles_p_x[ireco];
-      double reco_py = ReconstructedParticles_p_y[ireco];
-      double reco_pz = ReconstructedParticles_p_z[ireco];
-      double reco_mass = ReconstructedParticles_mass[ireco];
+      part.mcID = tracks_trueID[ireco];
+      //      part.charge = tracks_charge[ireco];
+      part.charge = (pid_ == 211 || pid_ == 321 || pid_ == 2212 || pid_ == -11 || pid_ == -13)?1:(pid_ == -211 || pid_ == -321 || pid_ == -2212 || pid_ == 11 || pid_ == 13)?-1:0;
+
+      double reco_px = tracks_p_x[ireco];
+      double reco_py = tracks_p_y[ireco];
+      double reco_pz = tracks_p_z[ireco];
+      reco_mass = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;
+
       double reco_p = sqrt(reco_px*reco_px + reco_py*reco_py + reco_pz*reco_pz);
+      double reco_E = sqrt(reco_p*reco_p + reco_mass * reco_mass);
+
       part.vecPart.SetPxPyPzE(reco_px, reco_py, reco_pz, sqrt(reco_p*reco_p + reco_mass*reco_mass));
 
+
+      //      cout  << "\t\t\t track  " << Form(" %4.2f %4.2f %4.2f true id %4d imc %3d mcid %3d \n",reco_px,reco_py,reco_pz,tracks_trueID[ireco],imc,part.mcID);
+      
       // add to `recopart` and hadronic final state sums only if there is a matching truth particle
-      if(part.mcID > 0) {
-        for(auto imc : mcpart) {
-          if(part.mcID == imc.mcID) {
-            recopart.push_back(part);
-            kin->AddToHFS(part.vecPart);
-            break;
-          }
-        }
+      if(part.mcID > 0) {       
+	if(imc>-1) {
+	  //  cout  << "\t\t\t add  to hadfs  \n" ;
+	  recopart.push_back(part);
+	  kin->AddToHFS(part.vecPart);
+	}
       }
 
       // find scattered electron, by matching to truth // TODO: not realistic... is there an upstream electron finder?
       if(pid_ == 11 && part.mcID == genEleID) {
         recEleFound++;
+	//	cout  << "\t\t\t reco electron " << Form(" %6.2f %6.2f %6.2f %6.2f  id %3d\n",reco_px,reco_py,reco_pz,sqrt(reco_p*reco_p + reco_mass*reco_mass),genEleID);
         kin->vecElectron.SetPxPyPzE(reco_px, reco_py, reco_pz, sqrt(reco_p*reco_p + reco_mass*reco_mass));
       }
 
@@ -257,13 +340,13 @@ void AnalysisDD4hep::Execute()
         }
       }
       /* // deprecated, since existence of truth match is checked earlier; in practice prox matching was never called
-      else {
-        // give it another shot: proximity matching
-        double mineta = 4.0;
-        numProxMatched++;
-        for(int imc=0; imc<(int)mcpart.size(); imc++) {
-          if(pid_ == mcpart[imc].pid) {
-            double deta = abs(kin->vecHadron.Eta() - mcpart[imc].vecPart.Eta());
+	 else {
+	 // give it another shot: proximity matching
+	 double mineta = 4.0;
+	 numProxMatched++;
+	 for(int imc=0; imc<(int)mcpart.size(); imc++) {
+	 if(pid_ == mcpart[imc].pid) {
+	 double deta = abs(kin->vecHadron.Eta() - mcpart[imc].vecPart.Eta());
             if(deta < mineta) {
               mineta = deta;
               kinTrue->vecHadron = mcpart[imc].vecPart;

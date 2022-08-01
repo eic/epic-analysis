@@ -1,5 +1,5 @@
-#ifndef AnalysisEE_
-#define AnalysisEE_
+#ifndef AnalysisAthena_
+#define AnalysisAthena_
 
 #include <vector>
 #include <fstream>
@@ -11,12 +11,12 @@ class SimpleTree;
 class Kinematics;
 class BinSet;
 
-class ClustersEE
+class Clusters
 {
   public:
-    ClustersEE() {}
-    ClustersEE(double E_, double x_, double y_, double z_, double theta_, double phi_) {}
-    virtual ~ClustersEE() {}
+    Clusters() {}
+    Clusters(double E_, double x_, double y_, double z_, double theta_, double phi_) {}
+    virtual ~Clusters() {}
 
     double E;
     double x;
@@ -27,7 +27,7 @@ class ClustersEE
 
 };
 
-class ParticlesEE
+class Particles
 {
   public:
     int pid;
@@ -36,29 +36,21 @@ class ParticlesEE
     TLorentzVector vecPart;
 };
 
-class AnalysisEE : public Analysis
+class AnalysisAthena : public Analysis
 {
   public:
-    AnalysisEE(
+    AnalysisAthena(
         TString infileName_="",
         Double_t eleBeamEn_=5,
         Double_t ionBeamEn_=41,
         Double_t crossingAngle_=0,
         TString outfilePrefix_=""
         );
-    ~AnalysisEE();
+    ~AnalysisAthena();
 
     void Execute() override;
 
-    ClassDefOverride(AnalysisEE,1);
+    ClassDefOverride(AnalysisAthena,1);
 };
-
-
-static const double pimass = 0.13957061;
-static const double kmass  = 0.493677;
-static const double pmass = 0.938272081;
-static const double emass = 0.000511;
-static const double mumass = 0.105658376;
-
 
 #endif

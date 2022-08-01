@@ -2,7 +2,7 @@ R__LOAD_LIBRARY(Sidis-eic)
 
 /* full simulation (dd4hep) usage
  * - note the similarity of the macro to the fast simulation
- * - you only need to swap `AnalysisDelphes` with `AnalysisDD4hep` to switch
+ * - you only need to swap `AnalysisDelphes` with `AnalysisAthena` to switch
  *   between fast and full simulations
  * - some settings are specific to the full simulations, e.g. electron
  *   energy threshold
@@ -25,8 +25,8 @@ void analysis_dd4hep(
 {
 
   // setup analysis ========================================
-  // - define `AnalysisDD4hep` instead of `AnalysisDelphes`
-  AnalysisDD4hep *A = new AnalysisDD4hep(
+  // - define `AnalysisAthena` instead of `AnalysisDelphes`
+  AnalysisAthena *A = new AnalysisAthena(
       infiles,
       eleBeamEn,
       ionBeamEn,
