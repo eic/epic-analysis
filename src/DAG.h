@@ -36,6 +36,7 @@ class DAG : public TObject
 
     DAG();
     ~DAG();
+    void SetDebug(Bool_t debug_) { debug=debug_; };
 
     // ---------------------------------------------------------------------
     /* operator staging functions:
@@ -249,9 +250,9 @@ class DAG : public TObject
 
   protected:
     Bool_t Visited(TString id_);
+    Bool_t debug;
 
   private:
-    Bool_t debug;
     std::map<TString,Node*> nodeMap;
     std::map<TString,BinSet*> layerMap;
     std::vector<TString> visitList;

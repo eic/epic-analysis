@@ -3,11 +3,7 @@
 ClassImp(HistosDAG)
 
 // default constructor
-HistosDAG::HistosDAG()
-  : debug(false)
-{
-  InitializeDAG();
-};
+HistosDAG::HistosDAG() : Adage<Histos>("histos") {};
 
 
 // build the DAG from specified bin scheme
@@ -18,8 +14,8 @@ void HistosDAG::Build(std::map<TString,BinSet*> binSchemes) {
 
   // leaf operator, to create Histos objects
   LeafOp([this](NodePath *P){
-    TString histosN = CreatePayloadName("histos");
-    TString histosT = CreatePayloadTitle("");
+    TString histosN = CreatePayloadName(P);
+    TString histosT = CreatePayloadTitle("",P);
     if(debug) {
       std::cout << "At path " << P->PathString() << ": ";
       std::cout << "Create " << histosN << std::endl;
@@ -37,6 +33,4 @@ void HistosDAG::Build(std::map<TString,BinSet*> binSchemes) {
   ExecuteAndClearOps();
 };
 
-
-HistosDAG::~HistosDAG() {
-};
+HistosDAG::~HistosDAG() {};

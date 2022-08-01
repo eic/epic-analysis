@@ -86,7 +86,7 @@ void comparator(
   // get DAGs and binning
   for(auto infile : infiles) {
     D = new HistosDAG();
-    D->Build(infile);
+    D->BuildFromFile(infile);
     auto xBins = D->GetBinSet(gx);
     auto yBins = D->GetBinSet(gy);
     if(first) {

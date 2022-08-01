@@ -3,8 +3,9 @@
 #define HistosDAG_
 
 #include "Adage.h"
+#include "Histos.h"
 
-class HistosDAG : public Adage
+class HistosDAG : public Adage<Histos>
 {
   public:
     HistosDAG();

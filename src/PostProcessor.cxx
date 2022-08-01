@@ -37,7 +37,7 @@ PostProcessor::PostProcessor(
 
   // rebuild DAGs
   HD = new HistosDAG();
-  HD->Build(infile);
+  HD->BuildFromFile(infile);
 
   // initialize algorithm-specific vars
   this->ResetVars();
