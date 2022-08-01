@@ -4,7 +4,7 @@
 #include <TLorentzVector.h>
 #include <TMath.h>
 
-#include "AnalysisDD4hep.h"
+#include "AnalysisAthena.h"
 
 using std::map;
 using std::vector;
@@ -12,7 +12,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-AnalysisDD4hep::AnalysisDD4hep(
+AnalysisAthena::AnalysisAthena(
     TString infileName_,
     Double_t eleBeamEn_,
     Double_t ionBeamEn_,
@@ -28,14 +28,14 @@ AnalysisDD4hep::AnalysisDD4hep(
     };
 
 // destructor
-AnalysisDD4hep::~AnalysisDD4hep() {
+AnalysisAthena::~AnalysisAthena() {
 };
 
 
 //=============================================
 // perform the analysis
 //=============================================
-void AnalysisDD4hep::Execute()
+void AnalysisAthena::Execute()
 {
   // setup
   Prepare();

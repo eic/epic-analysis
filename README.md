@@ -149,11 +149,11 @@ upstream simulation output:
   for scripts and guidance
 - In general, everything that can be done in fast simulation can also be done in
   full simulation; just replace your usage of `AnalysisDelphes` with
-  `AnalysisDD4hep`
+  `AnalysisAthena`
   - In practice, implementations may sometimes be a bit out of sync, where some
     features exist in fast simulation do not exist in full simulation, or vice
     versa
-- See the event loop in `src/AnalysisDD4hep.cxx` for details of how the full
+- See the event loop in `src/AnalysisAthena.cxx` for details of how the full
   simulation data are read
 
 ## ECCE Full Simulation
@@ -204,7 +204,7 @@ and follow the [README](tutorial/README.md).
       makes use of these streamed objects, rather than the `TObjArray`s
   - derived classes are specific to upstream data structures:
     - `AnalysisDelphes` for Delphes trees (fast simulations)
-    - `AnalysisDD4hep` for trees from the DD4hep+Juggler stack (ATHENA full simulations)
+    - `AnalysisAthena` for trees from the DD4hep+Juggler stack (ATHENA full simulations)
     - `AnalysisEE` for trees from the Fun4all+EventEvaluator stack (ECCE full simulations)
   - the `Kinematics` class is used to calculate all kinematics
     - `Analysis`-derived classes have one instance of `Kinematics` for generated

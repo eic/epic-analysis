@@ -1,5 +1,5 @@
-#ifndef AnalysisDD4hep_
-#define AnalysisDD4hep_
+#ifndef AnalysisAthena_
+#define AnalysisAthena_
 
 #include <vector>
 #include <fstream>
@@ -36,21 +36,21 @@ class Particles
     TLorentzVector vecPart;
 };
 
-class AnalysisDD4hep : public Analysis
+class AnalysisAthena : public Analysis
 {
   public:
-    AnalysisDD4hep(
+    AnalysisAthena(
         TString infileName_="",
         Double_t eleBeamEn_=5,
         Double_t ionBeamEn_=41,
         Double_t crossingAngle_=0,
         TString outfilePrefix_=""
         );
-    ~AnalysisDD4hep();
+    ~AnalysisAthena();
 
     void Execute() override;
 
-    ClassDefOverride(AnalysisDD4hep,1);
+    ClassDefOverride(AnalysisAthena,1);
 };
 
 #endif

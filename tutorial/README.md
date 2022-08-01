@@ -34,7 +34,7 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
 - many of these examples focus on fast simulations; to switch between fast and
   full simulations, change the `Analysis`-derived class in the macro:
   - `AnalysisDelphes` for Delphes trees (fast simulations)
-  - `AnalysisDD4hep` for trees from the DD4hep+Juggler stack (ATHENA full simulations)
+  - `AnalysisAthena` for trees from the DD4hep+Juggler stack (ATHENA full simulations)
   - `AnalysisEE` for trees from the Fun4all+EventEvaluator stack (ECCE full simulations)
 - note: some extra settings and features differ between these
 
@@ -78,7 +78,7 @@ Each of these examples has two macros:
 3. Full Simulations (all other tutorials are for fast simulations)
   - `analysis_dd4hep.C`: basically a copy of `analysis_xqbins.C`,
     but shows how to analyze full simulation data; the main difference
-    is using `AnalysisDD4hep` instead of `AnalysisDelphes`
+    is using `AnalysisAthena` instead of `AnalysisDelphes`
   - `postprocess_dd4hep_draw.C`: clone of `postprocess_xqbins_draw.C`,
     specific for this example
   - see also `analysis_eventEvaluator.C` and `postprocess_eventEvaluator_draw.C`
