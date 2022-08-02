@@ -42,10 +42,52 @@ Then open a pull request for `<new-branch-name> -> main`
 If you have `push` access to a `subrepo` remote, you can make your changes here. If you do not
 have `push` access, you will need to fork and make your changes separately (or reconfigure subrepo remotes here).
 
-Assuming you have `push` access to a subrepo `<subrepo>`:
-```bash
+At any time, use `git subrepo status` to print the configuration of each subrepo. Actions such as `git subrepo push`
+or `git subrepo pull` will create commits on `sidis-eic`, be sure to push them to remote.
 
-# *make changes* #
+Assuming you have `push` access to the subrepo `<subrepo>`, and you have already made your changes to `<subrepo>`
+and you're ready to push them to the `<subrepo>` remote:
+```bash
+# check `sidis-eic` git status
+git status
+```
+Commit and push all changes to `sidis-eic` (preferably in a new branch, and new PR); the
+changes can be both local to `sidis-eic` or local to `<subrepo>`, the do not have to be separate commits.
+
+Create a new branch (e.g., `<my-feature>`) for `<subrepo>` remote, and push the changes we made to it
+```bash
+git subrepo push deps/<subrepo> -b <my-feature> -u
+git push   # to push changes to `deps/<subrepo>/.gitrepo
+```
+The commit that you made above will be "copied" and pushed, in the sense that
+only the changes relevant to `<subrepo>` will be pushed to `<subrepo>` remote.
+- The `-b` option sets the branch name
+- The `-u` option updates the `.gitrepo` file, telling it to track `<my-feature>`
+
+Make more changes as needed; push them to both `sidis-eic` and `subrepo` remotes:
+```bash
+git commit ...
+git push ... # to `sidis-eic`
+git subrepo push deps/<subrepo>  # no need for -b or -u, we are tracking `<my-feature>` already
+git push  # (for .gitrepo)
+```
+
+When `<my-feature>` is merged to the `<subrepo>` main branch, we can revert the
+subrepo tracking branch and pull the update. Assuming the `<subrepo>` main
+branch is `main`:
+```bash
+git subrepo fetch deps/<subrepo> -b main            # fetch changes from <subrepo> remote
+git subrepo pull deps/<subrepo> -b main -u --force  # pull changes (--force is needed if remote deleted <my-feature>)
+git push
+```
+
+
+
+
+
+# 
+
+
 git commit ...
 git push ...  # push those changes to sidis-eic
 git subrepo push deps/<subrepo>   # push your changes to the subrepo remote
