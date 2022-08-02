@@ -1,4 +1,4 @@
-/* ADAGE frontend class
+/* ADAGE front-end template class
  * A - Analysis in a
  * D - Directed
  * A - Acyclic
@@ -8,6 +8,7 @@
  * - Associates DAG paths to unique objects
  * - User-friendly higher order functions (`Payload`, `MultiPayload`, ...) for operating
  *   on the stored objects
+ * - Inherits from back-end class `DAG`
  */
 #ifndef Adage_
 #define Adage_
@@ -18,9 +19,6 @@
 #include <sstream>
 
 // ROOT
-#include "TSystem.h"
-#include "TObject.h"
-#include "TNamed.h"
 #include "TString.h"
 #include "TRegexp.h"
 #include "TFile.h"
@@ -36,18 +34,23 @@
 template<class PL> class Adage : public DAG
 {
   public:
-    Adage(TString payloadNamePrefix_) : DAG() {
-      payloadNamePrefix = payloadNamePrefix_;
+
+    Adage(TString payloadNamePrefix_="") : DAG() {
+      payloadNamePrefix = payloadNamePrefix_; // optional unique name prefix, used only for storage in TFiles
     };
     ~Adage() {};
 
+    
+    // METHODS
+    // -----------------------------------------------------------------------------------
+
     // virtual method to build the DAG and instantiate payload data, from specified bin scheme
-    /* - payload classes must override this, following this general format:
-     *   - first, call BuildDAG(binSchemes)
-     *   - next, stage a LeafOp lambda
+    /* - derived classes must override this, following this general format:
+     *   - first, call `BuildDAG(binSchemes)`
+     *   - next, stage a `LeafOp` lambda:
      *     - instantiate your payload object, give it a unique name (`CreatePayloadName`, `CreatePayloadTitle`), etc.
-     *     - last line of LeafOp lambda should be InsertPayloadData
-     *   - last, call ExecuteAndClearOps();
+     *     - the last line of the `LeafOp` lambda should be `InsertPayloadData`
+     *   - last, call `ExecuteAndClearOps()`;
      */
     virtual void Build(std::map<TString,BinSet*> binSchemes) = 0;
 
@@ -56,6 +59,16 @@ template<class PL> class Adage : public DAG
      * - all objects that have names starting with `payloadNamePrefix` will be associated to DAG paths
      */
     void BuildFromFile(TFile *rootFile);
+
+    // return payload data (`PL` pointer) associated with the given `NodePath`
+    /* - if you have a `NodePath` from another DAG that has the same binning
+     *    scheme, set `NodePath_is_external=true`
+     */
+    PL *GetPayloadData(NodePath *P, bool NodePath_is_external=false);
+
+
+    // OPERATORS
+    // -----------------------------------------------------------------------------------
 
     // payload operator, executed on the specified object; see `FormatPayload`
     // for allowed arguments of operator `op`
@@ -81,22 +94,11 @@ template<class PL> class Adage : public DAG
     template<class O1>
       void MultiPayload(std::vector<TString> layers, O1 opPayload) { MultiPayload(layers,opPayload,[](){},[](){}); };
 
-    // format payload operators with proper arguments `(PayLoad object pointer, NodePath pointer)`, to allow easy overloading
-    static std::function<void(PL*,NodePath*)> FormatPayload(std::function<void(PL*,NodePath*)> op) { return op;     };
-    static std::function<void(PL*,NodePath*)> FormatPayload(std::function<void(NodePath*,PL*)> op) { return [op](PL *H, NodePath *P){ op(P,H); }; };
-    static std::function<void(PL*,NodePath*)> FormatPayload(std::function<void(PL*)>           op) { return [op](PL *H, NodePath *P){ op(H);   }; };
-    static std::function<void(PL*,NodePath*)> FormatPayload(std::function<void(NodePath*)>     op) { return [op](PL *H, NodePath *P){ op(P);   }; };
-    static std::function<void(PL*,NodePath*)> FormatPayload(std::function<void()>              op) { return [op](PL *H, NodePath *P){ op();    }; };
-
-    // return payload data `PL` associated with the given NodePath
-    // - if you have a NodePath from another DAG that has the same binning scheme, set `NodePath_is_external=true`
-    PL *GetPayloadData(NodePath *P, bool NodePath_is_external=false);
-
-
-  protected:
+     
+  protected: // -----------------------------------------------------------------------------------
 
     // build the DAG from specified bin scheme
-    void BuildDAG(std::map<TString,BinSet*> binSchemes);
+    void BuildDAG(std::map<TString,BinSet*> binSchemes, std::vector<TString> firstLayers={});
 
     // create a unique name or title for a payload object
     TString CreatePayloadName(NodePath *P);
@@ -106,9 +108,16 @@ template<class PL> class Adage : public DAG
     void InsertPayloadData(NodePath *P, PL *PLptr);
 
 
-  private:
+  private: // -----------------------------------------------------------------------------------
 
-    TString payloadNamePrefix;
+    // format payload operators with proper arguments `(PayLoad object pointer, NodePath pointer)`, to allow easy overloading
+    static std::function<void(PL*,NodePath*)> FormatPayload(std::function<void(PL*,NodePath*)> op) { return op;     };
+    static std::function<void(PL*,NodePath*)> FormatPayload(std::function<void(NodePath*,PL*)> op) { return [op](PL *H, NodePath *P){ op(P,H); }; };
+    static std::function<void(PL*,NodePath*)> FormatPayload(std::function<void(PL*)>           op) { return [op](PL *H, NodePath *P){ op(H);   }; };
+    static std::function<void(PL*,NodePath*)> FormatPayload(std::function<void(NodePath*)>     op) { return [op](PL *H, NodePath *P){ op(P);   }; };
+    static std::function<void(PL*,NodePath*)> FormatPayload(std::function<void()>              op) { return [op](PL *H, NodePath *P){ op();    }; };
+
+    TString payloadNamePrefix;                 // unique name, used for TFile I/O
     std::map<std::set<Node*>,PL*> payloadHash; // map DAG path of bin nodes -> PL*
 
   ClassDefOverride(Adage,1);
@@ -122,26 +131,28 @@ template<class PL> class Adage : public DAG
 
 // build the DAG from specified bin scheme
 template <class PL>
-void Adage<PL>::BuildDAG(std::map<TString,BinSet*> binSchemes) {
+void Adage<PL>::BuildDAG(std::map<TString,BinSet*> binSchemes, std::vector<TString> firstLayers) {
   // initialize DAG and payloadHash
   InitializeDAG();
   payloadHash.clear();
-  // add the finalState layer first, if it exists
-  try { 
-    BinSet *finalLayer = binSchemes.at("finalState");
-    if(finalLayer->GetNumBins()>0) AddLayer(finalLayer);
-  } catch(const std::out_of_range &ex) {
-    std::cerr << "WARNING: no finalState bins defined" << std::endl;
+  // add `firstLayers` first, if any, and if they exist in `binSchemes`
+  for(TString firstLayerN : firstLayers) {
+    try { 
+      if(debug) std::cout << "add BinSet " << firstLayerN << " to Adage" << std::endl;
+      BinSet *firstLayer = binSchemes.at(firstLayerN);
+      if(firstLayer->GetNumBins()>0) AddLayer(firstLayer);
+    } catch(const std::out_of_range &ex) {
+      std::cerr << "WARNING: no " << firstLayerN << " bins defined" << std::endl;
+    };
   };
   // add one layer for each BinSet with nonzero bins defined
   for(auto kv : binSchemes) {
+    if( std::find(firstLayers.begin(), firstLayers.end(), kv.first) != firstLayers.end() ) continue;
     if(debug) std::cout << "add BinSet " << kv.first << " to Adage" << std::endl;
-    if(kv.first=="finalState") continue;
     BinSet *binScheme = kv.second;
     if(binScheme->GetNumBins()>0) AddLayer(binScheme);
   };
 };
-
 
 // build the DAG from ROOT file
 template <class PL>
@@ -161,12 +172,12 @@ void Adage<PL>::BuildFromFile(TFile *rootFile) {
     };
   };
   nextKey.Reset();
-  // add each found to histMap
+  // add each payload found to `payloadHash`
   while(TKey *key = (TKey*)nextKey()) {
     keyname = TString(key->GetName());
     if(keyname.Contains(TRegexp(TString("^")+payloadNamePrefix))) {
       // get NodePath from matched name
-      if(debug) std::cout << "READ HISTOS " << keyname << std::endl;
+      if(debug) std::cout << "READ " << payloadNamePrefix << " " << keyname << std::endl;
       NodePath P;
       P.nodes.insert(GetRootNode());
       P.nodes.insert(GetLeafNode());
@@ -188,8 +199,7 @@ void Adage<PL>::BuildFromFile(TFile *rootFile) {
   };
 };
 
-
-// create a unique name or title for a payload object
+// create a unique name for the payload object associated to NodePath `P`; it will begin with `payloadNamePrefix`
 template <class PL>
 TString Adage<PL>::CreatePayloadName(NodePath *P) {
   TString ret = payloadNamePrefix;
@@ -199,6 +209,7 @@ TString Adage<PL>::CreatePayloadName(NodePath *P) {
   return ret;
 };
 
+// create a title for the payload object associated to NodePath `P`; it will include CutDef titles
 template <class PL>
 TString Adage<PL>::CreatePayloadTitle(TString titlePrefix, NodePath *P) {
   TString ret = titlePrefix;
@@ -209,7 +220,7 @@ TString Adage<PL>::CreatePayloadTitle(TString titlePrefix, NodePath *P) {
   return ret;
 };
 
-// associate a path to payload data
+// add payload object to `payloadHash`, which associates a NodePath to that object
 template <class PL>
 void Adage<PL>::InsertPayloadData(NodePath *P, PL *PLptr) {
   payloadHash.insert(std::pair<std::set<Node*>,PL*>(P->GetBinNodes(),PLptr));

@@ -2,15 +2,12 @@
 
 ClassImp(HistosDAG)
 
-// default constructor
-HistosDAG::HistosDAG() : Adage<Histos>("histos") {};
-
-
 // build the DAG from specified bin scheme
 void HistosDAG::Build(std::map<TString,BinSet*> binSchemes) {
 
   // build the DAG, given the bin scheme
-  BuildDAG(binSchemes);
+  // - require `"finalState"` bin to be the first layer
+  BuildDAG(binSchemes,{"finalState"});
 
   // leaf operator, to create Histos objects
   LeafOp([this](NodePath *P){
@@ -32,5 +29,3 @@ void HistosDAG::Build(std::map<TString,BinSet*> binSchemes) {
   if(debug) std::cout << "Begin Histos instantiation..." << std::endl;
   ExecuteAndClearOps();
 };
-
-HistosDAG::~HistosDAG() {};

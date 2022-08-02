@@ -8,8 +8,8 @@
 class HistosDAG : public Adage<Histos>
 {
   public:
-    HistosDAG();
-    ~HistosDAG();
+    HistosDAG() : Adage<Histos>("histos") {};
+    ~HistosDAG() {};
 
     // build the DAG from specified bin scheme
     void Build(std::map<TString,BinSet*> binSchemes) override;

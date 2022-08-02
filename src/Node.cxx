@@ -22,12 +22,12 @@ Node::Node(Int_t nodeType_, TString id_, CutDef *cut_, Int_t binNum_)
 void Node::Print() {
   TString nodeTypeStr;
   switch(nodeType) {
-    case NT::bin: nodeTypeStr="Bin"; break;
-    case NT::control: nodeTypeStr="Control"; break;
-    case NT::root: nodeTypeStr="Root"; break;
-    case NT::leaf: nodeTypeStr="Leaf"; break;
-    case NT::multi: nodeTypeStr="MultiControl"; break;
-    default: nodeTypeStr="Unknown";
+    case NT::bin:     nodeTypeStr="Bin";          break;
+    case NT::control: nodeTypeStr="Control";      break;
+    case NT::root:    nodeTypeStr="Root";         break;
+    case NT::leaf:    nodeTypeStr="Leaf";         break;
+    case NT::multi:   nodeTypeStr="MultiControl"; break;
+    default:          nodeTypeStr="Unknown";
   };
   cout << "NODE ::: " << id << " ::: " << nodeTypeStr << endl;
   cout << "  Inputs:" << endl;

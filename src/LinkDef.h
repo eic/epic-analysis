@@ -4,15 +4,14 @@
 #pragma link off all classes;
 #pragma link off all functions;
 
+#pragma link C++ class CutDef+;   // TODO: check for dependency on sidis-eic
+#pragma link C++ class BinSet+;   // TODO: check for dependency on sidis-eic
+#pragma link C++ class Node+;     // TODO: check for dependency on sidis-eic
+#pragma link C++ class NodePath+; // TODO: check for dependency on sidis-eic
+#pragma link C++ class DAG+;      // DONE: DAG and Adage are independent of sidis-eic
+
 #pragma link C++ class Histos+;
-
-#pragma link C++ class CutDef+;
-#pragma link C++ class BinSet+;
-#pragma link C++ class Node+;
-#pragma link C++ class NodePath+;
-#pragma link C++ class DAG+;
 #pragma link C++ class Adage<Histos>+;
-
 #pragma link C++ class HistosDAG+;
 
 #pragma link C++ class HistConfig+;

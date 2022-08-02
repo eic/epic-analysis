@@ -201,6 +201,7 @@ void DAG::TraverseDepth(Node *N, std::function<void(Node*,NodePath*)> lambda, No
   for(auto M : N->GetOutputs()) TraverseDepth(M,lambda,P);
 };
 
+
 // run each node's staged lambdas, while traversing depth first; if `activeNodesOnly`, all nodes
 // must have `active==true` (by default all nodes are active)
 void DAG::ExecuteOps(Bool_t activeNodesOnly, Node *N, NodePath P) {
@@ -212,16 +213,17 @@ void DAG::ExecuteOps(Bool_t activeNodesOnly, Node *N, NodePath P) {
   N->ExecuteOutboundOp(&P);
 };
 
+
 // clear all staged lambdas
 void DAG::ClearOps() {
   for(auto kv : nodeMap) kv.second->UnstageOps();
 };
 
+
 // set all nodes to active (the default) or inactive (if active_==false)
 void DAG::ActivateAllNodes(Bool_t active_) {
   for(auto kv : nodeMap) kv.second->SetActiveState(active_);
 };
-
 
 
 // traversal helper which checks if a node has been visited
