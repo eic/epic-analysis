@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:c-dilks/largex-eic-asym.git
+	branch = main
+	commit = a4923d81e54f7f46a579146d4e3ea55b2ab41c94
+	parent = 81f3778679a8bea0ec6c9f8ef3c0c7d8c44c8a26
+	method = merge
+	cmdver = 0.4.3
