@@ -1,0 +1,82 @@
+/*
+Steering file for LO DIS with realistic EIC beam parameters
+10x275 in High Acceptance Mode
+See CDR Table 3.4
+This card should be used in conjunction with the eicSimuBeamEffects
+project to generate HEPMC files for use in Delphes.
+https://github.com/bspage912/eicSimuBeamEffects
+*/
+
+! 1) Settings used in the main program.
+Main:numberOfEvents = 10000        ! number of events to generate
+Main:timesAllowErrors = 3          ! how many aborts before run stops
+
+
+! 2) Settings related to output in init(), next() and stat().
+Init:showChangedSettings = on      ! list changed settings
+Init:showChangedParticleData = off ! list changed particle data
+Next:numberCount = 100             ! print message every n events
+Next:numberShowInfo = 1            ! print event information n times
+Next:numberShowProcess = 1         ! print process record n times
+Next:numberShowEvent = 0           ! print event record n times
+
+! 3) Beam parameter settings. Values below agree with default ones.
+Beams:idA = 2212                     ! proton
+Beams:idB = 11                       ! electron
+Beams:eA  = 275                      ! proton energy
+Beams:eB  =10                        ! electron energy
+Beams:frameType = 2 
+
+Beams:allowMomentumSpread = on
+Beams:sigmapxA = 0.000065
+Beams:sigmapyA = 0.000065
+Beams:sigmapzA = 0.00068
+
+Beams:sigmapxB = 0.000116
+Beams:sigmapyB = 0.000084
+Beams:sigmapzB = 0.00058
+
+Beams:allowVertexSpread = on
+Beams:sigmaVertexX = 0.122
+Beams:sigmaVertexY = 0.011
+Beams:sigmaVertexZ = 0.0
+
+
+! 4) Settings for the hard-process generation.
+
+WeakBosonExchange:ff2ff(t:W) = on ! charged-current DIS
+#WeakBosonExchange:ff2ff(t:gmZ) = on ! neutral-current DIS
+PhaseSpace:Q2Min = 100
+PDF:lepton = off
+#PDF:pSet                  = LHAPDF6:CT18NNLO
+#PDF:pSet                  = LHAPDF6:CT18ANNLO
+#PDF:pSet                  = LHAPDF6:CT18NLO
+#PDF:pSet                  = LHAPDF6:CT18ANLO
+TimeShower:QEDshowerByL=off 
+SpaceShower:pTmaxMatch=2
+
+! 5) Switch on/off the key event generation steps.
+#PartonLevel:MPI = off              ! no multiparton interactions
+#PartonLevel:ISR = off              ! no initial-state radiation
+#PartonLevel:FSR = off              ! no final-state radiation
+#HadronLevel:Hadronize = off        ! no hadronization
+#HadronLevel:Decay = off            ! no decays
+
+! Allow long-lived hadrons to decay, since Delphes will not handle them
+#310:mayDecay   = true                 ! K0_S
+#3122:mayDecay  = true                 ! Lambda
+
+
+! 6) Other settings. Can be expanded as desired.
+#Tune:preferLHAPDF = off            ! use internal PDFs when LHAPDF not linked
+#Tune:pp = 6                        ! use Tune 4Cx
+
+! Allow long-lived particle decay within the EIC tracking volume
+ParticleDecays:limitCylinder = on
+ParticleDecays:xyMax = 800
+ParticleDecays:zMax = 1000
+
+Random:setSeed = on
+Random:seed = 0
+
+
