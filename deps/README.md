@@ -1,22 +1,18 @@
 Dependencies
 ============
 
-Dependencies are maintained as [git subrepos](https://github.com/ingydotnet/git-subrepo)
+Dependencies are maintained as [git subrepos](https://github.com/ingydotnet/git-subrepo) in subdirectories of this directory.
+They are:
+- [`delphes/delphes`](https://github.com/delphes/delphes): Fast simulation framework
+- [`eic/delphes_EIC`](https://github.com/eic/delphes_EIC/tree/master): Delphes configuration cards for the EIC
 
-```bash
-c-dilks/largex-eic-asym
-eic/delphes_EIC
-delphes/delphes
-```
-
-Subdirectories are local copies of repositories, called "subrepos". They are automatically
+The subdirectories are local copies of repositories, called "subrepos". They are automatically
 included when you clone `sidis-eic`.
 
 Maintainers of `sidis-eic` will be repsonsible for keeping these subrepos up-to-date.
-
 Do not push changes to these subrepos, unless you are using `git subrepo`; see the next
-section for details.
-
+section for details if you want to do this, otherwise make contributions to the dependencies
+separately in a standalone directory.
 
 Notes For Maintainers
 =====================
@@ -52,9 +48,9 @@ and you're ready to push them to the `<subrepo>` remote:
 git status
 ```
 Commit and push all changes to `sidis-eic` (preferably in a new branch, and new PR); the
-changes can be both local to `sidis-eic` or local to `<subrepo>`, the do not have to be separate commits.
+changes can be both local to `sidis-eic` or local to `<subrepo>`, they do not have to be separate commits.
 
-Create a new branch (e.g., `<my-feature>`) for `<subrepo>` remote, and push the changes we made to it
+Create a new branch (e.g., `<my-feature>`) for `<subrepo>` remote, and push the changes we made to it:
 ```bash
 git subrepo push deps/<subrepo> -b <my-feature> -u
 git push   # to push changes to `deps/<subrepo>/.gitrepo
@@ -80,16 +76,3 @@ git subrepo fetch deps/<subrepo> -b main            # fetch changes from <subrep
 git subrepo pull deps/<subrepo> -b main -u --force  # pull changes (--force is needed if remote deleted <my-feature>)
 git push
 ```
-
-
-
-
-
-# 
-
-
-git commit ...
-git push ...  # push those changes to sidis-eic
-git subrepo push deps/<subrepo>   # push your changes to the subrepo remote
-```
-
