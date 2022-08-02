@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:c-dilks/largex-eic-asym.git
 	branch = main
-	commit = a4923d81e54f7f46a579146d4e3ea55b2ab41c94
-	parent = 81f3778679a8bea0ec6c9f8ef3c0c7d8c44c8a26
+	commit = f84032e9e228dba8e033e3d72a4af2c3284fe972
+	parent = 28cf09fe2c4f1b8f4ba587932d65fc8e9fe8cc72
 	method = merge
 	cmdver = 0.4.3
