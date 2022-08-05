@@ -1,10 +1,14 @@
 Dependencies
 ============
 
-Dependencies are maintained as [git subrepos](https://github.com/ingydotnet/git-subrepo) in subdirectories of this directory.
+Dependencies are maintained in subdirectories of this directory.
+Many of them are [git subrepos](https://github.com/ingydotnet/git-subrepo), while the others must be
+intalled separately
 They are:
-- [`delphes/delphes`](https://github.com/delphes/delphes): Fast simulation framework
-- [`eic/delphes_EIC`](https://github.com/eic/delphes_EIC/tree/master): Delphes configuration cards for the EIC
+- [`delphes/delphes`](https://github.com/delphes/delphes):
+  Fast simulation framework, installed by `./installDelphes.sh`
+- [`eic/delphes_EIC`](https://github.com/eic/delphes_EIC/tree/master):
+  Delphes configuration cards for the EIC, maintained as subrepo
 
 The subdirectories are local copies of repositories, called "subrepos". They are automatically
 included when you clone `sidis-eic`.
