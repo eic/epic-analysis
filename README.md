@@ -76,6 +76,23 @@ upstream simulation output:
 
 - **ROOT**: prefer v6.24.02 or later
 - **Delphes**:
+
+
+
+
+
+
+# TODO: update this
+- delphes install script
+- `make delphes` and `make deps`
+- symlink `deps/delphes` if you have your own build
+
+
+
+
+
+
+
   - the analysis is capable of reading `delphes` fast simulation output, and also
     provides a simple wrapper for `delphes` to help keep input `hepmc` and output
     `root` files organized

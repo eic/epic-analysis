@@ -19,7 +19,7 @@ LIBS = $(shell root-config --glibs)
 
 # DELPHES
 DEPS += -I${DELPHES_HOME} -I${DELPHES_HOME}/external
-LIBS += -L${DELPHES_HOME} -lDelphes 
+LIBS += -L${DELPHES_HOME} -lDelphes
 
 # MSTWPDF
 DEPS += -I${MSTWPDF_HOME}
@@ -33,6 +33,6 @@ DEPS+= -I${DELPHES_HOME}/external/fastjet/plugins/Centauro
 endif
 FLAGS += -DINCCENTAURO=$(INCCENTAURO)
 
-# shared object name and source directory
+# sidis-eic target
 SIDIS-EIC = Sidis-eic
 SIDIS-EIC-OBJ := lib$(SIDIS-EIC).so
