@@ -134,7 +134,8 @@ upstream simulation output:
 - for convenience, the wrapper script `exeDelphes.sh` is provided, which runs
   `delphes` on a given `hepmc` or `hepmc.gz` file, and sets the output file
   names and the appropriate configuration card
-  - configuration cards are stored in the `cards/` directory as a submodule
+  - configuration cards are stored in the `deps/delphes_EIC/` directory,
+    a mirror of [`eic/delphes_EIC`](https://github.com/eic/delphes_EIC/tree/master)
     - clone this `sidis-eic` repository with `--recurse-submodules`, or
       if you already have cloned without submodules, execute
       `git submodule update --init` to obtain them
