@@ -1,19 +1,26 @@
 #!/bin/bash
 
+### SIDIS-EIC
+if [ -z "${BASH_SOURCE[0]}" ]; then
+  export SIDIS_EIC_HOME=$(dirname $(realpath $0))
+else
+  export SIDIS_EIC_HOME=$(dirname $(realpath ${BASH_SOURCE[0]}))
+fi
+echo "SIDIS_EIC_HOME = $SIDIS_EIC_HOME"
+export LD_LIBRARY_PATH=$SIDIS_EIC_HOME/lib:$LD_LIBRARY_PATH
+
 ### Delphes
 export LD_LIBRARY_PATH=$PYTHIA8/lib:$LD_LIBRARY_PATH
-export DELPHES_HOME=$(pwd)/deps/delphes
+export DELPHES_HOME=$SIDIS_EIC_HOME/deps/delphes
 if [ -f "$DELPHES_HOME/DelphesEnv.sh" ]; then
-  cd $DELPHES_HOME
-  source DelphesEnv.sh # source Delphes environment
+  source $DELPHES_HOME/DelphesEnv.sh
   export PATH=$PATH:$DELPHES_HOME
-  cd -
   echo "Delphes found at $DELPHES_HOME"
 else
   echo "WARNING: Delphes is not found at $DELPHES_HOME"
 fi
 
 ### MSTWPDF
-export MSTWPDF_HOME=$(pwd)/deps/mstwpdf
+export MSTWPDF_HOME=$SIDIS_EIC_HOME/deps/mstwpdf
 echo "MSTWPDF found at $MSTWPDF_HOME"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$MSTWPDF_HOME"

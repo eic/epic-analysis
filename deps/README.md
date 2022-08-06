@@ -7,7 +7,7 @@ while the others must be downloaded separately.
 
 ### Separate Download
 - `delphes`, from [delphes/delphes](https://github.com/delphes/delphes):
-  Fast simulation framework; run `deps/installDelphes.sh` to download and build
+  Fast simulation framework; run `deps/install_delphes.sh` to download and build
 
 ### Mirrors (subrepo, unless otherwise indicated)
 - `delphes_EIC`, from [eic/delphes_EIC](https://github.com/eic/delphes_EIC/tree/master):
