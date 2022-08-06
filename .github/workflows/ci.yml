@@ -31,8 +31,10 @@ jobs:
       - name: env
         run: |
           source environ.sh
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+          echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
+          echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: build-deps
         run: make deps
       - name: build-sidis-eic
@@ -73,8 +75,10 @@ jobs:
       - name: env
         run: |
           source environ.sh
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+          echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
+          echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: download_hepmc_files
         env:
           S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
@@ -122,8 +126,10 @@ jobs:
 #       - name: env
 #         run: |
 #           source environ.sh
+#           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+#           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
+#           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
 #           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-#           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
 #       - name: download_fullsim
 #         env:
 #           S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
@@ -177,8 +183,10 @@ jobs:
 #       - name: env
 #         run: |
 #           source environ.sh
+#           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+#           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
+#           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
 #           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-#           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
 #       - name: fastsim_get_delphes_files
 #         uses: actions/download-artifact@v2
 #         with:
@@ -233,8 +241,10 @@ jobs:
 #       - name: env
 #         run: |
 #           source environ.sh
+#           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+#           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
+#           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
 #           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-#           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
 #       - name: get_fullsim_artifacts
 #         uses: actions/download-artifact@v2
 #         with:
@@ -328,8 +338,10 @@ jobs:
 #       - name: env
 #         run: |
 #           source environ.sh
+#           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+#           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
+#           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
 #           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-#           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
 #       - name: get_analysis_artifacts
 #         uses: actions/download-artifact@v2
 #         with:
@@ -404,8 +416,10 @@ jobs:
 #       - name: env
 #         run: |
 #           source environ.sh
+#           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+#           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
+#           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
 #           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-#           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
 #       - name: get_fastsim_analysis_artifacts
 #         uses: actions/download-artifact@v2
 #         with:
