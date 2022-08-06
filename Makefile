@@ -2,10 +2,11 @@ include config.mk
 
 # dependencies
 DEPS += -Isrc
-#LIBS += -L. -l$(SIDIS-EIC)
+#LIBS += -L. -l$(SIDIS_EIC)
 
 # sidis-eic targets
 sidis-eic:
+	ln -sf ${DELPHES_HOME}/external ./
 	@cd mstwpdf; make
 	@cd src; make
 clean:

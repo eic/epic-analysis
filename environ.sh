@@ -8,7 +8,6 @@ if [ -f "$DELPHES_HOME/DelphesEnv.sh" ]; then
   source DelphesEnv.sh # source Delphes environment
   export PATH=$PATH:$DELPHES_HOME
   cd -
-  ln -sf $DELPHES_HOME/external ./ # symlink delphes `external`
   echo "Delphes found at $DELPHES_HOME"
 else
   echo "WARNING: Delphes is not found at $DELPHES_HOME"

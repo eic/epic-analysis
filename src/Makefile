@@ -1,8 +1,8 @@
 include ../config.mk
 
 # rootcling dictionary
-DICT := $(SIDIS-EIC)Dict.cxx
-PCM := $(SIDIS-EIC)Dict_rdict.pcm
+DICT := $(SIDIS_EIC)Dict.cxx
+PCM := $(SIDIS_EIC)Dict_rdict.pcm
 LINKDEF = LinkDef.h
 
 
@@ -10,13 +10,11 @@ LINKDEF = LinkDef.h
 SOURCES := $(filter-out $(DICT), $(wildcard *.cxx) $(wildcard sfset/*.cxx) $(wildcard interp/*.cxx)) $(DICT)
 HEADERS := $(filter-out $(LINKDEF), $(wildcard *.h) $(wildcard sfset/*.h) $(wildcard interp/*.h) $(wildcard interp/*.ipp)) $(LINKDEF)
 
-
 #-----------------------------------------------
 
-
-$(SIDIS-EIC-OBJ): $(DICT) $(HEADERS) $(SOURCES)
+../$(SIDIS_EIC_OBJ): $(DICT) $(HEADERS) $(SOURCES)
 	@echo "----- build $@ -----"
-	$(CXX) $(SOURCES) -shared -o ../$@ $(FLAGS) $(DEPS) $(LIBS)
+	$(CXX) $(SOURCES) -shared -o $@ $(FLAGS) $(DEPS) $(LIBS)
 
 $(DICT): $(HEADERS)
 	@echo "----- generate dictionary $@ -----"
@@ -24,4 +22,4 @@ $(DICT): $(HEADERS)
 	mv $(PCM) ../
 
 clean:
-	$(RM) ../$(SIDIS-EIC-OBJ) $(DICT) ../$(PCM)
+	$(RM) ../$(SIDIS_EIC_OBJ) $(DICT) ../$(PCM)

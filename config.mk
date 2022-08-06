@@ -2,15 +2,14 @@
 CXX = g++
 FLAGS = -g -Wno-deprecated -fPIC -fno-inline -Wno-write-strings
 FLAGS += -fmax-errors=3
+# extra flags
+#FLAGS += -O0
 
 # extra flags for Mac OS
 UNAME := $(shell uname)
 ifeq ($(UNAME), Darwin)
     FLAGS += -std=c++11
 endif
-
-# extra flags for valgrind
-#FLAGS += -O0
 
 # ROOT
 DEPS = -I$(shell root-config --incdir)
@@ -34,5 +33,5 @@ endif
 FLAGS += -DINCCENTAURO=$(INCCENTAURO)
 
 # sidis-eic target
-SIDIS-EIC = Sidis-eic
-SIDIS-EIC-OBJ := lib$(SIDIS-EIC).so
+SIDIS_EIC = Sidis-eic
+SIDIS_EIC_OBJ := lib$(SIDIS_EIC).so
