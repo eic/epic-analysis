@@ -45,11 +45,15 @@ jobs:
           name: x_build
           retention-days: 1
           path: |
+            # sidis-eic
             lib
             src/Sidis-eicDict.cxx
+            # mstwpdf
             deps/mstwpdf/*.o
             deps/mstwpdf/*.so
+            # delphes
             deps/delphes
+            external
 
 
 # DELPHES ---------------------------------------------------------------------------
