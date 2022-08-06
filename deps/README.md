@@ -1,25 +1,21 @@
 Dependencies
 ============
 
-Dependencies are maintained in subdirectories of this directory.
-Many of them are [git subrepos](https://github.com/ingydotnet/git-subrepo), while the others must be
-intalled separately
-They are:
-- [`delphes/delphes`](https://github.com/delphes/delphes):
-  Fast simulation framework, installed by `./installDelphes.sh`
-- [`eic/delphes_EIC`](https://github.com/eic/delphes_EIC/tree/master):
-  Delphes configuration cards for the EIC, maintained as subrepo
+Dependencies are maintained in subdirectories of this directory. Many of them
+are mirrored here, using [git subrepo](https://github.com/ingydotnet/git-subrepo),
+while the others must be installed separately.
 
-The subdirectories are local copies of repositories, called "subrepos". They are automatically
-included when you clone `sidis-eic`.
+- Separate Install
+  - `delphes`, from [delphes/delphes](https://github.com/delphes/delphes):
+    Fast simulation framework, installed by `deps/installDelphes.sh`
+- Mirrors (subrepo, unless otherwise indicated)
+  - `delphes_EIC`, from [eic/delphes_EIC](https://github.com/eic/delphes_EIC/tree/master):
+    Delphes configuration cards for the EIC
+  - `mstwpdf`, interpolation for MSTW PDFs not a subrepo
 
-Maintainers of `sidis-eic` will be repsonsible for keeping these subrepos up-to-date.
-Do not push changes to these subrepos, unless you are using `git subrepo`; see the next
-section for details if you want to do this, otherwise make contributions to the dependencies
-separately in a standalone directory.
 
-Notes For Maintainers
-=====================
+Subrepo Maintenance
+===================
 
 Each subrepo directory contains the file `.gitrepo`, which contains details
 about the subrepo configuration. Use `git subrepo` commands when making changes

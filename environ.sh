@@ -14,6 +14,6 @@ else
 fi
 
 ### MSTWPDF
-export MSTWPDF_HOME=$(pwd)/mstwpdf
+export MSTWPDF_HOME=$(pwd)/deps/mstwpdf
 echo "MSTWPDF found at $MSTWPDF_HOME"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$MSTWPDF_HOME"

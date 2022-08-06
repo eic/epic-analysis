@@ -7,10 +7,10 @@ DEPS += -Isrc
 # sidis-eic targets
 sidis-eic:
 	ln -sf ${DELPHES_HOME}/external ./
-	@cd mstwpdf; make
+	@cd ${MSTWPDF_HOME}; make
 	@cd src; make
 clean:
-	@cd mstwpdf; make clean
+	@cd ${MSTWPDF_HOME}; make clean
 	@cd src; make clean
 all:
 	make deps
