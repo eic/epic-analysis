@@ -94,6 +94,7 @@ jobs:
       - name: delphes
         run: |
           echo "-- delphes"
+          chmod u+x deps/delphes/DelphesHepMC3
           for hepmc in datagen/*.hepmc.gz; do deps/run_delphes.sh $hepmc; done
           echo "-- list datarec/"
           ls -lh datarec
