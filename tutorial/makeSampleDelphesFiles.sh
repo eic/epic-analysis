@@ -30,7 +30,7 @@ sep "list $genDir/"
 ls -lh $genDir
 
 sep "run delphes"
-for hepmc in $genDir/*.hepmc.gz; do ./exeDelphes.sh $hepmc; done
+for hepmc in $genDir/*.hepmc.gz; do ./run_delphes.sh $hepmc; done
 sep "list $recDir/"
 ls -lh $recDir
 
