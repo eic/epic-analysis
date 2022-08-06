@@ -3,15 +3,16 @@ Dependencies
 
 Dependencies are maintained in subdirectories of this directory. Many of them
 are mirrored here, using [git subrepo](https://github.com/ingydotnet/git-subrepo),
-while the others must be installed separately.
+while the others must be downloaded separately.
 
-- Separate Install
-  - `delphes`, from [delphes/delphes](https://github.com/delphes/delphes):
-    Fast simulation framework, installed by `deps/installDelphes.sh`
-- Mirrors (subrepo, unless otherwise indicated)
-  - `delphes_EIC`, from [eic/delphes_EIC](https://github.com/eic/delphes_EIC/tree/master):
-    Delphes configuration cards for the EIC
-  - `mstwpdf`, interpolation for MSTW PDFs not a subrepo
+### Separate Download
+- `delphes`, from [delphes/delphes](https://github.com/delphes/delphes):
+  Fast simulation framework; run `deps/installDelphes.sh` to download and build
+
+### Mirrors (subrepo, unless otherwise indicated)
+- `delphes_EIC`, from [eic/delphes_EIC](https://github.com/eic/delphes_EIC/tree/master):
+  Delphes configuration cards for the EIC
+- `mstwpdf`, interpolation for MSTW PDFs, not a subrepo
 
 
 Subrepo Maintenance
