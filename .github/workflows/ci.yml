@@ -26,30 +26,41 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
+      - name: build-delphes
+        run: deps/install_delphes.sh
       - name: env
         run: |
           source environ.sh
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+          echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
+          echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
-      - name: compile
-        run: make
+      - name: build-deps
+        run: make deps
+      - name: build-sidis-eic
+        run: make sidis-eic
       - name: artifacts
         uses: actions/upload-artifact@v2
         with:
           name: x_build
           retention-days: 1
           path: |
-            Sidis-eicDict_rdict.pcm
-            libSidis-eic.so
-            mstwpdf/*.o
-            mstwpdf/*.so
+            # sidis-eic
+            lib
             src/Sidis-eicDict.cxx
+            # mstwpdf
+            deps/mstwpdf/*.o
+            deps/mstwpdf/*.so
+            # delphes
+            deps/delphes
+            external
 
 
 # DELPHES ---------------------------------------------------------------------------
 
 # run delphes on a hepmc file
   delphes_fastsim:
+    needs: [ build ]
     runs-on: [ ubuntu-latest ]
     container:
       image: cjdilks/sidis-eic:latest
@@ -61,13 +72,17 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
+      - name: get_build_artifacts
+        uses: actions/download-artifact@v2
         with:
-          submodules: true
+          name: x_build
       - name: env
         run: |
           source environ.sh
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+          echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
+          echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: download_hepmc_files
         env:
           S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
@@ -83,7 +98,8 @@ jobs:
       - name: delphes
         run: |
           echo "-- delphes"
-          for hepmc in datagen/*.hepmc.gz; do ./exeDelphes.sh $hepmc; done
+          chmod u+x deps/delphes/DelphesHepMC3
+          for hepmc in datagen/*.hepmc.gz; do deps/run_delphes.sh $hepmc; done
           echo "-- list datarec/"
           ls -lh datarec
       - name: config_fastsim
@@ -101,7 +117,7 @@ jobs:
             delphes.config
 
 
-# DOWNLOAD FULLSIM ---------------------------------------------------------------------------
+# # DOWNLOAD FULLSIM ---------------------------------------------------------------------------
 
 # download fullsim files and make config
   download_fullsim:
@@ -115,8 +131,10 @@ jobs:
       - name: env
         run: |
           source environ.sh
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+          echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
+          echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: download_fullsim
         env:
           S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
@@ -163,15 +181,17 @@ jobs:
           echo "recon = ${{matrix.recon}}"
       - name: checkout
         uses: actions/checkout@v2
-      - name: env
-        run: |
-          source environ.sh
-          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: get_build_artifacts
         uses: actions/download-artifact@v2
         with:
           name: x_build
+      - name: env
+        run: |
+          source environ.sh
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+          echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
+          echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: fastsim_get_delphes_files
         uses: actions/download-artifact@v2
         with:
@@ -219,15 +239,17 @@ jobs:
           echo "recon = ${{matrix.recon}}"
       - name: checkout
         uses: actions/checkout@v2
-      - name: env
-        run: |
-          source environ.sh
-          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: get_build_artifacts
         uses: actions/download-artifact@v2
         with:
           name: x_build
+      - name: env
+        run: |
+          source environ.sh
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+          echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
+          echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: get_fullsim_artifacts
         uses: actions/download-artifact@v2
         with:
@@ -314,15 +336,17 @@ jobs:
           echo "pmacro = ${{matrix.pmacro}}"
       - name: checkout
         uses: actions/checkout@v2
-      - name: env
-        run: |
-          source environ.sh
-          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: get_build_artifacts
         uses: actions/download-artifact@v2
         with:
           name: x_build
+      - name: env
+        run: |
+          source environ.sh
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+          echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
+          echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: get_analysis_artifacts
         uses: actions/download-artifact@v2
         with:
@@ -390,15 +414,17 @@ jobs:
           echo "yvar = ${{matrix.yvar}}"
       - name: checkout
         uses: actions/checkout@v2
-      - name: env
-        run: |
-          source environ.sh
-          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: get_build_artifacts
         uses: actions/download-artifact@v2
         with:
           name: x_build
+      - name: env
+        run: |
+          source environ.sh
+          echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
+          echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
+          echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
+          echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
       - name: get_fastsim_analysis_artifacts
         uses: actions/download-artifact@v2
         with:

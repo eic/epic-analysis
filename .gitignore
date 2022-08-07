@@ -7,27 +7,28 @@
 *.o
 *.exe
 *.tmp
-out/*.png
-out/*.pdf
-out/*/*.png
-out/*/*.pdf
+*.zip
 *Dict.cxx
-out/*/*.txt
+tags
+
+# input/output directories
+out/*
+!out/.keep
+datagen/*
+!datagen/.keep
+datarec/*
+!datarec/.keep
+!datarec/xsec
+!datarec/trimTree.C
+results*
+
+# tmp files
+tutorial/delphes.config
+tutorial/delphes.config.bak
+get-files.sh
+*.xsec
+
+# environment setup files
 external
 *.sif
 container/img
-get-files.sh
-results*
-*.xsec
-tags
-*.zip
-tutorial/delphes.config
-tutorial/delphes.config.bak
-
-# users' custom ignores
-datagen/escalate
-datagen/arc
-datarec/arc
-datarec/athena/*
-datarec/ecce/*
-testconfig

@@ -34,72 +34,63 @@ upstream simulation output:
 
 # Setup and Dependencies
 
-## Option 1: Use the Singularity or Docker image
+## Upstream Dependencies
+These are common dependencies used for the upstream simulation, some of which
+are needed for `sidis-eic` as well. There are two options for obtaining upstream
+dependencies:
 
-- To minimize setup effort, and provide a consistent development environment, 
-  a Singularity image is available, which contains all the dependencies
-  pre-built, as well as sample ROOT files
-  - First run `container/install.sh` to download and build the Singularity image
-    - With no arguments, a usage guide will be printed
-    - Default image file location is `container/img/`
-    - Note that the image size is about 3 GB
-    - Images are hosted on [Docker Hub](https://hub.docker.com/r/cjdilks/sidis-eic)
-      - (the Docker image is hosted, but Singularity can pull it too)
-  - Then run `container/shell.sh` to start a shell in the Singularity container
-    - This will automatically call `source environ.sh` upon shell startup, which
-      sets environment variables
-  - Proceed with the **Building** section below (just type `make`)
+### Option 1: Common EIC-shell Docker (Singularity) Container
 
-- **Alternatively** if you prefer to use Docker:
-  - obtain the image using `docker pull cjdilks/sidis-eic:latest`
-  - start the container using a standard `docker run` command; you can also use
-    the script `container/docker-shell.sh`, if you find it useful
-    - the Docker image was built assuming a default user ID (UID) of 1000; if your
-      UID is different (check with the `id` command), your user name in the container
-      may be `I have no name!`, but you should still have read/write permission for
-      the present working directory; we have not tested working in this condition,
-      due to our preference for Singularity, however suggestions how to improve
-      are welcome
-    - Docker files are also provided, you can follow `container/dev/README.md`
-      for instructions how to build your own image
-  - once you are in the Docker container, proceed with the **Building** section below
-  - note: the Singularity container is likely more user-friendly
+Follow [eic-container documentation](https://eicweb.phy.anl.gov/containers/eic_container)
+to obtain the EIC software image
 
-## Option 2: Setup your own environment
+- The `eic-shell` script is used to start a container shell
+- This image contains all the dependencies needed for EIC simulations
+- All documentation below assumes you are running in `eic-shell`
+
+**NOTE**: our old image, that was obtained by scripts in `container/`, is deprecated.
+
+### Option 2: Setup your Own Environment
 
 - The other option is to manually set up your environment, by downloading and/or
-  building all of the necessary dependencies
-- Once you have all the dependencies, proceed with the **Building** section
-  below
+  building all of the necessary dependencies, including:
+  - **ROOT**: prefer v6.24.02 or later
+  - **MinIO Client**, if you will be accessing data from S3 (see 
+      [s3tools documentation](s3tools/README.md) for details)
+- Option 1 is strongly recommended, to ensure you have the most up-to-date dependencies;
+  we will not maintain an up-to-date list of upstream dependencies here
 
-### Dependencies
 
-- **ROOT**: prefer v6.24.02 or later
-- **Delphes**:
-  - the analysis is capable of reading `delphes` fast simulation output, and also
-    provides a simple wrapper for `delphes` to help keep input `hepmc` and output
-    `root` files organized
-    - it is not required to use the `delphes` wrapper, but `delphes` libraries are
-      needed for the analysis of fast simulation data
-  - first, make sure you have a build of `delphes` somewhere, preferably in a
-    separate directory
-  - set environment variables before doing anything, so this repository knows where your
-    `delphes` build is: `source environ.sh /path/to/delphes/repository`
-    - if you do not specify a path to `delphes` repository, it will use a default
-      path given in `environ.sh`; it is useful to edit this default path for your own
-      convenience
-    - it will also symlink `delphes` external code, so analysis macros
-      will not complain
-- **MinIO Client**, if you will be accessing data from S3 (see 
-  [s3tools documentation](s3tools/README.md) for details)
+## Local Dependencies
+These are additional dependencies needed by `sidis-eic`; they will be built
+locally and stored in the `deps/` directory (see [deps/README.md](deps/README.md)
+for more details). This section documents how to obtain and build local dependencies:
+
+- [Delphes](https://github.com/delphes/delphes) is the only local dependency that
+  is not mirrored in `deps/`; in other words you must download and build it:
+  - run `deps/install_delphes.sh`; this will clone the `delphes` repository to `deps/delphes`,
+    and compile it
+  - alternatively, if you already have a `delphes` build elsewhere, symlink `deps/delphes` to it
+- All other dependencies in `deps/` are mirrors, and are already included with `sidis-eic`.
+  For the ones that need building, see the **Building** section below.
 
 ## Building
 
 - First make sure environment variables are set by calling `source environ.sh`
-  - If you called `container/shell.sh`, this has already been done
-- Build analysis code with `make`
-  - It requires a `root` build as well as `delphes` (see above)
-  - All classes are found in the `src/` directory
+- Run `make` to build everything: all dependencies in `deps/`, followed by the
+  `sidis-eic` library from the source code in `src/`
+- Additional `make` targets are available (see `Makefile`), for more control during
+  development:
+
+```bash
+make                     # builds dependencies, then `sidis-eic` (equivalent to `make all`)
+make deps                # builds only dependencies
+make clean               # clean `sidis-eic` (but not dependencies)
+make deps-clean          # clean dependencies
+make all-clean           # clean `sidis-eic` and dependencies
+make <dependency>        # build a particular `<dependency>`
+make <dependency>-clean  # clean a particular `<dependency>`
+```
 
 ## Quick Start
 
@@ -114,15 +105,16 @@ upstream simulation output:
 ## Delphes Fast Simulation
 
 ### Delphes Wrapper
-- for convenience, the wrapper script `exeDelphes.sh` is provided, which runs
+- for convenience, the wrapper script `deps/run_delphes.sh` is provided, which runs
   `delphes` on a given `hepmc` or `hepmc.gz` file, and sets the output file
   names and the appropriate configuration card
-  - configuration cards are stored in the `cards/` directory as a submodule
+  - configuration cards are stored in the `deps/delphes_EIC/` directory,
+    a mirror of [`eic/delphes_EIC`](https://github.com/eic/delphes_EIC/tree/master)
     - clone this `sidis-eic` repository with `--recurse-submodules`, or
       if you already have cloned without submodules, execute
       `git submodule update --init` to obtain them
   - environment must be set first (`source environ.sh`)
-  - run `exeDelphes.sh` with no arguments for usage guide
+  - run `deps/run_delphes.sh` with no arguments for usage guide
   - in the script, you may need to change `exeDelphes` to the proper
     executable, e.g., `DelphesHepMC2` or `DelphesHepMC3`, depending
     on the format of your generator input
@@ -271,13 +263,6 @@ and follow the [README](tutorial/README.md).
     - loops over bins and perform actions, using Adage
 - see `src/PostProcessor.h` and `src/PostProcessor.cxx` for available
   post-processing routines; you are welcome to add your own
-
-### Asymmetry Fitting
-- the `SimpleTree` output is compatible with [asymmetry code](https://github.com/c-dilks/largex-eic-asym),
-  included here as a submodule in `asym/`
-  - clone this `sidis-eic` repository with `--recurse-submodules`, to get
-    `largex-eic-asym` and its main dependency `brufit`
-  - follow `asym/README.md`
 
 ---
 

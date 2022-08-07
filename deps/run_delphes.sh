@@ -3,7 +3,7 @@
 
 
 # default card
-cardfile=cards/ATHENA.tcl
+cardfile=deps/delphes_EIC/ATHENA.tcl
 
 # delphes executable 
 exeDelphes=$DELPHES_HOME/DelphesHepMC3

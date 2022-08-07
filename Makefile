@@ -1,35 +1,22 @@
 include config.mk
 
-
-# local dependencies
-DEPS += -Isrc
-#LIBS += -L. -l$(SIDIS-EIC)
-
-
-# assume each .cpp file has main and build corresponding .exe executable
-SOURCES := $(basename $(wildcard *.cpp))
-EXES := $(addsuffix .exe, $(SOURCES))
-
-
-#--------------------------------------------
-
-
-all: 
-	@cd mstwpdf; make
+# sidis-eic targets
+all: deps sidis-eic
+all-clean: deps-clean clean
+sidis-eic:
+	ln -sf ${DELPHES_HOME}/external ./
 	@cd src; make
-	make exe
-
-exe: $(EXES)
-
-%.exe: %.o
-	@echo "--- make executable $@"
-	$(CXX) -o $@ $< ./$(SIDIS-EIC-OBJ) $(LIBS)
-
-%.o: %.cpp
-	@echo "----- build $@ -----"
-	$(CXX) -c $^ -o $@ $(FLAGS) $(DEPS)
-
 clean:
-	@cd mstwpdf; make clean
 	@cd src; make clean
-#$(RM) $(EXES)
+
+# dependency targets
+deps: delphes mstwpdf
+deps-clean: delphes-clean mstwpdf-clean
+delphes:
+	@cd ${DELPHES_HOME}; make
+delphes-clean:
+	@cd ${DELPHES_HOME}; make clean
+mstwpdf:
+	@cd ${MSTWPDF_HOME}; make
+mstwpdf-clean:
+	@cd ${MSTWPDF_HOME}; make clean

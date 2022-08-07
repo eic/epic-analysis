@@ -1,39 +1,26 @@
 #!/bin/bash
 
-# run `source environ.sh /path/to/delphes/repo`, otherwise pass no
-# argument to use the default location
-# - it may be useful to set your own default location (hard-coded)
-# - if you are in a container, environment may already be set
-
-if [ $# -eq 1 ]; then
-  # user-specified delphes location
-  delphesDir=$1
-elif [ "$DELPHES_HOME" = "/opt/delphes" ]; then
-  # assume we are in a container, and delphes env is likely already set
-  delphesDir=$DELPHES_HOME
+### SIDIS-EIC
+if [ -z "${BASH_SOURCE[0]}" ]; then
+  export SIDIS_EIC_HOME=$(dirname $(realpath $0))
 else
-  # default delphes location (hard-coded)
-  delphesDir=${HOME}/builds/delphes
+  export SIDIS_EIC_HOME=$(dirname $(realpath ${BASH_SOURCE[0]}))
 fi
-echo "delphes repository expected at $delphesDir"
+echo "SIDIS_EIC_HOME = $SIDIS_EIC_HOME"
+export LD_LIBRARY_PATH=$SIDIS_EIC_HOME/lib:$LD_LIBRARY_PATH
 
-if [ -f "$delphesDir/DelphesEnv.sh" ]; then
-
-  # source delphes environment
-  cd $delphesDir
-  source DelphesEnv.sh
-  echo "DELPHES_HOME set to $DELPHES_HOME"
+### Delphes
+export LD_LIBRARY_PATH=$PYTHIA8/lib:$LD_LIBRARY_PATH
+export DELPHES_HOME=$SIDIS_EIC_HOME/deps/delphes
+if [ -f "$DELPHES_HOME/DelphesEnv.sh" ]; then
+  source $DELPHES_HOME/DelphesEnv.sh
   export PATH=$PATH:$DELPHES_HOME
-  echo "success!"
-  cd -
-
-  # symlink delphes external stuff (so that we can run analysis code here)
-  ln -sf $DELPHES_HOME/external ./
-
+  echo "Delphes found at $DELPHES_HOME"
 else
-  echo "ERROR: DelphesEnv.sh not found, is the repo really at ${delphesDir}?"
+  echo "WARNING: Delphes is not found at $DELPHES_HOME"
 fi
 
-export MSTWPDF_HOME=$(pwd)/mstwpdf
-echo "MSTWPDF at $MSTWPDF_HOME"
+### MSTWPDF
+export MSTWPDF_HOME=$SIDIS_EIC_HOME/deps/mstwpdf
+echo "MSTWPDF found at $MSTWPDF_HOME"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$MSTWPDF_HOME"
