@@ -27,11 +27,12 @@ LIBS += -L${MSTWPDF_HOME} -lmstwpdf
 # Fastjet Centauro
 INCCENTAURO = 0
 ifeq ($(INCCENTAURO),1)
-LIBS+= -L${DELPHES_HOME}/external/fastjet/plugins/Centauro -lCentauro
-DEPS+= -I${DELPHES_HOME}/external/fastjet/plugins/Centauro
+LIBS += -L${DELPHES_HOME}/external/fastjet/plugins/Centauro -lCentauro
+DEPS += -I${DELPHES_HOME}/external/fastjet/plugins/Centauro
 endif
 FLAGS += -DINCCENTAURO=$(INCCENTAURO)
 
-# sidis-eic target
-SIDIS_EIC = Sidis-eic
-SIDIS_EIC_OBJ := lib$(SIDIS_EIC).so
+# SIDIS-EIC
+ifndef SIDIS_EIC_HOME
+$(error "ERROR: run 'source environ.sh' before building")
+endif

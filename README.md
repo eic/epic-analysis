@@ -121,7 +121,7 @@ for more details
 ## Delphes Fast Simulation
 
 ### Delphes Wrapper
-- for convenience, the wrapper script `run_delphes.sh` is provided, which runs
+- for convenience, the wrapper script `deps/run_delphes.sh` is provided, which runs
   `delphes` on a given `hepmc` or `hepmc.gz` file, and sets the output file
   names and the appropriate configuration card
   - configuration cards are stored in the `deps/delphes_EIC/` directory,
@@ -130,7 +130,7 @@ for more details
       if you already have cloned without submodules, execute
       `git submodule update --init` to obtain them
   - environment must be set first (`source environ.sh`)
-  - run `run_delphes.sh` with no arguments for usage guide
+  - run `deps/run_delphes.sh` with no arguments for usage guide
   - in the script, you may need to change `exeDelphes` to the proper
     executable, e.g., `DelphesHepMC2` or `DelphesHepMC3`, depending
     on the format of your generator input
