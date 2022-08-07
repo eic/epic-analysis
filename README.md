@@ -34,7 +34,16 @@ upstream simulation output:
 
 # Setup and Dependencies
 
-## Option 1: Use the Singularity or Docker image
+## Upstream Dependencies
+These are common dependencies, used for the upstream simulation, and some of which
+are needed for `sidis-eic` as well. There are two options for obtaining upstream
+dependencies:
+
+### Option 1: Common EIC-shell Docker (Singularity) Container
+
+TODO: update documentation, since our common image will be deprecated soon;
+for now follow <https://eicweb.phy.anl.gov/containers/eic_container> instead
+of this "Option 1"
 
 - To minimize setup effort, and provide a consistent development environment, 
   a Singularity image is available, which contains all the dependencies
@@ -65,56 +74,37 @@ upstream simulation output:
   - once you are in the Docker container, proceed with the **Building** section below
   - note: the Singularity container is likely more user-friendly
 
-## Option 2: Setup your own environment
+### Option 2: Setup your Own Environment
 
 - The other option is to manually set up your environment, by downloading and/or
-  building all of the necessary dependencies
-- Once you have all the dependencies, proceed with the **Building** section
-  below
-
-### Dependencies
-
-- **ROOT**: prefer v6.24.02 or later
-- **Delphes**:
+  building all of the necessary dependencies, including:
+  - **ROOT**: prefer v6.24.02 or later
+  - **MinIO Client**, if you will be accessing data from S3 (see 
+      [s3tools documentation](s3tools/README.md) for details)
+- Option 1 is strongly recommended, to ensure you have the most up-to-date dependencies;
+  we will not maintain an up-to-date list of upstream dependencies here
 
 
+## Local Dependencies
+These are additional dependencies needed by `sidis-eic`; they will be built locally and
+stored in the `deps/` directory (see <deps/README.md> for more details). This section
+documents how to obtain and build local dependencies:
 
+Delphes is our only local dependency that is not mirrored in `deps/`; in other words
+you must download and build it:
+- run `deps/install_delphes.sh`; this will clone the `delphes` repository to `deps/delphes`,
+  and compile it
+- alternatively, if you already have a `delphes` build elsewhere, symlink `deps/delphes` to it
 
-
-
-# TODO: update this
-- delphes install script
-- `make delphes` and `make deps`
-- symlink `deps/delphes` if you have your own build
-
-
-
-
-
-
-
-  - the analysis is capable of reading `delphes` fast simulation output, and also
-    provides a simple wrapper for `delphes` to help keep input `hepmc` and output
-    `root` files organized
-    - it is not required to use the `delphes` wrapper, but `delphes` libraries are
-      needed for the analysis of fast simulation data
-  - first, make sure you have a build of `delphes` somewhere, preferably in a
-    separate directory
-  - set environment variables before doing anything, so this repository knows where your
-    `delphes` build is: `source environ.sh /path/to/delphes/repository`
-    - if you do not specify a path to `delphes` repository, it will use a default
-      path given in `environ.sh`; it is useful to edit this default path for your own
-      convenience
-    - it will also symlink `delphes` external code, so analysis macros
-      will not complain
-- **MinIO Client**, if you will be accessing data from S3 (see 
-  [s3tools documentation](s3tools/README.md) for details)
+All other dependencies in `deps/` are mirrors, and are already included with `sidis-eic`.
+For the ones that need building, use `make deps`; see the **Building** section below
+for more details
 
 ## Building
 
 - First make sure environment variables are set by calling `source environ.sh`
-  - If you called `container/shell.sh`, this has already been done
 - Build analysis code with `make`
+
   - It requires a `root` build as well as `delphes` (see above)
   - All classes are found in the `src/` directory
 
