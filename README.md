@@ -35,44 +35,20 @@ upstream simulation output:
 # Setup and Dependencies
 
 ## Upstream Dependencies
-These are common dependencies, used for the upstream simulation, and some of which
+These are common dependencies used for the upstream simulation, some of which
 are needed for `sidis-eic` as well. There are two options for obtaining upstream
 dependencies:
 
 ### Option 1: Common EIC-shell Docker (Singularity) Container
 
-TODO: update documentation, since our common image will be deprecated soon;
-for now follow <https://eicweb.phy.anl.gov/containers/eic_container> instead
-of this "Option 1"
+Follow [eic-container documentation](https://eicweb.phy.anl.gov/containers/eic_container)
+to obtain the EIC software image
 
-- To minimize setup effort, and provide a consistent development environment, 
-  a Singularity image is available, which contains all the dependencies
-  pre-built, as well as sample ROOT files
-  - First run `container/install.sh` to download and build the Singularity image
-    - With no arguments, a usage guide will be printed
-    - Default image file location is `container/img/`
-    - Note that the image size is about 3 GB
-    - Images are hosted on [Docker Hub](https://hub.docker.com/r/cjdilks/sidis-eic)
-      - (the Docker image is hosted, but Singularity can pull it too)
-  - Then run `container/shell.sh` to start a shell in the Singularity container
-    - This will automatically call `source environ.sh` upon shell startup, which
-      sets environment variables
-  - Proceed with the **Building** section below (just type `make`)
+- The `eic-shell` script is used to start a container shell
+- This image contains all the dependencies needed for EIC simulations
+- All documentation below assumes you are running in `eic-shell`
 
-- **Alternatively** if you prefer to use Docker:
-  - obtain the image using `docker pull cjdilks/sidis-eic:latest`
-  - start the container using a standard `docker run` command; you can also use
-    the script `container/docker-shell.sh`, if you find it useful
-    - the Docker image was built assuming a default user ID (UID) of 1000; if your
-      UID is different (check with the `id` command), your user name in the container
-      may be `I have no name!`, but you should still have read/write permission for
-      the present working directory; we have not tested working in this condition,
-      due to our preference for Singularity, however suggestions how to improve
-      are welcome
-    - Docker files are also provided, you can follow `container/dev/README.md`
-      for instructions how to build your own image
-  - once you are in the Docker container, proceed with the **Building** section below
-  - note: the Singularity container is likely more user-friendly
+**NOTE**: our old image, that was obtained by scripts in `container/`, is deprecated.
 
 ### Option 2: Setup your Own Environment
 
@@ -86,27 +62,35 @@ of this "Option 1"
 
 
 ## Local Dependencies
-These are additional dependencies needed by `sidis-eic`; they will be built locally and
-stored in the `deps/` directory (see <deps/README.md> for more details). This section
-documents how to obtain and build local dependencies:
+These are additional dependencies needed by `sidis-eic`; they will be built
+locally and stored in the `deps/` directory (see [deps/README.md](deps/README.md)
+for more details). This section documents how to obtain and build local dependencies:
 
-Delphes is our only local dependency that is not mirrored in `deps/`; in other words
-you must download and build it:
-- run `deps/install_delphes.sh`; this will clone the `delphes` repository to `deps/delphes`,
-  and compile it
-- alternatively, if you already have a `delphes` build elsewhere, symlink `deps/delphes` to it
-
-All other dependencies in `deps/` are mirrors, and are already included with `sidis-eic`.
-For the ones that need building, use `make deps`; see the **Building** section below
-for more details
+- [Delphes](https://github.com/delphes/delphes) is the only local dependency that
+  is not mirrored in `deps/`; in other words you must download and build it:
+  - run `deps/install_delphes.sh`; this will clone the `delphes` repository to `deps/delphes`,
+    and compile it
+  - alternatively, if you already have a `delphes` build elsewhere, symlink `deps/delphes` to it
+- All other dependencies in `deps/` are mirrors, and are already included with `sidis-eic`.
+  For the ones that need building, see the **Building** section below.
 
 ## Building
 
 - First make sure environment variables are set by calling `source environ.sh`
-- Build analysis code with `make`
+- Run `make` to build everything: all dependencies in `deps/`, followed by the
+  `sidis-eic` library from the source code in `src/`
+- Additional `make` targets are available (see `Makefile`), for more control during
+  development:
 
-  - It requires a `root` build as well as `delphes` (see above)
-  - All classes are found in the `src/` directory
+```bash
+make                     # builds dependencies, then `sidis-eic` (equivalent to `make all`)
+make deps                # builds only dependencies
+make clean               # clean `sidis-eic` (but not dependencies)
+make deps-clean          # clean dependencies
+make all-clean           # clean `sidis-eic` and dependencies
+make <dependency>        # build a particular `<dependency>`
+make <dependency>-clean  # clean a particular `<dependency>`
+```
 
 ## Quick Start
 
