@@ -1,9 +1,5 @@
 #include "Hist4D.h"
 
-#include <TFrame.h>
-
-#include <stdexcept>
-
 ClassImp(Hist4D);
 
 struct DifferentNumberOfBins : public std::runtime_error {

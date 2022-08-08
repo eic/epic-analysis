@@ -1,9 +1,3 @@
-#include <TTreeReader.h>
-#include <TTreeReaderValue.h>
-#include <TTreeReaderArray.h>
-#include <TLorentzVector.h>
-#include <TMath.h>
-
 #include "AnalysisAthena.h"
 
 using std::map;

@@ -3,6 +3,11 @@
 
 #include <vector>
 #include <fstream>
+#include <TTreeReader.h>
+#include <TTreeReaderValue.h>
+#include <TTreeReaderArray.h>
+#include <TLorentzVector.h>
+#include <TMath.h>
 
 #include "Analysis.h"
 

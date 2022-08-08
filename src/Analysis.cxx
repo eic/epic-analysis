@@ -1,9 +1,5 @@
 #include "Analysis.h"
 
-#include <fstream>
-#include <string>
-#include <sstream>
-
 ClassImp(Analysis)
 
 using std::map;
