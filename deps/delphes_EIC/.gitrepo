@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/eic/delphes_EIC.git
+	branch = master
+	commit = f9efe9d3ae3195e3058cb49019f117b28b7c2c9c
+	parent = 20d5986bc08f608de50fc3979627b35ed9f3cd3a
+	method = merge
+	cmdver = 0.4.3
