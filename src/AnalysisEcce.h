@@ -1,13 +1,9 @@
 #ifndef AnalysisEcce_
 #define AnalysisEcce_
 
-#include <vector>
-#include <fstream>
-#include <TTreeReader.h>
-#include <TTreeReaderValue.h>
-#include <TTreeReaderArray.h>
-#include <TLorentzVector.h>
-#include <TMath.h>
+#include "TTreeReader.h"
+#include "TTreeReaderValue.h"
+#include "TTreeReaderArray.h"
 
 #include "Analysis.h"
 
