@@ -107,6 +107,28 @@ class DAG : public TObject
     void RemoveNode(Node *N);
     void RemoveEdge(Node *inN, Node *outN);
 
+    // associate a layer (bin scheme) with a value, set by a lambda
+    // - add the lambda to `valueMap`, iff there exists a layer for `binVarName` 
+    // - if `force` is true, always add the lambda to `valueMap` (maybe slower)
+    void SetBinSchemeValue(
+        TString binVarName,
+        std::function<Double_t()> binValueLambda,
+        Bool_t force=false
+        );
+    // similar to `SetBinSchemeValue`, but for `valueMapExternal`, for CutDefs of type `external`
+    void SetBinSchemeValueExternal(
+        TString binVarName,
+        std::function<Bool_t(Node*)> binValueLambda,
+        Bool_t force=false
+        );
+
+    // check all bins, and activate nodes for which the CutDef is satisfied
+    void CheckBins();
+
+    // check if there is at least one full `NodePath` with all `Node`s active
+    // - NOTE: must be called after `CheckBins()`
+    Bool_t IsActiveEvent() { return activeEvent; };
+
     // set all nodes to active (the default) or inactive (if active_==false)
     void ActivateAllNodes(Bool_t active_=true);
 
@@ -252,6 +274,9 @@ class DAG : public TObject
     std::map<TString,Node*> nodeMap;
     std::map<TString,BinSet*> layerMap;
     std::vector<TString> visitList;
+    std::map<TString,std::function<Double_t()>> valueMap;
+    std::map<TString,std::function<Bool_t(Node*)>> valueMapExternal;
+    Bool_t activeEvent;
 
   ClassDef(DAG,1);
 };

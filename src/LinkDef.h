@@ -29,10 +29,10 @@
 #pragma link C++ class WeightsSum+;
 
 // analysis algorithms
-#pragma link C++ class Analysis+;        //// TODO: valueMap, HistosDAG, CutDef, BinSet
-#pragma link C++ class AnalysisDelphes+; //// TODO adage dependence?
-#pragma link C++ class AnalysisAthena+;  //// TODO adage dependence?
-#pragma link C++ class AnalysisEcce+;    //// TODO adage dependence?
+#pragma link C++ class Analysis+;
+#pragma link C++ class AnalysisDelphes+;
+#pragma link C++ class AnalysisAthena+;
+#pragma link C++ class AnalysisEcce+;
 #pragma link C++ class PostProcessor+;
 
 #endif

@@ -25,6 +25,7 @@ Analysis::Analysis(
   , crossingAngle(crossingAngle_)
   , outfilePrefix(outfilePrefix_)
   , reconMethod("")
+  , finalStateID("")
 {
   // available variables for binning
   // - availableBinSchemes is a map from variable name to variable title
@@ -239,6 +240,36 @@ void Analysis::Prepare() {
   // build HistosDAG with specified binning
   HD = new HistosDAG();
   HD->Build(binSchemes);
+
+  // tell HD what values to associate for each BinScheme name
+  // - these are the values that will be used for CutDef checks
+  // - the lambda must return a Double_t
+  /* DIS */
+  HD->SetBinSchemeValue("x",     [this](){ return kin->x;                       });
+  HD->SetBinSchemeValue("q2",    [this](){ return kin->Q2;                      });
+  HD->SetBinSchemeValue("w",     [this](){ return kin->W;                       });
+  HD->SetBinSchemeValue("y",     [this](){ return kin->y;                       });
+  /* single hadron */
+  HD->SetBinSchemeValue("p",     [this](){ return kin->pLab;                    });
+  HD->SetBinSchemeValue("eta",   [this](){ return kin->etaLab;                  });
+  HD->SetBinSchemeValue("pt",    [this](){ return kin->pT;                      });
+  HD->SetBinSchemeValue("ptLab", [this](){ return kin->pTlab;                   });
+  HD->SetBinSchemeValue("z",     [this](){ return kin->z;                       });
+  HD->SetBinSchemeValue("qT",    [this](){ return kin->qT;                      });
+  HD->SetBinSchemeValue("qTq",   [this](){ return kin->qT/TMath::Sqrt(kin->Q2); });
+  HD->SetBinSchemeValue("mX",    [this](){ return kin->mX;                      });
+  HD->SetBinSchemeValue("xF",    [this](){ return kin->xF;                      });
+  HD->SetBinSchemeValue("phiH",  [this](){ return kin->phiH;                    });
+  HD->SetBinSchemeValue("phiS",  [this](){ return kin->phiS;                    });
+  HD->SetBinSchemeValue("tSpin", [this](){ return (Double_t)kin->tSpin;         });
+  HD->SetBinSchemeValue("lSpin", [this](){ return (Double_t)kin->lSpin;         });
+  /* jets */
+  HD->SetBinSchemeValue("ptJet", [this](){ return kin->pTjet;                   });
+  HD->SetBinSchemeValue("zJet",  [this](){ return kin->zjet;                    });
+
+  // some bin schemes values are checked here, instead of by CutDef checks ("External" cut type)
+  // - the lambda must return a boolean
+  HD->SetBinSchemeValueExternal("finalState", [this](Node *N){ return N->GetCut()->GetCutID() == finalStateID; });
 
 
   // DEFINE HISTOGRAMS ------------------------------------
@@ -530,56 +561,6 @@ void Analysis::AddFinalState(TString finalStateN) {
 };
 
 
-// access HistosDAG
-//------------------------------------
-HistosDAG *Analysis::GetHistosDAG() { return HD; };
-
-
-// lambda to check which bins an observable is in, during DAG breadth
-// traversal; it requires `finalStateID`, `valueMap`, and will
-// activate/deactivate bin nodes accoding to values in `valuMap`
-//--------------------------------------------------------------------
-std::function<void(Node*)> Analysis::CheckBin() {
-  return [this](Node *N){
-    if(N->GetNodeType()==NT::bin) {
-      Bool_t active;
-      Double_t val;
-      if(N->GetVarName()=="finalState") active = (N->GetCut()->GetCutID()==finalStateID);
-      else {
-        try {
-          // get value associated to this variable, and check cut
-          val = valueMap.at(N->GetVarName());
-          active = N->GetCut()->CheckCut(val);
-        } catch(const std::out_of_range &ex) {
-          /* if this variable is not found in `valueMap`, then just activate
-           * the node; this can happen if you are looking at jets AND tracks
-           * final states, and you defined a binning scheme only valid for
-           * tracks, but not for jets, e.g., `phiS`; if the current finalState
-           * you are checking is a jet, we don't need to check phiS, so just
-           * activate the node and ignore that cut
-           */
-          active = true;
-        };
-      };
-      N->SetActiveState(active);
-    };
-  };
-};
-
-// payload operator to check if the event is 'active', i.e., there is at least
-// one full NodePath where all bin Nodes are active; it will set `activeEvent`
-//--------------------------------------------------------------------
-std::function<void(NodePath*)> Analysis::CheckActive() {
-  return [this](NodePath *P){
-    if(!activeEvent) { // only check if we don't yet know
-      for(Node *N : P->GetBinNodes()) {
-        if(N->IsActive()==false) return;
-      };
-      activeEvent = true;
-    };
-  };
-};
-
 // FillHistos methods: check bins and fill associated histograms
 // - checks which bins the track/jet/etc. falls in
 // - fills the histograms in the associated Histos objects
@@ -587,37 +568,9 @@ std::function<void(NodePath*)> Analysis::CheckActive() {
 // tracks (single particles)
 void Analysis::FillHistosTracks() {
 
-  // add kinematic values to `valueMap`
-  valueMap.clear();
-  /* DIS */
-  valueMap.insert(std::pair<TString,Double_t>( "x", kin->x ));
-  valueMap.insert(std::pair<TString,Double_t>( "q2", kin->Q2 ));
-  valueMap.insert(std::pair<TString,Double_t>( "w", kin->W ));
-  valueMap.insert(std::pair<TString,Double_t>( "y", kin->y ));
-  /* single hadron */
-  valueMap.insert(std::pair<TString,Double_t>( "p", kin->pLab ));
-  valueMap.insert(std::pair<TString,Double_t>( "eta", kin->etaLab ));
-  valueMap.insert(std::pair<TString,Double_t>( "pt", kin->pT ));
-  valueMap.insert(std::pair<TString,Double_t>( "ptLab", kin->pTlab ));
-  valueMap.insert(std::pair<TString,Double_t>( "z", kin->z ));
-  valueMap.insert(std::pair<TString,Double_t>( "qT", kin->qT ));
-  valueMap.insert(std::pair<TString,Double_t>( "qTq", kin->qT/TMath::Sqrt(kin->Q2) ));
-  valueMap.insert(std::pair<TString,Double_t>( "mX", kin->mX ));
-  valueMap.insert(std::pair<TString,Double_t>( "xF", kin->xF ));
-  valueMap.insert(std::pair<TString,Double_t>( "phiH", kin->phiH ));
-  valueMap.insert(std::pair<TString,Double_t>( "phiS", kin->phiS ));
-  valueMap.insert(std::pair<TString,Double_t>( "tSpin", (Double_t)kin->tSpin ));
-  valueMap.insert(std::pair<TString,Double_t>( "lSpin", (Double_t)kin->lSpin ));
+  // check which bins to fill
+  HD->CheckBins();
 
-  // check bins
-  // - activates HistosDAG bin nodes which contain this track
-  HD->TraverseBreadth(CheckBin());
-  // - set `activeEvent` if there is at least one multidimensional bin to fill
-  activeEvent = false;
-  HD->Payload(CheckActive());
-  HD->ExecuteOps(true);
-  if(!activeEvent) return;
-  
   // fill histograms, for activated bins only
   HD->Payload([this](Histos *H){
     // Full phase space.
@@ -688,27 +641,12 @@ void Analysis::FillHistosTracks() {
   HD->ExecuteOps(true);
 };
 
+
 // jets
 void Analysis::FillHistosJets() {
 
-  // add kinematic values to `valueMap`
-  valueMap.clear();
-  /* DIS */
-  valueMap.insert(std::pair<TString,Double_t>(  "x",      kin->x      ));
-  valueMap.insert(std::pair<TString,Double_t>(  "q2",     kin->Q2     ));
-  valueMap.insert(std::pair<TString,Double_t>(  "y",      kin->y      ));
-  /* jets */
-  valueMap.insert(std::pair<TString,Double_t>(  "ptJet",  kin->pTjet  ));
-  valueMap.insert(std::pair<TString,Double_t>(  "zJet",   kin->zjet   ));
-
-  // check bins
-  // - activates HistosDAG bin nodes which contain this track
-  HD->TraverseBreadth(CheckBin());
-  // - set `activeEvent` if there is at least one multidimensional bin to fill
-  activeEvent = false;
-  HD->Payload(CheckActive());
-  HD->ExecuteOps(true);
-  if(!activeEvent) return;
+  // check which bins to fill
+  HD->CheckBins();
 
   // fill histograms, for activated bins only
   HD->Payload([this](Histos *H){
@@ -730,8 +668,6 @@ void Analysis::FillHistosJets() {
   //   with this jet
   HD->ExecuteOps(true);
 };
-
-
 
 
 // destructor

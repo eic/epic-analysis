@@ -18,7 +18,7 @@ class CutDef : public TObject
 {
   public:
     CutDef();
-    // primary constructor (see CutDef.cpp)
+    // primary constructor (see CutDef.cxx)
     CutDef(
         TString varName_, TString varTitle_, TString cutType_,
         Double_t arg1=-1, Double_t arg2=-1
@@ -41,6 +41,7 @@ class CutDef : public TObject
     Double_t GetMin() { return min; };
     Double_t GetMax() { return max; };
     TString GetCutID() { return cutID; };
+    Bool_t IsExternal() { return cutType.CompareTo("External",TString::kIgnoreCase)==0; };
 
 
   private:

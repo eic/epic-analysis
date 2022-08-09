@@ -7,11 +7,6 @@
 
 #include "Analysis.h"
 
-class Histos;
-class SimpleTree;
-class Kinematics;
-class BinSet;
-
 class ClustersEE
 {
   public:

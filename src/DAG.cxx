@@ -9,6 +9,7 @@ using std::endl;
 // constructor
 DAG::DAG()
   : debug(false)
+  , activeEvent(true)
 {
   InitializeDAG();
 };
@@ -18,6 +19,8 @@ DAG::DAG()
 void DAG::InitializeDAG() {
   nodeMap.clear();
   layerMap.clear();
+  valueMap.clear();
+  valueMapExternal.clear();
   AddEdge(new Node(NT::root,"root_0"),new Node(NT::leaf,"leaf_0"));
 };
 
@@ -218,6 +221,71 @@ void DAG::ExecuteOps(Bool_t activeNodesOnly, Node *N, NodePath P) {
 void DAG::ClearOps() {
   for(auto kv : nodeMap) kv.second->UnstageOps();
 };
+
+
+// associate a layer (bin scheme) with a value, set by a lambda
+// - add the lambda to `valueMap`, iff there exists a layer for `binVarName` 
+// - if `force` is true, always add the lambda to `valueMap` (maybe slower)
+void DAG::SetBinSchemeValue(
+    TString binVarName,
+    std::function<Double_t()> binValueLambda,
+    Bool_t force
+    )
+{
+  if( force ? true : layerMap.find(binVarName) != layerMap.end() )
+    valueMap.insert({binVarName,binValueLambda});
+};
+// similar to `SetBinSchemeValue`, but for `valueMapExternal`, for CutDefs of type `external`
+void DAG::SetBinSchemeValueExternal(
+    TString binVarName,
+    std::function<Bool_t(Node*)> binValueLambda,
+    Bool_t force
+    )
+{
+  if( force ? true : layerMap.find(binVarName) != layerMap.end() )
+    valueMapExternal.insert({binVarName,binValueLambda});
+};
+
+
+// check all bins, and activate nodes for which the CutDef is satisfied
+void DAG::CheckBins() {
+  // activate bin nodes for which the CutDef is satisfied
+  auto CheckBin = [this] (Node *N) {
+    if(N->GetNodeType()==NT::bin) {
+      Bool_t active;
+      Double_t val;
+      // if it's an external cut, check the boolean returned from the `valueMapExternal` lambda
+      if(N->GetCut()->IsExternal()) {
+        try {
+          active = valueMapExternal.at(N->GetVarName())(N);
+        } catch(const std::out_of_range &ex) {
+          cerr << "\nERROR: variable \"" << N->GetVarName() << "\" not found in DAG::valueMapExternal" << endl;
+          active = false;
+        };
+      }
+      // otherwise, check the value returned from the `valueMap` lambda using `CutDef::CheckCut`
+      else {
+        try {
+          // get value associated to this variable, and check cut
+          val = valueMap.at(N->GetVarName())();
+          active = N->GetCut()->CheckCut(val);
+        } catch(const std::out_of_range &ex) {
+          cerr << "\nERROR: variable \"" << N->GetVarName() << "\" not found in DAG::valueMap" << endl;
+          active = false;
+        };
+      };
+      N->SetActiveState(active);
+    };
+  };
+  TraverseBreadth(CheckBin);
+  // set `activeEvent` if there is at least one multidimensional bin to fill
+  // - calls `ExecuteOps` with `activeNodesOnly=true`; the `LeafOp` will only
+  //   execute if the depth-first traversal reaches the leaf node, which
+  //   can only happen if there is at least one NodePath with all of its Nodes active
+  activeEvent = false;
+  LeafOp( [this](){ activeEvent = true; } );
+  ExecuteOps(true);
+}
 
 
 // set all nodes to active (the default) or inactive (if active_==false)
