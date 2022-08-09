@@ -35,6 +35,7 @@ jobs:
           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "ADAGE_HOME=${ADAGE_HOME}" >> $GITHUB_ENV
       - name: build-deps
         run: make deps
       - name: build-sidis-eic
@@ -47,13 +48,16 @@ jobs:
           path: |
             # sidis-eic
             lib
-            src/Sidis-eicDict.cxx
-            # mstwpdf
-            deps/mstwpdf/*.o
-            deps/mstwpdf/*.so
+            src/*Dict.cxx
             # delphes
             deps/delphes
             external
+            # mstwpdf
+            deps/mstwpdf/*.o
+            deps/mstwpdf/*.so
+            # adage
+            deps/adage/lib
+            deps/adage/src/*Dict.cxx
 
 
 # DELPHES ---------------------------------------------------------------------------
@@ -83,6 +87,7 @@ jobs:
           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "ADAGE_HOME=${ADAGE_HOME}" >> $GITHUB_ENV
       - name: download_hepmc_files
         env:
           S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
@@ -135,6 +140,7 @@ jobs:
           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "ADAGE_HOME=${ADAGE_HOME}" >> $GITHUB_ENV
       - name: download_fullsim
         env:
           S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
@@ -192,6 +198,7 @@ jobs:
           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "ADAGE_HOME=${ADAGE_HOME}" >> $GITHUB_ENV
       - name: fastsim_get_delphes_files
         uses: actions/download-artifact@v2
         with:
@@ -250,6 +257,7 @@ jobs:
           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "ADAGE_HOME=${ADAGE_HOME}" >> $GITHUB_ENV
       - name: get_fullsim_artifacts
         uses: actions/download-artifact@v2
         with:
@@ -347,6 +355,7 @@ jobs:
           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "ADAGE_HOME=${ADAGE_HOME}" >> $GITHUB_ENV
       - name: get_analysis_artifacts
         uses: actions/download-artifact@v2
         with:
@@ -425,6 +434,7 @@ jobs:
           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
+          echo "ADAGE_HOME=${ADAGE_HOME}" >> $GITHUB_ENV
       - name: get_fastsim_analysis_artifacts
         uses: actions/download-artifact@v2
         with:

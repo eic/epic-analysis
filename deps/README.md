@@ -13,6 +13,8 @@ while the others must be downloaded separately.
 - `delphes_EIC`, from [eic/delphes_EIC](https://github.com/eic/delphes_EIC/tree/master):
   Delphes configuration cards for the EIC
 - `mstwpdf`, interpolation for MSTW PDFs, not a subrepo
+- `adage`, analysis framework for multi-dimensional binning, from
+  [c-dilks/adage](https://github.com/c-dilks/adage)
 
 
 Subrepo Maintenance
