@@ -10,7 +10,7 @@ Nodes are implemented by the `Node` class, and the DAG is implemented by the `DA
 
 The figure below shows a DAG for a 4-dimensional binning scheme in (x,y,Q,z). The small blue circles are control nodes, and the large green rectangles are bin nodes. There is a unique control node at the top, called the root node, and a single control node at the bottom, called a leaf node. Each layer of bin nodes corresponds to one variable, and thus to one dimension. Each layer is fully connected to its neighboring layers; a full connection between two layers is called a "full patch".
 
-![fig1](img/dag1.png)
+![fig1](doc/img/dag1.png)
 
 There are two DAG traversal algorithms implemented:
 - Breadth-first, node repetition disallowed: this scans through the nodes as if you are reading the DAG like text, from top to bottom, left to right; each node is visited exactly once. This traversal is useful for overall operations on the DAG nodes and connections.
@@ -49,7 +49,7 @@ The leaf node is a control node, which means it can hold a lambda expression. Yo
 
 Control nodes are not limited to being root or leaf nodes, in fact they can be inserted between any two layers. The figure below shows an example of a control node inserted between the y and Q layers (note the layers have also been rearranged). The control node is said to "control" the Q layer, and can be called the "Q control node"; it also controls the "subloop" over (Q,x), since the x layer follows the Q layer. 
 
-![fig2](img/dag2.png)
+![fig2](doc/img/dag2.png)
 
 Two lambda expressions can be staged on each control node:
 - Inbound lambda: executes when the DAG depth-first traversal descends through the control node; this will execute before the subloop begins
@@ -109,7 +109,7 @@ together subloops. The following figure shows two payloads in the (Q,x) subloop,
 nodes. Notice the DAG traversal will go through the left (Q,x) subloop first, then immediately afterward go
 through the right (Q,x) subloop.
 
-![fig3](img/dag3.png)
+![fig3](doc/img/dag3.png)
 
 This figure corresponds to the following pseudocode:
 
@@ -206,5 +206,5 @@ Technical details: the `ConditionalControl(bool B)` function will remove all out
 
 ## Adage Syntax
 
-See [syntax reference documentation](syntax.md) for a usage guide of the Adage functions, e.g., `Subloop`, `MultiPayload`, etc.
+See [syntax reference documentation](doc/syntax.md) for a usage guide of the Adage functions, e.g., `Subloop`, `MultiPayload`, etc.
 

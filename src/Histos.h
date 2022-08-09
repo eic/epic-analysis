@@ -20,9 +20,11 @@
 #include "TH3.h"
 #include "TMath.h"
 
+// adage
+#include "adage/BinSet.h"
+#include "adage/CutDef.h"
+
 // sidis-eic
-#include "BinSet.h"
-#include "CutDef.h"
 #include "Hist4D.h"
 
 // container for histogram settings

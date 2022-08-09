@@ -2,7 +2,7 @@
 #ifndef HistosDAG_
 #define HistosDAG_
 
-#include "Adage.h"
+#include "adage/Adage.h"
 #include "Histos.h"
 
 class HistosDAG : public Adage<Histos>

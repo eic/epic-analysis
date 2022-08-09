@@ -9,7 +9,7 @@ fi
 echo "SIDIS_EIC_HOME = $SIDIS_EIC_HOME"
 export LD_LIBRARY_PATH=$SIDIS_EIC_HOME/lib:$LD_LIBRARY_PATH
 
-### Delphes
+### DELPHES
 export LD_LIBRARY_PATH=$PYTHIA8/lib:$LD_LIBRARY_PATH
 export DELPHES_HOME=$SIDIS_EIC_HOME/deps/delphes
 if [ -f "$DELPHES_HOME/DelphesEnv.sh" ]; then
@@ -24,3 +24,8 @@ fi
 export MSTWPDF_HOME=$SIDIS_EIC_HOME/deps/mstwpdf
 echo "MSTWPDF found at $MSTWPDF_HOME"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$MSTWPDF_HOME"
+
+### ADAGE
+export ADAGE_HOME=$SIDIS_EIC_HOME/deps/adage
+echo "ADAGE found at $ADAGE_HOME"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$ADAGE_HOME/lib"

@@ -20,11 +20,13 @@
 #include "TFile.h"
 #include "TRegexp.h"
 
+// adage
+#include "adage/BinSet.h"
+
 // sidis-eic
 #include "Histos.h"
 #include "HistosDAG.h"
 #include "Kinematics.h"
-#include "BinSet.h"
 #include "SimpleTree.h"
 #include "Weights.h"
 

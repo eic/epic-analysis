@@ -57,7 +57,7 @@ These functions allow for an alternative specification of subloops. Again, `O` i
 
 ### Conditional Controls
 
-It can be useful to add conditional controls to subloop control nodes, to allow or disallow the iteration through the subloop. See [Adage documentation](adage.md) for more information.
+It can be useful to add conditional controls to subloop control nodes, to allow or disallow the iteration through the subloop. See [Adage documentation](../README.md) for more information.
 
 
 ## Multi-Payloads

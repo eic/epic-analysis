@@ -15,11 +15,13 @@
 #include "TLegend.h"
 #include "TProfile.h"
 
+// adage
+#include "adage/CutDef.h"
+#include "adage/BinSet.h"
+
 // sidis-eic
 #include "Histos.h"
 #include "Kinematics.h"
-#include "CutDef.h"
-#include "BinSet.h"
 #include "HistosDAG.h"
 
 class PostProcessor : public TNamed
