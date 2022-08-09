@@ -194,7 +194,7 @@ void Adage<PL>::BuildFromFile(TFile *rootFile) {
       };
       // append to `payloadHash`
       if(debug) std::cout << "-> PATH: " << P.PathString() << std::endl;
-      payloadHash.insert(std::pair<std::set<Node*>,PL*>(P.GetBinNodes(),(PL*)key->ReadObj()));
+      payloadHash.insert({P.GetBinNodes(),(PL*)key->ReadObj()});
     };
   };
 };
@@ -223,7 +223,7 @@ TString Adage<PL>::CreatePayloadTitle(TString titlePrefix, NodePath *P) {
 // add payload object to `payloadHash`, which associates a NodePath to that object
 template <class PL>
 void Adage<PL>::InsertPayloadData(NodePath *P, PL *PLptr) {
-  payloadHash.insert(std::pair<std::set<Node*>,PL*>(P->GetBinNodes(),PLptr));
+  payloadHash.insert({P->GetBinNodes(),PLptr});
 };
 
 // return payload object associated with the given NodePath

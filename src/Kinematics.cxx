@@ -656,7 +656,7 @@ void Kinematics::GetJets(
         this->TransformToHeadOnFrame(partp4,partp4);
         particlesTrue.push_back(fastjet::PseudoJet(partp4.Px(),partp4.Py(),partp4.Pz(),partp4.E()));
 
-        jetConstituents.insert(std::pair<double,int>(eflowTrackp4.Px(), eflowTrack->PID) );
+        jetConstituents.insert({eflowTrackp4.Px(), eflowTrack->PID});
       }
     }
   }
@@ -755,7 +755,7 @@ void Kinematics::GetBreitFrameJets(
         partp4.Boost(breitBoostTrue);
         particlesTrue.push_back(fastjet::PseudoJet(partp4.Px(),partp4.Py(),partp4.Pz(),partp4.E()));
 
-        jetConstituents.insert(std::pair<double,int>(eflowTrackp4.Px(), eflowTrack->PID) );
+        jetConstituents.insert({eflowTrackp4.Px(), eflowTrack->PID});
 
       }
     }

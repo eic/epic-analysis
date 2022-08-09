@@ -32,58 +32,58 @@ Analysis::Analysis(
   // - try to avoid using underscores in the variable name (they are okay in the title);
   //   convention is camel case, starting lowercase 
   /* DIS */
-  availableBinSchemes.insert(std::pair<TString,TString>("x","x"));
-  availableBinSchemes.insert(std::pair<TString,TString>("q2","Q^{2}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("w","W"));
-  availableBinSchemes.insert(std::pair<TString,TString>("y","y"));
+  availableBinSchemes.insert({ "x",     "x"           });
+  availableBinSchemes.insert({ "q2",    "Q^{2}"       });
+  availableBinSchemes.insert({ "w",     "W"           });
+  availableBinSchemes.insert({ "y",     "y"           });
   /* single hadron */
-  availableBinSchemes.insert(std::pair<TString,TString>("p","p"));
-  availableBinSchemes.insert(std::pair<TString,TString>("eta","#eta"));
-  availableBinSchemes.insert(std::pair<TString,TString>("pt","p_{T}")); // transverse to q, in ion rest frame
-  availableBinSchemes.insert(std::pair<TString,TString>("ptLab","p_{T}^{lab}")); // transverse to xy plane, in lab frame
-  availableBinSchemes.insert(std::pair<TString,TString>("z","z"));
-  availableBinSchemes.insert(std::pair<TString,TString>("qT","q_{T}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("qTq","q_{T}/Q"));
-  availableBinSchemes.insert(std::pair<TString,TString>("mX","M_{X}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("xF","x_{F}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("phiH","#phi_{h}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("phiS","#phi_{S}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("tSpin","spin"));
-  availableBinSchemes.insert(std::pair<TString,TString>("lSpin","spinL"));
+  availableBinSchemes.insert({ "p",     "p"           });
+  availableBinSchemes.insert({ "eta",   "#eta"        });
+  availableBinSchemes.insert({ "pt",    "p_{T}"       }); // transverse to q, in ion rest frame
+  availableBinSchemes.insert({ "ptLab", "p_{T}^{lab}" }); // transverse to xy plane, in lab frame
+  availableBinSchemes.insert({ "z",     "z"           });
+  availableBinSchemes.insert({ "qT",    "q_{T}"       });
+  availableBinSchemes.insert({ "qTq",   "q_{T}/Q"     });
+  availableBinSchemes.insert({ "mX",    "M_{X}"       });
+  availableBinSchemes.insert({ "xF",    "x_{F}"       });
+  availableBinSchemes.insert({ "phiH",  "#phi_{h}"    });
+  availableBinSchemes.insert({ "phiS",  "#phi_{S}"    });
+  availableBinSchemes.insert({ "tSpin", "spin"        });
+  availableBinSchemes.insert({ "lSpin", "spinL"       });
   /* jets */
-  availableBinSchemes.insert(std::pair<TString,TString>("ptJet", "jet p_{T}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("zJet", "jet z"));
+  availableBinSchemes.insert({ "ptJet", "jet p_{T}"   });
+  availableBinSchemes.insert({ "zJet",  "jet z"       });
 
 
   // available final states
   // - specify which final states you want to include using `AddFinalState(TString name)`
   // - if you specify none, default final state(s) will be chosen for you
-  availableBinSchemes.insert(std::pair<TString,TString>("finalState","finalState"));
+  availableBinSchemes.insert({"finalState","finalState"});
   AddBinScheme("finalState");
   // - finalState name (ID) -> title
-  finalStateToTitle.insert(std::pair<TString,TString>("pipTrack","#pi^{+} tracks"));
-  finalStateToTitle.insert(std::pair<TString,TString>("pimTrack","#pi^{-} tracks"));
-  finalStateToTitle.insert(std::pair<TString,TString>("KpTrack","K^{+} tracks"));
-  finalStateToTitle.insert(std::pair<TString,TString>("KmTrack","K^{-} tracks"));
-  finalStateToTitle.insert(std::pair<TString,TString>("pTrack","p^{+} tracks"));
-  finalStateToTitle.insert(std::pair<TString,TString>("jet","jets"));
+  finalStateToTitle.insert({ "pipTrack", "#pi^{+} tracks" });
+  finalStateToTitle.insert({ "pimTrack", "#pi^{-} tracks" });
+  finalStateToTitle.insert({ "KpTrack",  "K^{+} tracks"   });
+  finalStateToTitle.insert({ "KmTrack",  "K^{-} tracks"   });
+  finalStateToTitle.insert({ "pTrack",   "p^{+} tracks"   });
+  finalStateToTitle.insert({ "jet",      "jets"           });
   // - PID -> finalState ID
-  PIDtoFinalState.insert(std::pair<int, TString>( 211,"pipTrack"));
-  PIDtoFinalState.insert(std::pair<int, TString>(-211,"pimTrack"));
-  PIDtoFinalState.insert(std::pair<int, TString>( 321,"KpTrack"));
-  PIDtoFinalState.insert(std::pair<int, TString>(-321,"KmTrack"));
-  PIDtoFinalState.insert(std::pair<int, TString>(2212,"pTrack"));
+  PIDtoFinalState.insert({  211,  "pipTrack" });
+  PIDtoFinalState.insert({ -211,  "pimTrack" });
+  PIDtoFinalState.insert({  321,  "KpTrack"  });
+  PIDtoFinalState.insert({ -321,  "KmTrack"  });
+  PIDtoFinalState.insert({  2212, "pTrack"   });
 
 
   // kinematics reconstruction methods
   // - choose one of these methods using `SetReconMethod(TString name)`
   // - if you specify none, a default method will be chosen
-  reconMethodToTitle.insert(std::pair<TString,TString>("Ele","Electron method"));
-  reconMethodToTitle.insert(std::pair<TString,TString>("DA","Double Angle method"));
-  reconMethodToTitle.insert(std::pair<TString,TString>("JB","Jacquet-Blondel method"));
-  reconMethodToTitle.insert(std::pair<TString,TString>("Mixed","Mixed method"));
-  reconMethodToTitle.insert(std::pair<TString,TString>("Sigma","Sigma method"));
-  reconMethodToTitle.insert(std::pair<TString,TString>("eSigma","eSigma method"));
+  reconMethodToTitle.insert({ "Ele",    "Electron method"        });
+  reconMethodToTitle.insert({ "DA",     "Double Angle method"    });
+  reconMethodToTitle.insert({ "JB",     "Jacquet-Blondel method" });
+  reconMethodToTitle.insert({ "Mixed",  "Mixed method"           });
+  reconMethodToTitle.insert({ "Sigma",  "Sigma method"           });
+  reconMethodToTitle.insert({ "eSigma", "eSigma method"          });
 
   // common settings defaults
   // - these settings can be set at the macro level
@@ -541,7 +541,7 @@ void Analysis::AddBinScheme(TString varname) {
   };
   if(binSchemes.find(varname)==binSchemes.end()) { // (duplicate prevention)
     BinSet *B = new BinSet(varname,vartitle);
-    binSchemes.insert(std::pair<TString,BinSet*>(varname,B));
+    binSchemes.insert({varname,B});
   };
 };
 

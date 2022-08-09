@@ -745,7 +745,7 @@ void PostProcessor::DrawRatios(
         summaryCanv->SetLogx(HH[num]->GetHistConfig(varName)->logx);
         summaryCanv->SetBottomMargin(0.15);
         summaryCanv->SetLeftMargin(0.15);
-        summaryCanvMap.insert(std::pair<TString,TCanvas*>(varName,summaryCanv));
+        summaryCanvMap.insert({varName,summaryCanv});
         ratioSummary->Draw();
       } else {
         kv->second->cd();

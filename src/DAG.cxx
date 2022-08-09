@@ -66,7 +66,7 @@ void DAG::AddNode(Node *N, Bool_t silence) {
       cerr << "WARNING: tried to add duplicate node " << id_ << " to DAG" << endl;
     return;
   } else {
-    nodeMap.insert(std::pair<TString,Node*>(id_,N));
+    nodeMap.insert({id_,N});
   };
 };
 
@@ -90,7 +90,7 @@ void DAG::ModifyNode(Node *N, TString newName, Int_t newType) {
   nodeMap.erase(N->GetID());
   N->SetID(newName);
   if(newType>=0) N->SetNodeType(newType);
-  nodeMap.insert(std::pair<TString,Node*>(newName,N));
+  nodeMap.insert({newName,N});
   if(debug) cout << " to " << N->GetID() << endl;
 };
 
@@ -121,7 +121,7 @@ void DAG::AddLayer(BinSet *BS) {
     binNum++;
   };
   AddLayer(nodes);
-  layerMap.insert(std::pair<TString,BinSet*>(BS->GetVarName(),new BinSet(*BS)));
+  layerMap.insert({BS->GetVarName(),new BinSet(*BS)});
 };
 // - add layer of nodes
 void DAG::AddLayer(std::vector<Node*> nodes) {
