@@ -29,13 +29,13 @@ jobs:
           steps:
             - name: "one"
               run: |
-              echo "[CI] install delphes"
-              deps/install_delphes.sh
+                echo "[CI] install delphes"
+                deps/install_delphes.sh
             - name: "two"
               run: |
-              echo "[CI] build sidis-eic"
-              source environ.sh
-              make
+                echo "[CI] build sidis-eic"
+                source environ.sh
+                make
           # run: |
           #   echo "[CI] install delphes"
           #   deps/install_delphes.sh
