@@ -27,10 +27,12 @@ jobs:
         with:
           platform-release: "jug_xl:nightly"
           steps:
-            - run: |
+            - name: "one"
+              run: |
               echo "[CI] install delphes"
               deps/install_delphes.sh
-            - run: |
+            - name: "two"
+              run: |
               echo "[CI] build sidis-eic"
               source environ.sh
               make
