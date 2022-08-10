@@ -13,7 +13,7 @@ export LD_LIBRARY_PATH=$SIDIS_EIC_HOME/lib:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=$PYTHIA8/lib:$LD_LIBRARY_PATH
 export DELPHES_HOME=$SIDIS_EIC_HOME/deps/delphes
 if [ -f "$DELPHES_HOME/DelphesEnv.sh" ]; then
-  # set unbound variables for CI `run-cvmfs-osg-eic-shell@main` payloads
+  # set $LIBRARY_PATH to "", if unbound (for CI `eic/run-cvmfs-osg-eic-shell` payloads)
   LIBRARY_PATH_BIND=${LIBRARY_PATH:-}
   [ -z "$LIBRARY_PATH_BIND" ] && export LIBRARY_PATH=""
   # source Delphes environment
