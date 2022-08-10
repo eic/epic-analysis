@@ -28,8 +28,10 @@ jobs:
           platform-release: "jug_xl:nightly"
           run: |
             # build delphes
+            echo "[CI] install delphes"
             deps/install_delphes.sh
             # build sidis-eic and its other dependencies
+            echo "[CI] build sidis-eic"
             source environ.sh
             make
       - uses: actions/upload-artifact@v2 # TODO:  use v3?

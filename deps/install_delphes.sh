@@ -14,7 +14,7 @@ else
 fi
 
 ### build
-# echo "[+] building Delphes"
-# source environ.sh
-# make delphes-clean
-# make delphes
+echo "[+] building Delphes"
+source environ.sh
+make delphes-clean
+make delphes
