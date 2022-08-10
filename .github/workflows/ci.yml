@@ -27,10 +27,8 @@ jobs:
         with:
           platform-release: "jug_xl:nightly"
           run: |
-            # build delphes
             echo "[CI] install delphes"
             deps/install_delphes.sh
-            # build sidis-eic and its other dependencies
             echo "[CI] build sidis-eic"
             source environ.sh
             make
@@ -50,94 +48,84 @@ jobs:
             external
 
 
-# # DELPHES ---------------------------------------------------------------------------
+# DELPHES ---------------------------------------------------------------------------
 
-# # run delphes on a hepmc file
-#   delphes_fastsim:
-#     needs: build
-#     runs-on: ubuntu-latest
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         minq2: [1, 10, 100, 1000]
-#     steps:
-#       - uses: actions/checkout@v2
-#       - name: get_build_artifacts
-#         uses: actions/download-artifact@v2
-#         with:
-#           name: x_build
-#       - name: env
-#         run: |
-#           source environ.sh
-#           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
-#           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
-#           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
-#           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-#       - name: download_hepmc_files
-#         env:
-#           S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
-#           S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
-#         run: |
-#           s3tools/add-host.sh
-#           echo "-- build list"
-#           s3tools/generate-hepmc-list.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 4 | tee hepmc.list
-#           echo "-- download"
-#           while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
-#           echo "-- list datagen/"
-#           ls -lh datagen
-#       - name: delphes
-#         run: |
-#           echo "-- delphes"
-#           chmod u+x deps/delphes/DelphesHepMC3
-#           for hepmc in datagen/*.hepmc.gz; do deps/run_delphes.sh $hepmc; done
-#           echo "-- list datarec/"
-#           ls -lh datarec
-#       - name: config_fastsim
-#         run: |
-#           s3tools/make-fastsim-local-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} datarec delphes.config
-#           echo "-- cat config"
-#           cat delphes.config
-#       - name: artifacts
-#         uses: actions/upload-artifact@v2
-#         with:
-#           name: delphes_${{env.ebeam_en}}x${{env.pbeam_en}}_q2min${{matrix.minq2}}_output
-#           retention-days: 1
-#           path: |
-#             datarec/*.root
-#             delphes.config
+# run delphes on a hepmc file
+  delphes_fastsim:
+    needs: build
+    runs-on: ubuntu-latest
+    secrets:
+      S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
+      S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
+    strategy:
+      fail-fast: false
+      matrix:
+        minq2: [1, 10, 100, 1000]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2  # TODO: v3?
+        with:
+          name: x_build
+      - uses: cvmfs-contrib/github-action-cvmfs@v2
+      - uses: eic/run-cvmfs-osg-eic-shell@main
+        with:
+          platform-release: "jug_xl:nightly"
+          run: |
+            source environ.sh
+            echo "[CI] add S3 host"
+            s3tools/add-host.sh
+            echo "[CI] generate list of HEPMC files"
+            s3tools/generate-hepmc-list.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 4 | tee hepmc.list
+            echo "[CI] download HEPMC files"
+            while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
+            echo "====="
+            ls -lh datagen
+            echo "[CI] RUN DELPHES"
+            chmod u+x deps/delphes/DelphesHepMC3
+            for hepmc in datagen/*.hepmc.gz; do deps/run_delphes.sh $hepmc; done
+            echo "====="
+            ls -lh datarec
+            echo "[CI] make config file"
+            s3tools/make-fastsim-local-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} datarec delphes.config
+            echo "====="
+            cat delphes.config
+      - uses: actions/upload-artifact@v2
+        with:
+          name: delphes_${{env.ebeam_en}}x${{env.pbeam_en}}_q2min${{matrix.minq2}}_output
+          retention-days: 1
+          path: |
+            datarec/*.root
+            delphes.config
 
 
-# # DOWNLOAD FULLSIM ---------------------------------------------------------------------------
+# DOWNLOAD FULLSIM ---------------------------------------------------------------------------
 
-# # download fullsim files and make config
-#   download_fullsim:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - uses: actions/checkout@v2
-#       - name: env
-#         run: |
-#           source environ.sh
-#           echo "LD_LIBRARY_PATH=${LD_LIBRARY_PATH}" >> $GITHUB_ENV
-#           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
-#           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
-#           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-#       - name: download_fullsim
-#         env:
-#           S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
-#           S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
-#         run: |
-#           s3tools/add-host.sh
-#           s3tools/make-athena-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} d 8 s3files.config
-#       - name: cat_config
-#         run: cat s3files.config
-#       - name: artifacts
-#         uses: actions/upload-artifact@v2
-#         with:
-#           name: x_fullsim
-#           retention-days: 1
-#           path: |
-#             s3files.config
-#             datarec
+# download fullsim files and make config
+  download_fullsim:
+    runs-on: ubuntu-latest
+    secrets:
+      S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
+      S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: cvmfs-contrib/github-action-cvmfs@v2
+      - uses: eic/run-cvmfs-osg-eic-shell@main
+        with:
+          platform-release: "jug_xl:nightly"
+          run: |
+            source environ.sh
+            echo "[CI] download fullsim files"
+            s3tools/add-host.sh
+            s3tools/make-athena-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} d 8 s3files.config
+            echo "[CI] cat config file"
+            cat s3files.config
+      - uses: actions/upload-artifact@v2
+        with:
+          name: x_fullsim
+          retention-days: 1
+          path: |
+            s3files.config
+            datarec
 
 
 # # ANALYSIS ---------------------------------------------------------------------------
@@ -165,8 +153,7 @@ jobs:
 #           echo "aname = ${{matrix.aname}}"
 #           echo "recon = ${{matrix.recon}}"
 #       - uses: actions/checkout@v2
-#       - name: get_build_artifacts
-#         uses: actions/download-artifact@v2
+#       - uses: actions/download-artifact@v2
 #         with:
 #           name: x_build
 #       - name: env
@@ -176,8 +163,7 @@ jobs:
 #           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
 #           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
 #           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-#       - name: fastsim_get_delphes_files
-#         uses: actions/download-artifact@v2
+#       - uses: actions/download-artifact@v2
 #         with:
 #           path: datarec
 #       - name: fastsim_organize_delphes_files
@@ -190,8 +176,7 @@ jobs:
 #         run: cat delphes.config
 #       - name: analysis_macro
 #         run: root -b -q 'macro/ci/analysis_${{matrix.aname}}.C("delphes.config",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"fastsim.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
-#       - name: artifacts
-#         uses: actions/upload-artifact@v2
+#       - uses: actions/upload-artifact@v2
 #         with:
 #           name: root_analysis_fastsim_${{matrix.aname}}_${{matrix.recon}}
 #           retention-days: 7
@@ -221,8 +206,7 @@ jobs:
 #           echo "aname = ${{matrix.aname}}"
 #           echo "recon = ${{matrix.recon}}"
 #       - uses: actions/checkout@v2
-#       - name: get_build_artifacts
-#         uses: actions/download-artifact@v2
+#       - uses: actions/download-artifact@v2
 #         with:
 #           name: x_build
 #       - name: env
@@ -232,8 +216,7 @@ jobs:
 #           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
 #           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
 #           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-#       - name: get_fullsim_artifacts
-#         uses: actions/download-artifact@v2
+#       - uses: actions/download-artifact@v2
 #         with:
 #           name: x_fullsim
 #       - name: cat_config
@@ -243,8 +226,7 @@ jobs:
 #           S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
 #           S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
 #         run: root -b -q 'macro/ci/analysis_${{matrix.aname}}.C("s3files.config",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"fullsim.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
-#       - name: artifacts
-#         uses: actions/upload-artifact@v2
+#       - uses: actions/upload-artifact@v2
 #         with:
 #           name: root_analysis_fullsim_${{matrix.aname}}_${{matrix.recon}}
 #           retention-days: 7
@@ -314,8 +296,7 @@ jobs:
 #           echo "recon = ${{matrix.recon}}"
 #           echo "pmacro = ${{matrix.pmacro}}"
 #       - uses: actions/checkout@v2
-#       - name: get_build_artifacts
-#         uses: actions/download-artifact@v2
+#       - uses: actions/download-artifact@v2
 #         with:
 #           name: x_build
 #       - name: env
@@ -325,8 +306,7 @@ jobs:
 #           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
 #           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
 #           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-#       - name: get_analysis_artifacts
-#         uses: actions/download-artifact@v2
+#       - uses: actions/download-artifact@v2
 #         with:
 #           name: root_analysis_${{matrix.mode}}_${{matrix.aname}}_${{matrix.recon}}
 #           path: out
@@ -336,8 +316,7 @@ jobs:
 #           mv -v out/${{matrix.mode}}.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
 #           root -b -q 'macro/ci/${{matrix.pmacro}}("out/${{matrix.mode}}.${{matrix.pname}}.${{matrix.recon}}.root")'
 #           rm -v out/${{matrix.mode}}.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
-#       - name: artifacts
-#         uses: actions/upload-artifact@v2
+#       - uses: actions/upload-artifact@v2
 #         with:
 #           name: results_${{matrix.mode}}_${{matrix.pname}}_${{matrix.recon}}
 #           retention-days: 30
@@ -388,8 +367,7 @@ jobs:
 #           echo "xvar = ${{matrix.xvar}}"
 #           echo "yvar = ${{matrix.yvar}}"
 #       - uses: actions/checkout@v2
-#       - name: get_build_artifacts
-#         uses: actions/download-artifact@v2
+#       - uses: actions/download-artifact@v2
 #         with:
 #           name: x_build
 #       - name: env
@@ -399,13 +377,11 @@ jobs:
 #           echo "SIDIS_EIC_HOME=${SIDIS_EIC_HOME}" >> $GITHUB_ENV
 #           echo "DELPHES_HOME=${DELPHES_HOME}" >> $GITHUB_ENV
 #           echo "MSTWPDF_HOME=${MSTWPDF_HOME}" >> $GITHUB_ENV
-#       - name: get_fastsim_analysis_artifacts
-#         uses: actions/download-artifact@v2
+#       - uses: actions/download-artifact@v2
 #         with:
 #           name: root_analysis_fastsim_${{matrix.aname}}_${{matrix.recon}}
 #           path: out
-#       - name: get_fullsim_analysis_artifacts
-#         uses: actions/download-artifact@v2
+#       - uses: actions/download-artifact@v2
 #         with:
 #           name: root_analysis_fullsim_${{matrix.aname}}_${{matrix.recon}}
 #           path: out
@@ -417,8 +393,7 @@ jobs:
 #           root -b -q 'macro/ci/comparator.C("out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root","out/fullsim.${{matrix.pname}}.${{matrix.recon}}.root","out/fastfull.${{matrix.pname}}.${{matrix.recon}}","${{matrix.xvar}}","${{matrix.yvar}}")'
 #           rm -v out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
 #           rm -v out/fullsim.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
-#       - name: artifacts
-#         uses: actions/upload-artifact@v2
+#       - uses: actions/upload-artifact@v2
 #         with:
 #           name: results_fastfull_${{matrix.pname}}_${{matrix.recon}}
 #           retention-days: 30
@@ -437,8 +412,7 @@ jobs:
 #     runs-on: ubuntu-latest
 #     steps:
 #       - uses: actions/checkout@v2
-#       - name: download
-#         uses: actions/download-artifact@v2
+#       - uses: actions/download-artifact@v2
 #         with:
 #           path: results
 #       - name: tree_artifacts
@@ -464,8 +438,7 @@ jobs:
 #         run: |
 #           macro/ci/merge-fastfull.sh results
 #           tree results
-#       - name: upload
-#         uses: actions/upload-artifact@v2
+#       - uses: actions/upload-artifact@v2
 #         with:
 #           retention-days: 90
 #           name: _FULL_RESULTS
