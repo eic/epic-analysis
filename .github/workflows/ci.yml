@@ -65,11 +65,11 @@ jobs:
           name: x_build
       - uses: cvmfs-contrib/github-action-cvmfs@v2
       - uses: eic/run-cvmfs-osg-eic-shell@main
+        env:
+          S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
+          S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
         with:
           platform-release: "jug_xl:nightly"
-          env:
-            S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
-            S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
           run: |
             source environ.sh
             echo "[CI] add S3 host"
