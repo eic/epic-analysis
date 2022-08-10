@@ -15,7 +15,7 @@ export DELPHES_HOME=$SIDIS_EIC_HOME/deps/delphes
 if [ -f "$DELPHES_HOME/DelphesEnv.sh" ]; then
   # set unbound variables for CI `run-cvmfs-osg-eic-shell@main` payloads
   LIBRARY_PATH_BIND=${LIBRARY_PATH:-}
-  [ -z "$LIBRARY_PATH_BIND" ] && LIBRARY_PATH=""
+  [ -z "$LIBRARY_PATH_BIND" ] && export LIBRARY_PATH=""
   # source Delphes environment
   source $DELPHES_HOME/DelphesEnv.sh
   export PATH=$PATH:$DELPHES_HOME
