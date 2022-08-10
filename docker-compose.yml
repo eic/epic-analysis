@@ -1,5 +1,0 @@
-version: '3'
-services:
-  dev:
-    build: ./container/dev
-    container_name: sidis-eic-dev
