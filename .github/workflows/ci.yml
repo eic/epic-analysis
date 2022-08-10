@@ -48,54 +48,54 @@ jobs:
             external
 
 
-# # DELPHES ---------------------------------------------------------------------------
+# DELPHES ---------------------------------------------------------------------------
 
-# # run delphes on a hepmc file
-#   delphes_fastsim:
-#     needs: build
-#     runs-on: ubuntu-latest
-#     strategy:
-#       fail-fast: false
-#       matrix:
-#         minq2: [1, 10, 100, 1000]
-#     steps:
-#       - uses: actions/checkout@v2
-#       - uses: actions/download-artifact@v2  # TODO: v3?
-#         with:
-#           name: x_build
-#       - uses: cvmfs-contrib/github-action-cvmfs@v2
-#       - uses: eic/run-cvmfs-osg-eic-shell@main
-#         env:
-#           S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
-#           S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
-#         with:
-#           platform-release: "jug_xl:nightly"
-#           run: |
-#             source environ.sh
-#             echo "[CI] add S3 host"
-#             s3tools/add-host.sh
-#             echo "[CI] generate list of HEPMC files"
-#             s3tools/generate-hepmc-list.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 4 | tee hepmc.list
-#             echo "[CI] download HEPMC files"
-#             while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
-#             echo "====="
-#             ls -lh datagen
-#             echo "[CI] RUN DELPHES"
-#             chmod u+x deps/delphes/DelphesHepMC3
-#             for hepmc in datagen/*.hepmc.gz; do deps/run_delphes.sh $hepmc; done
-#             echo "====="
-#             ls -lh datarec
-#             echo "[CI] make config file"
-#             s3tools/make-fastsim-local-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} datarec delphes.config
-#             echo "====="
-#             cat delphes.config
-#       - uses: actions/upload-artifact@v2
-#         with:
-#           name: delphes_${{env.ebeam_en}}x${{env.pbeam_en}}_q2min${{matrix.minq2}}_output
-#           retention-days: 1
-#           path: |
-#             datarec/*.root
-#             delphes.config
+# run delphes on a hepmc file
+  delphes_fastsim:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        minq2: [1, 10, 100, 1000]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v2  # TODO: v3?
+        with:
+          name: x_build
+      - uses: cvmfs-contrib/github-action-cvmfs@v2
+      - uses: eic/run-cvmfs-osg-eic-shell@main
+        env:
+          S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
+          S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
+        with:
+          platform-release: "jug_xl:nightly"
+          run: |
+            source environ.sh
+            echo "[CI] add S3 host"
+            s3tools/add-host.sh
+            echo "[CI] generate list of HEPMC files"
+            s3tools/generate-hepmc-list.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 4 | tee hepmc.list
+            echo "[CI] download HEPMC files"
+            while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
+            echo "====="
+            ls -lh datagen
+            echo "[CI] RUN DELPHES"
+            chmod u+x deps/delphes/DelphesHepMC3
+            for hepmc in datagen/*.hepmc.gz; do deps/run_delphes.sh $hepmc; done
+            echo "====="
+            ls -lh datarec
+            echo "[CI] make config file"
+            s3tools/make-fastsim-local-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} datarec delphes.config
+            echo "====="
+            cat delphes.config
+      - uses: actions/upload-artifact@v2
+        with:
+          name: delphes_${{env.ebeam_en}}x${{env.pbeam_en}}_q2min${{matrix.minq2}}_output
+          retention-days: 1
+          path: |
+            datarec/*.root
+            delphes.config
 
 
 # DOWNLOAD FULLSIM ---------------------------------------------------------------------------
