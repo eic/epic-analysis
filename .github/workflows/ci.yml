@@ -26,13 +26,14 @@ jobs:
       - uses: eic/run-cvmfs-osg-eic-shell@main
         with:
           platform-release: "jug_xl:nightly"
-          run: |
-            echo "[CI] install delphes"
-            deps/install_delphes.sh
-          run: |
-            echo "[CI] build sidis-eic"
-            source environ.sh
-            make
+          steps:
+            - run: |
+              echo "[CI] install delphes"
+              deps/install_delphes.sh
+            - run: |
+              echo "[CI] build sidis-eic"
+              source environ.sh
+              make
           # run: |
           #   echo "[CI] install delphes"
           #   deps/install_delphes.sh
