@@ -11,8 +11,8 @@ fast simulations, including the following features:
   etc.); see [Kinematics Documentation](doc/kinematics.md) for more information
 - Calculations of SIDIS variables, such as `PhiH` and `qT`, for single
   particles, as well as jet variables
-- Ability to specify arbitrary multi-dimensional binning schemes and cuts; see
-  [Adage documentation](doc/adage.md) for more information
+- Ability to specify arbitrary multi-dimensional binning schemes and cuts
+  using [Adage](https://github.com/c-dilks/adage)
 - Output data structures include multi-dimensionally binned histogram sets,
   tables, and `TTrees`
 - An analysis is primarily driven by macros, used to set up the binning and
@@ -192,7 +192,7 @@ and follow the [README](tutorial/README.md).
       histograms
     - the `Histos` class is a container for the histograms, and instances of
       `Histos` will also be streamed to `root` files, along with the binning
-      scheme (handled by the `BinSet` class); downstream post processing code
+      scheme (handled by the Adage `BinSet` class); downstream post processing code
       makes use of these streamed objects, rather than the `TObjArray`s
   - derived classes are specific to upstream data structures:
     - `AnalysisDelphes` for Delphes trees (fast simulations)
@@ -208,7 +208,7 @@ and follow the [README](tutorial/README.md).
 
 ### Bin Specification
 
-- The bins may be specified arbitrarily, using the `BinSet` and `CutDef` classes
+- The bins may be specified arbitrarily, using the Adage `BinSet` and `CutDef` classes
   - see example `analysis_*C` macros in `tutorial/`
   - `CutDef` can store and apply an arbitrary cut for a single variable, such as:
     - ranges: `a<x<b` or `|x-a|<b`
@@ -233,8 +233,8 @@ and follow the [README](tutorial/README.md).
             an event with `y=0.1` will appear in all three bins
 - Multi-dimensional binning
   - Binning in multi-dimensions is allowed, e.g., 3D binning in `x`,`Q2`,`z`
-  - See [Adage documentation](doc/adage.md) for more information on how multi-dimensional
-    binning is handled, as well as the [Adage syntax reference](doc/syntax.md)
+  - See [Adage documentation](deps/adage/README.md) for more information on how multi-dimensional
+    binning is handled, as well as the [Adage syntax reference](deps/adage/doc/syntax.md)
   - Be careful of the curse of dimensionality
 
 ### Simple Tree

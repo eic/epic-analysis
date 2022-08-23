@@ -1,15 +1,11 @@
 #ifndef AnalysisAthena_
 #define AnalysisAthena_
 
-#include <vector>
-#include <fstream>
+#include "TTreeReader.h"
+#include "TTreeReaderValue.h"
+#include "TTreeReaderArray.h"
 
 #include "Analysis.h"
-
-class Histos;
-class SimpleTree;
-class Kinematics;
-class BinSet;
 
 class Clusters
 {

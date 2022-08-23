@@ -1,21 +1,6 @@
 #ifndef AnalysisDelphes_
 #define AnalysisDelphes_
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <iostream>
-#include <sstream>
-#include <map>
-#include <set>
-#include <stdexcept>
-
-// root
-#include "TChain.h"
-#include "TObjArray.h"
-#include "TClonesArray.h"
-#include "TFile.h"
-#include "TRegexp.h"
-
 // delphes
 #include "classes/DelphesClasses.h"
 #include "external/ExRootAnalysis/ExRootTreeReader.h"
@@ -25,13 +10,6 @@
 
 // sidis-eic
 #include "Analysis.h"
-#include "Histos.h"
-#include "HistosDAG.h"
-#include "Kinematics.h"
-#include "CutDef.h"
-#include "BinSet.h"
-#include "SimpleTree.h"
-#include "Weights.h"
 
 
 class AnalysisDelphes : public Analysis

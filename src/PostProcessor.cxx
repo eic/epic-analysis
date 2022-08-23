@@ -37,7 +37,7 @@ PostProcessor::PostProcessor(
 
   // rebuild DAGs
   HD = new HistosDAG();
-  HD->Build(infile);
+  HD->BuildFromFile(infile);
 
   // initialize algorithm-specific vars
   this->ResetVars();
@@ -745,7 +745,7 @@ void PostProcessor::DrawRatios(
         summaryCanv->SetLogx(HH[num]->GetHistConfig(varName)->logx);
         summaryCanv->SetBottomMargin(0.15);
         summaryCanv->SetLeftMargin(0.15);
-        summaryCanvMap.insert(std::pair<TString,TCanvas*>(varName,summaryCanv));
+        summaryCanvMap.insert({varName,summaryCanv});
         ratioSummary->Draw();
       } else {
         kv->second->cd();

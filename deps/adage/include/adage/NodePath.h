@@ -29,7 +29,7 @@ class NodePath : public TObject
 
     // user-friendly methods
     /* - NodePath is effectively a linked list
-     * - use these methods to get specific nodes, along with things the nodes holds such as cuts
+     * - use these methods to get specific nodes, along with things the nodes hold such as cuts
      * - this class stores the list unsorted; use the sort methods to traverse the linked list in order 
      */
     TString BinListName(); // return a string of bin names, formatted for object names: `"bin1_bin2_bin3"`

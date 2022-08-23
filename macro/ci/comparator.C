@@ -86,7 +86,7 @@ void comparator(
   // get DAGs and binning
   for(auto infile : infiles) {
     D = new HistosDAG();
-    D->Build(infile);
+    D->BuildFromFile(infile);
     auto xBins = D->GetBinSet(gx);
     auto yBins = D->GetBinSet(gy);
     if(first) {
@@ -148,7 +148,7 @@ void comparator(
     try { 
       histosArrList.at(0).at(bx).at(by) = H; // first, insert the Histos* of D0
       for(auto De : Dext) { // then insert the Histos* of each DAG in Dext
-        histosArrList.at(++pc).at(bx).at(by) = De->GetHistosExternal(NP);
+        histosArrList.at(++pc).at(bx).at(by) = De->GetPayloadData(NP,true); // "true", since `NP` is not owned by `P0->Op()`
       }
     }
     catch(const std::out_of_range &e) { 

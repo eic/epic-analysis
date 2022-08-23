@@ -1,9 +1,3 @@
-#include <TTreeReader.h>
-#include <TTreeReaderValue.h>
-#include <TTreeReaderArray.h>
-#include <TLorentzVector.h>
-#include <TMath.h>
-
 #include "AnalysisAthena.h"
 
 using std::map;
@@ -289,8 +283,8 @@ void AnalysisAthena::Execute()
 
       // fill simple tree
       // - not binned
-      // - `activeEvent` is only true if at least one bin gets filled for this track
-      if( writeSimpleTree && activeEvent ) ST->FillTree(wTrack);
+      // - `IsActiveEvent()` is only true if at least one bin gets filled for this track
+      if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
 
     }//hadron loop
 

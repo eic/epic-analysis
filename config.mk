@@ -20,17 +20,21 @@ LIBS = $(shell root-config --glibs)
 DEPS += -I${DELPHES_HOME} -I${DELPHES_HOME}/external
 LIBS += -L${DELPHES_HOME} -lDelphes
 
-# MSTWPDF
-DEPS += -I${MSTWPDF_HOME}
-LIBS += -L${MSTWPDF_HOME} -lmstwpdf
-
-# Fastjet Centauro
+# DELPHES plugin: Fastjet Centauro
 INCCENTAURO = 0
 ifeq ($(INCCENTAURO),1)
 LIBS += -L${DELPHES_HOME}/external/fastjet/plugins/Centauro -lCentauro
 DEPS += -I${DELPHES_HOME}/external/fastjet/plugins/Centauro
 endif
 FLAGS += -DINCCENTAURO=$(INCCENTAURO)
+
+# MSTWPDF
+DEPS += -I${MSTWPDF_HOME}
+LIBS += -L${MSTWPDF_HOME} -lmstwpdf
+
+# ADAGE
+DEPS += -I${ADAGE_HOME}/include
+LIBS += -L${ADAGE_HOME}/lib -lAdage
 
 # SIDIS-EIC
 ifndef SIDIS_EIC_HOME

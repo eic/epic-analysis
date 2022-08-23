@@ -3,9 +3,11 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string>
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <vector>
 #include <map>
 #include <set>
 #include <stdexcept>
@@ -18,20 +20,15 @@
 #include "TFile.h"
 #include "TRegexp.h"
 
+// adage
+#include "adage/BinSet.h"
+
 // sidis-eic
 #include "Histos.h"
 #include "HistosDAG.h"
 #include "Kinematics.h"
-#include "CutDef.h"
-#include "BinSet.h"
 #include "SimpleTree.h"
 #include "Weights.h"
-
-// delphes (TODO: does fastjet need this?)
-//#include "classes/DelphesClasses.h"
-//#include "external/ExRootAnalysis/ExRootTreeReader.h"
-
-
 
 class Analysis : public TNamed
 {
@@ -72,7 +69,8 @@ class Analysis : public TNamed
     bool AddFile(std::vector<std::string> fileNames, std::vector<Long64_t> entries, Double_t xs, Double_t Q2min);
 
     // access HistosDAG
-    HistosDAG *GetHistosDAG();
+    HistosDAG *GetHistosDAG() { return HD; };
+
 
     // set weights // TODO: are these used yet?
     void SetWeights(Weights const* w) { weight = w; }
@@ -99,14 +97,6 @@ class Analysis : public TNamed
     // FillHistos methods: fill histograms
     void FillHistosTracks();
     void FillHistosJets();
-
-    // lambda to check which bins an observable is in, during DAG breadth
-    // traversal; it requires `finalStateID`, `valueMap`, and will
-    // activate/deactivate bin nodes accoding to values in `valuMap`
-    std::function<void(Node*)> CheckBin();
-    // payload operator to check if the event will appear in at least one bin
-    std::function<void(NodePath*)> CheckActive();
-
 
     // shared objects
     SimpleTree *ST;
@@ -142,9 +132,7 @@ class Analysis : public TNamed
     Double_t elePtrue, maxElePtrue;
     int pid;
     fastjet::PseudoJet jet;
-    std::map<TString,Double_t> valueMap;
     TString finalStateID;
-    Bool_t activeEvent;
     Double_t wTrack,wJet;
 
     // binning names / titles / etc.

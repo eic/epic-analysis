@@ -39,13 +39,16 @@ jobs:
           path: |
             # sidis-eic
             lib
-            src/Sidis-eicDict.cxx
-            # mstwpdf
-            deps/mstwpdf/*.o
-            deps/mstwpdf/*.so
+            src/*Dict.cxx
             # delphes
             deps/delphes
             external
+            # mstwpdf
+            deps/mstwpdf/*.o
+            deps/mstwpdf/*.so
+            # adage
+            deps/adage/lib
+            deps/adage/src/*Dict.cxx
 
 # DELPHES ---------------------------------------------------------------------------
 

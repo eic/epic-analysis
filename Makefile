@@ -4,19 +4,31 @@ include config.mk
 all: deps sidis-eic
 all-clean: deps-clean clean
 sidis-eic:
-	ln -sf ${DELPHES_HOME}/external ./
-	@cd src; make
+	@echo "\n===== SIDIS-EIC ====="
+	@ln -sf ${DELPHES_HOME}/external ./
+	@cd src; $(MAKE)
 clean:
-	@cd src; make clean
+	@echo "\n===== CLEAN SIDIS-EIC ====="
+	@cd src; $(MAKE) clean
 
 # dependency targets
-deps: delphes mstwpdf
-deps-clean: delphes-clean mstwpdf-clean
+deps: delphes mstwpdf adage
+deps-clean: delphes-clean mstwpdf-clean adage-clean
 delphes:
-	@cd ${DELPHES_HOME}; make
+	@echo "\n===== DELPHES ====="
+	@cd ${DELPHES_HOME}; $(MAKE)
 delphes-clean:
-	@cd ${DELPHES_HOME}; make clean
+	@echo "\n===== CLEAN DELPHES ====="
+	@cd ${DELPHES_HOME}; $(MAKE) clean
 mstwpdf:
-	@cd ${MSTWPDF_HOME}; make
+	@echo "\n===== MSTWPDF ====="
+	@cd ${MSTWPDF_HOME}; $(MAKE)
 mstwpdf-clean:
-	@cd ${MSTWPDF_HOME}; make clean
+	@echo "\n===== CLEAN MSTWPDF ====="
+	@cd ${MSTWPDF_HOME}; $(MAKE) clean
+adage:
+	@echo "\n===== ADAGE ====="
+	@cd ${ADAGE_HOME}; $(MAKE)
+adage-clean:
+	@echo "\n===== CLEAN ADAGE ====="
+	@cd ${ADAGE_HOME}; $(MAKE) clean

@@ -180,14 +180,14 @@ void Histos::DefineHist4D(
 // add histogram to containers
 void Histos::RegisterHist(TString varname_, TH1 *hist_, HistConfig *config_) {
   VarNameList.push_back(varname_);
-  histConfigMap.insert(std::pair<TString,HistConfig*>(varname_,config_));
-  histMap.insert(std::pair<TString,TH1*>(varname_,hist_));
+  histConfigMap.insert({varname_,config_});
+  histMap.insert({varname_,hist_});
 };
 
 void Histos::RegisterHist4(TString varname_, Hist4D *hist_, HistConfig *config_) {
   VarNameList.push_back(varname_);
-  hist4ConfigMap.insert(std::pair<TString,HistConfig*>(varname_,config_));
-  hist4Map.insert(std::pair<TString,Hist4D*>(varname_,hist_));
+  hist4ConfigMap.insert({varname_,config_});
+  hist4Map.insert({varname_,hist_});
 };
 
 

@@ -1,9 +1,5 @@
 #include "Analysis.h"
 
-#include <fstream>
-#include <string>
-#include <sstream>
-
 ClassImp(Analysis)
 
 using std::map;
@@ -29,64 +25,65 @@ Analysis::Analysis(
   , crossingAngle(crossingAngle_)
   , outfilePrefix(outfilePrefix_)
   , reconMethod("")
+  , finalStateID("")
 {
   // available variables for binning
   // - availableBinSchemes is a map from variable name to variable title
   // - try to avoid using underscores in the variable name (they are okay in the title);
   //   convention is camel case, starting lowercase 
   /* DIS */
-  availableBinSchemes.insert(std::pair<TString,TString>("x","x"));
-  availableBinSchemes.insert(std::pair<TString,TString>("q2","Q^{2}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("w","W"));
-  availableBinSchemes.insert(std::pair<TString,TString>("y","y"));
+  availableBinSchemes.insert({ "x",     "x"           });
+  availableBinSchemes.insert({ "q2",    "Q^{2}"       });
+  availableBinSchemes.insert({ "w",     "W"           });
+  availableBinSchemes.insert({ "y",     "y"           });
   /* single hadron */
-  availableBinSchemes.insert(std::pair<TString,TString>("p","p"));
-  availableBinSchemes.insert(std::pair<TString,TString>("eta","#eta"));
-  availableBinSchemes.insert(std::pair<TString,TString>("pt","p_{T}")); // transverse to q, in ion rest frame
-  availableBinSchemes.insert(std::pair<TString,TString>("ptLab","p_{T}^{lab}")); // transverse to xy plane, in lab frame
-  availableBinSchemes.insert(std::pair<TString,TString>("z","z"));
-  availableBinSchemes.insert(std::pair<TString,TString>("qT","q_{T}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("qTq","q_{T}/Q"));
-  availableBinSchemes.insert(std::pair<TString,TString>("mX","M_{X}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("xF","x_{F}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("phiH","#phi_{h}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("phiS","#phi_{S}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("tSpin","spin"));
-  availableBinSchemes.insert(std::pair<TString,TString>("lSpin","spinL"));
+  availableBinSchemes.insert({ "p",     "p"           });
+  availableBinSchemes.insert({ "eta",   "#eta"        });
+  availableBinSchemes.insert({ "pt",    "p_{T}"       }); // transverse to q, in ion rest frame
+  availableBinSchemes.insert({ "ptLab", "p_{T}^{lab}" }); // transverse to xy plane, in lab frame
+  availableBinSchemes.insert({ "z",     "z"           });
+  availableBinSchemes.insert({ "qT",    "q_{T}"       });
+  availableBinSchemes.insert({ "qTq",   "q_{T}/Q"     });
+  availableBinSchemes.insert({ "mX",    "M_{X}"       });
+  availableBinSchemes.insert({ "xF",    "x_{F}"       });
+  availableBinSchemes.insert({ "phiH",  "#phi_{h}"    });
+  availableBinSchemes.insert({ "phiS",  "#phi_{S}"    });
+  availableBinSchemes.insert({ "tSpin", "spin"        });
+  availableBinSchemes.insert({ "lSpin", "spinL"       });
   /* jets */
-  availableBinSchemes.insert(std::pair<TString,TString>("ptJet", "jet p_{T}"));
-  availableBinSchemes.insert(std::pair<TString,TString>("zJet", "jet z"));
+  availableBinSchemes.insert({ "ptJet", "jet p_{T}"   });
+  availableBinSchemes.insert({ "zJet",  "jet z"       });
 
 
   // available final states
   // - specify which final states you want to include using `AddFinalState(TString name)`
   // - if you specify none, default final state(s) will be chosen for you
-  availableBinSchemes.insert(std::pair<TString,TString>("finalState","finalState"));
+  availableBinSchemes.insert({"finalState","finalState"});
   AddBinScheme("finalState");
   // - finalState name (ID) -> title
-  finalStateToTitle.insert(std::pair<TString,TString>("pipTrack","#pi^{+} tracks"));
-  finalStateToTitle.insert(std::pair<TString,TString>("pimTrack","#pi^{-} tracks"));
-  finalStateToTitle.insert(std::pair<TString,TString>("KpTrack","K^{+} tracks"));
-  finalStateToTitle.insert(std::pair<TString,TString>("KmTrack","K^{-} tracks"));
-  finalStateToTitle.insert(std::pair<TString,TString>("pTrack","p^{+} tracks"));
-  finalStateToTitle.insert(std::pair<TString,TString>("jet","jets"));
+  finalStateToTitle.insert({ "pipTrack", "#pi^{+} tracks" });
+  finalStateToTitle.insert({ "pimTrack", "#pi^{-} tracks" });
+  finalStateToTitle.insert({ "KpTrack",  "K^{+} tracks"   });
+  finalStateToTitle.insert({ "KmTrack",  "K^{-} tracks"   });
+  finalStateToTitle.insert({ "pTrack",   "p^{+} tracks"   });
+  finalStateToTitle.insert({ "jet",      "jets"           });
   // - PID -> finalState ID
-  PIDtoFinalState.insert(std::pair<int, TString>( 211,"pipTrack"));
-  PIDtoFinalState.insert(std::pair<int, TString>(-211,"pimTrack"));
-  PIDtoFinalState.insert(std::pair<int, TString>( 321,"KpTrack"));
-  PIDtoFinalState.insert(std::pair<int, TString>(-321,"KmTrack"));
-  PIDtoFinalState.insert(std::pair<int, TString>(2212,"pTrack"));
+  PIDtoFinalState.insert({  211,  "pipTrack" });
+  PIDtoFinalState.insert({ -211,  "pimTrack" });
+  PIDtoFinalState.insert({  321,  "KpTrack"  });
+  PIDtoFinalState.insert({ -321,  "KmTrack"  });
+  PIDtoFinalState.insert({  2212, "pTrack"   });
 
 
   // kinematics reconstruction methods
   // - choose one of these methods using `SetReconMethod(TString name)`
   // - if you specify none, a default method will be chosen
-  reconMethodToTitle.insert(std::pair<TString,TString>("Ele","Electron method"));
-  reconMethodToTitle.insert(std::pair<TString,TString>("DA","Double Angle method"));
-  reconMethodToTitle.insert(std::pair<TString,TString>("JB","Jacquet-Blondel method"));
-  reconMethodToTitle.insert(std::pair<TString,TString>("Mixed","Mixed method"));
-  reconMethodToTitle.insert(std::pair<TString,TString>("Sigma","Sigma method"));
-  reconMethodToTitle.insert(std::pair<TString,TString>("eSigma","eSigma method"));
+  reconMethodToTitle.insert({ "Ele",    "Electron method"        });
+  reconMethodToTitle.insert({ "DA",     "Double Angle method"    });
+  reconMethodToTitle.insert({ "JB",     "Jacquet-Blondel method" });
+  reconMethodToTitle.insert({ "Mixed",  "Mixed method"           });
+  reconMethodToTitle.insert({ "Sigma",  "Sigma method"           });
+  reconMethodToTitle.insert({ "eSigma", "eSigma method"          });
 
   // common settings defaults
   // - these settings can be set at the macro level
@@ -243,6 +240,36 @@ void Analysis::Prepare() {
   // build HistosDAG with specified binning
   HD = new HistosDAG();
   HD->Build(binSchemes);
+
+  // tell HD what values to associate for each BinScheme name
+  // - these are the values that will be used for CutDef checks
+  // - the lambda must return a Double_t
+  /* DIS */
+  HD->SetBinSchemeValue("x",     [this](){ return kin->x;                       });
+  HD->SetBinSchemeValue("q2",    [this](){ return kin->Q2;                      });
+  HD->SetBinSchemeValue("w",     [this](){ return kin->W;                       });
+  HD->SetBinSchemeValue("y",     [this](){ return kin->y;                       });
+  /* single hadron */
+  HD->SetBinSchemeValue("p",     [this](){ return kin->pLab;                    });
+  HD->SetBinSchemeValue("eta",   [this](){ return kin->etaLab;                  });
+  HD->SetBinSchemeValue("pt",    [this](){ return kin->pT;                      });
+  HD->SetBinSchemeValue("ptLab", [this](){ return kin->pTlab;                   });
+  HD->SetBinSchemeValue("z",     [this](){ return kin->z;                       });
+  HD->SetBinSchemeValue("qT",    [this](){ return kin->qT;                      });
+  HD->SetBinSchemeValue("qTq",   [this](){ return kin->qT/TMath::Sqrt(kin->Q2); });
+  HD->SetBinSchemeValue("mX",    [this](){ return kin->mX;                      });
+  HD->SetBinSchemeValue("xF",    [this](){ return kin->xF;                      });
+  HD->SetBinSchemeValue("phiH",  [this](){ return kin->phiH;                    });
+  HD->SetBinSchemeValue("phiS",  [this](){ return kin->phiS;                    });
+  HD->SetBinSchemeValue("tSpin", [this](){ return (Double_t)kin->tSpin;         });
+  HD->SetBinSchemeValue("lSpin", [this](){ return (Double_t)kin->lSpin;         });
+  /* jets */
+  HD->SetBinSchemeValue("ptJet", [this](){ return kin->pTjet;                   });
+  HD->SetBinSchemeValue("zJet",  [this](){ return kin->zjet;                    });
+
+  // some bin schemes values are checked here, instead of by CutDef checks ("External" cut type)
+  // - the lambda must return a boolean
+  HD->SetBinSchemeValueExternal("finalState", [this](Node *N){ return N->GetCut()->GetCutID() == finalStateID; });
 
 
   // DEFINE HISTOGRAMS ------------------------------------
@@ -514,7 +541,7 @@ void Analysis::AddBinScheme(TString varname) {
   };
   if(binSchemes.find(varname)==binSchemes.end()) { // (duplicate prevention)
     BinSet *B = new BinSet(varname,vartitle);
-    binSchemes.insert(std::pair<TString,BinSet*>(varname,B));
+    binSchemes.insert({varname,B});
   };
 };
 
@@ -534,56 +561,6 @@ void Analysis::AddFinalState(TString finalStateN) {
 };
 
 
-// access HistosDAG
-//------------------------------------
-HistosDAG *Analysis::GetHistosDAG() { return HD; };
-
-
-// lambda to check which bins an observable is in, during DAG breadth
-// traversal; it requires `finalStateID`, `valueMap`, and will
-// activate/deactivate bin nodes accoding to values in `valuMap`
-//--------------------------------------------------------------------
-std::function<void(Node*)> Analysis::CheckBin() {
-  return [this](Node *N){
-    if(N->GetNodeType()==NT::bin) {
-      Bool_t active;
-      Double_t val;
-      if(N->GetVarName()=="finalState") active = (N->GetCut()->GetCutID()==finalStateID);
-      else {
-        try {
-          // get value associated to this variable, and check cut
-          val = valueMap.at(N->GetVarName());
-          active = N->GetCut()->CheckCut(val);
-        } catch(const std::out_of_range &ex) {
-          /* if this variable is not found in `valueMap`, then just activate
-           * the node; this can happen if you are looking at jets AND tracks
-           * final states, and you defined a binning scheme only valid for
-           * tracks, but not for jets, e.g., `phiS`; if the current finalState
-           * you are checking is a jet, we don't need to check phiS, so just
-           * activate the node and ignore that cut
-           */
-          active = true;
-        };
-      };
-      N->SetActiveState(active);
-    };
-  };
-};
-
-// payload operator to check if the event is 'active', i.e., there is at least
-// one full NodePath where all bin Nodes are active; it will set `activeEvent`
-//--------------------------------------------------------------------
-std::function<void(NodePath*)> Analysis::CheckActive() {
-  return [this](NodePath *P){
-    if(!activeEvent) { // only check if we don't yet know
-      for(Node *N : P->GetBinNodes()) {
-        if(N->IsActive()==false) return;
-      };
-      activeEvent = true;
-    };
-  };
-};
-
 // FillHistos methods: check bins and fill associated histograms
 // - checks which bins the track/jet/etc. falls in
 // - fills the histograms in the associated Histos objects
@@ -591,37 +568,9 @@ std::function<void(NodePath*)> Analysis::CheckActive() {
 // tracks (single particles)
 void Analysis::FillHistosTracks() {
 
-  // add kinematic values to `valueMap`
-  valueMap.clear();
-  /* DIS */
-  valueMap.insert(std::pair<TString,Double_t>( "x", kin->x ));
-  valueMap.insert(std::pair<TString,Double_t>( "q2", kin->Q2 ));
-  valueMap.insert(std::pair<TString,Double_t>( "w", kin->W ));
-  valueMap.insert(std::pair<TString,Double_t>( "y", kin->y ));
-  /* single hadron */
-  valueMap.insert(std::pair<TString,Double_t>( "p", kin->pLab ));
-  valueMap.insert(std::pair<TString,Double_t>( "eta", kin->etaLab ));
-  valueMap.insert(std::pair<TString,Double_t>( "pt", kin->pT ));
-  valueMap.insert(std::pair<TString,Double_t>( "ptLab", kin->pTlab ));
-  valueMap.insert(std::pair<TString,Double_t>( "z", kin->z ));
-  valueMap.insert(std::pair<TString,Double_t>( "qT", kin->qT ));
-  valueMap.insert(std::pair<TString,Double_t>( "qTq", kin->qT/TMath::Sqrt(kin->Q2) ));
-  valueMap.insert(std::pair<TString,Double_t>( "mX", kin->mX ));
-  valueMap.insert(std::pair<TString,Double_t>( "xF", kin->xF ));
-  valueMap.insert(std::pair<TString,Double_t>( "phiH", kin->phiH ));
-  valueMap.insert(std::pair<TString,Double_t>( "phiS", kin->phiS ));
-  valueMap.insert(std::pair<TString,Double_t>( "tSpin", (Double_t)kin->tSpin ));
-  valueMap.insert(std::pair<TString,Double_t>( "lSpin", (Double_t)kin->lSpin ));
+  // check which bins to fill
+  HD->CheckBins();
 
-  // check bins
-  // - activates HistosDAG bin nodes which contain this track
-  HD->TraverseBreadth(CheckBin());
-  // - set `activeEvent` if there is at least one multidimensional bin to fill
-  activeEvent = false;
-  HD->Payload(CheckActive());
-  HD->ExecuteOps(true);
-  if(!activeEvent) return;
-  
   // fill histograms, for activated bins only
   HD->Payload([this](Histos *H){
     // Full phase space.
@@ -692,27 +641,12 @@ void Analysis::FillHistosTracks() {
   HD->ExecuteOps(true);
 };
 
+
 // jets
 void Analysis::FillHistosJets() {
 
-  // add kinematic values to `valueMap`
-  valueMap.clear();
-  /* DIS */
-  valueMap.insert(std::pair<TString,Double_t>(  "x",      kin->x      ));
-  valueMap.insert(std::pair<TString,Double_t>(  "q2",     kin->Q2     ));
-  valueMap.insert(std::pair<TString,Double_t>(  "y",      kin->y      ));
-  /* jets */
-  valueMap.insert(std::pair<TString,Double_t>(  "ptJet",  kin->pTjet  ));
-  valueMap.insert(std::pair<TString,Double_t>(  "zJet",   kin->zjet   ));
-
-  // check bins
-  // - activates HistosDAG bin nodes which contain this track
-  HD->TraverseBreadth(CheckBin());
-  // - set `activeEvent` if there is at least one multidimensional bin to fill
-  activeEvent = false;
-  HD->Payload(CheckActive());
-  HD->ExecuteOps(true);
-  if(!activeEvent) return;
+  // check which bins to fill
+  HD->CheckBins();
 
   // fill histograms, for activated bins only
   HD->Payload([this](Histos *H){
@@ -734,8 +668,6 @@ void Analysis::FillHistosJets() {
   //   with this jet
   HD->ExecuteOps(true);
 };
-
-
 
 
 // destructor

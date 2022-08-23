@@ -125,7 +125,7 @@ Bool_t CutDef::CheckCut(Double_t arg1) {
   }
 
   // externally applied cut
-  else if(cutType.CompareTo("External",TString::kIgnoreCase)==0) {
+  else if(this->IsExternal()) {
     cerr << "WARNING: unnecessary call to CutDef::CheckCut for External cut" << endl;
     return true;
   }
