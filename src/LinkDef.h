@@ -23,6 +23,7 @@
 
 // analysis event loop classes
 #pragma link C++ class Analysis+;
+#pragma link C++ class AnalysisEpic+;
 #pragma link C++ class AnalysisAthena+;
 #pragma link C++ class AnalysisEcce+;
 #ifndef EXCLUDE_DELPHES
