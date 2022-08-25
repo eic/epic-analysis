@@ -79,23 +79,19 @@ void AnalysisEcce::Execute()
   //  TTreeReaderArray<short> tracks_charge(tr,  "tracks_charge");
 
 
-  TTreeReader::EEntryStatus entrystats = tr.SetEntry(0);
-
   // calculate Q2 weights
   CalculateEventQ2Weights();
 
   // counters
-  Long64_t nevt, numNoBeam, numEle, numNoEle, numNoHadrons, numProxMatched, errorCount;
-  nevt = numNoBeam = numEle = numNoEle = numNoHadrons = numProxMatched = errorCount = 0;
+  Long64_t numNoBeam, numEle, numNoEle, numNoHadrons, numProxMatched, errorCount;
+  numNoBeam = numEle = numNoEle = numNoHadrons = numProxMatched = errorCount = 0;
 
   // event loop =========================================================
   cout << "begin event loop..." << endl;
-  while(tr.Next()) {
-    if(nevt%10000==0) cout << nevt << " events..." << endl;
+  tr.SetEntriesRange(1,maxEvents);
+  do {
+    if(tr.GetCurrentEntry()%10000==0) cout << tr.GetCurrentEntry() << " events..." << endl;
   
-    nevt++;
-    if(nevt>maxEvents && maxEvents>0) break;
-
     // resets
     kin->ResetHFS();
     kinTrue->ResetHFS();
@@ -371,8 +367,7 @@ void AnalysisEcce::Execute()
 
     }//hadron loop
 
-  }// tree reader loop
-
+  } while(tr.Next()); // tree reader loop
   cout << "end event loop" << endl;
   // event loop end =========================================================
 
