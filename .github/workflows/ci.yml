@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: cvmfs-contrib/github-action-cvmfs@v2
+      - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
         with:
           platform-release: "jug_xl:nightly"
@@ -65,7 +65,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: x_build
-      - uses: cvmfs-contrib/github-action-cvmfs@v2
+      - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
         env:
           S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
@@ -106,7 +106,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: cvmfs-contrib/github-action-cvmfs@v2
+      - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
         env:
           S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
@@ -155,7 +155,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           path: datarec
-      - uses: cvmfs-contrib/github-action-cvmfs@v2
+      - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
         with:
           platform-release: "jug_xl:nightly"
@@ -204,7 +204,7 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: x_fullsim
-      - uses: cvmfs-contrib/github-action-cvmfs@v2
+      - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
         with:
           platform-release: "jug_xl:nightly"
@@ -286,7 +286,7 @@ jobs:
         with:
           name: root_analysis_${{matrix.mode}}_${{matrix.aname}}_${{matrix.recon}}
           path: out
-      - uses: cvmfs-contrib/github-action-cvmfs@v2
+      - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
         with:
           platform-release: "jug_xl:nightly"
@@ -358,7 +358,7 @@ jobs:
         with:
           name: root_analysis_fullsim_${{matrix.aname}}_${{matrix.recon}}
           path: out
-      - uses: cvmfs-contrib/github-action-cvmfs@v2
+      - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
         with:
           platform-release: "jug_xl:nightly"
