@@ -1,4 +1,4 @@
-# SIDIS-eic
+# SIDIS-EIC
 
 General purpose analysis software for SIDIS at the EIC
 
