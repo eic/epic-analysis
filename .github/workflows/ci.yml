@@ -61,7 +61,7 @@ jobs:
           run: |
             echo "[CI] build sidis-eic"
             source environ.sh
-            make
+            EXCLUDE_DELPHES=1 make
       - uses: actions/upload-artifact@v3
         with:
           name: x_build_no_delphes

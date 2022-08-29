@@ -17,11 +17,15 @@ clean:
 deps: delphes mstwpdf adage
 deps-clean: delphes-clean mstwpdf-clean adage-clean
 delphes:
-	@echo "\n===== DELPHES ====="
-	@cd ${DELPHES_HOME}; $(MAKE)
+	@if [ -z "${EXCLUDE_DELPHES}" ]; then \
+		echo "\n===== DELPHES ====="; \
+		cd ${DELPHES_HOME}; $(MAKE); \
+	fi
 delphes-clean:
-	@echo "\n===== CLEAN DELPHES ====="
-	@cd ${DELPHES_HOME}; $(MAKE) clean
+	@if [ -z "${EXCLUDE_DELPHES}" ]; then \
+		echo "\n===== CLEAN DELPHES ====="; \
+		cd ${DELPHES_HOME}; $(MAKE) clean; \
+	fi
 mstwpdf:
 	@echo "\n===== MSTWPDF ====="
 	@cd ${MSTWPDF_HOME}; $(MAKE)
