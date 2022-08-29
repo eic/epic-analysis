@@ -210,7 +210,7 @@ jobs:
             echo "[CI] cat delphes.config"
             cat delphes.config
             echo "[CI] ANALYSIS MACRO"
-            root -b -q 'macro/ci/analysis_${{matrix.aname}}.C("delphes.config",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"fastsim.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
+            root -b -q macro/ci/include_delphes.C 'macro/ci/analysis_${{matrix.aname}}.C("delphes.config",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"fastsim.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
       - uses: actions/upload-artifact@v3
         with:
           name: root_analysis_fastsim_${{matrix.aname}}_${{matrix.recon}}
