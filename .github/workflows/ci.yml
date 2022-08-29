@@ -203,7 +203,7 @@ jobs:
             echo "aname = ${{matrix.aname}}"
             echo "recon = ${{matrix.recon}}"
             echo "[CI] flatten tree of Delphes files"
-            find . -name "*.root" -print | grep -E '^x_delphes' | tee tmp.list
+            find . -name "*.root" -print | grep -E '^x_delphes' > tmp.list
             cat tmp.list | while read f; do mv -v $f datarec/; done
             cat x_delphes*/delphes.config > delphes.config
             sort -nr -o delphes.config{,}
