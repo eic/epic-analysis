@@ -23,7 +23,9 @@
 #include "TRandomGen.h"
 
 // Delphes
+#ifdef INCLUDE_DELPHES
 #include "classes/DelphesClasses.h"
+#endif
 
 // Fastjet
 #include "fastjet/ClusterSequence.hh"
@@ -48,6 +50,15 @@ class Kinematics : public TObject
     void CalculateHadronKinematics();
 
     // hadronic final state (HFS)
+    void AddToHFS(TLorentzVector p4_);
+    void SubtractElectronFromHFS();
+    void ResetHFS();
+
+
+    // DELPHES-specific methods //////////////////////////
+#ifdef INCLUDE_DELPHES
+
+    // hadronic final state (HFS)
     void GetHFS(
         TObjArrayIter itTrack,
         TObjArrayIter itEFlowTrack,
@@ -59,12 +70,9 @@ class Kinematics : public TObject
         TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
         );
     void GetTrueHFS(TObjArrayIter itParticle);
-    void ResetHFS();
-    void SubtractElectronFromHFS();
-    void AddToHFS(TLorentzVector p4_);
 
     // PID
-    int getTrackPID(
+    int GetTrackPID(
         Track *track,
         TObjArrayIter itpfRICHTrack,
         TObjArrayIter itDIRCepidTrack, TObjArrayIter itDIRChpidTrack,
@@ -78,13 +86,16 @@ class Kinematics : public TObject
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
         );
     void CalculateJetKinematics(fastjet::PseudoJet jet);
-    #if INCCENTAURO == 1
+#if INCCENTAURO == 1
     void GetBreitFrameJets(
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
         );
     void CalculateBreitJetKinematics(fastjet::PseudoJet jet);
-    #endif
+#endif // ifdef INCCENTAURO
+#endif // ifdef INCLUDE_DELPHES
+    // end DELPHES-specific methods //////////////////////////
+
 
     // kinematics (should be Double_t, if going in SimpleTree)
     Double_t W,Q2,Nu,x,y,s; // DIS

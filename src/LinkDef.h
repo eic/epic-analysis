@@ -21,11 +21,15 @@
 #pragma link C++ class WeightsProduct+;
 #pragma link C++ class WeightsSum+;
 
-// analysis algorithms
+// analysis event loop classes
 #pragma link C++ class Analysis+;
-#pragma link C++ class AnalysisDelphes+;
 #pragma link C++ class AnalysisAthena+;
 #pragma link C++ class AnalysisEcce+;
+#ifdef INCLUDE_DELPHES
+#pragma link C++ class AnalysisDelphes+;
+#endif
+
+// postprocessing
 #pragma link C++ class PostProcessor+;
 
 #endif

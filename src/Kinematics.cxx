@@ -423,60 +423,54 @@ void Kinematics::ValidateHeadOnFrame() {
 };
 
 
-// get PID information from PID systems tracks
-int Kinematics::getTrackPID(
-    Track *track,
-    TObjArrayIter itpfRICHTrack,
-    TObjArrayIter itDIRCepidTrack, TObjArrayIter itDIRChpidTrack,
-    TObjArrayIter itBTOFepidTrack, TObjArrayIter itBTOFhpidTrack,
-    TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
-    ) {
+// add a 4-momentum to the hadronic final state
+void Kinematics::AddToHFS(TLorentzVector p4_) {
+  TLorentzVector p4 = p4_;
+  if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(p4,p4);
+  sigmah += (p4.E() - p4.Pz());
+  Pxh += p4.Px();
+  Pyh += p4.Py();
+  hadronSumVec += p4;
+  countHadrons++;
+};
 
-  itpfRICHTrack.Reset();
-  itDIRCepidTrack.Reset();   itDIRChpidTrack.Reset();
-  itBTOFepidTrack.Reset();   itBTOFhpidTrack.Reset();
-  itdualRICHagTrack.Reset(); itdualRICHcfTrack.Reset();
-  GenParticle *trackParticle = (GenParticle*)track->Particle.GetObject();
-  GenParticle *detectorParticle;
 
-  // TODO: make this less repetitive:
-
-  while(Track *detectorTrack = (Track*)itpfRICHTrack() ){
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) return detectorTrack->PID;
+// subtract electron from hadronic final state variables
+void Kinematics::SubtractElectronFromHFS() {
+  if(!isnan(vecElectron.E())){
+    switch(mainFrame) {
+      case fLab:
+        sigmah -= (vecElectron.E() - vecElectron.Pz());
+        Pxh -= vecElectron.Px();
+        Pyh -= vecElectron.Py();
+        hadronSumVec -= vecElectron;
+        break;
+      case fHeadOn:
+        this->TransformToHeadOnFrame(vecElectron,HvecElectron);
+        sigmah -= (HvecElectron.E() - HvecElectron.Pz());
+        Pxh -= HvecElectron.Px();
+        Pyh -= HvecElectron.Py();
+        hadronSumVec -= HvecElectron;
+        break;
+    }
+    countHadrons--;
+  } else {
+    cerr << "ERROR: electron energy is NaN" << endl;
+    // TODO: kill event
   }
-
-  while(Track *detectorTrack = (Track*)itDIRCepidTrack() ){
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) return detectorTrack->PID;
-  }
-  while(Track *detectorTrack = (Track*)itDIRChpidTrack() ){
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) return detectorTrack->PID;
-  }
-
-  while(Track *detectorTrack = (Track*)itBTOFepidTrack() ){
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) return detectorTrack->PID;
-  }
-  while(Track *detectorTrack = (Track*)itBTOFhpidTrack() ){
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) return detectorTrack->PID;
-  }
-
-  while(Track *detectorTrack = (Track*)itdualRICHagTrack() ){
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) return detectorTrack->PID;
-  }
-  while(Track *detectorTrack = (Track*)itdualRICHcfTrack() ){
-    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
-    if( detectorParticle == trackParticle ) return detectorTrack->PID;
-  }
-
-  return -1; // not found
-}
+};
 
 
+// reset some variables for the hadronic final state
+void Kinematics::ResetHFS() {
+  sigmah = Pxh = Pyh = 0;
+  hadronSumVec.SetPxPyPzE(0,0,0,0);
+  countHadrons = 0;
+};
+
+
+// DELPHES-only methods //////////////////////////////////////////////////////
+#ifdef INCLUDE_DELPHES
 // calculates reconstructed hadronic final state variables from DELPHES tree branches
 // expects 'vecElectron' set
 // - calculates `sigmah`, `Pxh`, and `Pyh` in the lab and head-on frames
@@ -504,7 +498,7 @@ void Kinematics::GetHFS(
     if(!isnan(trackp4.E())){
       if( std::abs(track->Eta) < 4.0  ){
 
-        int pid = getTrackPID( // get smeared PID
+        int pid = GetTrackPID( // get smeared PID
             track,
             itpfRICHTrack,
             itDIRCepidTrack, itDIRChpidTrack,
@@ -577,50 +571,62 @@ void Kinematics::GetTrueHFS(TObjArrayIter itParticle){
   this->SubtractElectronFromHFS();
 };
 
-// reset some variables for the hadronic final state
-void Kinematics::ResetHFS() {
-  sigmah = Pxh = Pyh = 0;
-  hadronSumVec.SetPxPyPzE(0,0,0,0);
-  countHadrons = 0;
-};
 
+// get PID information from PID systems tracks
+int Kinematics::GetTrackPID(
+    Track *track,
+    TObjArrayIter itpfRICHTrack,
+    TObjArrayIter itDIRCepidTrack, TObjArrayIter itDIRChpidTrack,
+    TObjArrayIter itBTOFepidTrack, TObjArrayIter itBTOFhpidTrack,
+    TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
+    ) {
 
-// add a 4-momentum to the hadronic final state
-void Kinematics::AddToHFS(TLorentzVector p4_) {
-  TLorentzVector p4 = p4_;
-  if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(p4,p4);
-  sigmah += (p4.E() - p4.Pz());
-  Pxh += p4.Px();
-  Pyh += p4.Py();
-  hadronSumVec += p4;
-  countHadrons++;
-};
+  itpfRICHTrack.Reset();
+  itDIRCepidTrack.Reset();   itDIRChpidTrack.Reset();
+  itBTOFepidTrack.Reset();   itBTOFhpidTrack.Reset();
+  itdualRICHagTrack.Reset(); itdualRICHcfTrack.Reset();
+  GenParticle *trackParticle = (GenParticle*)track->Particle.GetObject();
+  GenParticle *detectorParticle;
 
-// subtract electron from hadronic final state variables
-void Kinematics::SubtractElectronFromHFS() {
-  if(!isnan(vecElectron.E())){
-    switch(mainFrame) {
-      case fLab:
-        sigmah -= (vecElectron.E() - vecElectron.Pz());
-        Pxh -= vecElectron.Px();
-        Pyh -= vecElectron.Py();
-        hadronSumVec -= vecElectron;
-        break;
-      case fHeadOn:
-        this->TransformToHeadOnFrame(vecElectron,HvecElectron);
-        sigmah -= (HvecElectron.E() - HvecElectron.Pz());
-        Pxh -= HvecElectron.Px();
-        Pyh -= HvecElectron.Py();
-        hadronSumVec -= HvecElectron;
-        break;
-    }
-    countHadrons--;
-  } else {
-    cerr << "ERROR: electron energy is NaN" << endl;
-    // TODO: kill event
+  // TODO: make this less repetitive:
+
+  while(Track *detectorTrack = (Track*)itpfRICHTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) return detectorTrack->PID;
   }
-};
 
+  while(Track *detectorTrack = (Track*)itDIRCepidTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) return detectorTrack->PID;
+  }
+  while(Track *detectorTrack = (Track*)itDIRChpidTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) return detectorTrack->PID;
+  }
+
+  while(Track *detectorTrack = (Track*)itBTOFepidTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) return detectorTrack->PID;
+  }
+  while(Track *detectorTrack = (Track*)itBTOFhpidTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) return detectorTrack->PID;
+  }
+
+  while(Track *detectorTrack = (Track*)itdualRICHagTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) return detectorTrack->PID;
+  }
+  while(Track *detectorTrack = (Track*)itdualRICHcfTrack() ){
+    detectorParticle = (GenParticle*)detectorTrack->Particle.GetObject();
+    if( detectorParticle == trackParticle ) return detectorTrack->PID;
+  }
+
+  return -1; // not found
+}
+
+
+// JET METHODS ///////////////////////
 
 void Kinematics::GetJets(
     TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
@@ -705,6 +711,46 @@ void Kinematics::GetJets(
   jetsRec = sorted_by_pt(csRec.inclusive_jets());
   jetsTrue = sorted_by_pt(csTrue.inclusive_jets());
 
+};
+
+
+void Kinematics::CalculateJetKinematics(fastjet::PseudoJet jet){
+  // `jet` is already in the head-on frame, since `jetsRec` was filled with head-on frame momenta
+  TLorentzVector pjet(jet.px(), jet.py(), jet.pz(), jet.E());
+  TVector3 qTjetVect( vecElectron.Px()+pjet.Px(), vecElectron.Py()+pjet.Py(), 0); // (used only in Lorentz invariant calculations)
+  qTjet = qTjetVect.Mag();
+
+  zjet = (vecIonBeam.Dot(pjet))/((vecIonBeam).Dot(vecQ));
+  pTjet = jet.pt(); // lab frame pT
+
+  jperp.clear();
+  zhad_jet.clear();
+  std::vector<fastjet::PseudoJet> constituents = jet.constituents();
+  int constituentPID = 0; // if we only want zh/jperp for pi+, other tracks
+
+  if(constituentPID == 0){
+    for(int i = 0; i < constituents.size(); i++){
+      TLorentzVector partVec(constituents[i].px(), constituents[i].py(), constituents[i].pz(), constituents[i].E());
+      TVector3 jperpVec = Reject(partVec.Vect(),pjet.Vect());
+      jperp.push_back(jperpVec.Mag());
+      zhad_jet.push_back( (partVec.Vect()).Mag()/((pjet.Vect()).Mag()) );
+    }
+  }
+  else {
+    for(int i = 0; i < constituents.size(); i++){
+      TLorentzVector partVec(constituents[i].px(), constituents[i].py(), constituents[i].pz(), constituents[i].E());
+      std::map<double,int>::iterator it;
+      it = jetConstituents.find(partVec.Px());
+      if(it != jetConstituents.end()){
+        int pidTrack = it->second;
+        if(pidTrack == constituentPID){
+          TVector3 jperpVec = Reject(partVec.Vect(),pjet.Vect());
+          jperp.push_back(jperpVec.Mag());
+          zhad_jet.push_back( (partVec.Vect()).Mag()/((pjet.Vect()).Mag()) );
+        }
+      }
+    }
+  }
 };
 
 
@@ -860,47 +906,11 @@ void Kinematics::CalculateBreitJetKinematics(fastjet::PseudoJet jet){
   }
 
 };
-#endif
+#endif // ifdef INCCENTAURO
+#endif // ifdef INCLUDE_DELPHES
+// end DELPHES-only methods //////////////////////////////////////////////////////
 
 
-void Kinematics::CalculateJetKinematics(fastjet::PseudoJet jet){
-  // `jet` is already in the head-on frame, since `jetsRec` was filled with head-on frame momenta
-  TLorentzVector pjet(jet.px(), jet.py(), jet.pz(), jet.E());
-  TVector3 qTjetVect( vecElectron.Px()+pjet.Px(), vecElectron.Py()+pjet.Py(), 0); // (used only in Lorentz invariant calculations)
-  qTjet = qTjetVect.Mag();
-
-  zjet = (vecIonBeam.Dot(pjet))/((vecIonBeam).Dot(vecQ));
-  pTjet = jet.pt(); // lab frame pT
-
-  jperp.clear();
-  zhad_jet.clear();
-  std::vector<fastjet::PseudoJet> constituents = jet.constituents();
-  int constituentPID = 0; // if we only want zh/jperp for pi+, other tracks
-
-  if(constituentPID == 0){
-    for(int i = 0; i < constituents.size(); i++){
-      TLorentzVector partVec(constituents[i].px(), constituents[i].py(), constituents[i].pz(), constituents[i].E());
-      TVector3 jperpVec = Reject(partVec.Vect(),pjet.Vect());
-      jperp.push_back(jperpVec.Mag());
-      zhad_jet.push_back( (partVec.Vect()).Mag()/((pjet.Vect()).Mag()) );
-    }
-  }
-  else {
-    for(int i = 0; i < constituents.size(); i++){
-      TLorentzVector partVec(constituents[i].px(), constituents[i].py(), constituents[i].pz(), constituents[i].E());
-      std::map<double,int>::iterator it;
-      it = jetConstituents.find(partVec.Px());
-      if(it != jetConstituents.end()){
-        int pidTrack = it->second;
-        if(pidTrack == constituentPID){
-          TVector3 jperpVec = Reject(partVec.Vect(),pjet.Vect());
-          jperp.push_back(jperpVec.Mag());
-          zhad_jet.push_back( (partVec.Vect()).Mag()/((pjet.Vect()).Mag()) );
-        }
-      }
-    }
-  }
-};
 
 
 // BOOSTS

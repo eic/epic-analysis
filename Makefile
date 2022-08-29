@@ -5,7 +5,9 @@ all: deps sidis-eic
 all-clean: deps-clean clean
 sidis-eic:
 	@echo "\n===== SIDIS-EIC ====="
-	@ln -sf ${DELPHES_HOME}/external ./
+	@if [ -z "${EXCLUDE_DELPHES}" ]; then \
+		ln -svf ${DELPHES_HOME}/external ./; \
+	fi
 	@cd src; $(MAKE)
 clean:
 	@echo "\n===== CLEAN SIDIS-EIC ====="

@@ -174,7 +174,7 @@ void AnalysisDelphes::Execute() {
       // - check PID, to see if it's a final state we're interested in for
       //   histograms; if not, proceed to next track
       // pid = trk->PID; //NOTE: trk->PID is currently not smeared so it just returns the truth-level PID
-      pid = kin->getTrackPID( // get smeared PID
+      pid = kin->GetTrackPID( // get smeared PID
           trk,
           itpfRICHTrack,
           itDIRCepidTrack, itDIRChpidTrack,
