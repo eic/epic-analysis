@@ -85,7 +85,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        minq2: [1, 10, 100, 1000]
+        minq2: [1, 10, 100, 1000] # note: keep consistent with `download-artifact` with name `x_delphes_*`
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -118,7 +118,7 @@ jobs:
             cat delphes.config
       - uses: actions/upload-artifact@v3
         with:
-          name: delphes_${{env.ebeam_en}}x${{env.pbeam_en}}_q2min${{matrix.minq2}}_output
+          name: x_delphes_q2min${{matrix.minq2}}
           retention-days: 1
           path: |
             datarec/*.root
@@ -179,7 +179,20 @@ jobs:
           name: x_build_all
       - uses: actions/download-artifact@v3
         with:
-          path: datarec
+          name: x_delphes_q2min1
+          path: x_delphes_q2min1
+      - uses: actions/download-artifact@v3
+        with:
+          name: x_delphes_q2min10
+          path: x_delphes_q2min10
+      - uses: actions/download-artifact@v3
+        with:
+          name: x_delphes_q2min100
+          path: x_delphes_q2min100
+      - uses: actions/download-artifact@v3
+        with:
+          name: x_delphes_q2min1000
+          path: x_delphes_q2min1000
       - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
         with:
@@ -190,9 +203,9 @@ jobs:
             echo "aname = ${{matrix.aname}}"
             echo "recon = ${{matrix.recon}}"
             echo "[CI] flatten tree of Delphes files"
-            find datarec -name "*.root" -print | tee tmp.list
+            find -name "*.root" -print | grep -E '^x_delphes' | tee tmp.list
             cat tmp.list | while read f; do mv -v $f datarec/; done
-            cat datarec/delphes*/delphes.config > delphes.config
+            cat x_delphes*/delphes.config > delphes.config
             sort -nr -o delphes.config{,}
             echo "[CI] cat delphes.config"
             cat delphes.config
@@ -430,7 +443,6 @@ jobs:
         run: |
           rm -vr results/x_*
           rm -vr results/root_analysis_*
-          rm -vr results/delphes_*_output
           find results -name "*.root" -print | xargs rm -v
           rm -v results/*y_minima*/*/canv*.png
           tree results
