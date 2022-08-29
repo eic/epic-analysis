@@ -754,7 +754,7 @@ void Kinematics::CalculateJetKinematics(fastjet::PseudoJet jet){
 };
 
 
-#if INCCENTAURO == 1
+#ifdef INCLUDE_CENTAURO
 void Kinematics::GetBreitFrameJets(
   TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
   TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
@@ -906,7 +906,7 @@ void Kinematics::CalculateBreitJetKinematics(fastjet::PseudoJet jet){
   }
 
 };
-#endif // ifdef INCCENTAURO
+#endif // ifdef INCLUDE_CENTAURO
 #endif // ifdef INCLUDE_DELPHES
 // end DELPHES-only methods //////////////////////////////////////////////////////
 

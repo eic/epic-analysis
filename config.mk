@@ -24,12 +24,13 @@ ifndef EXCLUDE_DELPHES
 endif
 
 # DELPHES plugin: Fastjet Centauro
-INCCENTAURO = 0
-ifeq ($(INCCENTAURO),1)
+# usage: `INCLUDE_CENTAURO=1 make`
+# FIXME(jet): test and add to documentation
+ifdef INCLUDE_CENTAURO
 	LIBS += -L${DELPHES_HOME}/external/fastjet/plugins/Centauro -lCentauro
 	DEPS += -I${DELPHES_HOME}/external/fastjet/plugins/Centauro
+	FLAGS += -DINCLUDE_CENTAURO
 endif
-FLAGS += -DINCCENTAURO=$(INCCENTAURO)
 
 # MSTWPDF
 DEPS += -I${MSTWPDF_HOME}

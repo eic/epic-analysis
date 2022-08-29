@@ -29,7 +29,7 @@
 
 // Fastjet
 #include "fastjet/ClusterSequence.hh"
-#if INCCENTAURO == 1
+#ifdef INCLUDE_CENTAURO
 #include "fastjet/plugins/Centauro/Centauro.hh"
 #endif
 //using namespace fastjet;
@@ -86,13 +86,13 @@ class Kinematics : public TObject
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
         );
     void CalculateJetKinematics(fastjet::PseudoJet jet);
-#if INCCENTAURO == 1
+#ifdef INCLUDE_CENTAURO
     void GetBreitFrameJets(
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
         );
     void CalculateBreitJetKinematics(fastjet::PseudoJet jet);
-#endif // ifdef INCCENTAURO
+#endif // ifdef INCLUDE_CENTAURO
 #endif // ifdef INCLUDE_DELPHES
     // end DELPHES-specific methods //////////////////////////
 

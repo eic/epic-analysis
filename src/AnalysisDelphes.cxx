@@ -239,7 +239,7 @@ void AnalysisDelphes::Execute() {
     finalStateID = "jet";
     if(activeFinalStates.find(finalStateID)!=activeFinalStates.end()) {
 
-      #if INCCENTAURO == 1
+      #ifdef INCLUDE_CENTAURO
       if(useBreitJets) kin->GetBreitFrameJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
       #endif
 
@@ -254,7 +254,7 @@ void AnalysisDelphes::Execute() {
       for(int i = 0; i < kin->jetsRec.size(); i++){
 
         if(useBreitJets) {
-          #if INCCENTAURO == 1
+          #ifdef INCLUDE_CENTAURO
           jet = kin->breitJetsRec[i];
           kin->CalculateBreitJetKinematics(jet);
           #endif
