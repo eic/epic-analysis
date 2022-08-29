@@ -25,14 +25,12 @@
 // Delphes
 #ifdef INCLUDE_DELPHES
 #include "classes/DelphesClasses.h"
-#endif
-
-// Fastjet
 #include "fastjet/ClusterSequence.hh"
 #ifdef INCLUDE_CENTAURO
 #include "fastjet/plugins/Centauro/Centauro.hh"
 #endif
 //using namespace fastjet;
+#endif
 
 using std::map;
 using std::cout;
@@ -130,11 +128,12 @@ class Kinematics : public TObject
     TLorentzVector vecEleBeam, vecIonBeam;
     TLorentzVector vecElectron, vecW, vecQ;
     TLorentzVector vecHadron;
-    // jets
+
+#ifdef INCLUDE_DELPHES
+    // jet objects
     std::vector<fastjet::PseudoJet> jetsRec, jetsTrue;
     std::vector<fastjet::PseudoJet> breitJetsRec, breitJetsTrue;
     std::map<double, int> jetConstituents;
-
     fastjet::ClusterSequence csRec;
     fastjet::ClusterSequence csTrue;
 
@@ -143,6 +142,7 @@ class Kinematics : public TObject
     std::vector<double> zhad_jet;
     // struck quark information
     Double_t quarkpT;
+#endif
 
 
     // particle masses

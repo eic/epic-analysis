@@ -239,9 +239,9 @@ void AnalysisDelphes::Execute() {
     finalStateID = "jet";
     if(activeFinalStates.find(finalStateID)!=activeFinalStates.end()) {
 
-      #ifdef INCLUDE_CENTAURO
+#ifdef INCLUDE_CENTAURO
       if(useBreitJets) kin->GetBreitFrameJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
-      #endif
+#endif
 
       Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, chain->GetTreeNumber());
       wJet = Q2weightFactor * weightJet->GetWeight(*kinTrue); // TODO: should we separate weights for breit and non-breit jets?
@@ -254,10 +254,10 @@ void AnalysisDelphes::Execute() {
       for(int i = 0; i < kin->jetsRec.size(); i++){
 
         if(useBreitJets) {
-          #ifdef INCLUDE_CENTAURO
+#ifdef INCLUDE_CENTAURO
           jet = kin->breitJetsRec[i];
           kin->CalculateBreitJetKinematics(jet);
-          #endif
+#endif
         } else {
           jet = kin->jetsRec[i];
           kin->CalculateJetKinematics(jet);

@@ -96,7 +96,9 @@ class Analysis : public TNamed
 
     // FillHistos methods: fill histograms
     void FillHistosTracks();
+#ifdef INCLUDE_DELPHES
     void FillHistosJets();
+#endif
 
     // shared objects
     SimpleTree *ST;
@@ -131,9 +133,11 @@ class Analysis : public TNamed
     Double_t eleP,maxEleP;
     Double_t elePtrue, maxElePtrue;
     int pid;
-    fastjet::PseudoJet jet;
     TString finalStateID;
     Double_t wTrack,wJet;
+#ifdef INCLUDE_DELPHES
+    fastjet::PseudoJet jet;
+#endif
 
     // binning names / titles / etc.
     std::map<TString,TString> availableBinSchemes;
