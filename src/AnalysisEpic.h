@@ -27,6 +27,10 @@ class AnalysisEpic : public Analysis
 
     void Execute() override;
 
+    // printers
+    void PrintParticle(const edm4hep::MCParticle& P);
+    void PrintParticle(const edm4hep::ReconstructedParticle& P);
+
   private:
     podio::ROOTReader podioReader;
     podio::EventStore evStore;

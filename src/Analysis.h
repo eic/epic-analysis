@@ -30,6 +30,7 @@
 #include "Kinematics.h"
 #include "SimpleTree.h"
 #include "Weights.h"
+#include "CommonConstants.h"
 
 class Analysis : public TNamed
 {
@@ -99,6 +100,9 @@ class Analysis : public TNamed
     // finish the analysis; call `Analysis::Finish()` at the end of derived `Execute()` methods
     void Finish();
 
+    // print an error; if more than `errorCntMax` errors are printed, printing is suppressed
+    void ErrorPrint(TString message);
+
     // FillHistos methods: fill histograms
     void FillHistosTracks();
 #ifndef EXCLUDE_DELPHES
@@ -113,6 +117,8 @@ class Analysis : public TNamed
     Weights const* weightJet;
     Double_t wTrackTotal, wJetTotal;
     Long64_t entriesTot;
+    Long64_t errorCnt;
+    const Long64_t errorCntMax = 100;
     const TString sep = "--------------------------------------------";
 
     // setup / common settings

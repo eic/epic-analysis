@@ -102,6 +102,7 @@ Analysis::Analysis(
   // miscellaneous
   infiles.clear();
   entriesTot = 0;
+  errorCnt = 0;
 };
 
 
@@ -809,6 +810,12 @@ void Analysis::FillHistosJets() {
 };
 #endif
 
+// print an error; if more than `errorCntMax` errors are printed, printing is suppressed
+void Analysis::ErrorPrint(TString message) {
+  errorCnt++;
+  if(errorCnt <= errorCntMax) cerr << message << endl;
+  if(errorCnt == errorCntMax) cerr << "... more than " << errorCntMax << " errors; suppressing the rest ..." << endl;
+}
 
 // destructor
 Analysis::~Analysis() {
