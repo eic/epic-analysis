@@ -50,9 +50,6 @@ Analysis::Analysis(
   availableBinSchemes.insert({ "phiS",  "#phi_{S}"    });
   availableBinSchemes.insert({ "tSpin", "spin"        });
   availableBinSchemes.insert({ "lSpin", "spinL"       });
-  /* jets */
-  availableBinSchemes.insert({ "ptJet", "jet p_{T}"   });
-  availableBinSchemes.insert({ "zJet",  "jet z"       });
 
 
   // available final states
@@ -66,7 +63,6 @@ Analysis::Analysis(
   finalStateToTitle.insert({ "KpTrack",  "K^{+} tracks"   });
   finalStateToTitle.insert({ "KmTrack",  "K^{-} tracks"   });
   finalStateToTitle.insert({ "pTrack",   "p^{+} tracks"   });
-  finalStateToTitle.insert({ "jet",      "jets"           });
   // - PID -> finalState ID
   PIDtoFinalState.insert({  211,  "pipTrack" });
   PIDtoFinalState.insert({ -211,  "pimTrack" });
@@ -74,6 +70,14 @@ Analysis::Analysis(
   PIDtoFinalState.insert({ -321,  "KmTrack"  });
   PIDtoFinalState.insert({  2212, "pTrack"   });
 
+  // jets
+#ifdef INCLUDE_DELPHES
+  // available variables for binning
+  availableBinSchemes.insert({ "ptJet", "jet p_{T}" });
+  availableBinSchemes.insert({ "zJet",  "jet z"     });
+  // available final states
+  finalStateToTitle.insert({ "jet", "jets" });
+#endif
 
   // kinematics reconstruction methods
   // - choose one of these methods using `SetReconMethod(TString name)`
@@ -264,8 +268,10 @@ void Analysis::Prepare() {
   HD->SetBinSchemeValue("tSpin", [this](){ return (Double_t)kin->tSpin;         });
   HD->SetBinSchemeValue("lSpin", [this](){ return (Double_t)kin->lSpin;         });
   /* jets */
+#ifdef INCLUDE_DELPHES
   HD->SetBinSchemeValue("ptJet", [this](){ return kin->pTjet;                   });
   HD->SetBinSchemeValue("zJet",  [this](){ return kin->zjet;                    });
+#endif
 
   // some bin schemes values are checked here, instead of by CutDef checks ("External" cut type)
   // - the lambda must return a boolean
@@ -332,19 +338,10 @@ void Analysis::Prepare() {
     HS->DefineHist2D("depolCAvsQ2", "Q^{2}", "C/A",      "GeV^{2}", "", NBINS, 1, 3000, NBINS, 0, 2.5, true, false);
     HS->DefineHist2D("depolVAvsQ2", "Q^{2}", "V/A",      "GeV^{2}", "", NBINS, 1, 3000, NBINS, 0, 2.5, true, false);
     HS->DefineHist2D("depolWAvsQ2", "Q^{2}", "W/A",      "GeV^{2}", "", NBINS, 1, 3000, NBINS, 0, 2.5, true, false);
-     
     // -- single-hadron cross sections
     //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
     HS->DefineHist1D("Q_xsec","Q","GeV",10,1.0,10.0,true,true); // log
     HS->Hist("Q_xsec")->SetMinimum(1e-10);
-    // -- jet kinematics
-    HS->DefineHist1D("pT_jet","jet p_{T}","GeV", NBINS, 1e-2, 50);
-    HS->DefineHist1D("mT_jet","jet m_{T}","GeV", NBINS, 1e-2, 20);
-    HS->DefineHist1D("z_jet","jet z","", NBINS,0, 1);
-    HS->DefineHist1D("eta_jet","jet #eta_{lab}","", NBINS,-5,5);
-    HS->DefineHist1D("qT_jet","jet q_{T}", "GeV", NBINS, 0, 10.0);
-    HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
-    HS->DefineHist1D("qTQ_jet","jet q_{T}/Q","", NBINS, 0, 3.0);
     // -- resolutions
     HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -0.5, 0.5);
     HS->DefineHist1D("y_Res","y-y_{true}","", NBINS, -0.2, 0.2);
@@ -396,6 +393,16 @@ void Analysis::Prepare() {
         NBINS,-TMath::Pi(),TMath::Pi(),
         NBINS,-TMath::Pi(),TMath::Pi()
         );
+    // -- jet kinematics
+#ifdef INCLUDE_DELPHES
+    HS->DefineHist1D("pT_jet","jet p_{T}","GeV", NBINS, 1e-2, 50);
+    HS->DefineHist1D("mT_jet","jet m_{T}","GeV", NBINS, 1e-2, 20);
+    HS->DefineHist1D("z_jet","jet z","", NBINS,0, 1);
+    HS->DefineHist1D("eta_jet","jet #eta_{lab}","", NBINS,-5,5);
+    HS->DefineHist1D("qT_jet","jet q_{T}", "GeV", NBINS, 0, 10.0);
+    HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
+    HS->DefineHist1D("qTQ_jet","jet q_{T}/Q","", NBINS, 0, 3.0);
+#endif
   });
   HD->ExecuteAndClearOps();
 
@@ -643,6 +650,7 @@ void Analysis::FillHistosTracks() {
 
 
 // jets
+#ifdef INCLUDE_DELPHES
 void Analysis::FillHistosJets() {
 
   // check which bins to fill
@@ -668,6 +676,7 @@ void Analysis::FillHistosJets() {
   //   with this jet
   HD->ExecuteOps(true);
 };
+#endif
 
 
 // destructor

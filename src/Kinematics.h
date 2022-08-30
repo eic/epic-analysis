@@ -23,14 +23,13 @@
 #include "TRandomGen.h"
 
 // Delphes
+#ifdef INCLUDE_DELPHES
 #include "classes/DelphesClasses.h"
-
-// Fastjet
 #include "fastjet/ClusterSequence.hh"
-#if INCCENTAURO == 1
+#ifdef INCLUDE_CENTAURO
 #include "fastjet/plugins/Centauro/Centauro.hh"
 #endif
-//using namespace fastjet;
+#endif
 
 using std::map;
 using std::cout;
@@ -48,6 +47,15 @@ class Kinematics : public TObject
     void CalculateHadronKinematics();
 
     // hadronic final state (HFS)
+    void AddToHFS(TLorentzVector p4_);
+    void SubtractElectronFromHFS();
+    void ResetHFS();
+
+
+    // DELPHES-specific methods //////////////////////////
+#ifdef INCLUDE_DELPHES
+
+    // hadronic final state (HFS)
     void GetHFS(
         TObjArrayIter itTrack,
         TObjArrayIter itEFlowTrack,
@@ -59,12 +67,9 @@ class Kinematics : public TObject
         TObjArrayIter itdualRICHagTrack, TObjArrayIter itdualRICHcfTrack
         );
     void GetTrueHFS(TObjArrayIter itParticle);
-    void ResetHFS();
-    void SubtractElectronFromHFS();
-    void AddToHFS(TLorentzVector p4_);
 
     // PID
-    int getTrackPID(
+    int GetTrackPID(
         Track *track,
         TObjArrayIter itpfRICHTrack,
         TObjArrayIter itDIRCepidTrack, TObjArrayIter itDIRChpidTrack,
@@ -78,13 +83,16 @@ class Kinematics : public TObject
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
         );
     void CalculateJetKinematics(fastjet::PseudoJet jet);
-    #if INCCENTAURO == 1
+#ifdef INCLUDE_CENTAURO
     void GetBreitFrameJets(
         TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
         TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
         );
     void CalculateBreitJetKinematics(fastjet::PseudoJet jet);
-    #endif
+#endif // ifdef INCLUDE_CENTAURO
+#endif // ifdef INCLUDE_DELPHES
+    // end DELPHES-specific methods //////////////////////////
+
 
     // kinematics (should be Double_t, if going in SimpleTree)
     Double_t W,Q2,Nu,x,y,s; // DIS
@@ -119,11 +127,12 @@ class Kinematics : public TObject
     TLorentzVector vecEleBeam, vecIonBeam;
     TLorentzVector vecElectron, vecW, vecQ;
     TLorentzVector vecHadron;
-    // jets
+
+#ifdef INCLUDE_DELPHES
+    // jet objects
     std::vector<fastjet::PseudoJet> jetsRec, jetsTrue;
     std::vector<fastjet::PseudoJet> breitJetsRec, breitJetsTrue;
     std::map<double, int> jetConstituents;
-
     fastjet::ClusterSequence csRec;
     fastjet::ClusterSequence csTrue;
 
@@ -132,6 +141,7 @@ class Kinematics : public TObject
     std::vector<double> zhad_jet;
     // struck quark information
     Double_t quarkpT;
+#endif
 
 
     // particle masses

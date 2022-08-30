@@ -12,6 +12,10 @@ LINKDEF := LinkDef.h
 # source code (with $(DICT) and $(LINKDEF) moved to end of lists for rootcling)
 SOURCES := $(filter-out $(DICT),    $(wildcard *.cxx) $(wildcard sfset/*.cxx) $(wildcard interp/*.cxx)) $(DICT)
 HEADERS := $(filter-out $(LINKDEF), $(wildcard *.h)   $(wildcard sfset/*.h)   $(wildcard interp/*.h)    $(wildcard interp/*.ipp)) $(LINKDEF)
+ifdef EXCLUDE_DELPHES
+	SOURCES := $(filter-out AnalysisDelphes.cxx, $(SOURCES))
+	HEADERS := $(filter-out AnalysisDelphes.h,   $(HEADERS))
+endif
 
 #-----------------------------------------------
 

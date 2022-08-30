@@ -14,7 +14,9 @@ void analysis_p_eta(
   Analysis *A;
   if(outfilePrefix.Contains("fullsim"))
        A = new AnalysisAthena(  infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+#ifdef INCLUDE_DELPHES
   else A = new AnalysisDelphes( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+#endif
 
   A->SetReconMethod(reconMethod); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
