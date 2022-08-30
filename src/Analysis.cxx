@@ -198,6 +198,7 @@ void Analysis::Prepare() {
           return;
         }
         entries[idx] = tree->GetEntries();
+        file->Close();
       }
     }
     if (!AddFile(fileNames, entries, xs, Q2min)) {

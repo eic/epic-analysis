@@ -40,5 +40,5 @@ LIBS += -L${ADAGE_HOME}/lib -lAdage
 
 # SIDIS-EIC
 ifndef SIDIS_EIC_HOME
-	$(error "ERROR: run 'source environ.sh' before building")
+$(error "ERROR: run 'source environ.sh' before building")
 endif
