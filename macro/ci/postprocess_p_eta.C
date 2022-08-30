@@ -8,24 +8,8 @@ void postprocess_p_eta(TString infile="out/coverage.fullsim.root") {
   std::vector<TString> histList;
   if(infile.Contains("coverage")) {
     histList.push_back("Q2vsX");
-    histList.push_back("x");
-    histList.push_back("y");
-    histList.push_back("W");
-    histList.push_back("pLab");
-    histList.push_back("pTlab");
-    histList.push_back("etaLab");
-    histList.push_back("phiLab");
-    histList.push_back("z");
-    histList.push_back("pT");
-    histList.push_back("qT");
-    histList.push_back("qTq");
-    histList.push_back("mX");
-    histList.push_back("phiH");
-    histList.push_back("phiS");
-    histList.push_back("phiHvsPhiS");
     histList.push_back("etaVsP");
-    histList.push_back("phiSivers");
-    histList.push_back("phiCollins");
+    histList.push_back("phiHvsPhiS");
   }
   else if(infile.Contains("resolution")) {
     histList.push_back("x_Res");
