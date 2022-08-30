@@ -38,30 +38,16 @@ upstream simulation output:
 
 ## Upstream Dependencies
 These are common dependencies used for the upstream simulation, some of which
-are needed for `sidis-eic` as well. There are two options for obtaining upstream
-dependencies:
-
-### Option 1: Common EIC-shell Docker (Singularity) Container
+are needed for `sidis-eic` as well.
 
 Follow [eic-container documentation](https://eicweb.phy.anl.gov/containers/eic_container)
-to obtain the EIC software image
+to obtain and install the EIC software image.
 
 - The `eic-shell` script is used to start a container shell
-- This image contains all the dependencies needed for EIC simulations
+- This image contains all the upstream dependencies needed for EIC simulations
 - All documentation below assumes you are running in `eic-shell`
-
-**NOTE**: our old image, that was obtained by scripts in `container/`, is deprecated.
-
-### Option 2: Setup your Own Environment
-
-- The other option is to manually set up your environment, by downloading and/or
-  building all of the necessary dependencies, including:
-  - **ROOT**: prefer v6.24.02 or later
-  - **MinIO Client**, if you will be accessing data from S3 (see 
-      [s3tools documentation](s3tools/README.md) for details)
-- Option 1 is strongly recommended, to ensure you have the most up-to-date dependencies;
-  we will not maintain an up-to-date list of upstream dependencies here
-
+  - **NOTE**: our old image, that was obtained by scripts in `container/`, is deprecated.
+  - **NOTE**: it is no longer recommended to set up your own environment
 
 ## Local Dependencies
 These are additional dependencies needed by `sidis-eic`; they will be built
