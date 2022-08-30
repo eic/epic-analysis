@@ -49,6 +49,9 @@ to obtain and install the EIC software image.
   - **NOTE**: our old image, that was obtained by scripts in `container/`, is deprecated.
   - **NOTE**: it is no longer recommended to set up your own environment
 
+If you upgrade your image (`eic-shell --upgrade`), it is recommended to `clean` build
+everything: `make all-clean && make`
+
 ## Local Dependencies
 These are additional dependencies needed by `sidis-eic`; they will be built
 locally and stored in the `deps/` directory (see [deps/README.md](deps/README.md)
