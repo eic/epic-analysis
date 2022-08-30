@@ -17,10 +17,11 @@ LIBS = $(shell root-config --glibs)
 #LIBS += -lMinuit -lRooFitCore -lRooFit -lRooStats -lProof -lMathMore
 
 # DELPHES
-ifndef EXCLUDE_DELPHES
+ifdef EXCLUDE_DELPHES
+	FLAGS += -DEXCLUDE_DELPHES
+else
 	DEPS += -I${DELPHES_HOME} -I${DELPHES_HOME}/external
 	LIBS += -L${DELPHES_HOME} -lDelphes
-	FLAGS += -DINCLUDE_DELPHES
 endif
 
 # DELPHES plugin: Fastjet Centauro
@@ -40,5 +41,5 @@ LIBS += -L${ADAGE_HOME}/lib -lAdage
 
 # SIDIS-EIC
 ifndef SIDIS_EIC_HOME
-	$(error "ERROR: run 'source environ.sh' before building")
+$(error "ERROR: run 'source environ.sh' before building")
 endif
