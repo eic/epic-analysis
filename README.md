@@ -92,6 +92,11 @@ make <dependency>        # build a particular `<dependency>`
 make <dependency>-clean  # clean a particular `<dependency>`
 ```
 
+Additional build options are available:
+- `INCLUDE_CENTAURO=1 make` will build with `fastjet` plugin `Centauro`; note that `Centauro` is not included
+  with `Delphes` by default
+- `EXCLUDE_DELPHES=1 make` will build `sidis-eic` without Delphes, which is primarily used to expedite CI workflows
+
 ## Quick Start
 
 - If you're ready to try the software hands-on, follow the [tutorials](tutorial/README.md) in 

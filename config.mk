@@ -24,8 +24,6 @@ ifndef EXCLUDE_DELPHES
 endif
 
 # DELPHES plugin: Fastjet Centauro
-# usage: `INCLUDE_CENTAURO=1 make`
-# FIXME(jet): test and add to documentation
 ifdef INCLUDE_CENTAURO
 	LIBS += -L${DELPHES_HOME}/external/fastjet/plugins/Centauro -lCentauro
 	DEPS += -I${DELPHES_HOME}/external/fastjet/plugins/Centauro

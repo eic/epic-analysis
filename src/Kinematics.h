@@ -29,7 +29,6 @@
 #ifdef INCLUDE_CENTAURO
 #include "fastjet/plugins/Centauro/Centauro.hh"
 #endif
-//using namespace fastjet;
 #endif
 
 using std::map;
