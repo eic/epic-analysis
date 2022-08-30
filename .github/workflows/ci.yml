@@ -265,7 +265,6 @@ jobs:
 
 # run postprocess macros matrix for fastsim and fullsim
   postprocess:
-    if: ${{always()}}
     needs: 
       - analysis_fastsim
       - analysis_fullsim
@@ -412,7 +411,6 @@ jobs:
 
 # collect artifacts into one directory
   collect:
-    if: ${{always()}}
     needs: 
       - postprocess
       - compare_fastfull
