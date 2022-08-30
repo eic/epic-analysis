@@ -278,28 +278,28 @@ jobs:
           - fullsim
         pname: # list only jobs which will only use one (primary) recon method
           - bin_test
-          - coverage_p_eta
+          - coverage2D_p_eta
           - y_minima
         recon: [Ele] # primary recon method(s)
         include:
           # use only primary recon method
           - { pname: bin_test,         aname: x_q2,   pmacro: postprocess_bin_test.C }
-          - { pname: coverage_p_eta,   aname: p_eta,  pmacro: postprocess_p_eta.C }
+          - { pname: coverage2D_p_eta, aname: p_eta,  pmacro: postprocess_p_eta.C }
           - { pname: y_minima,         aname: yRatio, pmacro: postprocess_yRatio.C }
           # use all reconstruction methods: (...seems like we really need to define every matrix element...) 
           ## coverage
-          - { mode: fastsim, pname: coverage_x_q2,   recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fullsim, pname: coverage_x_q2,   recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim, pname: coverage_x_q2,   recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fullsim, pname: coverage_x_q2,   recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim, pname: coverage_x_q2,   recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fullsim, pname: coverage_x_q2,   recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim, pname: coverage_x_q2,   recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fullsim, pname: coverage_x_q2,   recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim, pname: coverage_x_q2,   recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fullsim, pname: coverage_x_q2,   recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim, pname: coverage_x_q2,   recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fullsim, pname: coverage_x_q2,   recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage2D_x_q2,   recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: coverage2D_x_q2,   recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage2D_x_q2,   recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: coverage2D_x_q2,   recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage2D_x_q2,   recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: coverage2D_x_q2,   recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage2D_x_q2,   recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: coverage2D_x_q2,   recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage2D_x_q2,   recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: coverage2D_x_q2,   recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage2D_x_q2,   recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fullsim, pname: coverage2D_x_q2,   recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
@@ -439,6 +439,7 @@ jobs:
         run: |
           macro/ci/merge-recon.sh results resolution_x_q2
           macro/ci/merge-recon.sh results coverage_x_q2
+          macro/ci/merge-recon.sh results coverage2D_x_q2
           tree results
       - name: merge_fastfull
         run: |
