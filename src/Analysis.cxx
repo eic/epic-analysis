@@ -71,7 +71,7 @@ Analysis::Analysis(
   PIDtoFinalState.insert({  2212, "pTrack"   });
 
   // jets
-#ifdef INCLUDE_DELPHES
+#ifndef EXCLUDE_DELPHES
   // available variables for binning
   availableBinSchemes.insert({ "ptJet", "jet p_{T}" });
   availableBinSchemes.insert({ "zJet",  "jet z"     });
@@ -269,7 +269,7 @@ void Analysis::Prepare() {
   HD->SetBinSchemeValue("tSpin", [this](){ return (Double_t)kin->tSpin;         });
   HD->SetBinSchemeValue("lSpin", [this](){ return (Double_t)kin->lSpin;         });
   /* jets */
-#ifdef INCLUDE_DELPHES
+#ifndef EXCLUDE_DELPHES
   HD->SetBinSchemeValue("ptJet", [this](){ return kin->pTjet;                   });
   HD->SetBinSchemeValue("zJet",  [this](){ return kin->zjet;                    });
 #endif
@@ -395,7 +395,7 @@ void Analysis::Prepare() {
         NBINS,-TMath::Pi(),TMath::Pi()
         );
     // -- jet kinematics
-#ifdef INCLUDE_DELPHES
+#ifndef EXCLUDE_DELPHES
     HS->DefineHist1D("pT_jet","jet p_{T}","GeV", NBINS, 1e-2, 50);
     HS->DefineHist1D("mT_jet","jet m_{T}","GeV", NBINS, 1e-2, 20);
     HS->DefineHist1D("z_jet","jet z","", NBINS,0, 1);
@@ -651,7 +651,7 @@ void Analysis::FillHistosTracks() {
 
 
 // jets
-#ifdef INCLUDE_DELPHES
+#ifndef EXCLUDE_DELPHES
 void Analysis::FillHistosJets() {
 
   // check which bins to fill

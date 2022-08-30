@@ -96,7 +96,7 @@ class Analysis : public TNamed
 
     // FillHistos methods: fill histograms
     void FillHistosTracks();
-#ifdef INCLUDE_DELPHES
+#ifndef EXCLUDE_DELPHES
     void FillHistosJets();
 #endif
 
@@ -135,7 +135,7 @@ class Analysis : public TNamed
     int pid;
     TString finalStateID;
     Double_t wTrack,wJet;
-#ifdef INCLUDE_DELPHES
+#ifndef EXCLUDE_DELPHES
     fastjet::PseudoJet jet;
 #endif
 

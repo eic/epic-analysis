@@ -23,7 +23,7 @@
 #include "TRandomGen.h"
 
 // Delphes
-#ifdef INCLUDE_DELPHES
+#ifndef EXCLUDE_DELPHES
 #include "classes/DelphesClasses.h"
 #include "fastjet/ClusterSequence.hh"
 #ifdef INCLUDE_CENTAURO
@@ -53,7 +53,7 @@ class Kinematics : public TObject
 
 
     // DELPHES-specific methods //////////////////////////
-#ifdef INCLUDE_DELPHES
+#ifndef EXCLUDE_DELPHES
 
     // hadronic final state (HFS)
     void GetHFS(
@@ -90,7 +90,7 @@ class Kinematics : public TObject
         );
     void CalculateBreitJetKinematics(fastjet::PseudoJet jet);
 #endif // ifdef INCLUDE_CENTAURO
-#endif // ifdef INCLUDE_DELPHES
+#endif // ifndef EXCLUDE_DELPHES
     // end DELPHES-specific methods //////////////////////////
 
 
@@ -128,7 +128,7 @@ class Kinematics : public TObject
     TLorentzVector vecElectron, vecW, vecQ;
     TLorentzVector vecHadron;
 
-#ifdef INCLUDE_DELPHES
+#ifndef EXCLUDE_DELPHES
     // jet objects
     std::vector<fastjet::PseudoJet> jetsRec, jetsTrue;
     std::vector<fastjet::PseudoJet> breitJetsRec, breitJetsTrue;

@@ -1,0 +1,3 @@
+{
+#define EXCLUDE_DELPHES
+}

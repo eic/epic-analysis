@@ -470,7 +470,7 @@ void Kinematics::ResetHFS() {
 
 
 // DELPHES-only methods //////////////////////////////////////////////////////
-#ifdef INCLUDE_DELPHES
+#ifndef EXCLUDE_DELPHES
 // calculates reconstructed hadronic final state variables from DELPHES tree branches
 // expects 'vecElectron' set
 // - calculates `sigmah`, `Pxh`, and `Pyh` in the lab and head-on frames
@@ -907,7 +907,7 @@ void Kinematics::CalculateBreitJetKinematics(fastjet::PseudoJet jet){
 
 };
 #endif // ifdef INCLUDE_CENTAURO
-#endif // ifdef INCLUDE_DELPHES
+#endif // ifndef EXCLUDE_DELPHES
 // end DELPHES-only methods //////////////////////////////////////////////////////
 
 
