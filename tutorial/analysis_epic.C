@@ -11,8 +11,10 @@ R__LOAD_LIBRARY(Sidis-eic)
 //   CI artifact: results/dis/10on100/minQ2=1/rec-dis_10x100_minQ2=1.root
 // 
 // test procedure:
-// 1. download this artifact from a recent pipeline, and store in datarec/
+// 1. download this artifact from a recent pipeline, and store in `datarec/epic_test/`
 // 2. run this macro
+//
+// if you use a different artifact, edit `tutorial/s3files.epic.config`
 //
 //
 
@@ -22,11 +24,11 @@ R__LOAD_LIBRARY(Sidis-eic)
  *   between fast and full simulations
  */
 void analysis_epic(
-    TString  infiles="benchmark_artifact.config", // list of input files
-    Double_t eleBeamEn=10,                        // electron beam energy [GeV]
-    Double_t ionBeamEn=100,                       // ion beam energy [GeV]
-    Double_t crossingAngle=-25,                   // crossing angle [mrad]
-    TString  outfilePrefix="tutorial.epic"        // output filename prefix
+    TString  infiles="tutorial/s3files.epic.config", // list of input files
+    Double_t eleBeamEn=10,                           // electron beam energy [GeV]
+    Double_t ionBeamEn=100,                          // ion beam energy [GeV]
+    Double_t crossingAngle=-25,                      // crossing angle [mrad]
+    TString  outfilePrefix="tutorial.epic"           // output filename prefix
     )
 {
 
