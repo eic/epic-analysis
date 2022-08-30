@@ -1,6 +1,7 @@
 include ../config.mk
 
 SIDIS_EIC = Sidis-eic
+ROOTCLING = rootcling
 
 # targets
 PREFIX  := ${SIDIS_EIC_HOME}/lib
@@ -15,6 +16,7 @@ HEADERS := $(filter-out $(LINKDEF), $(wildcard *.h)   $(wildcard sfset/*.h)   $(
 ifdef EXCLUDE_DELPHES
 	SOURCES := $(filter-out AnalysisDelphes.cxx, $(SOURCES))
 	HEADERS := $(filter-out AnalysisDelphes.h,   $(HEADERS))
+	ROOTCLING += -D=EXCLUDE_DELPHES
 endif
 
 #-----------------------------------------------
@@ -27,7 +29,7 @@ $(PREFIX)/$(LIB): $(DICT) $(HEADERS) $(SOURCES)
 $(DICT): $(HEADERS)
 	@echo ">>>>> generate $(SIDIS_EIC) dictionary"
 	@echo "      $@"
-	@rootcling -f $@ $(DEPS) $^
+	$(ROOTCLING) -f $@ $(DEPS) $^
 	@mkdir -p $(PREFIX)
 	@mv $(PCM) $(PREFIX)/
 
