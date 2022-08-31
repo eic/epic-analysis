@@ -57,9 +57,6 @@ void AnalysisEpic::Execute()
     // resets
     kin->ResetHFS();
     kinTrue->ResetHFS();
-    edm4hep::MCParticle& mcpartEleBeam; // trouble
-    edm4hep::MCParticle& mcpartIonBeam;
-    edm4hep::MCParticle& mcpartElectron;
     double mcpartElectronP   = 0.0;
     bool double_counted_beam = false;
     int num_ele_beams    = 0;
@@ -70,9 +67,14 @@ void AnalysisEpic::Execute()
     auto& mcparts  = evStore.get<edm4hep::MCParticleCollection>("MCParticles");
     auto& recparts = evStore.get<edm4hep::ReconstructedParticleCollection>("ReconstructedParticles");
 
+    // data objects
+    edm4hep::MCParticle mcpartEleBeam;
+    edm4hep::MCParticle mcpartIonBeam;
+    edm4hep::MCParticle mcpartElectron;
+
     // loop over generated particles
     cout << endl << "MCParticles: ---------------------------------------" << endl;
-    for(const auto& mcpart : mcparts) {
+    for(auto mcpart : mcparts) {
 
       // print out this MCParticle
       // PrintParticle(mcpart);
@@ -145,7 +147,7 @@ void AnalysisEpic::Execute()
     printf("  %10s %8s %8s %8s %8s %8s %8s\n", "", "x", "Q2", "W", "y", "nu", "elec?");
     for(const auto upstreamReconMethod : upstreamReconMethodList)
       for(const auto& calc : evStore.get<eicd::InclusiveKinematicsCollection>("InclusiveKinematics"+upstreamReconMethod) )
-        printf("  %10s %8.2f %8.2f %8.2f %8.2f %8.2f %8d\n",
+        printf("  %10s %8.5f %8.2f %8.2f %8.5f %8.2f %8d\n",
             upstreamReconMethod.c_str(),
             calc.getX(),
             calc.getQ2(),
@@ -210,6 +212,8 @@ void AnalysisEpic::PrintParticle(const edm4hep::ReconstructedParticle& P) {
     << P.getMomentum().z << ")" << endl;
   cout << "  p=|Momentum|: " << edm4hep::utils::p(P) << endl;
   cout << "  Energy:       " << P.getEnergy() << endl;
+  cout << "  Mass:         " << P.getMass() << endl;
+  cout << "  Charge:       " << P.getCharge() << endl;
   cout << "  # of clusters: "   << P.clusters_size()    << endl;
   cout << "  # of tracks:   "   << P.tracks_size()      << endl;
   cout << "  # of PIDs:     "   << P.particleIDs_size() << endl;
