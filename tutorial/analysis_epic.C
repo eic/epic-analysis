@@ -42,6 +42,7 @@ void analysis_epic(
       outfilePrefix
       );
 
+  A->verbose = true;
   A->maxEvents = 300000; // use this to limit the number of events
   A->writeSimpleTree = true;
 

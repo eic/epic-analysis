@@ -92,6 +92,7 @@ Analysis::Analysis(
 
   // common settings defaults
   // - these settings can be set at the macro level
+  verbose         = false;
   writeSimpleTree = false;
   maxEvents       = 0;
   useBreitJets    = false;

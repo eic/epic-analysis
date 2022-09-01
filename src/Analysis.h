@@ -54,6 +54,7 @@ class Analysis : public TNamed
     void AddFinalState(TString finalStateN);
 
     // common settings
+    Bool_t verbose; // if true, print a lot more information
     Bool_t writeSimpleTree; // if true, write SimpleTree (not binned)
     Long64_t maxEvents; /* default=0, which runs all events;
                          * if > 0, run a maximum number of `maxEvents` events (useful for quick tests)

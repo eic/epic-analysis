@@ -27,9 +27,21 @@ class AnalysisEpic : public Analysis
 
     void Execute() override;
 
+    // return Lorentz vector for a given particle
+    template <class ParticleType>
+    TLorentzVector GetP4(ParticleType& P) {
+      return TLorentzVector(
+          P.getMomentum().x,
+          P.getMomentum().y,
+          P.getMomentum().z,
+          P.getEnergy()
+          );
+    }
+
     // printers
     void PrintParticle(const edm4hep::MCParticle& P);
     void PrintParticle(const edm4hep::ReconstructedParticle& P);
+    void PrintHeader(TString msg);
 
   private:
     podio::ROOTReader podioReader;
