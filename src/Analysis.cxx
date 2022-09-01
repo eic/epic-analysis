@@ -93,8 +93,9 @@ Analysis::Analysis(
   // common settings defaults
   // - these settings can be set at the macro level
   writeSimpleTree = false;
-  maxEvents = 0;
-  useBreitJets = false;
+  maxEvents       = 0;
+  useBreitJets    = false;
+  errorCntMax     = 100;
 
   weight = new WeightsUniform();
   weightJet = new WeightsUniform();

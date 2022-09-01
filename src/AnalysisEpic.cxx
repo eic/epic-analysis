@@ -35,6 +35,8 @@ void AnalysisEpic::Execute()
   // create PODIO event store
   podioReader.openFiles(infilesFlat);
   evStore.setReader(&podioReader);
+  ENT = podioReader.getEntries();
+  if(maxEvents>0) ENT = std::min(maxEvents,ENT);
   
   // calculate Q2 weights
   CalculateEventQ2Weights();
@@ -50,7 +52,7 @@ void AnalysisEpic::Execute()
 
   // event loop =========================================================
   cout << "begin event loop..." << endl;
-  for(unsigned e=0; e<podioReader.getEntries(); e++) {
+  for(unsigned e=0; e<ENT; e++) {
     if(e%10000==0) cout << e << " events..." << endl;
     cout << endl << "EVENT " << e << " ===============================================" << endl;
 

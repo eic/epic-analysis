@@ -118,7 +118,6 @@ class Analysis : public TNamed
     Double_t wTrackTotal, wJetTotal;
     Long64_t entriesTot;
     Long64_t errorCnt;
-    const Long64_t errorCntMax = 100;
     const TString sep = "--------------------------------------------";
 
     // setup / common settings
