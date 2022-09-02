@@ -102,7 +102,7 @@ class Analysis : public TNamed
     void Finish();
 
     // print an error; if more than `errorCntMax` errors are printed, printing is suppressed
-    void ErrorPrint(TString message);
+    void ErrorPrint(std::string message);
 
     // FillHistos methods: fill histograms
     void FillHistosTracks();

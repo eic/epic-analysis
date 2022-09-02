@@ -813,10 +813,10 @@ void Analysis::FillHistosJets() {
 #endif
 
 // print an error; if more than `errorCntMax` errors are printed, printing is suppressed
-void Analysis::ErrorPrint(TString message) {
+void Analysis::ErrorPrint(std::string message) {
   errorCnt++;
-  if(errorCnt <= errorCntMax) cerr << message << endl;
-  if(errorCnt == errorCntMax) cerr << "... more than " << errorCntMax << " errors; suppressing the rest ..." << endl;
+  if(errorCnt <= errorCntMax) fmt::print(stderr,"{}\n",message);
+  if(errorCnt == errorCntMax) fmt::print(stderr,"... {} errors printed; suppressing the rest ...\n",errorCnt);
 }
 
 // destructor

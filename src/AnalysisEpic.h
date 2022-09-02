@@ -4,9 +4,13 @@
 // data model
 #include "podio/EventStore.h"
 #include "podio/ROOTReader.h"
-#include "edm4hep/MCParticleCollection.h"
-#include "edm4hep/ReconstructedParticleCollection.h"
+#include "podio/CollectionBase.h"
 #include "edm4hep/utils/kinematics.h"
+
+// data model collections
+#include "edm4hep/MCParticleCollection.h"
+#include "eicd/ReconstructedParticleCollection.h"
+#include "eicd/MCRecoParticleAssociationCollection.h"
 #include "eicd/InclusiveKinematicsCollection.h"
 
 // sidis-eic
@@ -40,8 +44,17 @@ class AnalysisEpic : public Analysis
 
     // printers
     void PrintParticle(const edm4hep::MCParticle& P);
-    void PrintParticle(const edm4hep::ReconstructedParticle& P);
-    void PrintHeader(TString msg);
+    void PrintParticle(const eicd::ReconstructedParticle& P);
+
+
+  protected:
+
+    // get PDG from reconstructed particle
+    int GetReconstructedPDG(
+        const edm4hep::MCParticle& simPart,
+        const eicd::ReconstructedParticle& recPart,
+        bool& usedTruth
+        );
 
   private:
     podio::ROOTReader podioReader;
