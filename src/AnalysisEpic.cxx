@@ -63,16 +63,15 @@ void AnalysisEpic::Execute()
     int num_rec_electrons    = 0;
     
     // read particle collections for this event
-    // FIXME: not yet fully using `edm4*` in physics_benchmarks pipelines; instead using `eicd`
     const auto& simParts   = evStore.get<edm4hep::MCParticleCollection>("MCParticles");
-    const auto& recParts   = evStore.get<eicd::ReconstructedParticleCollection>("ReconstructedParticles");
-    const auto& mcRecLinks = evStore.get<eicd::MCRecoParticleAssociationCollection>("ReconstructedParticlesAssoc");
+    const auto& recParts   = evStore.get<edm4eic::ReconstructedParticleCollection>("ReconstructedParticles");
+    const auto& mcRecLinks = evStore.get<edm4eic::MCRecoParticleAssociationCollection>("ReconstructedParticlesAssoc");
 
     // data objects
     edm4hep::MCParticle mcPartEleBeam;
     edm4hep::MCParticle mcPartIonBeam;
     edm4hep::MCParticle mcPartElectron;
-    std::set<eicd::ReconstructedParticle> recPartsToAnalyze;
+    std::set<edm4eic::ReconstructedParticle> recPartsToAnalyze;
 
     // loop over generated particles
     if(verbose) fmt::print("\n{:-<60}\n","MCParticles ");
@@ -161,8 +160,8 @@ void AnalysisEpic::Execute()
     // loop over associations: MC particle <-> Reconstructed particle
     if(verbose) fmt::print("\n{:-<60}\n","MC<->Reco ASSOCIATIONS ");
     for(const auto& link : mcRecLinks ) {
-      auto recPart = link.getRec();
-      auto simPart = link.getSim();
+      auto recPart = link.getRec(); // reconstructed particle
+      auto simPart = link.getSim(); // simulated (truth) particle
       bool truthMatch = simPart.isAvailable();
       // if(!truthMatch) continue; // FIXME: consider using this once we have matching
 
@@ -188,7 +187,8 @@ void AnalysisEpic::Execute()
 
       // find scattered electron, by matching to truth
       // FIXME: not working unless we have truth matching and/or reconstructed PID
-      // FIXME: does `simPart==mcPartElectron` actually work !? - alternatively use ID to check matching
+      // FIXME: any common upstream electron finder?
+      // FIXME: does `simPart==mcPartElectron` work?
       /*
       if(pid==constants::pdgElectron && simPart==mcPartElectron) {
         num_rec_electrons++;
@@ -228,7 +228,7 @@ void AnalysisEpic::Execute()
     fmt::print("\n{:-<60}\n","KINEMATICS, calculated from upstream: ");
     fmt::print("  {:>10} {:>8} {:>8} {:>8} {:>8} {:>8} {:>8}\n", "", "x", "Q2", "W", "y", "nu", "elec?");
     for(const auto upstreamReconMethod : upstreamReconMethodList)
-      for(const auto& calc : evStore.get<eicd::InclusiveKinematicsCollection>("InclusiveKinematics"+upstreamReconMethod) )
+      for(const auto& calc : evStore.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematics"+upstreamReconMethod) )
         fmt::print("  {:10} {:8.5f} {:8.2f} {:8.2f} {:8.5f} {:8.2f} {:>8}\n",
             upstreamReconMethod,
             calc.getX(),
@@ -282,7 +282,7 @@ void AnalysisEpic::PrintParticle(const edm4hep::MCParticle& P) {
     fmt::print("    {:>20}: {}\n", "PDG", daughter.getPDG());
 }
 
-void AnalysisEpic::PrintParticle(const eicd::ReconstructedParticle& P) {
+void AnalysisEpic::PrintParticle(const edm4eic::ReconstructedParticle& P) {
   fmt::print("\n");
   fmt::print("  {:>20}: ", "PDG");
   if(P.getParticleIDUsed().isAvailable()) fmt::print("{}\n", P.getParticleIDUsed().getPDG());
@@ -313,10 +313,11 @@ void AnalysisEpic::PrintParticle(const eicd::ReconstructedParticle& P) {
 
 // helper methods //////////////////////////////////////////////
 
-// get PDG from reconstructed particle
+// get PDG from reconstructed particle; resort to true PDG, if
+// PID is unavailable (sets `usedTruth` to true)
 int AnalysisEpic::GetReconstructedPDG(
     const edm4hep::MCParticle& simPart,
-    const eicd::ReconstructedParticle& recPart,
+    const edm4eic::ReconstructedParticle& recPart,
     bool& usedTruth
     )
 {
@@ -329,7 +330,7 @@ int AnalysisEpic::GetReconstructedPDG(
     pid = recPart.getParticleIDUsed().getPDG();
   */
   
-  // if using eicd::ReconstructedParticle:
+  // if using edm4eic::ReconstructedParticle:
   // pid = recPart.getPDG(); // FIXME: not available either
 
   // if reconstructed PID is unavailable, use MC PDG

@@ -9,7 +9,7 @@ R__LOAD_LIBRARY(podioDict)
 R__LOAD_LIBRARY(podioRootIO)
 R__LOAD_LIBRARY(edm4hep)
 R__LOAD_LIBRARY(edm4eic)
-R__LOAD_LIBRARY(eicd)
+// R__LOAD_LIBRARY(eicd) // replaced with edm4eic
 R__LOAD_LIBRARY(fmt)
 #include "podio/EventStore.h"
 #include "podio/ROOTReader.h"

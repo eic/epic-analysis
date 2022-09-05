@@ -9,9 +9,9 @@
 
 // data model collections
 #include "edm4hep/MCParticleCollection.h"
-#include "eicd/ReconstructedParticleCollection.h"
-#include "eicd/MCRecoParticleAssociationCollection.h"
-#include "eicd/InclusiveKinematicsCollection.h"
+#include "edm4eic/ReconstructedParticleCollection.h"
+#include "edm4eic/MCRecoParticleAssociationCollection.h"
+#include "edm4eic/InclusiveKinematicsCollection.h"
 
 // sidis-eic
 #include "Analysis.h"
@@ -44,7 +44,7 @@ class AnalysisEpic : public Analysis
 
     // printers
     void PrintParticle(const edm4hep::MCParticle& P);
-    void PrintParticle(const eicd::ReconstructedParticle& P);
+    void PrintParticle(const edm4eic::ReconstructedParticle& P);
 
 
   protected:
@@ -52,7 +52,7 @@ class AnalysisEpic : public Analysis
     // get PDG from reconstructed particle
     int GetReconstructedPDG(
         const edm4hep::MCParticle& simPart,
-        const eicd::ReconstructedParticle& recPart,
+        const edm4eic::ReconstructedParticle& recPart,
         bool& usedTruth
         );
 
