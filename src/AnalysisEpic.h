@@ -31,6 +31,9 @@ class AnalysisEpic : public Analysis
 
     void Execute() override;
 
+    // settings
+    bool crossCheckKinematics;
+
     // return Lorentz vector for a given particle
     template <class ParticleType>
     TLorentzVector GetP4(ParticleType& P) {
@@ -54,6 +57,13 @@ class AnalysisEpic : public Analysis
         const edm4hep::MCParticle& simPart,
         const edm4eic::ReconstructedParticle& recPart,
         bool& usedTruth
+        );
+    // common loop over Reconstructed Particle <-> MC Particle associations
+    // payload signature: (simPart, recPart, reconstructed PDG)
+    void LoopMCRecoAssocs(
+        const edm4eic::MCRecoParticleAssociationCollection& mcRecAssocs,
+        std::function<void(const edm4hep::MCParticle&, const edm4eic::ReconstructedParticle&, int)> payload,
+        bool printParticles=false
         );
 
   private:

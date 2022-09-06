@@ -42,19 +42,27 @@ void analysis_epic(
       outfilePrefix
       );
 
-  A->verbose = true;
-  A->maxEvents = 300000; // use this to limit the number of events
-  A->writeSimpleTree = true;
+  // settings
+  A->crossCheckKinematics = true;   // enable cross check with upstream kinematics
+  A->verbose              = false;
+  A->maxEvents            = 300000; // use this to limit the number of events
+  A->writeSimpleTree      = true;
 
   // set reconstruction method and final states =============================
   // - see `Analysis` constructor for methods (or other tutorials)
+
   A->SetReconMethod("Ele");
+  // A->SetReconMethod("DA");
+  // A->SetReconMethod("JB");
+  // A->SetReconMethod("Sigma");
+  // A->SetReconMethod("Mixed");
+  // A->SetReconMethod("eSigma");
 
   A->AddFinalState("pipTrack");
-  //A->AddFinalState("pimTrack");
-  //A->AddFinalState("KpTrack");
-  //A->AddFinalState("KmTrack");
-  //A->AddFinalState("jet"); // (TODO)
+  // A->AddFinalState("pimTrack");
+  // A->AddFinalState("KpTrack");
+  // A->AddFinalState("KmTrack");
+  // A->AddFinalState("jet"); // (TODO)
 
 
   // define cuts ====================================

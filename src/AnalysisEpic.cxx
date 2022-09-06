@@ -12,7 +12,8 @@ AnalysisEpic::AnalysisEpic(
       ionBeamEn_,
       crossingAngle_,
       outfilePrefix_
-      ) 
+      )
+    , crossCheckKinematics(false)
 {};
 
 AnalysisEpic::~AnalysisEpic() {};
@@ -37,7 +38,8 @@ void AnalysisEpic::Execute()
   // calculate Q2 weights
   CalculateEventQ2Weights();
 
-  // list of reconstruction methods produced upstream
+  // upstream reconstruction methods
+  // - list of upstream methods
   const std::vector<std::string> upstreamReconMethodList = {
     "Truth",
     "Electron",
@@ -45,6 +47,18 @@ void AnalysisEpic::Execute()
     "JB",
     "Sigma"
   };
+  // - association of `Kinematics::CalculateDIS` reconstruction method with upstream;
+  //   for those unavailable upstream, use `"NONE"`
+  const std::map<TString,std::string> associatedUpstreamMethodMap = {
+    { "Ele",    "Electron" },
+    { "DA",     "DA"       },
+    { "JB",     "JB"       },
+    { "Sigma",  "Sigma"    },
+    { "Mixed",  "NONE"     },
+    { "eSigma", "NONE"     }
+  };
+  // - get upstream method associated with `reconMethod`
+  const auto& associatedUpstreamMethod = associatedUpstreamMethodMap.at(reconMethod);
 
   // event loop =========================================================
   fmt::print("begin event loop...\n");
@@ -63,15 +77,14 @@ void AnalysisEpic::Execute()
     int num_rec_electrons    = 0;
     
     // read particle collections for this event
-    const auto& simParts   = evStore.get<edm4hep::MCParticleCollection>("MCParticles");
-    const auto& recParts   = evStore.get<edm4eic::ReconstructedParticleCollection>("ReconstructedParticles");
-    const auto& mcRecLinks = evStore.get<edm4eic::MCRecoParticleAssociationCollection>("ReconstructedParticlesAssoc");
+    const auto& simParts    = evStore.get<edm4hep::MCParticleCollection>("MCParticles");
+    const auto& recParts    = evStore.get<edm4eic::ReconstructedParticleCollection>("ReconstructedParticles");
+    const auto& mcRecAssocs = evStore.get<edm4eic::MCRecoParticleAssociationCollection>("ReconstructedParticlesAssoc");
 
     // data objects
     edm4hep::MCParticle mcPartEleBeam;
     edm4hep::MCParticle mcPartIonBeam;
     edm4hep::MCParticle mcPartElectron;
-    std::set<edm4eic::ReconstructedParticle> recPartsToAnalyze;
 
     // loop over generated particles
     if(verbose) fmt::print("\n{:-<60}\n","MCParticles ");
@@ -81,14 +94,14 @@ void AnalysisEpic::Execute()
       // if(verbose) PrintParticle(simPart);
 
       // generated particle properties
-      auto pid = simPart.getPDG();
+      auto simPDG = simPart.getPDG();
 
       // add to Hadronic Final State (HFS) sums
       kinTrue->AddToHFS(GetP4(simPart));
 
       // filter for beam particles
       if(simPart.getGeneratorStatus() == constants::statusBeam) {
-        switch(pid) {
+        switch(simPDG) {
           case constants::pdgElectron:
             if(num_ele_beams>0) double_counted_beam = true;
             mcPartEleBeam = simPart;
@@ -100,13 +113,13 @@ void AnalysisEpic::Execute()
             num_ion_beams++;
             break;
           default:
-            ErrorPrint(fmt::format("WARNING: Unknown beam particle with PDG={}",pid));
+            ErrorPrint(fmt::format("WARNING: Unknown beam particle with PDG={}",simPDG));
         }
       }
 
       // filter for scattered electron: select the one with the highest |p|
       if(simPart.getGeneratorStatus() == constants::statusFinal) {
-        if(pid == constants::pdgElectron) {
+        if(simPDG == constants::pdgElectron) {
           auto eleP = edm4hep::utils::p(simPart);
           if(eleP>mcPartElectronP) {
             mcPartElectron  = simPart;
@@ -138,68 +151,57 @@ void AnalysisEpic::Execute()
       PrintParticle(mcPartElectron);
     }
 
-    // loop over reconstructed particles
-    /*
-    if(verbose) fmt::print("\n{:-<60}\n","ReconstructedParticles ");
-    for(const auto& recPart : recParts) {
-
-      // print out this ReconstructedParticle
-      if(verbose) PrintParticle(recPart);
-
-      // for(const auto& track : recPart.getTracks()) {
-      //   // ...
-      // }
-      // for(const auto& cluster : recPart.getClusters()) {
-      //   // ...
-      // }
-
-    } // loop over reconstructed particles
-    */
-
-
-    // loop over associations: MC particle <-> Reconstructed particle
-    if(verbose) fmt::print("\n{:-<60}\n","MC<->Reco ASSOCIATIONS ");
-    for(const auto& link : mcRecLinks ) {
-      auto recPart = link.getRec(); // reconstructed particle
-      auto simPart = link.getSim(); // simulated (truth) particle
-      bool truthMatch = simPart.isAvailable();
-      // if(!truthMatch) continue; // FIXME: consider using this once we have matching
-
-      // print out this reconstructed particle, and its match
-      if(verbose) {
-        fmt::print("\n   {:->35}\n"," reconstructed particle:");
-        PrintParticle(recPart);
-        fmt::print("\n   {:.>35}\n"," truth match:");
-        if(truthMatch) PrintParticle(simPart);
-        else fmt::print("     {:>35}\n","NO MATCH");
-        fmt::print("\n");
-      }
-
-      // get PID
-      bool usedTruthPID = false;
-      auto pid = GetReconstructedPDG(simPart, recPart, usedTruthPID);
-      if(verbose) fmt::print("   GetReconstructedPDG = {}\n",pid);
-      // if(usedTruthPID) continue; // FIXME: consider using this once we have decent PID
-
-      // add to list of reconstructed particles to analyze, and to the HFS
-      recPartsToAnalyze.insert(recPart);
+    // add reconstructed particles to Hadronic Final State (HFS)
+    /* the following will run loops over Reconstructed Particle <-> MC Particle associations
+     * - uses high-order function `LoopMCRecoAssocs` for common tasks, such as quality cuts
+     *   and getting the reconstructed PID (PDG)
+     * - first define a first-order function (`payload`), then call `LoopMCRecoAssocs`
+     * - see `LoopMCRecoAssocs` for `payload` signature
+     */
+    auto AllRecPartsToHFS = [&] (auto& simPart, auto& recPart, auto recPDG) {
       kin->AddToHFS(GetP4(recPart));
+    };
+    if(verbose) fmt::print("\n{:-<60}\n","MC<->Reco ASSOCIATIONS ");
+    LoopMCRecoAssocs(mcRecAssocs, AllRecPartsToHFS, verbose);
 
-      // find scattered electron, by matching to truth
-      // FIXME: not working unless we have truth matching and/or reconstructed PID
-      // FIXME: any common upstream electron finder?
-      // FIXME: does `simPart==mcPartElectron` work?
-      /*
-      if(pid==constants::pdgElectron && simPart==mcPartElectron) {
+    // find reconstructed electron
+    // ============================================================================
+    /* FIXME: need realistic electron finder; all of the following options rely
+     * on MC-truth matching; is there any common upstream realistic electron finder
+     */
+
+    // find scattered electron by simply matching to truth
+    // FIXME: not working, until we have truth matching and/or reconstructed PID
+    // FIXME: does `simPart==mcPartElectron` work as expected?
+    /*
+    auto FindRecoEleByTruth = [&] (auto& simPart, auto& recPart, auto recPDG) {
+      if(recPDG==constants::pdgElectron && simPart==mcPartElectron) {
         num_rec_electrons++;
         kin->vecElectron = GetP4(recPart);
+      };
+    };
+    LoopMCRecoAssocs(mcRecAssocs, FindRecoEleByTruth);
+    */
+
+    // use electron finder from upstream algorithm `InclusiveKinematics*`
+    // FIXME: is the correct upstream electron finder used here? The
+    // `InclusiveKinematics*` recon algorithms seem to rely on
+    // `Jug::Base::Beam::find_first_scattered_electron(mcParts)` and matching
+    // to truth; this guarantees we get the correct reconstructed scattered
+    // electron
+    const auto& disCalcs = evStore.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematicsElectron");
+    if(disCalcs.size() != 1) ErrorPrint(fmt::format("WARNING: disCalcs.size = {} != 1 for this event",disCalcs.size()));
+    for(const auto& calc : disCalcs) {
+      auto ele = calc.getScat();
+      if( ! ele.isAvailable()) {
+        ErrorPrint("WARNING: `disCalcs` scattered electron unavailable");
+        continue;
       }
-      */
+      num_rec_electrons++;
+      kin->vecElectron = GetP4(ele);
+    }
 
-    } // end loop over MC<->Rec associations
-
-    /* // FIXME: beyond here, need scattered electron
-    // check for found reconstructed particles
+    // check for found reconstructed scattered electron
     if(num_rec_electrons == 0) { ErrorPrint("WARNING: reconstructed scattered electron not found"); continue; };
     if(num_rec_electrons >  1) { ErrorPrint("WARNING: found more than 1 reconstructed scattered electron"); };
 
@@ -211,33 +213,104 @@ void AnalysisEpic::Execute()
     // electron), otherwise hadronic recon methods will fail
     if(kin->countHadrons == 0) { ErrorPrint("WARNING: no hadrons"); };
   
-    // calculate DIS kinematics
-    if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
-    if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
-
-    //// TODO: stopped syncing with AnalysisAthena here ////
-
-    */
+    // calculate DIS kinematics; skip the event if the calculation did not go well
+    if( ! kin->CalculateDIS(reconMethod)     ) continue; // reconstructed
+    if( ! kinTrue->CalculateDIS(reconMethod) ) continue; // generated (truth)
 
 
 
+    // loop over Reco<->MC associations again
+    /* - calculate SIDIS kinematics
+     * - fill output data structures
+     */
+    auto SidisOutput = [&] (auto& simPart, auto& recPart, auto recPDG) {
+
+      // final state cut
+      // - check PID, to see if it's a final state we're interested in
+      auto kv = PIDtoFinalState.find(recPDG);
+      if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else return;
+      if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) return;
+
+      // set SIDIS particle 4-momenta, and calculate their kinematics
+      kinTrue->vecHadron = GetP4(simPart);
+      kinTrue->CalculateHadronKinematics();
+      kin->vecHadron = GetP4(recPart);
+      kin->CalculateHadronKinematics();
+
+      // weighting
+      //   FIXME: we are in a podio::EventStore event loop, thus we need an
+      //          alternative to `chain->GetTreeNumber()`; currently disabling weighting
+      //          for now, by setting `wTrack=1.0`
+      // Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
+      // wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+      wTrack = 1.0; // FIXME
+      wTrackTotal += wTrack;
+
+      // fill track histograms in activated bins
+      FillHistosTracks();
+
+      // fill simple tree
+      // - not binned
+      // - `IsActiveEvent()` is only true if at least one bin gets filled for this track
+      if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
+    };
+    LoopMCRecoAssocs(mcRecAssocs, SidisOutput);
 
 
     // read kinematics calculations from upstream /////////////////////////
     // TODO: cross check these with our calculations from `Kinematics`
-    fmt::print("\n{:-<60}\n","KINEMATICS, calculated from upstream: ");
-    fmt::print("  {:>10} {:>8} {:>8} {:>8} {:>8} {:>8} {:>8}\n", "", "x", "Q2", "W", "y", "nu", "elec?");
-    for(const auto upstreamReconMethod : upstreamReconMethodList)
-      for(const auto& calc : evStore.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematics"+upstreamReconMethod) )
-        fmt::print("  {:10} {:8.5f} {:8.2f} {:8.2f} {:8.5f} {:8.2f} {:>8}\n",
-            upstreamReconMethod,
-            calc.getX(),
-            calc.getQ2(),
-            calc.getW(),
-            calc.getY(),
-            calc.getNu(),
-            calc.getScat().isAvailable()
-            );
+    if(crossCheckKinematics) {
+      auto PrintRow = [] <typename T> (std::string name, std::vector<T> vals, bool header=false) {
+        fmt::print("  {:>16}",name);
+        if(header) { for(auto val : vals) fmt::print(" {:>8}",   val); }
+        else       { for(auto val : vals) fmt::print(" {:8.4f}", val); }
+        fmt::print("\n");
+      };
+      // upstream calculations
+      fmt::print("\n{:-<75}\n","KINEMATICS, calculated from upstream: ");
+      PrintRow("", std::vector<std::string>({ "x", "Q2", "W", "y", "nu" }), true);
+      for(const auto upstreamReconMethod : upstreamReconMethodList)
+        for(const auto& calc : evStore.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematics"+upstreamReconMethod) )
+          PrintRow( upstreamReconMethod, std::vector<float>({
+              calc.getX(),
+              calc.getQ2(),
+              calc.getW(),
+              calc.getY(),
+              calc.getNu()
+              }));
+      // local calculations
+      fmt::print("{:-<75}\n",fmt::format("KINEMATICS, calculated locally in SIDIS-EIC, with method \"{}\": ",reconMethod));
+      auto PrintKinematics = [&PrintRow] (std::string name, Kinematics *K) {
+        PrintRow( name, std::vector<Double_t>({
+            K->x,
+            K->Q2,
+            K->W,
+            K->y,
+            K->Nu
+            }));
+      };
+      PrintKinematics("Truth",kinTrue);
+      PrintKinematics("Reconstructed",kin);
+      // compare upstream and local
+      if(associatedUpstreamMethod != "NONE") {
+        fmt::print("{:-<75}\n",fmt::format("DIFFERENCE: upstream({}) - local({}): ",associatedUpstreamMethod,reconMethod));
+        for(const auto upstreamMethod : std::vector<std::string>({"Truth",associatedUpstreamMethod})) {
+          const auto& upstreamCalcs = evStore.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematics"+upstreamMethod);
+          for(const auto& upstreamCalc : upstreamCalcs) {
+            auto K    = upstreamMethod=="Truth" ? kinTrue : kin;
+            auto name = upstreamMethod=="Truth" ? "Truth" : "Reconstructed";
+            PrintRow( name, std::vector<Double_t>({
+                upstreamCalc.getX()  - K->x,
+                upstreamCalc.getQ2() - K->Q2,
+                upstreamCalc.getW()  - K->W,
+                upstreamCalc.getY()  - K->y,
+                upstreamCalc.getNu() - K->Nu
+                }));
+          }
+        }
+      }
+      else fmt::print("{:-<75}\n  method \"{}\" is not available upstream\n","DIFFERENCE: ",reconMethod);
+    } // if crossCheckKinematics
 
 
     // next event //////////////////////////////////
@@ -311,7 +384,51 @@ void AnalysisEpic::PrintParticle(const edm4eic::ReconstructedParticle& P) {
 }
 
 
-// helper methods //////////////////////////////////////////////
+// helper methods /////////////////////////////////////////////////////////////
+
+// common loop over Reconstructed Particle <-> MC Particle associations
+/* - get PID
+ * - basic quality cuts
+ * - execute `payload`
+//     payload signature: (simPart, recPart, reconstructed PDG)
+ */
+void AnalysisEpic::LoopMCRecoAssocs(
+    const edm4eic::MCRecoParticleAssociationCollection& mcRecAssocs,
+    std::function<void(const edm4hep::MCParticle&, const edm4eic::ReconstructedParticle&, int)> payload,
+    bool printParticles
+    )
+{
+  for(const auto& assoc : mcRecAssocs ) {
+
+    // get reconstructed and simulated particles, and check for matching
+    auto recPart = assoc.getRec(); // reconstructed particle
+    auto simPart = assoc.getSim(); // simulated (truth) particle
+    // if(!simPart.isAvailable()) continue; // FIXME: consider using this once we have matching
+
+    // print out this reconstructed particle, and its matching truth 
+    if(printParticles) {
+      fmt::print("\n   {:->35}\n"," reconstructed particle:");
+      PrintParticle(recPart);
+      fmt::print("\n   {:.>35}\n"," truth match:");
+      if(simPart.isAvailable())
+        PrintParticle(simPart);
+      else
+        fmt::print("     {:>35}\n","NO MATCH");
+      fmt::print("\n");
+    }
+
+    // get reconstructed PDG from PID
+    bool usedTruthPID = false;
+    auto recPDG = GetReconstructedPDG(simPart, recPart, usedTruthPID);
+    if(verbose) fmt::print("   GetReconstructedPDG = {}\n",recPDG);
+    // if(usedTruthPID) continue; // FIXME: consider using this once we have decent PID
+
+    // run payload
+    payload(simPart, recPart, recPDG);
+
+  } // end loop over Reco<->MC associations
+} // end LoopMCRecoAssocs
+
 
 // get PDG from reconstructed particle; resort to true PDG, if
 // PID is unavailable (sets `usedTruth` to true)
@@ -321,24 +438,25 @@ int AnalysisEpic::GetReconstructedPDG(
     bool& usedTruth
     )
 {
-  int pid = 0;
+  int pdg = 0;
   usedTruth = false;
 
   // if using edm4hep::ReconstructedParticle:
   /*
   if(recPart.getParticleIDUsed().isAvailable()) // FIXME: not available
-    pid = recPart.getParticleIDUsed().getPDG();
+    pdg = recPart.getParticleIDUsed().getPDG();
   */
   
   // if using edm4eic::ReconstructedParticle:
-  // pid = recPart.getPDG(); // FIXME: not available either
+  // pdg = recPart.getPDG(); // FIXME: not available either
 
   // if reconstructed PID is unavailable, use MC PDG
-  if(pid==0) {
+  if(pdg==0) {
     usedTruth = true;
     if(simPart.isAvailable())
-      pid = simPart.getPDG();
+      pdg = simPart.getPDG();
   }
 
-  return pid;
+  return pdg;
 }
+

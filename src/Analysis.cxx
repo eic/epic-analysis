@@ -96,7 +96,7 @@ Analysis::Analysis(
   writeSimpleTree = false;
   maxEvents       = 0;
   useBreitJets    = false;
-  errorCntMax     = 100;
+  errorCntMax     = 1000;
 
   weight = new WeightsUniform();
   weightJet = new WeightsUniform();
