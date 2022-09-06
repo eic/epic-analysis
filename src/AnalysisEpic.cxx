@@ -66,6 +66,13 @@ void AnalysisEpic::Execute()
     if(e%10000==0) fmt::print("{} events...\n",e);
     if(verbose) fmt::print("\n\n{:=<70}\n",fmt::format("EVENT {} ",e));
 
+    // next event
+    // FIXME: check that we analyze ALL of the events: do we miss the first or last one?
+    if(e>0) {
+      evStore.clear();
+      podioReader.endOfEvent();
+    }
+
     // resets
     kin->ResetHFS();
     kinTrue->ResetHFS();
@@ -312,15 +319,12 @@ void AnalysisEpic::Execute()
       else fmt::print("{:-<75}\n  method \"{}\" is not available upstream\n","DIFFERENCE: ",reconMethod);
     } // if crossCheckKinematics
 
-
-    // next event //////////////////////////////////
-    evStore.clear();
-    podioReader.endOfEvent();
-
   } // event loop
   fmt::print("end event loop\n");
 
   // finish execution
+  evStore.clear();
+  podioReader.endOfEvent();
   podioReader.closeFile();
   Finish();
 }
