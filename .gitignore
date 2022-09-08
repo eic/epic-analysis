@@ -22,6 +22,8 @@ datarec/*
 !datarec/trimTree.C
 results*
 
+!datarec/test-prop8
+
 # tmp files
 tutorial/delphes.config
 tutorial/delphes.config.bak

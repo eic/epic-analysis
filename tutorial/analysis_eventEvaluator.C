@@ -17,9 +17,9 @@ R__LOAD_LIBRARY(Sidis-eic)
  *     example, send a pull request with the new list)
  */
 void analysis_eventEvaluator(
-    TString infiles="tutorial/s3files.ecce.config", /* list of input files (S3 URLs, plus other columns) */
-    Double_t eleBeamEn=18, /* electron beam energy [GeV] */
-    Double_t ionBeamEn=275, /* ion beam energy [GeV] */
+    TString infiles="datarec/test-prop8/files.config", /* list of input files (S3 URLs, plus other columns) */
+    Double_t eleBeamEn=10, /* electron beam energy [GeV] */
+    Double_t ionBeamEn=100, /* ion beam energy [GeV] */
     Double_t crossingAngle=-25, /* crossing angle [mrad] */
     TString outfilePrefix="tutorial.eventEvaluator" /* output filename prefix*/)
 {
