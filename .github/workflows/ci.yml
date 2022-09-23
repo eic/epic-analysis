@@ -130,10 +130,10 @@ jobs:
             datarec/*.root
             delphes.config
 
-# DOWNLOAD FULLSIM ---------------------------------------------------------------------------
+# DOWNLOAD ATHENA ---------------------------------------------------------------------------
 
-# download fullsim files and make config
-  download_fullsim:
+# download ATHENA files and make config
+  download_athena:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -146,14 +146,14 @@ jobs:
           platform-release: "jug_xl:nightly"
           setup: environ.sh
           run: |
-            echo "[CI] download fullsim files"
+            echo "[CI] download ATHENA files"
             s3tools/add-host.sh
             s3tools/make-athena-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} d 8 s3files.config
             echo "[CI] cat config file"
             cat s3files.config
       - uses: actions/upload-artifact@v3
         with:
-          name: x_fullsim
+          name: x_athena
           retention-days: 1
           path: |
             s3files.config
@@ -223,11 +223,11 @@ jobs:
           retention-days: 7
           path: out
 
-# run analysis macros matrix for fullsim
-  analysis_fullsim:
+# run analysis macros matrix for ATHENA
+  analysis_athena:
     needs: 
       - build_no_delphes
-      - download_fullsim
+      - download_athena
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -247,7 +247,7 @@ jobs:
           name: x_build_no_delphes
       - uses: actions/download-artifact@v3
         with:
-          name: x_fullsim
+          name: x_athena
       - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
         with:
@@ -260,27 +260,27 @@ jobs:
             echo "[CI] cat s3files.config"
             cat s3files.config
             echo "[CI] ANALYSIS MACRO"
-            ${{env.root_no_delphes}} 'macro/ci/analysis_${{matrix.aname}}.C("s3files.config",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"fullsim.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
+            ${{env.root_no_delphes}} 'macro/ci/analysis_${{matrix.aname}}.C("s3files.config",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"athena.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
       - uses: actions/upload-artifact@v3
         with:
-          name: root_analysis_fullsim_${{matrix.aname}}_${{matrix.recon}}
+          name: root_analysis_athena_${{matrix.aname}}_${{matrix.recon}}
           retention-days: 7
           path: out
 
 # POSTPROCESS ---------------------------------------------------------------------------
 
-# run postprocess macros matrix for fastsim and fullsim
+# run postprocess macros matrix for fastsim and ATHENA
   postprocess:
     needs: 
       - analysis_fastsim
-      - analysis_fullsim
+      - analysis_athena
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         mode:
           - fastsim
-          - fullsim
+          - athena
         pname: # list only jobs which will only use one (primary) recon method
           - bin_test
           - coverage2D_p_eta
@@ -294,17 +294,17 @@ jobs:
           # use all reconstruction methods: (...seems like we really need to define every matrix element...) 
           ## coverage
           - { mode: fastsim, pname: coverage2D_x_q2,   recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fullsim, pname: coverage2D_x_q2,   recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena, pname: coverage2D_x_q2,   recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: fastsim, pname: coverage2D_x_q2,   recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fullsim, pname: coverage2D_x_q2,   recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena, pname: coverage2D_x_q2,   recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: fastsim, pname: coverage2D_x_q2,   recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fullsim, pname: coverage2D_x_q2,   recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena, pname: coverage2D_x_q2,   recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: fastsim, pname: coverage2D_x_q2,   recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fullsim, pname: coverage2D_x_q2,   recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena, pname: coverage2D_x_q2,   recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: fastsim, pname: coverage2D_x_q2,   recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fullsim, pname: coverage2D_x_q2,   recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena, pname: coverage2D_x_q2,   recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: fastsim, pname: coverage2D_x_q2,   recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fullsim, pname: coverage2D_x_q2,   recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena, pname: coverage2D_x_q2,   recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
@@ -341,11 +341,11 @@ jobs:
 
 # COMPARATORS ---------------------------------------------------------------------------
 
-# run compare macros matrix for fastsim vs. fullsim
+# run compare macros matrix for fastsim vs. ATHENA
   compare_fastfull:
     needs:
       - analysis_fastsim
-      - analysis_fullsim
+      - analysis_athena
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -384,7 +384,7 @@ jobs:
           path: out
       - uses: actions/download-artifact@v3
         with:
-          name: root_analysis_fullsim_${{matrix.aname}}_${{matrix.recon}}
+          name: root_analysis_athena_${{matrix.aname}}_${{matrix.recon}}
           path: out
       - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
@@ -401,10 +401,10 @@ jobs:
             echo "[CI] COMPARATOR MACRO"
             ls out
             mv -v out/fastsim.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
-            mv -v out/fullsim.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
-            ${{env.root_no_delphes}} 'macro/ci/comparator.C("out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root","out/fullsim.${{matrix.pname}}.${{matrix.recon}}.root","out/fastfull.${{matrix.pname}}.${{matrix.recon}}","${{matrix.xvar}}","${{matrix.yvar}}")'
+            mv -v out/athena.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
+            ${{env.root_no_delphes}} 'macro/ci/comparator.C("out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root","out/athena.${{matrix.pname}}.${{matrix.recon}}.root","out/fastfull.${{matrix.pname}}.${{matrix.recon}}","${{matrix.xvar}}","${{matrix.yvar}}")'
             rm -v out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
-            rm -v out/fullsim.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
+            rm -v out/athena.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
       - uses: actions/upload-artifact@v3
         with:
           name: results_fastfull_${{matrix.pname}}_${{matrix.recon}}

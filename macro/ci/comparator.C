@@ -109,20 +109,17 @@ void comparator(
   }
 
   // set legend labels
-  // - add "key" strings to `legendKeys`, so if the key is contained in the
-  //   infile name, the key string will be used in the legend label, rather than
-  //   the infile name
-  std::vector<TString> legendKeys;
-  legendKeys.push_back("fastsim");
-  legendKeys.push_back("fullsim");
+  auto makeLegendName = [] (TString infileName) -> TString {
+    if     (infileName.Contains("fastsim")) return "Delphes";
+    else if(infileName.Contains("athena"))  return "ATHENA";
+    else if(infileName.Contains("ecce"))    return "ECCE";
+    else if(infileName.Contains("epic"))    return "EPIC";
+    return "UNKNOWN";
+  };
   for(auto infile : infiles) {
     TString infileN = TString(infile->GetName());
-    TString key = infileN;
-    for(auto legendKey : legendKeys) {
-      if(infileN.Contains(legendKey)) key = legendKey;
-    }
-    P0->legendLabels.push_back(key);
-  };
+    P0->legendLabels.push_back(makeLegendName(infileN));
+  }
 
   // 3D array structure: list of 2D arrays of Histos pointers
   // - each element of the list will be compared

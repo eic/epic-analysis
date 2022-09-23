@@ -16,7 +16,7 @@ void analysis_x_q2(
 
   // setup analysis ========================================
   Analysis *A;
-  if(outfilePrefix.Contains("fullsim"))
+  if(outfilePrefix.Contains("athena"))
        A = new AnalysisAthena(  infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
 #ifndef EXCLUDE_DELPHES
   else A = new AnalysisDelphes( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
