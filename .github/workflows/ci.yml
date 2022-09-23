@@ -138,7 +138,9 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        detector: [athena, ecce]
+        include:
+          - { detector: athena, num_files: 8  }
+          - { detector: ecce,   num_files: 16 }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -152,7 +154,7 @@ jobs:
           run: |
             echo "[CI] download ATHENA files"
             s3tools/add-host.sh
-            s3tools/make-${{matrix.detector}}-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} d 8 s3files.config
+            s3tools/make-${{matrix.detector}}-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} d ${{matrix.num_files}} s3files.config
             echo "[CI] cat config file"
             cat s3files.config
       - uses: actions/upload-artifact@v3
@@ -237,6 +239,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
+        detector: [athena, ecce]
         aname: [x_q2, p_eta, yRatio]
         recon: [Ele]
         include:
