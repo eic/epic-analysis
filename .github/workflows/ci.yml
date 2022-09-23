@@ -320,8 +320,8 @@ jobs:
           - { pname: y_minima,         aname: yRatio, pmacro: postprocess_yRatio.C   }
           # use all reconstruction methods: (...seems like we really need to define every matrix element...) 
           ## coverage
-          # - { mode: fastsim, pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: athena,  pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena,  pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: fastsim, pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: athena,  pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: fastsim, pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
@@ -332,11 +332,6 @@ jobs:
           # - { mode: athena,  pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: fastsim, pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: athena,  pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          #
-          #
-          - { pname: coverage2D_x_q2,  aname: x_q2,   pmacro: postprocess_x_q2.C     } # DEBUG: Ele only
-          #
-          #
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
@@ -392,25 +387,19 @@ jobs:
           - { pname: resolution_p_eta, aname: p_eta, xvar: p, yvar: eta }
           # use all reconstruction methods: (...seems like we really need to define every matrix element...) 
           ## resolution
-          # - { pname: resolution_x_q2, recon: Ele,    aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: resolution_x_q2, recon: Ele,    aname: x_q2, xvar: x, yvar: q2 }
           # - { pname: resolution_x_q2, recon: Mixed,  aname: x_q2, xvar: x, yvar: q2 }
           # - { pname: resolution_x_q2, recon: DA,     aname: x_q2, xvar: x, yvar: q2 }
           # - { pname: resolution_x_q2, recon: JB,     aname: x_q2, xvar: x, yvar: q2 }
           # - { pname: resolution_x_q2, recon: Sigma,  aname: x_q2, xvar: x, yvar: q2 }
           # - { pname: resolution_x_q2, recon: eSigma, aname: x_q2, xvar: x, yvar: q2 }
           ## coverage
-          # - { pname: coverage_x_q2,   recon: Ele,    aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: coverage_x_q2,   recon: Ele,    aname: x_q2, xvar: x, yvar: q2 }
           # - { pname: coverage_x_q2,   recon: Mixed,  aname: x_q2, xvar: x, yvar: q2 }
           # - { pname: coverage_x_q2,   recon: DA,     aname: x_q2, xvar: x, yvar: q2 }
           # - { pname: coverage_x_q2,   recon: JB,     aname: x_q2, xvar: x, yvar: q2 }
           # - { pname: coverage_x_q2,   recon: Sigma,  aname: x_q2, xvar: x, yvar: q2 }
           # - { pname: coverage_x_q2,   recon: eSigma, aname: x_q2, xvar: x, yvar: q2 }
-          #
-          #
-          - { pname: resolution_x_q2, aname: x_q2, xvar: x, yvar: q2 } # DEBUG
-          - { pname: coverage_x_q2,   aname: x_q2, xvar: x, yvar: q2 } # DEBUG
-          #
-          #
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
