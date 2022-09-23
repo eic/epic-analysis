@@ -17,6 +17,10 @@ env:
   root: root -b -q
   root_no_delphes: root -b -q macro/ci/define_exclude_delphes.C 
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
 
 # BUILD ---------------------------------------------------------------------------
