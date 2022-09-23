@@ -12,8 +12,8 @@ void analysis_yRatio(
 
   // setup analysis ========================================
   Analysis *A;
-  if(outfilePrefix.Contains("athena"))
-       A = new AnalysisAthena(  infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+  if     (outfilePrefix.Contains("athena")) A = new AnalysisAthena( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+  else if(outfilePrefix.Contains("ecce"))   A = new AnalysisEcce(   infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
 #ifndef EXCLUDE_DELPHES
   else A = new AnalysisDelphes( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
 #endif
