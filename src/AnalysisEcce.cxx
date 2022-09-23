@@ -7,18 +7,20 @@ using std::cerr;
 using std::endl;
 
 AnalysisEcce::AnalysisEcce(
-		       TString infileName_,
-		       Double_t eleBeamEn_,
-		       Double_t ionBeamEn_,
-		       Double_t crossingAngle_,
-		       TString outfilePrefix_
-		       ) : Analysis(
-				    infileName_,
-				    eleBeamEn_,
-				    ionBeamEn_,
-				    crossingAngle_,
-				    outfilePrefix_
-				    ) {
+    TString infileName_,
+    Double_t eleBeamEn_,
+    Double_t ionBeamEn_,
+    Double_t crossingAngle_,
+    TString outfilePrefix_
+    ) : Analysis(
+      infileName_,
+      eleBeamEn_,
+      ionBeamEn_,
+      crossingAngle_,
+      outfilePrefix_
+      ),
+    trackSource(0) // default track source is "all tracks"
+{
 };
 
 // destructor
@@ -49,10 +51,10 @@ void AnalysisEcce::Execute()
 
   TTreeReaderArray<Int_t> hepmcp_status(tr, "hepmcp_status");
   TTreeReaderArray<Int_t> hepmcp_PDG(tr,    "hepmcp_PDG");
-  TTreeReaderArray<float> hepmcp_E(tr,      "hepmcp_E");
-  TTreeReaderArray<float> hepmcp_psx(tr,    "hepmcp_px");
-  TTreeReaderArray<float> hepmcp_psy(tr,    "hepmcp_py");
-  TTreeReaderArray<float> hepmcp_psz(tr,    "hepmcp_pz");
+  TTreeReaderArray<Float_t> hepmcp_E(tr,      "hepmcp_E");
+  TTreeReaderArray<Float_t> hepmcp_psx(tr,    "hepmcp_px");
+  TTreeReaderArray<Float_t> hepmcp_psy(tr,    "hepmcp_py");
+  TTreeReaderArray<Float_t> hepmcp_psz(tr,    "hepmcp_pz");
 
   TTreeReaderArray<Int_t> hepmcp_BCID(tr, "hepmcp_BCID");
   TTreeReaderArray<Int_t> hepmcp_m1(tr, "hepmcp_m1"); 
@@ -63,20 +65,21 @@ void AnalysisEcce::Execute()
   TTreeReaderArray<Int_t> mcpart_ID(tr,        "mcpart_ID");
   TTreeReaderArray<Int_t> mcpart_ID_parent(tr, "mcpart_ID_parent"); 
   TTreeReaderArray<Int_t> mcpart_PDG(tr,       "mcpart_PDG");
-  TTreeReaderArray<float> mcpart_E(tr,         "mcpart_E");
-  TTreeReaderArray<float> mcpart_psx(tr,       "mcpart_px");
-  TTreeReaderArray<float> mcpart_psy(tr,       "mcpart_py");
-  TTreeReaderArray<float> mcpart_psz(tr,       "mcpart_pz");
+  TTreeReaderArray<Float_t> mcpart_E(tr,         "mcpart_E");
+  TTreeReaderArray<Float_t> mcpart_psx(tr,       "mcpart_px");
+  TTreeReaderArray<Float_t> mcpart_psy(tr,       "mcpart_py");
+  TTreeReaderArray<Float_t> mcpart_psz(tr,       "mcpart_pz");
   TTreeReaderArray<Int_t> mcpart_BCID(tr,      "mcpart_BCID");
 
 
   // Reco tracks
-  TTreeReaderArray<float> tracks_id(tr,  "tracks_ID"); // needs to be made an int eventually in actual EE code
-  TTreeReaderArray<float> tracks_p_x(tr, "tracks_px");
-  TTreeReaderArray<float> tracks_p_y(tr, "tracks_py");
-  TTreeReaderArray<float> tracks_p_z(tr,  "tracks_pz");
-  TTreeReaderArray<float> tracks_trueID(tr,  "tracks_trueID");
-  //  TTreeReaderArray<short> tracks_charge(tr,  "tracks_charge");
+  TTreeReaderArray<Float_t> tracks_id(tr,  "tracks_ID"); // needs to be made an int eventually in actual EE code
+  TTreeReaderArray<Float_t> tracks_p_x(tr, "tracks_px");
+  TTreeReaderArray<Float_t> tracks_p_y(tr, "tracks_py");
+  TTreeReaderArray<Float_t> tracks_p_z(tr,  "tracks_pz");
+  TTreeReaderArray<Float_t> tracks_trueID(tr,  "tracks_trueID");
+  TTreeReaderArray<UShort_t> tracks_source(tr,  "tracks_source");
+   // TTreeReaderArray<Short_t> tracks_charge(tr,  "tracks_charge");
 
 
   // calculate Q2 weights
@@ -115,6 +118,7 @@ void AnalysisEcce::Execute()
     }    
     
     for(int itrack=0; itrack<tracks_id.GetSize(); itrack++) {
+      if(tracks_source[itrack]!=trackSource) continue;
       trackmap.insert({tracks_trueID[itrack],itrack});
     }
     
@@ -225,7 +229,8 @@ void AnalysisEcce::Execute()
     int recEleFound = 0;
     for(int ireco=0; ireco<tracks_id.GetSize(); ireco++) {
 
-
+      // skip track if not from the user-specified source `trackSource`
+      if(tracks_source[ireco]!=trackSource) continue;
 
       int pid_ = 0; //tracks_pid[ireco];
       double reco_mass = 0.;
@@ -282,7 +287,7 @@ void AnalysisEcce::Execute()
       numNoEle++;
       continue; // TODO: only need to skip if we are using a recon method that needs it (`if reconMethod==...`)
     }
-    else if(recEleFound>1) cerr << "WARNING: found more than 1 reconstructed scattered electron in an event" << endl;
+    else if(recEleFound>1) cerr << "WARNING: found " << recEleFound << " (more than 1) reconstructed scattered electrons in an event" << endl;
     else numEle++;
 
     // subtract electron from hadronic final state variables

@@ -46,6 +46,13 @@ class AnalysisEcce : public Analysis
 
     void Execute() override;
 
+    // select which track source; can be set at the macro level
+    UShort_t trackSource; /* all = 0,
+                           * inner = 1,
+                           * silicon = 2,
+                           * ttl = 3
+                           */
+
     ClassDefOverride(AnalysisEcce,1);
 };
 
