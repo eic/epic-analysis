@@ -166,7 +166,7 @@ jobs:
           platform-release: "jug_xl:nightly"
           setup: environ.sh
           run: |
-            echo "[CI] download ATHENA files"
+            echo "[CI] download files from S3"
             s3tools/add-host.sh
             s3tools/make-${{matrix.detector}}-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} d ${{matrix.num_files}} s3files.config
             echo "[CI] cat config file"
@@ -190,7 +190,6 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        detector: [athena, ecce]
         aname: [x_q2, p_eta, yRatio]
         recon: [Ele]
         include:
@@ -244,7 +243,7 @@ jobs:
           retention-days: 7
           path: out
 
-# run analysis macros matrix for ATHENA
+# run analysis macros matrix for full simulation
   analysis_fullsim:
     needs: 
       - build_no_delphes
@@ -296,7 +295,7 @@ jobs:
 
 # POSTPROCESS ---------------------------------------------------------------------------
 
-# run postprocess macros matrix for fastsim and ATHENA
+# run postprocess macros matrix for fastsim and fullsim
   postprocess:
     needs: 
       - analysis_fastsim
@@ -308,6 +307,7 @@ jobs:
         mode:
           - fastsim
           - athena
+          - ecce
         pname: # list only jobs which will only use one (primary) recon method
           - bin_test
           - coverage2D_p_eta
@@ -322,16 +322,22 @@ jobs:
           ## coverage
           - { mode: fastsim, pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: athena,  pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: ecce,    pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: fastsim, pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: athena,  pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          # - { mode: ecce,    pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: fastsim, pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: athena,  pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          # - { mode: ecce,    pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: fastsim, pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: athena,  pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          # - { mode: ecce,    pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: fastsim, pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: athena,  pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          # - { mode: ecce,    pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: fastsim, pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
           # - { mode: athena,  pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          # - { mode: ecce,    pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
@@ -368,7 +374,7 @@ jobs:
 
 # COMPARATORS ---------------------------------------------------------------------------
 
-# run compare macros matrix for fastsim vs. ATHENA
+# run compare macros matrix for fastsim vs. fullsim
   compare_fastfull:
     needs:
       - analysis_fastsim
@@ -413,6 +419,10 @@ jobs:
         with:
           name: root_analysis_athena_${{matrix.aname}}_${{matrix.recon}}
           path: out
+      - uses: actions/download-artifact@v3
+        with:
+          name: root_analysis_ecce_${{matrix.aname}}_${{matrix.recon}}
+          path: out
       - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
         with:
@@ -429,9 +439,11 @@ jobs:
             ls out
             mv -v out/fastsim.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
             mv -v out/athena.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
-            ${{env.root_no_delphes}} 'macro/ci/comparator.C("out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root","out/athena.${{matrix.pname}}.${{matrix.recon}}.root","out/fastfull.${{matrix.pname}}.${{matrix.recon}}","${{matrix.xvar}}","${{matrix.yvar}}")'
+            mv -v out/ecce.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
+            ${{env.root_no_delphes}} 'macro/ci/comparator.C("out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root","out/athena.${{matrix.pname}}.${{matrix.recon}}.root","out/ecce.${{matrix.pname}}.${{matrix.recon}}.root","out/fastfull.${{matrix.pname}}.${{matrix.recon}}","${{matrix.xvar}}","${{matrix.yvar}}")'
             rm -v out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
             rm -v out/athena.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
+            rm -v out/ecce.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
       - uses: actions/upload-artifact@v3
         with:
           name: results_fastfull_${{matrix.pname}}_${{matrix.recon}}

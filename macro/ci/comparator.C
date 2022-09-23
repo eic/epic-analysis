@@ -4,7 +4,8 @@ R__LOAD_LIBRARY(Sidis-eic)
 // - depending on infile, different histograms will be drawn
 void comparator(
     TString infile0="out/resolution.fastsim.root",
-    TString infile1="out/resolution.fullsim.root",
+    TString infile1="out/resolution.athena.root",
+    TString infile2="out/resolution.ecce.root",
     TString outfile="out/resolution.fastfull.root",
     TString gx="x", TString gy="q2" // plotgrid vars
     ) {
@@ -69,9 +70,11 @@ void comparator(
   if(gy=="p")   { gyT="p";     logy=true;  }
 
   // file names and bin vars
-  std::vector<TFile*> infiles;
-  infiles.push_back(new TFile(infile0));
-  infiles.push_back(new TFile(infile1));
+  std::vector<TFile*> infiles = {
+    new TFile(infile0),
+    new TFile(infile1),
+    new TFile(infile2)
+  };
   bool first=true;
   Int_t numXbins, numYbins;
   Double_t xMin, xMax, yMin, yMax;
