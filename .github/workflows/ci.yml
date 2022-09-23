@@ -242,12 +242,17 @@ jobs:
         detector: [athena, ecce]
         aname: [x_q2, p_eta, yRatio]
         recon: [Ele]
-        include:
-          - { aname: x_q2, recon: Mixed }
-          - { aname: x_q2, recon: JB }
-          - { aname: x_q2, recon: DA }
-          - { aname: x_q2, recon: Sigma }
-          - { aname: x_q2, recon: eSigma }
+        # include: # FIXME: need to figure out how to avoid having to write every single matrix element here... 
+        # - { aname: x_q2, recon: Mixed,  detector: athena }
+        # - { aname: x_q2, recon: JB,     detector: athena }
+        # - { aname: x_q2, recon: DA,     detector: athena }
+        # - { aname: x_q2, recon: Sigma,  detector: athena }
+        # - { aname: x_q2, recon: eSigma, detector: athena }
+        # - { aname: x_q2, recon: Mixed,  detector: ecce   }
+        # - { aname: x_q2, recon: JB,     detector: ecce   }
+        # - { aname: x_q2, recon: DA,     detector: ecce   }
+        # - { aname: x_q2, recon: Sigma,  detector: ecce   }
+        # - { aname: x_q2, recon: eSigma, detector: ecce   }
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
@@ -256,7 +261,6 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: x_fullsim_${{matrix.detector}}
-          path: . # bug workaround: `download-artifact` ignores ${{matrix.detector}} unless we specify a path (?)
       - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
         with:
