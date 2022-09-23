@@ -6,32 +6,41 @@
 # - the config file consists of file names (or URLs), with Q2 minima and cross sections
 ###################
 
-#### RELEASE TAG AND RECO DIR: ###########################
-release="prop.5/prop.5.1/AI";
-# release="prop.6/prop.6.0/SIDIS"; # event evaluator output empty?
-releaseDir="S3/eictest/ECCE/MC/$release/pythia6"
-#### references for EventEvaluator files
-eventEvalDir="eval_00000"
-eventEvalFileRegex='.*g4event_eval.root'
+#### RELEASE TAG #########################################
+tag=latest
 ##########################################################
+
+### use tag to specify the release information and settings
+case $tag in
+  latest)
+    release="22.1"
+    releaseDir="S3/eictest/EPIC/Campaigns/$release/SIDIS/pythia6"
+    eventEvalDir="eval_00002"
+    ;;
+  proposal) ### ECCE proposal release:
+    release="prop.5/prop.5.1/AI";
+    releaseDir="S3/eictest/ECCE/MC/$release/pythia6"
+    eventEvalDir="eval_00000"
+    ;;
+  *)
+    echo "ERROR: unknown production tag"
+    exit 1
+esac
+# common settings for all releases
+eventEvalFileRegex='.*g4event_eval.root'
 
 # usage:
 if [ $# -lt 2 ]; then
+  echo "Querying S3 for available data directories..."
   echo """
-  USAGE: $0 [energy] [mode(d/s/c)] [limit(optional)] [outputFile(optional)]
+  USAGE: $0 [subdir] [mode(d/s/c)] [limit(optional)] [outputFile(optional)]
 
-   - [energy]: 5x41
-               5x100
-               10x100
-               10x275
-               18x275
-       - NOTES: 
-             - for release 'prop.6/prop.6.0', only 5x41 and 18x275 are available,
-               with varying Q2 ranges
-             - note that in some cases, there is a 'suffix' specifying the Q2 range;
-               to use those, just include it in [energy], for example:
+   - [subdir]: subdirectory of files, one of the following:
 
-                 $0 18x275-q2-low
+              SUBDIRECTORIES ON S3:
+              =====================
+$(mc ls $releaseDir | sed 's;.* ep-;                ;' | sed 's;/$;;')
+              =====================
                
    - [mode]:   s - make config file for streaming from S3
                d - download from S3, then make the local config file
@@ -52,11 +61,11 @@ if [ $# -lt 2 ]; then
    configured for a specific set of data, but you may want to change
    them.
 
-  CURRENT RELEASE: $release
-
-  AVAILABLE DATA ON S3 (press ^C to abort S3 query):
+  CURRENT RELEASE: 
+    release:      $release
+    releaseDir:   $releaseDir
+    eventEvalDir: $eventEvalDir
   """
-  mc tree $releaseDir
   exit 2
 fi
 energyArg=$1

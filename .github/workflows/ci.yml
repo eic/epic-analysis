@@ -130,11 +130,15 @@ jobs:
             datarec/*.root
             delphes.config
 
-# DOWNLOAD ATHENA ---------------------------------------------------------------------------
+# DOWNLOAD FULLSIM ---------------------------------------------------------------------------
 
-# download ATHENA files and make config
-  download_athena:
+# download full simulation files and make config
+  download_fullsim:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        detector: [athena, ecce]
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -148,12 +152,12 @@ jobs:
           run: |
             echo "[CI] download ATHENA files"
             s3tools/add-host.sh
-            s3tools/make-athena-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} d 8 s3files.config
+            s3tools/make-${{matrix.detector}}-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} d 8 s3files.config
             echo "[CI] cat config file"
             cat s3files.config
       - uses: actions/upload-artifact@v3
         with:
-          name: x_athena
+          name: x_${{matrix.detector}}
           retention-days: 1
           path: |
             s3files.config
@@ -170,6 +174,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
+        detector: [athena, ecce]
         aname: [x_q2, p_eta, yRatio]
         recon: [Ele]
         include:
@@ -224,10 +229,10 @@ jobs:
           path: out
 
 # run analysis macros matrix for ATHENA
-  analysis_athena:
+  analysis_fullsim:
     needs: 
       - build_no_delphes
-      - download_athena
+      - download_fullsim
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
@@ -247,7 +252,7 @@ jobs:
           name: x_build_no_delphes
       - uses: actions/download-artifact@v3
         with:
-          name: x_athena
+          name: x_${{matrix.detector}}
       - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
         with:
@@ -260,10 +265,10 @@ jobs:
             echo "[CI] cat s3files.config"
             cat s3files.config
             echo "[CI] ANALYSIS MACRO"
-            ${{env.root_no_delphes}} 'macro/ci/analysis_${{matrix.aname}}.C("s3files.config",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"athena.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
+            ${{env.root_no_delphes}} 'macro/ci/analysis_${{matrix.aname}}.C("s3files.config",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"${{matrix.detector}}.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
       - uses: actions/upload-artifact@v3
         with:
-          name: root_analysis_athena_${{matrix.aname}}_${{matrix.recon}}
+          name: root_analysis_${{matrix.detector}}_${{matrix.aname}}_${{matrix.recon}}
           retention-days: 7
           path: out
 
@@ -273,7 +278,7 @@ jobs:
   postprocess:
     needs: 
       - analysis_fastsim
-      - analysis_athena
+      - analysis_fullsim
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -293,18 +298,18 @@ jobs:
           - { pname: y_minima,         aname: yRatio, pmacro: postprocess_yRatio.C }
           # use all reconstruction methods: (...seems like we really need to define every matrix element...) 
           ## coverage
-          - { mode: fastsim, pname: coverage2D_x_q2,   recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: athena, pname: coverage2D_x_q2,   recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim, pname: coverage2D_x_q2,   recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: athena, pname: coverage2D_x_q2,   recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim, pname: coverage2D_x_q2,   recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: athena, pname: coverage2D_x_q2,   recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim, pname: coverage2D_x_q2,   recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: athena, pname: coverage2D_x_q2,   recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim, pname: coverage2D_x_q2,   recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: athena, pname: coverage2D_x_q2,   recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim, pname: coverage2D_x_q2,   recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: athena, pname: coverage2D_x_q2,   recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena,  pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena,  pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena,  pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena,  pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena,  pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim, pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena,  pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
@@ -345,7 +350,7 @@ jobs:
   compare_fastfull:
     needs:
       - analysis_fastsim
-      - analysis_athena
+      - analysis_fullsim
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
