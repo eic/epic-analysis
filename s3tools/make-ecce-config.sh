@@ -6,8 +6,60 @@
 # - the config file consists of file names (or URLs), with Q2 minima and cross sections
 ###################
 
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+# do not forget to switch to the latest tag before merging this PR
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+# do not forget to switch to the latest tag before merging this PR
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+#
+# do not forget to switch to the latest tag before merging this PR
+#
+#
+#
+
 #### RELEASE TAG #########################################
-tag=latest
+tag=proposal
 ##########################################################
 
 ### use tag to specify the release information and settings
