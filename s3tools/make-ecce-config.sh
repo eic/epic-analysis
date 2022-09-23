@@ -59,7 +59,7 @@
 #
 
 #### RELEASE TAG #########################################
-tag=proposal
+tag=legacy
 ##########################################################
 
 ### use tag to specify the release information and settings
@@ -69,8 +69,8 @@ case $tag in
     releaseDir="S3/eictest/EPIC/Campaigns/$release/SIDIS/pythia6"
     eventEvalDir="eval_00002"
     ;;
-  proposal) ### ECCE proposal release:
-    release="prop.5/prop.5.1/AI";
+  legacy) ### older example ECCE release
+    release="prop.5/prop.5.1/SIDIS";
     releaseDir="S3/eictest/ECCE/MC/$release/pythia6"
     eventEvalDir="eval_00000"
     ;;

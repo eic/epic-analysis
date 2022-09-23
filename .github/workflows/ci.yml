@@ -1,3 +1,17 @@
+#
+#
+#
+#
+#
+#
+# don't forget to revert energy to 10x100 before merging this PR
+#
+#
+#
+#
+#
+#
+#
 name: ci
 
 on:
@@ -11,8 +25,8 @@ defaults:
     shell: bash
 
 env:
-  ebeam_en: 10
-  pbeam_en: 100
+  ebeam_en: 18
+  pbeam_en: 275
   cross_ang: -25
   root: root -b -q
   root_no_delphes: root -b -q macro/ci/define_exclude_delphes.C 
