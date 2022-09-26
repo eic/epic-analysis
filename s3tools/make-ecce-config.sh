@@ -67,7 +67,7 @@ case $tag in
   latest)
     release="22.1"
     releaseDir="S3/eictest/EPIC/Campaigns/$release/SIDIS/pythia6"
-    eventEvalDir="eval_00000"
+    eventEvalDir="" # latest files are in the top-level directory, not `eval_0000{0,2}`
     ;;
   legacy) ### older example ECCE release
     release="prop.5/prop.5.1/SIDIS";
@@ -142,6 +142,12 @@ Q2min=1 # FIXME: assumed, so far this script only looks at the general Q2
         # this Q2min only matters when you want to combine datasets with
         # different Q2 minima (see `make-athena-config.sh`)
 ########################################################################
+echo """
+sourceDir = $sourceDir
+targetDir = $targetDir
+Q2min     = $Q2min   FIXME: need proper Q2 min here, if combining data
+                       sets with differing Q2 minima
+"""
 
 # download files from S3
 function status { echo ""; echo "[+] $1"; }
