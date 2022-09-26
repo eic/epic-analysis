@@ -59,7 +59,7 @@
 #
 
 #### RELEASE TAG #########################################
-tag=legacy
+tag=latest
 ##########################################################
 
 ### use tag to specify the release information and settings
