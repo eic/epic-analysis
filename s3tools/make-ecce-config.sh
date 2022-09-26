@@ -33,14 +33,15 @@ eventEvalFileRegex='.*g4event_eval.root'
 if [ $# -lt 2 ]; then
   echo "Querying S3 for available data directories..."
   echo """
-  USAGE: $0 [subdir] [mode(d/s/c)] [limit(optional)] [outputFile(optional)]
+  USAGE: $0 [energy] [mode(d/s/c)] [limit(optional)] [outputFile(optional)]
 
-   - [subdir]: subdirectory of files, one of the following:
+   - [energy]: beam energies; data from differing Q2 ranges are combined
+               automatically, weighted by cross sections
 
-              SUBDIRECTORIES ON S3:
-              =====================
-$(mc ls $releaseDir | sed 's;.* ep-;                ;' | sed 's;/$;;')
-              =====================
+              AVAILABLE ENERGIES ON S3 in $releaseDir
+              ========================
+$(mc ls $releaseDir | sed 's;.* ep-;                ;' | sed 's;/$;;' | sed 's;-.*;;g' | uniq )
+              ========================
                
    - [mode]:   s - make config file for streaming from S3
                d - download from S3, then make the local config file
@@ -68,44 +69,59 @@ $(mc ls $releaseDir | sed 's;.* ep-;                ;' | sed 's;/$;;')
   """
   exit 2
 fi
-energyArg=$1
+energy=$1
 mode=$2
 limit=5
 outFile=""
 if [ $# -ge 3 ]; then limit=$3; fi
 if [ $# -ge 4 ]; then outFile=$4; fi
 
-# split energyArg to energy and suffix
-energy=$(echo $energyArg | sed 's/-.*//')
-suffix=$(echo $energyArg | sed 's/[^-]*//')
+### get list of subdirectories associated to this beam energy; each subdirectory has a different Q2 range
+echo "Querying S3 for available data directories..."
+subdirListUnsorted=$(mc ls $releaseDir | grep $energy | awk '{print $NF}' | sed 's;/$;;')
+### sort in order of decreasing Q2 minimum
+function searchSubdirList { echo $subdirListUnsorted | sed 's; ;\n;g' | grep $*; }
+subdirList="`searchSubdirList high` `searchSubdirList low` `searchSubdirList -v q2`" # take all 3 directories
+# subdirList="`searchSubdirList high` `searchSubdirList -v q2`" # skip the 'q2-low` directory
+printf "\nSubdirectories:\n"
+for subdir in $subdirList; do echo "  $subdir"; done
 
 # cd to the main directory 
 pushd $(dirname $(realpath $0))/..
 
-# settings #############################################################
-sourceDir=$(echo "$releaseDir/ep-$energyArg/$eventEvalDir" | sed 's;/$;;' | sed 's;//;/;g')
-targetDir="datarec/ecce/$release/$energyArg"
-Q2min=1 # FIXME: assumed, so far this script only looks at the general Q2 
-        # production, and it doesn't matter if this is the *correct* Q2min;
-        # this Q2min only matters when you want to combine datasets with
-        # different Q2 minima (see `make-athena-config.sh`)
-########################################################################
-echo """
-sourceDir = $sourceDir
-targetDir = $targetDir
-Q2min     = $Q2min   FIXME: need proper Q2 min here, if combining data
-                       sets with differing Q2 minima
-"""
+# function to get the sourceDir, given subdir $1
+function getSourceDir {
+  echo "$releaseDir/$1/$eventEvalDir" | sed 's;/$;;' | sed 's;//;/;g';
+}
+
+# function to get the Q2 minimum, given subdir $1
+function getQ2min {
+  if   [[ "$1" =~ "q2-low"  ]]; then echo 1;
+  elif [[ "$1" =~ "q2-high" ]]; then echo 100;
+  else echo 1  # general Q2 # FIXME: is Q2min=1 correct?
+  fi
+}
+
+# set destination directory
+targetDir="datarec/ecce/$release/$energy"
+
+# print settings
+printf "\nsource directories:\n"
+for subdir in $subdirList; do echo "  $(getSourceDir $subdir)   Q2min = $(getQ2min $subdir)"; done
+echo "targetDir = $targetDir"
 
 # download files from S3
 function status { echo ""; echo "[+] $1"; }
 if [ "$mode" == "d" ]; then
   status "downloading files from S3..."
-  if [ $limit -gt 0 ]; then
-    s3tools/generate-s3-list.sh "$sourceDir" | grep -E $eventEvalFileRegex | head -n$limit | s3tools/download.sh "$targetDir"
-  else
-    s3tools/generate-s3-list.sh "$sourceDir" | grep -E $eventEvalFileRegex | s3tools/download.sh "$targetDir"
-  fi
+  for subdir in $subdirList; do
+    sourceDir=$(getSourceDir $subdir)
+    if [ $limit -gt 0 ]; then
+      s3tools/generate-s3-list.sh "$sourceDir" | grep -E $eventEvalFileRegex | head -n$limit | s3tools/download.sh "$targetDir/$subdir"
+    else
+      s3tools/generate-s3-list.sh "$sourceDir" | grep -E $eventEvalFileRegex |                 s3tools/download.sh "$targetDir/$subdir"
+    fi
+  done
 fi
 
 # build a config file
@@ -114,19 +130,23 @@ mkdir -p $targetDir
 if [ -z "$outFile" ]; then configFile=$targetDir/files.config
 else configFile=$outFile; fi
 > $configFile
-crossSection=$(s3tools/read-xsec-table.sh $energy $Q2min)
-if [ "$mode" == "d" -o "$mode" == "c" ]; then
-  s3tools/generate-local-list.sh "$targetDir" 0 $crossSection $Q2min | tee -a $configFile
-elif [ "$mode" == "s" ]; then
-  if [ $limit -gt 0 ]; then
-    s3tools/generate-s3-list.sh "$sourceDir" 0 $crossSection $Q2min | grep -E $eventEvalFileRegex | head -n$limit | tee -a $configFile
+for subdir in $subdirList; do
+  crossSection=$(s3tools/read-xsec-table.sh "pythia6:$subdir")
+  sourceDir=$(getSourceDir $subdir)
+  Q2min=$(getQ2min $subdir)
+  if [ "$mode" == "d" -o "$mode" == "c" ]; then
+    s3tools/generate-local-list.sh "$targetDir/$subdir" 0 $crossSection $Q2min | tee -a $configFile
+  elif [ "$mode" == "s" ]; then
+    if [ $limit -gt 0 ]; then
+      s3tools/generate-s3-list.sh "$sourceDir" 0 $crossSection $Q2min | grep -E $eventEvalFileRegex | head -n$limit | tee -a $configFile
+    else
+      s3tools/generate-s3-list.sh "$sourceDir" 0 $crossSection $Q2min | grep -E $eventEvalFileRegex | tee -a $configFile
+    fi
   else
-    s3tools/generate-s3-list.sh "$sourceDir" 0 $crossSection $Q2min | grep -E $eventEvalFileRegex | tee -a $configFile
+    echo "ERROR: unknown mode"
+    exit 1
   fi
-else
-  echo "ERROR: unknown mode"
-  exit 1
-fi
+done
 
 # PATCH: convert config file to one-line-per-Q2min format
 status "reformatting config file to one-line-per-Q2min format..."

@@ -3,19 +3,18 @@
 
 # arguments
 table=datarec/xsec/xsec.dat
-if [ $# -lt 2 ]; then echo """
-  USAGE: $0 [energy] [Q2min] [xsec.dat file (optional)]
-
-  EXAMPLE: $0 18x275 100
+if [ $# -lt 1 ]; then echo """
+  USAGE: $0 [search_string] [xsec.dat file (optional)]
+  EXAMPLE: $0 18x275/minQ2=100
   default dat file: $table
   """
   exit 2
 fi
-if [ $# -ge 3 ]; then table=$3; fi
+if [ $# -ge 2 ]; then table=$2; fi
 
 # grep for query ("label")
-query="$1/minQ2=$2" 
-xsec=$(grep -w $query $table | awk '{print $2}')
+query="$1" 
+xsec=$(grep -E "^${query} " $table | awk '{print $2}')
 
 # not found error
 if [ -z "$xsec" ]; then
