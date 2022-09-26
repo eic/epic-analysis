@@ -135,7 +135,7 @@ suffix=$(echo $energyArg | sed 's/[^-]*//')
 pushd $(dirname $(realpath $0))/..
 
 # settings #############################################################
-sourceDir="$releaseDir/ep-$energyArg/$eventEvalDir"
+sourceDir=$(echo "$releaseDir/ep-$energyArg/$eventEvalDir" | sed 's;/$;;' | sed 's;//;/;g')
 targetDir="datarec/ecce/$release/$energyArg"
 Q2min=1 # FIXME: assumed, so far this script only looks at the general Q2 
         # production, and it doesn't matter if this is the *correct* Q2min;
