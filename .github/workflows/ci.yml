@@ -1,17 +1,3 @@
-#
-#
-#
-#
-#
-#
-# don't forget to revert energy to 10x100 before merging this PR
-#
-#
-#
-#
-#
-#
-#
 name: ci
 
 on:
