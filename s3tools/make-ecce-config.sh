@@ -67,7 +67,7 @@ case $tag in
   latest)
     release="22.1"
     releaseDir="S3/eictest/EPIC/Campaigns/$release/SIDIS/pythia6"
-    eventEvalDir="eval_00002"
+    eventEvalDir="eval_00000"
     ;;
   legacy) ### older example ECCE release
     release="prop.5/prop.5.1/SIDIS";
