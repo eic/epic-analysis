@@ -140,7 +140,7 @@ jobs:
       matrix:
         include:
           - { detector: athena, num_files: 20 }
-          - { detector: ecce,   num_files: 50 }
+          - { detector: ecce,   num_files: 20 }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
