@@ -6,7 +6,7 @@ void comparator(
     TString infile0="out/resolution.fastsim.root",
     TString infile1="out/resolution.athena.root",
     TString infile2="out/resolution.ecce.root",
-    TString outfile="out/resolution.fastfull.root",
+    TString outfile="out/resolution.comparison.root",
     TString gx="x", TString gy="q2" // plotgrid vars
     ) {
 

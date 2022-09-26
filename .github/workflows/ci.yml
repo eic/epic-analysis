@@ -375,7 +375,7 @@ jobs:
 # COMPARATORS ---------------------------------------------------------------------------
 
 # run compare macros matrix for fastsim vs. fullsim
-  compare_fastfull:
+  comparison:
     needs:
       - analysis_fastsim
       - analysis_fullsim
@@ -440,17 +440,17 @@ jobs:
             mv -v out/fastsim.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
             mv -v out/athena.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
             mv -v out/ecce.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
-            ${{env.root_no_delphes}} 'macro/ci/comparator.C("out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root","out/athena.${{matrix.pname}}.${{matrix.recon}}.root","out/ecce.${{matrix.pname}}.${{matrix.recon}}.root","out/fastfull.${{matrix.pname}}.${{matrix.recon}}","${{matrix.xvar}}","${{matrix.yvar}}")'
+            ${{env.root_no_delphes}} 'macro/ci/comparator.C("out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root","out/athena.${{matrix.pname}}.${{matrix.recon}}.root","out/ecce.${{matrix.pname}}.${{matrix.recon}}.root","out/comparison.${{matrix.pname}}.${{matrix.recon}}","${{matrix.xvar}}","${{matrix.yvar}}")'
             rm -v out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
             rm -v out/athena.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
             rm -v out/ecce.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
       - uses: actions/upload-artifact@v3
         with:
-          name: results_fastfull_${{matrix.pname}}_${{matrix.recon}}
+          name: comparison_${{matrix.pname}}_${{matrix.recon}}
           retention-days: 30
           path: |
-            out/fastfull*.images/*.png
-            out/fastfull*.root
+            out/comparison*.images/*.png
+            out/comparison*.root
 
 # ARTIFACTS ---------------------------------------------------------------------------
 
@@ -458,7 +458,7 @@ jobs:
   collect:
     needs: 
       - postprocess
-      - compare_fastfull
+      - comparison
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
