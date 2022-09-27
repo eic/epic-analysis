@@ -98,7 +98,7 @@ function getSourceDir {
 function getQ2min {
   if   [[ "$1" =~ "q2-low"  ]]; then echo 1;
   elif [[ "$1" =~ "q2-high" ]]; then echo 100;
-  else echo 1  # general Q2 # FIXME: is Q2min=1 correct?
+  else echo 1  # general Q2 
   fi
 }
 

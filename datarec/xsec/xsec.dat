@@ -21,17 +21,14 @@ pythia8:18x275/minQ2=10    69275               0.00266
 pythia8:18x275/minQ2=1     7.4167e+05          0.00277
 # Pythia 6, from ECCE production files:
 # S3/eictest/ECCE/ProductionInputFiles/SIDIS/pythia6
-# FIXME: there are no HEPMC files here, just ROOT files; since the generation
-#        of this table requires HEPMC files (`s3tools/get-cross-section-ALL.sh`), for
-#        now we just guess the cross section from the corresponding ATHENA Pythia 8
-#        production above. These ECCE production files have Q2 maxima, unlike the
-#        ATHENA HEPMC files; therefore, the cross sections may be a bit wrong here.
+# Note: the following are values for noradcor files, radcor 
 #label                     cross_section_[pb]  relative_uncertainty
-pythia6:ep-5x41            4.0012e+05          0.00266   # general Q2
-pythia6:ep-5x41-q2-low     4.0012e+05          0.00266   # 1 < Q2 < 100
-pythia6:ep-10x100          5.5566e+05          0.00276   # general Q2
-pythia6:ep-10x100-q2-low   5.5566e+05          0.00276   # 1 < Q2 < 100
-pythia6:ep-10x100-q2-high  1343                0.0023    # 100 < Q2
-pythia6:ep-18x275          7.4167e+05          0.00277   # general Q2
-pythia6:ep-18x275-q2-low   7.4167e+05          0.00277   # 1 < Q2 < 100
-pythia6:ep-18x275-q2-high  3370.2              0.00245   # 100 < Q2
+pythia6:ep-5x41            3.189e+05           0.0011   # general Q2
+pythia6:ep-5x41-q2-low     3.187e+05           0.0009   # 1 < Q2 < 100
+pythia6:ep-5x41-q2-high    1.622e+02           0.0111   # 1 < Q2 < 100
+pythia6:ep-10x100          5.797e+05           0.0011   # general Q2
+pythia6:ep-10x100-q2-low   5.784e+05           0.0010   # 1 < Q2 < 100
+pythia6:ep-10x100-q2-high  1.159e+03           0.0114    # 100 < Q2
+pythia6:ep-18x275          8.830e+05           0.0011   # general Q2
+pythia6:ep-18x275-q2-low   8.796e+05           0.0006   # 1 < Q2 < 100
+pythia6:ep-18x275-q2-high  3.092e+03           0.0475   # 100 < Q2
