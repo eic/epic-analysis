@@ -16,6 +16,9 @@ DEPS = -I$(shell root-config --incdir)
 LIBS = $(shell root-config --glibs)
 #LIBS += -lMinuit -lRooFitCore -lRooFit -lRooStats -lProof -lMathMore
 
+# Miscellaneous
+LIBS += -lfmt
+
 # DELPHES
 ifdef EXCLUDE_DELPHES
 	FLAGS += -DEXCLUDE_DELPHES

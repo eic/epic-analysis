@@ -215,6 +215,24 @@ void Analysis::Prepare() {
     return;
   }
 
+  // print configuration
+  fmt::print("{:=<50}\n","CONFIGURATION: ");
+  fmt::print("eleBeamEn     = {} GeV\n",eleBeamEn);
+  fmt::print("ionBeamEn     = {} GeV\n",ionBeamEn);
+  fmt::print("crossingAngle = {} mrad\n",crossingAngle);
+  fmt::print("reconMethod   = {}\n",reconMethod);
+  fmt::print("{:-<50}\n","");
+  PrintStdVector(Q2mins,"Q2mins");
+  PrintStdVector(Q2xsecsTot,"Q2xsecsTot");
+  PrintStdVector(Q2xsecs,"Q2xsecs");
+  PrintStdVector2D(inEntries,"inEntries");
+  PrintStdVector(Q2entries,"Q2entries");
+  PrintStdVector(inLookup,"inLookup");
+  PrintStdVector(Q2weights,"Q2weights");
+  fmt::print("{:-<50}\n","");
+  PrintStdMap(availableBinSchemes,"availableBinSchemes");
+  fmt::print("{:=<50}\n","");
+
   // set output file name
   outfileName = "out/"+outfilePrefix+".root";
 
@@ -460,6 +478,7 @@ Int_t Analysis::GetEventQ2Idx(Double_t Q2, Int_t guess) {
     } while (idx >= 0 && Q2 < Q2mins[idx]);
     return idx;
   } else {
+    // FIXME: if the guess was right the first time (using inLookup), we may not want to scan toward tighter Q2 cuts
     while (idx + 1 < Q2mins.size() && Q2 >= Q2mins[idx + 1]) {
       idx += 1;
     }

@@ -12,6 +12,7 @@
 #include <set>
 #include <stdexcept>
 #include <functional>
+#include <fmt/format.h>
 
 // root
 #include "TChain.h"
@@ -143,9 +144,31 @@ class Analysis : public TNamed
     std::map<TString,TString> availableBinSchemes;
     std::map<TString,BinSet*> binSchemes;
     std::map<TString,TString> reconMethodToTitle;
-    std::map<TString, TString> finalStateToTitle;
-    std::map<int, TString> PIDtoFinalState;
+    std::map<TString,TString> finalStateToTitle;
+    std::map<int,TString> PIDtoFinalState;
     std::set<TString> activeFinalStates;
+
+    // container printing
+    // mostly for debugging; if we need more than this, switch to using a common pretty printer library
+    template<class O> void PrintStdVector(std::vector<O> vec, std::string name="") {
+      if(name!="") fmt::print("{}: ",name);
+      fmt::print("[ ");
+      for(const auto elem : vec) fmt::print("{}, ",elem);
+      fmt::print("]\n");
+    }
+    template<class O> void PrintStdVector2D(std::vector<std::vector<O>> vec, std::string name="") {
+      if(name!="") fmt::print("{} = ",name);
+      fmt::print("[\n");
+      for(const auto elem : vec) PrintStdVector(elem,"  ");
+      fmt::print("]\n");
+    }
+    template<class K, class V> void PrintStdMap(std::map<K,V> hash, std::string name="") {
+      if(name!="") fmt::print("{} = ",name);
+      fmt::print("{{\n");
+      for(const auto [key,val] : hash) fmt::print("  {} => {},\n",key,val);
+      fmt::print("}}\n");
+    }
+
 
   ClassDef(Analysis,1);
 };
