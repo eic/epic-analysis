@@ -25,10 +25,10 @@ pythia8:18x275/minQ2=1     7.4167e+05          0.00277
 #label                     cross_section_[pb]  relative_uncertainty
 pythia6:ep-5x41            3.189e+05           0.0011   # general Q2
 pythia6:ep-5x41-q2-low     3.187e+05           0.0009   # 1 < Q2 < 100
-pythia6:ep-5x41-q2-high    1.622e+02           0.0111   # 1 < Q2 < 100
+pythia6:ep-5x41-q2-high    1.622e+02           0.0111   # 100 < Q2
 pythia6:ep-10x100          5.797e+05           0.0011   # general Q2
 pythia6:ep-10x100-q2-low   5.784e+05           0.0010   # 1 < Q2 < 100
-pythia6:ep-10x100-q2-high  1.159e+03           0.0114    # 100 < Q2
+pythia6:ep-10x100-q2-high  1.159e+03           0.0114   # 100 < Q2
 pythia6:ep-18x275          8.830e+05           0.0011   # general Q2
 pythia6:ep-18x275-q2-low   8.796e+05           0.0006   # 1 < Q2 < 100
 pythia6:ep-18x275-q2-high  3.092e+03           0.0475   # 100 < Q2
