@@ -67,7 +67,7 @@ class Analysis : public TNamed
     // add files to the TChain; this is called by `Prepare()`, but you can use these public
     // methods to add more files if you want
     // add single file `fileName` with given Q2 range and xs.
-    bool AddFile(std::vector<std::string> fileNames, std::vector<Long64_t> entries, Double_t xs, Double_t Q2min);
+    bool AddFile(std::vector<std::string> fileNames, std::vector<Long64_t> entries, Double_t xs, Double_t Q2min, Double_t Q2max);
 
     // access HistosDAG
     HistosDAG *GetHistosDAG() { return HD; };
@@ -118,8 +118,8 @@ class Analysis : public TNamed
     // A lookup index for guessing which Q2 range an event belongs to.
     std::vector<std::size_t> inLookup;
     std::vector<Double_t> Q2xsecs;
-    std::vector<Double_t> Q2xsecsTot;
     std::vector<Double_t> Q2mins;
+    std::vector<Double_t> Q2maxs;
     std::vector<Long64_t> Q2entries;
     std::vector<Double_t> Q2weights;
     TString infileName,outfileName,outfilePrefix;
@@ -147,6 +147,13 @@ class Analysis : public TNamed
     std::map<TString,TString> finalStateToTitle;
     std::map<int,TString> PIDtoFinalState;
     std::set<TString> activeFinalStates;
+
+    // check if Q2 `val` is between `min` and `max` if `max==0`, only `val>=min` is checked
+    template<class T> bool InQ2Range(T val, T min, T max, bool ignoreZero=false) {
+      if (ignoreZero && !(val>0)) return true;
+      if (max>0.0) return val>=min && val<=max;
+      else         return val>=min;
+    }
 
     // container printing
     // mostly for debugging; if we need more than this, switch to using a common pretty printer library

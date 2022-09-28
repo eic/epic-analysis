@@ -107,7 +107,7 @@ Analysis::Analysis(
 // input files
 //------------------------------------
 // add a single file
-bool Analysis::AddFile(std::vector<std::string> fileNames, std::vector<Long64_t> entries, Double_t xs, Double_t Q2min) {
+bool Analysis::AddFile(std::vector<std::string> fileNames, std::vector<Long64_t> entries, Double_t xs, Double_t Q2min, Double_t Q2max) {
   cout << "AddFile: " << Q2min << ", " << xs << ", ";
   for (string fileName : fileNames) {
       cout << fileName << ", ";
@@ -127,24 +127,18 @@ bool Analysis::AddFile(std::vector<std::string> fileNames, std::vector<Long64_t>
   }
   infiles.insert(infiles.begin() + insertIdx, fileNames);
   Q2xsecs.insert(Q2xsecs.begin() + insertIdx, xs);
-  Q2xsecsTot.insert(Q2xsecsTot.begin() + insertIdx, xs);
   Q2mins.insert(Q2mins.begin() + insertIdx, Q2min);
+  Q2maxs.insert(Q2maxs.begin() + insertIdx, Q2max);
   inEntries.insert(inEntries.begin() + insertIdx, entries);
   Long64_t totalEntry = 0;
   for (Long64_t entry : entries) {
       totalEntry += entry;
   }
   Q2entries.insert(Q2entries.begin() + insertIdx, totalEntry);
-  // adjust cross-sections to account for overlapping regions
-  for (std::size_t idx = infiles.size() - 1; idx > insertIdx; --idx) {
-    Q2xsecs[insertIdx] -= Q2xsecs[idx];
-  }
-  if (insertIdx > 0) {
-    Q2xsecs[insertIdx - 1] -= Q2xsecs[insertIdx];
-  }
   for (std::size_t idx = 0; idx < Q2xsecs.size(); ++idx) {
     if (Q2xsecs[idx] < 0.) {
-      cerr << "Cross-sections must strictly decrease with stricter Q2min cuts" << endl;
+      cerr << "ERROR: Cross-sections must strictly decrease with stricter Q2min cuts; re-arrange your config file" << endl;
+      PrintStdVector(Q2xsecs,"   cross sections");
       return false;
     }
   }
@@ -167,8 +161,8 @@ void Analysis::Prepare() {
     stringstream ss(line);
     std::vector<string> fileNames;
     std::vector<Long64_t> entries;
-    Double_t xs, Q2min;
-    ss >> Q2min >> xs;
+    Double_t xs, Q2min, Q2max;
+    ss >> Q2min >> Q2max >> xs;
     if (!ss) {
       continue;
     }
@@ -201,7 +195,7 @@ void Analysis::Prepare() {
         file->Close();
       }
     }
-    if (!AddFile(fileNames, entries, xs, Q2min)) {
+    if (!AddFile(fileNames, entries, xs, Q2min, Q2max)) {
       cerr << "ERROR: Couldn't add files ";
       for (std::string fileName : fileNames) {
         cerr << fileName << " ";
@@ -223,7 +217,7 @@ void Analysis::Prepare() {
   fmt::print("reconMethod   = {}\n",reconMethod);
   fmt::print("{:-<50}\n","");
   PrintStdVector(Q2mins,"Q2mins");
-  PrintStdVector(Q2xsecsTot,"Q2xsecsTot");
+  PrintStdVector(Q2maxs,"Q2maxs");
   PrintStdVector(Q2xsecs,"Q2xsecs");
   PrintStdVector2D(inEntries,"inEntries");
   PrintStdVector(Q2entries,"Q2entries");
@@ -316,7 +310,7 @@ void Analysis::Prepare() {
         NBINS,1,3000,
         true,true
         );
-    HS->DefineHist1D("Q","Q","GeV",NBINS,1.0,55.0,true,true);
+    HS->DefineHist1D("Q2","Q2","GeV",NBINS,1.0,3000,true,true);
     HS->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
     HS->DefineHist1D("y","y","",NBINS,1e-3,1,true);
     HS->DefineHist1D("W","W","GeV",NBINS,0,50);
@@ -359,7 +353,7 @@ void Analysis::Prepare() {
     HS->DefineHist2D("depolWAvsQ2", "Q^{2}", "W/A",      "GeV^{2}", "", NBINS, 1, 3000, NBINS, 0, 2.5, true, false);
     // -- single-hadron cross sections
     //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
-    HS->DefineHist1D("Q_xsec","Q","GeV",10,1.0,10.0,true,true); // log
+    HS->DefineHist1D("Q_xsec","Q","GeV",NBINS,1.0,3000,true,true); // log
     HS->Hist("Q_xsec")->SetMinimum(1e-10);
     // -- resolutions
     HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -0.5, 0.5);
@@ -437,26 +431,32 @@ void Analysis::CalculateEventQ2Weights() {
   for (Long64_t entry : Q2entries) {
     entriesTot += entry;
   }
-  xsecTot = Q2xsecsTot.front();
+  xsecTot = Q2xsecs.front();
   cout << "Q2 weighting info:" << endl;
   for (Int_t idx = 0; idx < Q2xsecs.size(); ++idx) {
-    Double_t xsecFactor = Q2xsecs[idx] / xsecTot;
-    Double_t entries = 0.;
-    for (Int_t idxC = 0; idxC <= idx; ++idxC) {
-      // estimate how many events from this file lie in the given Q2 range
-      entries += Q2entries[idxC] * (Q2xsecs[idx] / Q2xsecsTot[idxC]);
+    // calculate total luminosity, and the luminosity that contains this Q2 range
+    Double_t lumiTotal = Double_t(entriesTot)     / xsecTot;
+    Double_t lumiThis  = Double_t(Q2entries[idx]) / Q2xsecs[idx];
+    /*
+    //// alternative `lumiThis`: try to correct for overlapping Q2 ranges; in practice this
+    //// does not make much of a difference, in fact, the cross section looks slighly worse
+    lumiThis = 0.;
+    for (Int_t j = 0; j < Q2xsecs.size(); ++j) {
+      // check if Q2 range `j` contains the Q2 range `idx`; if so, include its luminosity
+      if (InQ2Range(Q2mins[idx], Q2mins[j], Q2maxs[j]) &&
+          InQ2Range(Q2maxs[idx], Q2mins[j], Q2maxs[j], true))
+      {
+        lumiThis += Double_t(Q2entries[j]) / Q2xsecs[j];
+      }
     }
-    Double_t numFactor = entries / entriesTot;
-    Q2weights[idx] = xsecFactor / numFactor;
-    cout << "\tQ2 > " << Q2mins[idx] << ":" << endl;
-    cout << "\t\t";
-    for (Int_t idxF = 0; idxF < infiles[idx].size(); ++idxF) {
-      cout << infiles[idx][idxF] << "; ";
-    }
-    cout << endl;
+    */
+    // calculate the weight for this Q2 range
+    Q2weights[idx] = lumiTotal / lumiThis;
+    cout << "\tQ2 > "     << Q2mins[idx];
+    if(Q2maxs[idx]>0) cout << " && Q2 < " << Q2maxs[idx];
+    cout << ":" << endl;
     cout << "\t\tcount    = " << Q2entries[idx] << endl;
     cout << "\t\txsec     = " << Q2xsecs[idx] << endl;
-    cout << "\t\txsec_tot = " << Q2xsecsTot[idx] << endl;
     cout << "\t\tweight   = " << Q2weights[idx] << endl;
   }
 }
@@ -472,16 +472,25 @@ Double_t Analysis::GetEventQ2Weight(Double_t Q2, Int_t guess) {
 
 Int_t Analysis::GetEventQ2Idx(Double_t Q2, Int_t guess) {
   Int_t idx = guess;
-  if (Q2 < Q2mins[idx]) {
+  // generally prefer the most restrictive Q2 range we have
+  if (!InQ2Range(Q2,Q2mins[idx],Q2maxs[idx])) {
+    // if Q2 is not in the expected range, try a less restrictive one
     do {
       idx -= 1;
-    } while (idx >= 0 && Q2 < Q2mins[idx]);
+    } while (idx >= 0 && !InQ2Range(Q2,Q2mins[idx],Q2maxs[idx]));
+    // fmt::print("SCANNED DOWN to less restrictive Q2 range: Q2={}, guess={}, return idx={}\n",Q2,guess,idx);
     return idx;
   } else {
-    // FIXME: if the guess was right the first time (using inLookup), we may not want to scan toward tighter Q2 cuts
-    while (idx + 1 < Q2mins.size() && Q2 >= Q2mins[idx + 1]) {
+    // look for the most restrictive Q2 range that contains this Q2
+    //
+    //
+    // FIXME: may need to replace this with a for loop for Pythia6 binning
+    //
+    //
+    while (idx+1 < Q2mins.size() && InQ2Range(Q2,Q2mins[idx+1],Q2maxs[idx+1])) {
       idx += 1;
     }
+    // if(idx!=guess) fmt::print("SCANNED UP to more restrictive Q2 range: Q2={}, guess={}, return idx={}\n",Q2,guess,idx);
     return idx;
   }
 }
@@ -495,7 +504,7 @@ void Analysis::Finish() {
   HD->ActivateAllNodes();
   HD->ClearOps();
 
-  // calculate integrated luminosity
+  // calculate integrated luminosity // FIXME: maybe not correct
   Double_t lumi = wTrackTotal/xsecTot; // [nb^-1]
   cout << "Integrated Luminosity:       " << lumi << "/nb" << endl;
   cout << sep << endl;
@@ -526,7 +535,7 @@ void Analysis::Finish() {
   HD->Payload([this](Histos *H){ H->Write(); }); HD->ExecuteAndClearOps();
   std::vector<Double_t> vec_wTrackTotal { wTrackTotal };
   std::vector<Double_t> vec_wJetTotal { wJetTotal };
-  outFile->WriteObject(&Q2xsecsTot, "XsTotal");
+  outFile->WriteObject(&Q2xsecs, "XsTotal");
   outFile->WriteObject(&vec_wTrackTotal, "WeightTotal");
   outFile->WriteObject(&vec_wJetTotal, "WeightJetTotal");
 
@@ -604,7 +613,7 @@ void Analysis::FillHistosTracks() {
     H->Hist4("full_xsec")->Fill(kin->x,kin->Q2,kin->pT,kin->z,wTrack);
     // DIS kinematics
     dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,wTrack);
-    H->Hist("Q")->Fill(TMath::Sqrt(kin->Q2),wTrack);
+    H->Hist("Q2")->Fill(kin->Q2,wTrack);
     H->Hist("x")->Fill(kin->x,wTrack);
     H->Hist("W")->Fill(kin->W,wTrack);
     H->Hist("y")->Fill(kin->y,wTrack);
