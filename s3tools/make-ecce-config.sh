@@ -132,7 +132,6 @@ fi
 status "build config file..."
 mkdir -p $targetDir
 if [ -z "$configFile" ]; then configFile=$targetDir/files.config; fi
-configFile=$targetDir/files.config
 > $configFile.list
 for subdir in $subdirList; do
   crossSection=$(s3tools/read-xsec-table.sh "pythia6:$subdir")
