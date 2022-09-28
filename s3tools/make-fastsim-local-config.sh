@@ -6,12 +6,13 @@
 ###################
 
 # usage:
-if [ $# -lt 4 ]; then
+if [ $# -lt 5 ]; then
   echo """
-  USAGE: $0 [energy] [Q2min] [source_directory] [output_file_name]
+  USAGE: $0 [energy] [Q2min] [Q2max] [source_directory] [output_file_name]
 
    - [energy]: 5x41 5x100 10x100 10x275 18x275
    - [Q2min]: 1 10 100 1000
+   - [Q2max]: 0 100 ...
    - [source_directory]: location of fastsim files
    - [output_file_name]: output config file name
 
@@ -20,8 +21,9 @@ if [ $# -lt 4 ]; then
 fi
 energy=$1
 Q2min=$2
-sourceDir=$3
-configFile=$4
+Q2max=$3
+sourceDir=$4
+configFile=$5
 
 # cd to the main directory 
 pushd $(dirname $(realpath $0))/..
@@ -29,23 +31,17 @@ pushd $(dirname $(realpath $0))/..
 # build a config file
 function status { echo ""; echo "[+] $1"; }
 status "build config file..."
-> $configFile
+> $configFile.list
 crossSection=$(s3tools/read-xsec-table.sh "pythia8:$energy/minQ2=$Q2min")
-s3tools/generate-local-list.sh "$sourceDir" 0 $crossSection $Q2min | tee -a $configFile
-
-# PATCH: convert config file to one-line-per-Q2min format
-status "reformatting config file to one-line-per-Q2min format..."
-mv -v $configFile{,.bak}
-s3tools/reformat-config.sh $configFile{.bak,}
+s3tools/generate-local-list.sh "$sourceDir" $crossSection $Q2min $Q2max | tee -a $configFile.list
+s3tools/generate-config-file.rb $configFile $energy $configFile.list
 
 # output some info
 popd
 status "done building config file at:"
 echo "     $configFile"
-status "run root macros with parameters:"
-echo "     '(\"$configFile\",$(echo $energy|sed 's/x/,/'))'"
 echo ""
-if [ -n "$(grep UNKNOWN $configFile)" ]; then
+if [ -n "$(grep UNKNOWN $configFile.list)" ]; then
   >&2 echo "ERROR: missing some cross sections"
   exit 1
 fi

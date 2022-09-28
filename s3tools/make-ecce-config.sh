@@ -30,10 +30,10 @@ esac
 eventEvalFileRegex='.*g4event_eval.root'
 
 # usage:
-if [ $# -lt 2 ]; then
+if [ $# -lt 3 ]; then
   echo "Querying S3 for available data directories..."
   echo """
-  USAGE: $0 [energy] [mode(d/s/c)] [limit(optional)] [outputFile(optional)]
+  USAGE: $0 [energy] [local_dir] [mode] [limit(optional)] [config_file(optional)]
 
    - [energy]: beam energies; data from differing Q2 ranges are combined
                automatically, weighted by cross sections
@@ -43,6 +43,8 @@ if [ $# -lt 2 ]; then
 $(mc ls $releaseDir | sed 's;.* ep-;                ;' | sed 's;/$;;' | sed 's;-.*;;g' | uniq )
               ========================
                
+   - [local_dir]: output directory name: datarec/[local_dir]
+
    - [mode]:   s - make config file for streaming from S3
                d - download from S3, then make the local config file
                c - just make the local config file, for local files
@@ -50,13 +52,9 @@ $(mc ls $releaseDir | sed 's;.* ep-;                ;' | sed 's;/$;;' | sed 's;-
    - [limit]   integer>0 : only stream/download this many files per Q2 min
                0         : stream/download all files
                default=5
-   
-   - [outputFile]: output file name (optional)
-                   - default name is based on release version 
-                   - relative paths will be relative to main dir
-   
-   Examples: $0 5x41 d       # download
-             $0 18x275 s     # stream
+
+   - [config_file]  name of the config file; if not specified, the
+                    config file will be in datarec/[local_dir]
 
    See script for local and remote file path settings; they are
    configured for a specific set of data, but you may want to change
@@ -70,11 +68,12 @@ $(mc ls $releaseDir | sed 's;.* ep-;                ;' | sed 's;/$;;' | sed 's;-
   exit 2
 fi
 energy=$1
-mode=$2
+locDir=$2
+mode=$3
 limit=5
-outFile=""
-if [ $# -ge 3 ]; then limit=$3; fi
-if [ $# -ge 4 ]; then outFile=$4; fi
+configFile=""
+if [ $# -ge 4 ]; then limit=$4; fi
+if [ $# -ge 5 ]; then configFile=$5; fi
 
 ### get list of subdirectories associated to this beam energy; each subdirectory has a different Q2 range
 echo "Querying S3 for available data directories..."
@@ -101,13 +100,18 @@ function getQ2min {
   else echo 1  # general Q2 
   fi
 }
+function getQ2max {
+  if [[ "$1" =~ "q2-low"  ]]; then echo 100;
+  else echo 0 # no maximum
+  fi
+}
 
 # set destination directory
-targetDir="datarec/ecce/$release/$energy"
+targetDir="datarec/$locDir/$release/$energy"
 
 # print settings
 printf "\nsource directories:\n"
-for subdir in $subdirList; do echo "  $(getSourceDir $subdir)   Q2min = $(getQ2min $subdir)"; done
+for subdir in $subdirList; do echo "  $(getSourceDir $subdir)   Q2min = $(getQ2min $subdir)   Q2max = $(getQ2max $subdir)"; done
 echo "targetDir = $targetDir"
 
 # download files from S3
@@ -127,31 +131,28 @@ fi
 # build a config file
 status "build config file..."
 mkdir -p $targetDir
-if [ -z "$outFile" ]; then configFile=$targetDir/files.config
-else configFile=$outFile; fi
-> $configFile
+if [ -z "$configFile" ]; then configFile=$targetDir/files.config; fi
+configFile=$targetDir/files.config
+> $configFile.list
 for subdir in $subdirList; do
   crossSection=$(s3tools/read-xsec-table.sh "pythia6:$subdir")
   sourceDir=$(getSourceDir $subdir)
   Q2min=$(getQ2min $subdir)
+  Q2max=$(getQ2max $subdir)
   if [ "$mode" == "d" -o "$mode" == "c" ]; then
-    s3tools/generate-local-list.sh "$targetDir/$subdir" 0 $crossSection $Q2min | tee -a $configFile
+    s3tools/generate-local-list.sh "$targetDir/$subdir" $crossSection $Q2min $Q2max | tee -a $configFile.list
   elif [ "$mode" == "s" ]; then
     if [ $limit -gt 0 ]; then
-      s3tools/generate-s3-list.sh "$sourceDir" 0 $crossSection $Q2min | grep -E $eventEvalFileRegex | head -n$limit | tee -a $configFile
+      s3tools/generate-s3-list.sh "$sourceDir" $crossSection $Q2min $Q2max | grep -E $eventEvalFileRegex | head -n$limit | tee -a $configFile.list
     else
-      s3tools/generate-s3-list.sh "$sourceDir" 0 $crossSection $Q2min | grep -E $eventEvalFileRegex | tee -a $configFile
+      s3tools/generate-s3-list.sh "$sourceDir" $crossSection $Q2min $Q2max | grep -E $eventEvalFileRegex | tee -a $configFile.list
     fi
   else
     echo "ERROR: unknown mode"
     exit 1
   fi
 done
-
-# PATCH: convert config file to one-line-per-Q2min format
-status "reformatting config file to one-line-per-Q2min format..."
-mv -v $configFile{,.bak}
-s3tools/reformat-config.sh $configFile{.bak,}
+s3tools/generate-config-file.rb $configFile $energy $configFile.list
 
 # output some info
 #status "files in target directory:"
@@ -159,10 +160,8 @@ s3tools/reformat-config.sh $configFile{.bak,}
 popd
 status "done building config file at:"
 echo "     $configFile"
-status "run root macros with parameters:"
-echo "     '(\"$configFile\",$(echo $energy|sed 's/x/,/'))'"
 echo ""
-if [ -n "$(grep UNKNOWN $configFile)" ]; then
+if [ -n "$(grep UNKNOWN $configFile.list)" ]; then
   >&2 echo "ERROR: missing some cross sections"
   exit 1
 fi
