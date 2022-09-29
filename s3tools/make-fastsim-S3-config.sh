@@ -50,7 +50,7 @@ if [ $# -ge 4 ]; then limit=$4; fi
 if [ $# -ge 5 ]; then configFile=$5; fi
 
 # settings
-Q2minima=( 1000 100 10 1 ) # should be decreasing order
+Q2minima=( 1000 100 10 1 )
 Q2max=0 # no max
 genDir=datagen/$locDir/$energy
 recDir=datarec/$locDir/$energy

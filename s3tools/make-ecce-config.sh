@@ -77,11 +77,7 @@ if [ $# -ge 5 ]; then configFile=$5; fi
 
 ### get list of subdirectories associated to this beam energy; each subdirectory has a different Q2 range
 echo "Querying S3 for available data directories..."
-subdirListUnsorted=$(mc ls $releaseDir | grep $energy | awk '{print $NF}' | sed 's;/$;;')
-### sort in order of decreasing Q2 minimum
-function searchSubdirList { echo $subdirListUnsorted | sed 's; ;\n;g' | grep $*; }
-subdirList="`searchSubdirList high` `searchSubdirList low` `searchSubdirList -v q2`" # take all 3 directories
-# subdirList="`searchSubdirList high` `searchSubdirList -v q2`" # skip the 'q2-low` directory
+subdirList=$(mc ls $releaseDir | grep $energy | awk '{print $NF}' | sed 's;/$;;')
 printf "\nSubdirectories:\n"
 for subdir in $subdirList; do echo "  $subdir"; done
 

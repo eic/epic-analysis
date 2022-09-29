@@ -2,14 +2,9 @@
 
 ClassImp(Analysis)
 
-using std::map;
-using std::vector;
-using std::string;
-using std::stringstream;
 using std::cout;
 using std::cerr;
 using std::endl;
-using std::ifstream;
 
 // constructor
 Analysis::Analysis(
@@ -109,11 +104,15 @@ Analysis::Analysis(
 // add a single file
 bool Analysis::AddFile(std::vector<std::string> fileNames, std::vector<Long64_t> entries, Double_t xs, Double_t Q2min, Double_t Q2max) {
   cout << "AddFile: " << Q2min << ", " << xs << ", ";
-  for (string fileName : fileNames) {
+  for (auto fileName : fileNames) {
       cout << fileName << ", ";
   }
   cout << endl;
   // insert in order of Q2min
+  //
+  //
+  // FIXME: just check for the correct order of the cross section
+  //
   std::size_t insertIdx = 0;
   for (std::size_t idx = 0; idx < infiles.size(); ++idx) {
     if (Q2min == Q2mins[idx]) {
@@ -155,13 +154,116 @@ bool Analysis::AddFile(std::vector<std::string> fileNames, std::vector<Long64_t>
 // prepare for the analysis
 //------------------------------------
 void Analysis::Prepare() {
-  ifstream fin(infileName);
-  string line;
-  while (std::getline(fin, line)) {
-    stringstream ss(line);
-    std::vector<string> fileNames;
+
+  // parse config file --------------------
+  std::ifstream fin(infileName);
+  std::string line;
+  fmt::print("PARSING\n");
+
+  // buffers
+  std::string token, bufferKey, bufferVal;
+  Double_t xsec  = 0.0;
+  Double_t Q2min = 1.0;
+  Double_t Q2max = 0.0;
+  std::vector<std::string> fileNames;
+  bool readingListOfFiles = false;
+
+  // lambda to add a list of files to this analysis; wraps `Analysis::AddFile`
+  auto AddFiles = [this, &fileNames, &xsec, $Q2min, &Q2max] () {
+    // get the number of entries, and check the file
     std::vector<Long64_t> entries;
-    Double_t xs, Q2min, Q2max;
+    for(auto fileName : fileNames) {
+      auto file = TFile::Open(fileName.c_str());
+      if (file->IsZombie()) {
+        fmt::print(stderr,"ERROR: Couldn't open input file '{}'\n",fileName);
+        return;
+      }
+      TTree *tree = file->Get<TTree>("Delphes");
+      if (tree == nullptr) tree = file->Get<TTree>("events");
+      if (tree == nullptr) tree = file->Get<TTree>("event_tree");
+      if (tree == nullptr) {
+        fmt::print(stderr,"ERROR: Couldn't find tree in file '{}'\n",fileName);
+        entries.push_back(0);
+      }
+      else entries.push_back(tree->GetEntries());
+      file->Close();
+    }
+    // add the file
+    if (!AddFile(fileNames, entries, xsec, Q2min, Q2max)) {
+      fmt::print(stderr,"ERROR: Couldn't add files\n");
+    }
+  }
+
+  // loop over lines
+  while (std::getline(fin, line)) {
+
+    // chomp comments
+    auto lineEnd = line.find("#");
+    auto lineChomped = line.substr(0,lineEnd-1);
+    fmt::print("\nlineChomped = \"{}\"\n",lineChomped);
+
+    // each line will be parsed as one of the following:
+    enum parseAs_enum { kNone, kSetting, kRootFile };
+    int parseAs = kNone;
+
+    // tokenize
+    std::stringstream lineStream(lineChomped);
+    while (std::getline(lineStream, token, ' ')) {
+      // classify `parseAs` and fill buffers
+      if (token.rfind(":",0)==0) { // parse as setting name
+        parseAs   = kSetting;
+        bufferKey = token;
+      }
+      else if (parseAs==kSetting) { // parse as setting value
+        if (token!="" && bufferVal=="") bufferVal = token;
+      }
+      else { // parse as root file name
+        parseAs   = kRootFile;
+        bufferKey = token;
+      }
+      // fmt::print("  token = \"{}\"\n",token);
+    } // tokenize
+
+    // parse buffers
+    if (parseAs==kSetting) {
+      fmt::print("  setting:  {} = {}\n",bufferKey,bufferVal);
+      // if we were reading a list of files, we're done with this list; add the files and reset
+      if(readingListOfFiles) {
+        AddFiles();
+        readingListOfFiles = false;
+        xsec  = 0.0;
+        Q2min = 1.0;
+        Q2max = 0.0;
+        fileNames.clear();
+      }
+      // parse setting value(s)
+      if      (bufferKey==":eleBeamEn")         eleBeamEn         = std::stod(bufferVal);
+      else if (bufferKey==":ionBeamEn")         ionBeamEn         = std::stod(bufferVal);
+      else if (bufferKey==":crossingAngle")     crossingAngle     = std::stod(bufferVal);
+      else if (bufferKey==":totalCrossSection") totalCrossSection = std::stod(bufferVal);
+      else if (bufferKey==":q2min")             Q2min             = std::stod(bufferVal);
+      else if (bufferKey==":q2max")             Q2max             = std::stod(bufferVal);
+      else if (bufferKey==":crossSection")      xsec              = std::stod(bufferVal);
+      else
+        fmt::print(stderr,"WARNING: unkown setting \"{}\"\n",bufferKey);
+    }
+    else if (parseAs==kRootFile) {
+      fmt::print("  rootFile: {}\n",bufferKey);
+      readingListOfFiles = true;
+      fileNames.push_back(bufferKey);
+    }
+
+  } // loop over lines
+
+  // add last list of files
+  AddFiles();
+
+
+  /*
+    // old:
+    std::stringstream ss(line);
+    std::vector<std::string> fileNames;
+    std::vector<Long64_t> entries;
     ss >> Q2min >> Q2max >> xs;
     if (!ss) {
       continue;
@@ -203,13 +305,15 @@ void Analysis::Prepare() {
       cerr << endl;
       return;
     }
-  }
+  */
+
+
   if (infiles.empty()) {
     cerr << "ERROR: no input files have been specified" << endl;
     return;
   }
 
-  // print configuration
+  // print configuration ----------------------------------
   fmt::print("{:=<50}\n","CONFIGURATION: ");
   fmt::print("eleBeamEn     = {} GeV\n",eleBeamEn);
   fmt::print("ionBeamEn     = {} GeV\n",ionBeamEn);
@@ -431,7 +535,7 @@ void Analysis::CalculateEventQ2Weights() {
   for (Long64_t entry : Q2entries) {
     entriesTot += entry;
   }
-  xsecTot = Q2xsecs.front();
+  xsecTot = Q2xsecs.front(); // FIXME: specify this from the config file/////////////////////////////////////////////
   cout << "Q2 weighting info:" << endl;
   for (Int_t idx = 0; idx < Q2xsecs.size(); ++idx) {
     // calculate total luminosity, and the luminosity that contains this Q2 range

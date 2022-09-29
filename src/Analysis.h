@@ -124,9 +124,10 @@ class Analysis : public TNamed
     std::vector<Double_t> Q2weights;
     TString infileName,outfileName,outfilePrefix;
     TFile *outFile;
-    Double_t eleBeamEn = 5; // GeV
-    Double_t ionBeamEn = 41; // GeV
-    Double_t crossingAngle = 0; // mrad
+    Double_t eleBeamEn; // GeV
+    Double_t ionBeamEn; // GeV
+    Double_t crossingAngle; // mrad
+    Double_t totalCrossSection;
     TString reconMethod;
 
     // event loop objects
