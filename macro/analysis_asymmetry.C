@@ -41,19 +41,13 @@ struct WeightsTest : public WeightsSivers {
 };
 
 void analysis_asymmetry(
-    TString infiles="datarec/in.config", /* delphes tree(s) */
-    Double_t eleBeamEn=5, /* electron beam energy [GeV] */
-    Double_t ionBeamEn=41, /* ion beam energy [GeV] */
-    Double_t crossingAngle=-25, /* crossing angle [mrad] */
+    TString configFile="datarec/in.config", /* delphes tree(s) */
     TString outfilePrefix="asymmetry" /* output filename prefix*/
 ) {
 
   // setup analysis ========================================
   AnalysisDelphes *A = new AnalysisDelphes(
-      infiles,
-      eleBeamEn,
-      ionBeamEn,
-      crossingAngle,
+      configFile,
       outfilePrefix
       );
   Weights* weights = new WeightsSum({

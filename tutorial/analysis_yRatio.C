@@ -2,21 +2,12 @@ R__LOAD_LIBRARY(Sidis-eic)
 
 // ratios of histograms with y-cut enabled to those with y-cut disabled
 void analysis_yRatio(
-    TString infiles="tutorial/delphes.config", /* list of input files */
-    Double_t eleBeamEn=10, /* electron beam energy [GeV] */
-    Double_t ionBeamEn=100, /* ion beam energy [GeV] */
-    Double_t crossingAngle=-25, /* crossing angle [mrad] */
-    TString outfilePrefix="yRatio" /* output filename prefix*/
+    TString configFile="tutorial/delphes.config", // input config file
+    TString outfilePrefix="yRatio"                // output filename prefix
 ) {
 
   // setup analysis ========================================
-  AnalysisDelphes *A = new AnalysisDelphes(
-      infiles,
-      eleBeamEn,
-      ionBeamEn,
-      crossingAngle,
-      outfilePrefix
-      );
+  AnalysisDelphes *A = new AnalysisDelphes(configFile, outfilePrefix);
 
   //A->maxEvents = 30000; // use this to limit the number of events
   A->writeSimpleTree = true; // write SimpleTree (for one bin)

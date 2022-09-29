@@ -2,20 +2,17 @@ R__LOAD_LIBRARY(Sidis-eic)
 
 // ratios of histograms with y-cut enabled to those with y-cut disabled
 void analysis_yRatio(
-    TString infiles,
-    Double_t eleBeamEn,
-    Double_t ionBeamEn,
-    Double_t crossingAngle,
+    TString configFile,
     TString outfilePrefix,
     TString reconMethod="Ele"
 ) {
 
   // setup analysis ========================================
   Analysis *A;
-  if     (outfilePrefix.Contains("athena")) A = new AnalysisAthena( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
-  else if(outfilePrefix.Contains("ecce"))   A = new AnalysisEcce(   infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+  if     (outfilePrefix.Contains("athena")) A = new AnalysisAthena( configFile, outfilePrefix );
+  else if(outfilePrefix.Contains("ecce"))   A = new AnalysisEcce(   configFile, outfilePrefix );
 #ifndef EXCLUDE_DELPHES
-  else A = new AnalysisDelphes( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+  else A = new AnalysisDelphes( configFile, outfilePrefix );
 #endif
 
   A->SetReconMethod(reconMethod); // set reconstruction method

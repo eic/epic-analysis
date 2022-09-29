@@ -6,19 +6,14 @@ void analysis_depolarization(
     /**/
     Double_t eleBeamEn=18,
     Double_t ionBeamEn=275,
-    /**/
-    Double_t crossingAngle=-25
     )
 {
 
-  TString infiles = Form("datarec/delphes.%dx%d.config",(int)eleBeamEn,(int)ionBeamEn);
+  TString configFile = Form("datarec/delphes.%dx%d.config",(int)eleBeamEn,(int)ionBeamEn);
   TString outfilePrefix = Form("depol.%dx%d",(int)eleBeamEn,(int)ionBeamEn);
 
   AnalysisDelphes *A = new AnalysisDelphes(
-      infiles,
-      eleBeamEn,
-      ionBeamEn,
-      crossingAngle,
+      configFile,
       outfilePrefix
       );
 

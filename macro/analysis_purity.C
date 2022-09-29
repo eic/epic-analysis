@@ -2,22 +2,15 @@ R__LOAD_LIBRARY(Sidis-eic)
 
 // ratios of histograms with y-cut enabled to those with y-cut disabled
 void analysis_purity(
-    TString infiles="datarec/in.config", /* delphes tree(s) */
-    Double_t eleBeamEn=5, /* electron beam energy [GeV] */
-    Double_t ionBeamEn=41, /* ion beam energy [GeV] */
-    Double_t crossingAngle=-25, /* crossing angle [mrad] */
+    TString configFile="datarec/in.config", /* delphes tree(s) */
     TString methodname="ele", /*reconstruction method name*/
     TString outfilePrefix="resolutions" /* output filename prefix*/
-    
 ) {
 
   //outfilePrefix+="_DA";
   // setup analysis ========================================
   AnalysisDelphes *A = new AnalysisDelphes(
-      infiles,
-      eleBeamEn,
-      ionBeamEn,
-      crossingAngle,
+      configFile,
       outfilePrefix+"_"+methodname
       );
 

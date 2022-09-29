@@ -2,20 +2,17 @@ R__LOAD_LIBRARY(Sidis-eic)
 
 // analysis in bins of (p,eta)
 void analysis_p_eta(
-    TString infiles="datarec/canyonlands-v1.2/5x41/files.config", // default, for manual local testing
-    Double_t eleBeamEn=5,
-    Double_t ionBeamEn=41,
-    Double_t crossingAngle=-25,
-    TString outfilePrefix="coverage.fullsim",
+    TString configFile,
+    TString outfilePrefix,
     TString reconMethod="Ele"
 ) {
 
   // setup analysis ========================================
   Analysis *A;
-  if     (outfilePrefix.Contains("athena")) A = new AnalysisAthena( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
-  else if(outfilePrefix.Contains("ecce"))   A = new AnalysisEcce(   infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+  if     (outfilePrefix.Contains("athena")) A = new AnalysisAthena( configFile, outfilePrefix );
+  else if(outfilePrefix.Contains("ecce"))   A = new AnalysisEcce(   configFile, outfilePrefix );
 #ifndef EXCLUDE_DELPHES
-  else A = new AnalysisDelphes( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+  else A = new AnalysisDelphes( configFile, outfilePrefix );
 #endif
 
   A->SetReconMethod(reconMethod); // set reconstruction method
