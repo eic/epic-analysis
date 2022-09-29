@@ -57,12 +57,12 @@ end
 # puts "\ngroupSettings:"
 # pp groupSettings
 
-# sort groups by increasing cross section
-groupSettingsSorted = groupSettings.sort_by{ |s| s.last[:crossSection] }.to_h
+# sort groups by decreasing cross section
+groupSettingsSorted = groupSettings.sort_by{ |s| s.last[:crossSection] }.reverse.to_h
 puts "\ngroupSettings, sorted by cross section:"
 pp groupSettingsSorted
 
-# assume the largest cross section is the total cross section
+# assume the largest cross section is the total cross section (may not always be true!)
 globalSettings[:totalCrossSection] = groupSettings.values.map{ |s| s[:crossSection] }.max
 
 # start config file
@@ -82,8 +82,8 @@ globalSettings.each{ |k,v| writeSetting.call k, v }
 
 # write group settings
 configOut.puts """
-\# Group Settings   | NOTE: they must be sorted by decreasing strictness
-\# ==============   | of Q2 cuts, or at least by increasing cross section
+\# Group Settings   | NOTE: they must be sorted by increasing strictness
+\# ==============   | of Q2 cuts, or at least by decreasing cross section
 """
 groupSettingsSorted.values.each_with_index do |settingsHash,i|
   configOut.puts "\n\# Q2 range #{i+1}"

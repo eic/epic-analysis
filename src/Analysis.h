@@ -64,10 +64,15 @@ class Analysis : public TNamed
     // set kinematics reconstruction method; see constructor for available methods
     void SetReconMethod(TString reconMethod_) { reconMethod=reconMethod_; }; 
 
-    // add files to the TChain; this is called by `Prepare()`, but you can use these public
-    // methods to add more files if you want
-    // add single file `fileName` with given Q2 range and xs.
-    bool AddFile(std::vector<std::string> fileNames, std::vector<Long64_t> entries, Double_t xs, Double_t Q2min, Double_t Q2max);
+    // add a group of files to the analysis, where all of these files have a
+    // common cross section `xs`, and Q2 range `Q2min` to `Q2max`
+    void AddFileGroup(
+        std::vector<std::string> fileNames,
+        std::vector<Long64_t> entries,
+        Double_t xs,
+        Double_t Q2min,
+        Double_t Q2max
+        );
 
     // access HistosDAG
     HistosDAG *GetHistosDAG() { return HD; };
@@ -108,7 +113,6 @@ class Analysis : public TNamed
     Weights const* weight;
     Weights const* weightJet;
     Double_t wTrackTotal, wJetTotal;
-    Double_t xsecTot;
     Long64_t entriesTot;
     const TString sep = "--------------------------------------------";
 
