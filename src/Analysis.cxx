@@ -9,18 +9,16 @@ using std::endl;
 // constructor
 Analysis::Analysis(
   TString infileName_,
-  Double_t eleBeamEn_,
-  Double_t ionBeamEn_,
-  Double_t crossingAngle_,
   TString outfilePrefix_
 )
   : infileName(infileName_)
-  , eleBeamEn(eleBeamEn_)
-  , ionBeamEn(ionBeamEn_)
-  , crossingAngle(crossingAngle_)
   , outfilePrefix(outfilePrefix_)
   , reconMethod("")
   , finalStateID("")
+  , eleBeamEn(10.0)
+  , ionBeamEn(100.0)
+  , crossingAngle(-25.0)
+  , totalCrossSection(1e6)
 {
   // available variables for binning
   // - availableBinSchemes is a map from variable name to variable title

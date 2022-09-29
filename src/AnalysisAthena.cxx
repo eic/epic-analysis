@@ -6,24 +6,13 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-AnalysisAthena::AnalysisAthena(
-    TString infileName_,
-    Double_t eleBeamEn_,
-    Double_t ionBeamEn_,
-    Double_t crossingAngle_,
-    TString outfilePrefix_
-    ) : Analysis(
-      infileName_,
-      eleBeamEn_,
-      ionBeamEn_,
-      crossingAngle_,
-      outfilePrefix_
-      ) {
-    };
+// constructor
+AnalysisAthena::AnalysisAthena(TString infileName_, TString outfilePrefix_) :
+  Analysis(infileName_, outfilePrefix_)
+{ };
 
 // destructor
-AnalysisAthena::~AnalysisAthena() {
-};
+AnalysisAthena::~AnalysisAthena() { };
 
 
 //=============================================

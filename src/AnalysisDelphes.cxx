@@ -9,22 +9,15 @@ using std::cerr;
 using std::endl;
 
 // constructor
-AnalysisDelphes::AnalysisDelphes(
-  TString infileName_,
-  Double_t eleBeamEn_,
-  Double_t ionBeamEn_,
-  Double_t crossingAngle_,
-  TString outfilePrefix_
-) : Analysis(
-  infileName_,
-  eleBeamEn_,
-  ionBeamEn_,
-  crossingAngle_,
-  outfilePrefix_
-) {
+AnalysisDelphes::AnalysisDelphes(TString infileName_, TString outfilePrefix_) :
+  Analysis(infileName_, outfilePrefix_)
+{
   // delphes-specific settings defaults
   /* ... none defined yet ... */
 };
+
+// destructor
+AnalysisDelphes::~AnalysisDelphes() { };
 
 
 //=============================================
@@ -278,9 +271,3 @@ void AnalysisDelphes::Execute() {
   Finish();
   //cout << "DEBUG PID in HFS: nSmeared=" << kin->countPIDsmeared << "  nNotSmeared=" << kin->countPIDtrue << endl;
 };
-
-
-// destructor
-AnalysisDelphes::~AnalysisDelphes() {
-};
-

@@ -6,26 +6,14 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-AnalysisEcce::AnalysisEcce(
-    TString infileName_,
-    Double_t eleBeamEn_,
-    Double_t ionBeamEn_,
-    Double_t crossingAngle_,
-    TString outfilePrefix_
-    ) : Analysis(
-      infileName_,
-      eleBeamEn_,
-      ionBeamEn_,
-      crossingAngle_,
-      outfilePrefix_
-      ),
-    trackSource(0) // default track source is "all tracks"
-{
-};
+// constructor
+AnalysisEcce::AnalysisEcce(TString infileName_, TString outfilePrefix_) :
+  Analysis(infileName_, outfilePrefix_),
+  trackSource(0) // default track source is "all tracks"
+{ };
 
 // destructor
-AnalysisEcce::~AnalysisEcce() {
-};
+AnalysisEcce::~AnalysisEcce() { };
 
 
 //=============================================

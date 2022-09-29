@@ -36,9 +36,6 @@ class Analysis : public TNamed
   public:
     Analysis(
         TString infileName_="",
-        Double_t eleBeamEn_=5,
-        Double_t ionBeamEn_=41,
-        Double_t crossingAngle_=0,
         TString outfilePrefix_=""
         );
     ~Analysis();
