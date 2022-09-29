@@ -37,7 +37,11 @@ plots.each do |plotName,energies|
   energies.each do |energy,plot|
     plot.SetLineColor energyHash[energy][:color]
     plot.SetTitle plot.GetTitle.split(',').first.sub(' distribution','')
-    plot.GetXaxis.SetRangeUser 1, 1200
+    if plot.GetName.match?(/Q2/)
+      plot.GetXaxis.SetRangeUser 1, 1200
+    else
+      plot.GetXaxis.SetRangeUser 5e-3, 1
+    end
     plot.GetYaxis.SetRangeUser 0, 1.2 if plot.GetName.match?(/WA|CA/)
     plot.GetXaxis.SetLabelSize 0.05
     plot.GetYaxis.SetLabelSize 0.05
