@@ -8,10 +8,10 @@ using std::endl;
 
 // constructor
 Analysis::Analysis(
-  TString infileName_,
+  TString configFileName_,
   TString outfilePrefix_
 )
-  : infileName(infileName_)
+  : configFileName(configFileName_)
   , outfilePrefix(outfilePrefix_)
   , reconMethod("")
   , finalStateID("")
@@ -152,10 +152,10 @@ void Analysis::AddFileGroup(
 void Analysis::Prepare() {
 
   // parse config file --------------------
-  std::ifstream fin(infileName);
+  std::ifstream fin(configFileName);
   std::string line;
   bool debugParser = false;
-  fmt::print("[+++] PARSING CONFIG FILE {}\n",infileName);
+  fmt::print("[+++] PARSING CONFIG FILE {}\n",configFileName);
 
   // vars
   Double_t xsec  = 0.0;

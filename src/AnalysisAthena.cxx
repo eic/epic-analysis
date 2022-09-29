@@ -7,8 +7,8 @@ using std::cerr;
 using std::endl;
 
 // constructor
-AnalysisAthena::AnalysisAthena(TString infileName_, TString outfilePrefix_) :
-  Analysis(infileName_, outfilePrefix_)
+AnalysisAthena::AnalysisAthena(TString configFileName_, TString outfilePrefix_) :
+  Analysis(configFileName_, outfilePrefix_)
 { };
 
 // destructor

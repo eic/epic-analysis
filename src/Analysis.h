@@ -35,7 +35,7 @@ class Analysis : public TNamed
 {
   public:
     Analysis(
-        TString infileName_="",
+        TString configFileName_="",
         TString outfilePrefix_=""
         );
     ~Analysis();
@@ -123,7 +123,7 @@ class Analysis : public TNamed
     std::vector<Double_t> Q2maxs;
     std::vector<Long64_t> Q2entries;
     std::vector<Double_t> Q2weights;
-    TString infileName,outfileName,outfilePrefix;
+    TString configFileName,outfileName,outfilePrefix;
     TFile *outFile;
     Double_t eleBeamEn; // GeV
     Double_t ionBeamEn; // GeV

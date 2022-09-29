@@ -15,7 +15,7 @@
 class AnalysisDelphes : public Analysis
 {
   public:
-    AnalysisDelphes(TString infileName_="", TString outfilePrefix_="");
+    AnalysisDelphes(TString configFileName_="", TString outfilePrefix_="");
     ~AnalysisDelphes();
 
     // perform the analysis

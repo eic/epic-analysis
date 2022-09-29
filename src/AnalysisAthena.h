@@ -35,7 +35,7 @@ class Particles
 class AnalysisAthena : public Analysis
 {
   public:
-    AnalysisAthena(TString infileName_="", TString outfilePrefix_="");
+    AnalysisAthena(TString configFileName_="", TString outfilePrefix_="");
     ~AnalysisAthena();
 
     void Execute() override;

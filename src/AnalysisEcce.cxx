@@ -7,8 +7,8 @@ using std::cerr;
 using std::endl;
 
 // constructor
-AnalysisEcce::AnalysisEcce(TString infileName_, TString outfilePrefix_) :
-  Analysis(infileName_, outfilePrefix_),
+AnalysisEcce::AnalysisEcce(TString configFileName_, TString outfilePrefix_) :
+  Analysis(configFileName_, outfilePrefix_),
   trackSource(0) // default track source is "all tracks"
 { };
 

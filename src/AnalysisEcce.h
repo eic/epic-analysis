@@ -35,7 +35,7 @@ class ParticlesEE
 class AnalysisEcce : public Analysis
 {
   public:
-    AnalysisEcce(TString infileName_="", TString outfilePrefix_="");
+    AnalysisEcce(TString configFileName_="", TString outfilePrefix_="");
     ~AnalysisEcce();
 
     void Execute() override;

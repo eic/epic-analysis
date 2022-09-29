@@ -9,8 +9,8 @@ using std::cerr;
 using std::endl;
 
 // constructor
-AnalysisDelphes::AnalysisDelphes(TString infileName_, TString outfilePrefix_) :
-  Analysis(infileName_, outfilePrefix_)
+AnalysisDelphes::AnalysisDelphes(TString configFileName_, TString outfilePrefix_) :
+  Analysis(configFileName_, outfilePrefix_)
 {
   // delphes-specific settings defaults
   /* ... none defined yet ... */
