@@ -37,7 +37,14 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
 
 
 ### Full Simulation
-- full simulation files are streamed from S3 using `tutorial/s3files.*.config`
+- full simulation files can be streamed from S3 using `tutorial/s3files.*.config` config files
+- use `s3tools/` scripts to make new config files, download files from S3, and more; for example:
+```bash
+s3tools/make-athena-config.sh 10x100 tutorial.athena s 8  # stream ATHENA files
+s3tools/make-ecce-config.sh 10x100 tutorial.ecce d 12     # download ECCE files
+```
+- run `s3tools/` scripts with no arguments to print usage guide
+- downloading from S3 is preferred, if disk space is available
 
 
 ## Introductory Notes
