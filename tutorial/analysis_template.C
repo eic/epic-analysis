@@ -11,6 +11,10 @@ void analysis_template(
 
   // setup analysis ========================================
   AnalysisDelphes *A = new AnalysisDelphes(configFile, outfilePrefix);
+  // use a different `Analysis`-derived class to handle different data streams:
+  // AnalysisEpic *A = new AnalysisEpic(configFile, outfilePrefix);     // EPIC Single Software Stack
+  // AnalysisEcce *A = new AnalysisEcce(configFile, outfilePrefix);     // ECCE Fun4all + EventEvaluator
+  // AnalysisAthena *A = new AnalysisAthena(configFile, outfilePrefix); // ATHENA DD4hep + Juggler
 
   //A->maxEvents = 10000; // use this to limit the number of events
   A->writeSimpleTree = true; // write SimpleTree (for one bin)
