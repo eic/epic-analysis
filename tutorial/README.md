@@ -18,11 +18,23 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
     the login and password; follow [s3tools documentation](../s3tools/README.md) for guidance
 
 ### Fast Simulation
-- run `tutorial/makeSampleDelphesFiles.sh` to download HEPMC files from S3,
-  and run them through Delphes
-  - edit the settings in this script, such as beam energy
-  - change the maximum number of files to process, to limit disk space
-    consumption
+- to download sample HEPMC files from S3, and run them through Delphes, run:
+  ```bash
+  s3tools/make-fastsim-S3-config.sh 10x100 tutorial a 4
+  ```
+  - run `s3tools/make-fastsim-S3-config.sh` for an explaination of the
+    arguments for this script
+  - by default, Delphes output files will be written to `datarec/tutorial`
+    (and the HEPMC files will be in `datagen/tutorial`)
+- copy the resulting top-level `delphes.config` file to the `tutorial/`
+  directory. If you ran `s3tools/make-fastsim-S3-config.sh` with the above
+  settings, run
+  ```bash
+  cp datarec/tutorial/10x100/delphes.config tutorial/
+  ```
+  By default, all of the tutorial macros for fast simulations assume the
+  `config` file is `tutorial/delphes.config`.
+
 
 ### Full Simulation
 - full simulation files are streamed from S3 using `tutorial/s3files.*.config`

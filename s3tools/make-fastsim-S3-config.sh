@@ -67,7 +67,7 @@ fi
 if [ "$mode" == "f" -o "$mode" == "a" ]; then
   status "clean Delphes output directories"
   for Q2min in ${Q2minima[@]}; do
-    rm -rv $recDir/minQ2=$Q2min
+    rm -rvf $recDir/minQ2=$Q2min
   done
   status "running Delphes (one thread per Q2min)"
   function runDelphes { 
