@@ -158,7 +158,7 @@ void Analysis::Prepare() {
   fmt::print("[+++] PARSING CONFIG FILE {}\n",configFileName);
 
   // vars
-  Double_t xsec  = 0.0;
+  Double_t xsec  = totalCrossSection;
   Double_t Q2min = 1.0;
   Double_t Q2max = 0.0;
   std::vector<std::string> fileNames;
@@ -227,7 +227,7 @@ void Analysis::Prepare() {
         if(debugParser) fmt::print("-> new setting, add current list of `fileNames`, then reset\n");
         AddFiles();
         readingListOfFiles = false;
-        xsec  = 0.0;
+        xsec  = totalCrossSection;
         Q2min = 1.0;
         Q2max = 0.0;
         fileNames.clear();

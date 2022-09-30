@@ -189,6 +189,10 @@ and follow the [README](tutorial/README.md).
     - set any other settings (e.g., a maximum number of events to process,
       useful for quick tests)
     - execute the analysis
+  - the input is a config file, which contains a list of files to analyze
+    together with settings such as beam energy and Q2 ranges; see
+    [doc/example.config](doc/example.config) for an example config file and
+    more details
   - the output will be a `root` file, filled with `TObjArray`s of
     histograms
     - each `TObjArray` can be for a different subset of events (bin), e.g.,

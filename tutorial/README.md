@@ -16,6 +16,9 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
   - this requires access to S3, the common storage area
   - environment variables `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` must contain
     the login and password; follow [s3tools documentation](../s3tools/README.md) for guidance
+- a set of files, together with settings such as beam energy and Q2 ranges, are
+  specified by config files; see [doc/example.config](../doc/example.config) for an example
+  config file and more details
 
 ### Fast Simulation
 - to download sample HEPMC files from S3, and run them through Delphes, run:

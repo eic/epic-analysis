@@ -13,7 +13,8 @@ One top-level script automates all the work:
   - running with no arguments will print the usage guide
   - output:
     - config file, with file names, Q2 minima, and cross sections; used as
-      input to the analysis macros
+      input to the analysis macros; see [doc/example.config](../doc/example.config)
+      for a sample config file
     - the downloaded full simulation files, if you chose to download from S3
   - this script contains some settings such as directory paths to data on S3,
     for the convenience of SIDIS full simulation analysis
@@ -67,26 +68,9 @@ Next we need to make a "config file", which consists of the file name, and
 additional columns such as cross section and minimum Q2. Follow the next sections,
 whether you plan to stream from S3 or download.
 
-### Config File Format
-
-TODO: UPDATE THIS
-TODO: UPDATE THIS
-TODO: UPDATE THIS
-TODO: UPDATE THIS
-TODO: UPDATE THIS
-TODO: UPDATE THIS
-TODO: UPDATE THIS
-TODO: UPDATE THIS
-
-The config files require the following columns, in this order:
-- file name (relative to the top-level directory, unless you use an absolute
-  path)
-- the number of events for the weighting and cross section
-  - set to `0` for all
-  - this is not related to `Analysis::maxEvents`, which limits how
-    many events to process
-- cross section (can be obtained from Pythia output logs, for example)
-- minimum Q2
+The config file includes settings such as beam energy, cross sections, and
+Q2 ranges. See [doc/example.config](../doc/example.config) for an example
+config file, and documentation.
 
 ### Cross Sections
 - cross sections are stored in `datarec/xsec/xsec.dat`; use `read-xsec-table.sh`
