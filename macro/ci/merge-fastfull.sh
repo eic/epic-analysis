@@ -16,7 +16,6 @@ while read dirFast; do
 
   # set fullsim and output directory names
   echo "--------------------"
-  dirFull=$(echo $dirFast | sed 's/fastsim/fullsim/g')
   dirOut=$(echo $dirFast | sed 's/fastsim//g' | sed 's/__/_/g')
   mkdir -p $dirOut
 
@@ -29,16 +28,24 @@ while read dirFast; do
   popd
 
   # repeat for fullsim artifacts
-  echo "MOVE AND RENAME artifacts in $dirFull -> $dirOut"
-  pushd $dirFull
-  for file in *; do
-    mv -v $file ../$dirOut/$(echo $file | sed 's/^.*\./&fullsim./g')
+  for detector in athena ecce epic; do
+    dirFull=$(echo $dirFast | sed "s/fastsim/${detector}/g")
+    echo "MOVE AND RENAME artifacts in $dirFull -> $dirOut"
+    if [ -d "$dirFull" ]; then
+      pushd $dirFull
+      for file in *; do
+        mv -v $file ../$dirOut/$(echo $file | sed "s/^.*\./&${detector}./g")
+      done
+      popd
+      echo "CLEANUP"
+      rm -rv $dirFull
+    else
+      echo "WARNING: $dirFull does not exist; ignoring"
+    fi
   done
-  popd
 
-  # remove empty directories
   echo "CLEANUP"
-  rm -rv $dirFast $dirFull
+  rm -rv $dirFast
 
 done
 

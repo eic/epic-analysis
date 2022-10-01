@@ -473,9 +473,25 @@ void PostProcessor::DrawInBins(
         //hist->GetXaxis()->SetLabelSize(0);
         //hist->GetYaxis()->SetLabelSize(0);
 
-        hist->SetLineColor(count+1);
         hist->SetLineWidth(3);
-        if(count==0) hist->SetFillColor(kGray);
+        switch(count) {
+          case 0:
+            hist->SetLineColor(kBlack);
+            hist->SetFillColor(kGray);
+            break;
+          case 1:
+            hist->SetLineColor(kRed);
+            hist->SetLineStyle(7);
+            break;
+          case 2:
+            hist->SetLineColor(kGreen+2);
+            hist->SetLineStyle(9);
+            break;
+          case 3:
+            hist->SetLineColor(kAzure);
+            hist->SetLineStyle(1);
+            break;
+        }
 
         if(legendLabels.size()>0 && i==0 && j==0) {
           try { leg->AddEntry(hist,legendLabels[count],"LF"); }

@@ -195,9 +195,9 @@ void Analysis::Prepare() {
         if (tree == nullptr) tree = file->Get<TTree>("event_tree");
         if (tree == nullptr) {
           cerr << "ERROR: Couldn't find Delphes or events tree in file '" << fileNames[idx] << "'" << endl;
-          return;
+          entries[idx] = 0;
         }
-        entries[idx] = tree->GetEntries();
+        else entries[idx] = tree->GetEntries();
         file->Close();
       }
     }

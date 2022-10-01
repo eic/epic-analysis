@@ -4,8 +4,9 @@ R__LOAD_LIBRARY(Sidis-eic)
 // - depending on infile, different histograms will be drawn
 void comparator(
     TString infile0="out/resolution.fastsim.root",
-    TString infile1="out/resolution.fullsim.root",
-    TString outfile="out/resolution.fastfull.root",
+    TString infile1="out/resolution.athena.root",
+    TString infile2="out/resolution.ecce.root",
+    TString outfile="out/resolution.comparison.root",
     TString gx="x", TString gy="q2" // plotgrid vars
     ) {
 
@@ -69,9 +70,11 @@ void comparator(
   if(gy=="p")   { gyT="p";     logy=true;  }
 
   // file names and bin vars
-  std::vector<TFile*> infiles;
-  infiles.push_back(new TFile(infile0));
-  infiles.push_back(new TFile(infile1));
+  std::vector<TFile*> infiles = {
+    new TFile(infile0),
+    new TFile(infile1),
+    new TFile(infile2)
+  };
   bool first=true;
   Int_t numXbins, numYbins;
   Double_t xMin, xMax, yMin, yMax;
@@ -109,20 +112,17 @@ void comparator(
   }
 
   // set legend labels
-  // - add "key" strings to `legendKeys`, so if the key is contained in the
-  //   infile name, the key string will be used in the legend label, rather than
-  //   the infile name
-  std::vector<TString> legendKeys;
-  legendKeys.push_back("fastsim");
-  legendKeys.push_back("fullsim");
+  auto makeLegendName = [] (TString infileName) -> TString {
+    if     (infileName.Contains("fastsim")) return "Delphes";
+    else if(infileName.Contains("athena"))  return "ATHENA";
+    else if(infileName.Contains("ecce"))    return "ECCE";
+    else if(infileName.Contains("epic"))    return "EPIC";
+    return "UNKNOWN";
+  };
   for(auto infile : infiles) {
     TString infileN = TString(infile->GetName());
-    TString key = infileN;
-    for(auto legendKey : legendKeys) {
-      if(infileN.Contains(legendKey)) key = legendKey;
-    }
-    P0->legendLabels.push_back(key);
-  };
+    P0->legendLabels.push_back(makeLegendName(infileN));
+  }
 
   // 3D array structure: list of 2D arrays of Histos pointers
   // - each element of the list will be compared

@@ -84,7 +84,7 @@ if [ -z "$outFile" ]; then configFile=$targetDir/files.config
 else configFile=$outFile; fi
 > $configFile
 for Q2min in ${Q2minima[@]}; do
-  crossSection=$(s3tools/read-xsec-table.sh $energy $Q2min)
+  crossSection=$(s3tools/read-xsec-table.sh "pythia8:$energy/minQ2=$Q2min")
   if [ "$mode" == "d" -o "$mode" == "c" ]; then
     s3tools/generate-local-list.sh "$targetDir/minQ2=$Q2min" 0 $crossSection $Q2min | tee -a $configFile
   elif [ "$mode" == "s" ]; then

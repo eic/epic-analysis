@@ -1,20 +1,34 @@
-#label             cross_section_[pb]  relative_uncertainty
-5x100/minQ2=1000   0.43023             0.00258
-5x100/minQ2=100    778.99              0.00223
-5x100/minQ2=10     30476               0.00251
-5x100/minQ2=1      4.8573e+05          0.0027
-5x41/minQ2=100     287.28              0.00216
-5x41/minQ2=10      20365               0.00242
-5x41/minQ2=1       4.0012e+05          0.00266
-10x100/minQ2=1000  6.8238              0.0023
-10x100/minQ2=100   1343                0.0023
-10x100/minQ2=10    40026               0.00258
-10x100/minQ2=1     5.5566e+05          0.00276
-10x275/minQ2=1000  42.031              0.00221
-10x275/minQ2=100   2489.4              0.0024
-10x275/minQ2=10    57053               0.00266
-10x275/minQ2=1     6.6791e+05          0.00276
-18x275/minQ2=1000  79.451              0.00223
-18x275/minQ2=100   3370.2              0.00245
-18x275/minQ2=10    69275               0.00266
-18x275/minQ2=1     7.4167e+05          0.00277
+# Pythia 8, from ATHENA production HEPMC files: S3/eictest/ATHENA/EVGEN/DIS/NC
+#label                     cross_section_[pb]  relative_uncertainty
+pythia8:5x100/minQ2=1000   0.43023             0.00258
+pythia8:5x100/minQ2=100    778.99              0.00223
+pythia8:5x100/minQ2=10     30476               0.00251
+pythia8:5x100/minQ2=1      4.8573e+05          0.0027
+pythia8:5x41/minQ2=100     287.28              0.00216
+pythia8:5x41/minQ2=10      20365               0.00242
+pythia8:5x41/minQ2=1       4.0012e+05          0.00266
+pythia8:10x100/minQ2=1000  6.8238              0.0023
+pythia8:10x100/minQ2=100   1343                0.0023
+pythia8:10x100/minQ2=10    40026               0.00258
+pythia8:10x100/minQ2=1     5.5566e+05          0.00276
+pythia8:10x275/minQ2=1000  42.031              0.00221
+pythia8:10x275/minQ2=100   2489.4              0.0024
+pythia8:10x275/minQ2=10    57053               0.00266
+pythia8:10x275/minQ2=1     6.6791e+05          0.00276
+pythia8:18x275/minQ2=1000  79.451              0.00223
+pythia8:18x275/minQ2=100   3370.2              0.00245
+pythia8:18x275/minQ2=10    69275               0.00266
+pythia8:18x275/minQ2=1     7.4167e+05          0.00277
+# Pythia 6, from ECCE production files:
+# S3/eictest/ECCE/ProductionInputFiles/SIDIS/pythia6
+# Note: the following are values for noradcor files, radcor 
+#label                     cross_section_[pb]  relative_uncertainty
+pythia6:ep-5x41            3.189e+05           0.0011   # general Q2
+pythia6:ep-5x41-q2-low     3.187e+05           0.0009   # 1 < Q2 < 100
+pythia6:ep-5x41-q2-high    1.622e+02           0.0111   # 100 < Q2
+pythia6:ep-10x100          5.797e+05           0.0011   # general Q2
+pythia6:ep-10x100-q2-low   5.784e+05           0.0010   # 1 < Q2 < 100
+pythia6:ep-10x100-q2-high  1.159e+03           0.0114   # 100 < Q2
+pythia6:ep-18x275          8.830e+05           0.0011   # general Q2
+pythia6:ep-18x275-q2-low   8.796e+05           0.0006   # 1 < Q2 < 100
+pythia6:ep-18x275-q2-high  3.092e+03           0.0475   # 100 < Q2

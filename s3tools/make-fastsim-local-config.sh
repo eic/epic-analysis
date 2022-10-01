@@ -30,7 +30,7 @@ pushd $(dirname $(realpath $0))/..
 function status { echo ""; echo "[+] $1"; }
 status "build config file..."
 > $configFile
-crossSection=$(s3tools/read-xsec-table.sh $energy $Q2min)
+crossSection=$(s3tools/read-xsec-table.sh "pythia8:$energy/minQ2=$Q2min")
 s3tools/generate-local-list.sh "$sourceDir" 0 $crossSection $Q2min | tee -a $configFile
 
 # PATCH: convert config file to one-line-per-Q2min format
