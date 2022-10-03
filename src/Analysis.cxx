@@ -489,10 +489,8 @@ void Analysis::CalculateEventQ2Weights() {
     // calculate total luminosity, and the luminosity that contains this Q2 range
     Double_t lumiTotal = Double_t(entriesTot)     / totalCrossSection;
     Double_t lumiThis  = Double_t(Q2entries[idx]) / Q2xsecs[idx];
-    /*
-    //// alternative `lumiThis`: try to correct for overlapping Q2 ranges; in practice this
-    //// does not make much of a difference, in fact, the cross section looks slighly worse
-    lumiThis = 0.;
+    //// alternative `lumiThis`: try to correct for overlapping Q2 ranges
+    lumiThis = 0.; // reset
     for (Int_t j = 0; j < Q2xsecs.size(); ++j) {
       // check if Q2 range `j` contains the Q2 range `idx`; if so, include its luminosity
       if (InQ2Range(Q2mins[idx], Q2mins[j], Q2maxs[j]) &&
@@ -501,7 +499,6 @@ void Analysis::CalculateEventQ2Weights() {
         lumiThis += Double_t(Q2entries[j]) / Q2xsecs[j];
       }
     }
-    */
     // calculate the weight for this Q2 range
     Q2weights[idx] = lumiTotal / lumiThis;
     cout << "\tQ2 > "     << Q2mins[idx];
