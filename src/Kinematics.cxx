@@ -206,7 +206,7 @@ Bool_t Kinematics::CalculateDIS(TString recmethod){
   this->TransformToHeadOnFrame(vecEleBeam,HvecEleBeam);
   this->TransformToHeadOnFrame(vecIonBeam,HvecIonBeam);
   this->TransformToHeadOnFrame(vecElectron,HvecElectron);
-
+  
   // calculate primary DIS variables, including Q2,x,y,W,nu
   if     (recmethod.CompareTo( "Ele", TString::kIgnoreCase)==0)    { this->CalculateDISbyElectron(); }
   else if(recmethod.CompareTo( "DA", TString::kIgnoreCase)==0)     { this->CalculateDISbyDA(); }
@@ -432,6 +432,13 @@ void Kinematics::AddToHFS(TLorentzVector p4_) {
   Pyh += p4.Py();
   hadronSumVec += p4;
   countHadrons++;
+  //HFS tree variables
+  hfspx[nHFS] = p4.Px();
+  hfspy[nHFS] = p4.Py();
+  hfspz[nHFS] = p4.Pz();
+  hfsE[nHFS] = p4.E();
+  new(ar[nHFS]) TLorentzVector(p4);
+  nHFS++;
 };
 
 
@@ -462,10 +469,12 @@ void Kinematics::SubtractElectronFromHFS() {
 
 
 // reset some variables for the hadronic final state
-void Kinematics::ResetHFS() {
+void Kinematics::ResetHFS() {  
   sigmah = Pxh = Pyh = 0;
   hadronSumVec.SetPxPyPzE(0,0,0,0);
   countHadrons = 0;
+  nHFS = 0;
+  ar.Clear();
 };
 
 

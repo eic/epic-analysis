@@ -21,7 +21,7 @@
 #include "TLorentzVector.h"
 #include "TRandom.h"
 #include "TRandomGen.h"
-
+#include "TClonesArray.h"
 // Delphes
 #ifndef EXCLUDE_DELPHES
 #include "classes/DelphesClasses.h"
@@ -99,7 +99,7 @@ class Kinematics : public TObject
     Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // hadron
     Double_t sigmah, Pxh, Pyh; // hadronic final state variables
     TLorentzVector hadronSumVec;
-
+  
     // nucleon transverse spin; if you set this externally,
     // it must be done before calculating `phiS` (before
     // `CalculateHadronKinematics`)
@@ -142,8 +142,15 @@ class Kinematics : public TObject
     // struck quark information
     Double_t quarkpT;
 #endif
-
-
+    // HFS tree objects
+    Int_t nHFS;
+    Double_t hfspx[100];
+    Double_t hfspy[100];
+    Double_t hfspz[100];
+    Double_t hfsE[100];
+    Double_t hfspid[100];
+    TClonesArray *hfsp4 = new TClonesArray("TLorentzVector");
+    TClonesArray &ar = *hfsp4;
     // particle masses
     static Double_t ElectronMass() { return 0.000511; };
     static Double_t ProtonMass()   { return 0.938272; };

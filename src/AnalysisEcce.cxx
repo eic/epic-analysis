@@ -47,7 +47,7 @@ void AnalysisEcce::Execute()
   TTreeReaderArray<Int_t> hepmcp_BCID(tr, "hepmcp_BCID");
   TTreeReaderArray<Int_t> hepmcp_m1(tr, "hepmcp_m1"); 
   TTreeReaderArray<Int_t> hepmcp_m2(tr, "hepmcp_m2"); 
-
+  
 
   // All true particles (including secondaries, etc)
   TTreeReaderArray<Int_t> mcpart_ID(tr,        "mcpart_ID");
@@ -125,12 +125,12 @@ void AnalysisEcce::Execute()
     int genEleID = -1;
     bool foundBeamElectron = false;
     bool foundBeamIon = false;
-
+    int genEleBCID = -1;
+    cout << tr.GetCurrentEntry() << endl;
     for(int imc=0; imc<hepmcp_PDG.GetSize(); imc++) {
-
-      int pid_ = hepmcp_PDG[imc];
-
       
+      int pid_ = hepmcp_PDG[imc];
+            
       int genStatus_ = hepmcp_status[imc]; // genStatus 4: beam particle,  1: final state
       
       double px_ = hepmcp_psx[imc];
@@ -139,10 +139,14 @@ void AnalysisEcce::Execute()
       double e_  = hepmcp_E[imc];
       
       double p_ = sqrt(pow(hepmcp_psx[imc],2) + pow(hepmcp_psy[imc],2) + pow(hepmcp_psz[imc],2));
-      double mass_ = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;
-      
+      double mass_ = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;      
+
       // add to `mcpart`
       ParticlesEE part;
+
+      //cout << genStatus_ << " " << pid_ << " " << part.mcID << " " << hepmcp_BCID[imc] << " " << hepmcp_m1[imc] << " " << hepmcp_m2[imc] << " "
+      //      << px_ << " " << py_ << " " << pz_ << " " << e_ << endl;
+
       
       if(genStatus_ == 1) { // final state
 	
@@ -151,7 +155,8 @@ void AnalysisEcce::Execute()
 	if (search != mcbcidmap.end()) {
 	  imcpart = search->second;
 	}
-
+	
+	
 	if (imcpart >-1){
 	  px_ = mcpart_psx[imcpart];
 	  py_ = mcpart_psy[imcpart];
@@ -162,7 +167,9 @@ void AnalysisEcce::Execute()
 	}
 	  else
 	    part.mcID = -1;
-	  	
+	//cout << genStatus_ << " " << pid_ << " " << part.mcID << " " << hepmcp_BCID[imc] << " " << hepmcp_m1[imc] << " " << hepmcp_m2[imc] << " "
+	//    << px_ << " " << py_ << " " << pz_ << " " << e_ << endl;
+	
 	  part.pid = pid_;
 	  part.vecPart.SetPxPyPzE(px_, py_, pz_, e_);
         
@@ -178,11 +185,12 @@ void AnalysisEcce::Execute()
 	      maxP = p_;
 	      kinTrue->vecElectron.SetPxPyPzE(px_, py_, pz_, e_);
 	      genEleID = part.mcID; //mcpart_ID[imc];
+	      genEleBCID = hepmcp_BCID[imc];
 	      //	      cout  << "\t\t\t found scattered electron  " << Form(" %6.2f %6.2f %6.2f %6.2f %6.2f  %5.3f %6.2f %6.2f id %3d\n",px_,py_,pz_, sqrt(p_*p_ + mass_*mass_),p_,mass_,hepmcp_E[imc],mcpart_E[imcpart],genEleID);
 	    }
 	  }
       }
-
+      
       else if(genStatus_ == 4) { // beam particles
         if(pid_ == 11) { // electron beam
           if(!foundBeamElectron) {
@@ -202,7 +210,32 @@ void AnalysisEcce::Execute()
         }
       }
     } // end truth loop
+    
+    for(int imc=0; imc<hepmcp_PDG.GetSize(); imc++) {
+      int pid_ = hepmcp_PDG[imc];     
+      int genStatus_ = hepmcp_status[imc]; // genStatus 4: beam particle,  1: final state                                                                            						
 
+      double px_ = hepmcp_psx[imc];
+      double py_ = hepmcp_psy[imc];
+      double pz_ = hepmcp_psz[imc];
+      double e_  = hepmcp_E[imc];
+      
+      double p_ = sqrt(pow(hepmcp_psx[imc],2) + pow(hepmcp_psy[imc],2) + pow(hepmcp_psz[imc],2));
+      double mass_ = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;      
+      // add to `mcpart`                                                                                                                                                                                                                      
+	   int mother = hepmcp_m1[imc];
+      if(pid_ == 22 || pid_ == 23){
+	if(genStatus_ == 1){
+	  if( mother == genEleBCID ){
+	    TLorentzVector FSRmom(px_, py_, pz_, e_);
+	    TLorentzVector eleCorr = kinTrue->vecElectron + FSRmom;
+	    kinTrue->vecElectron.SetPxPyPzE(eleCorr.Px(), eleCorr.Py(), eleCorr.Pz(), eleCorr.E());
+	  }
+	}
+      }
+      
+      
+    }
     // check beam finding
     if(!foundBeamElectron || !foundBeamIon) { numNoBeam++; continue; };
 
@@ -242,14 +275,14 @@ void AnalysisEcce::Execute()
       double reco_py = tracks_p_y[ireco];
       double reco_pz = tracks_p_z[ireco];
       reco_mass = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;
-
+      
       double reco_p = sqrt(reco_px*reco_px + reco_py*reco_py + reco_pz*reco_pz);
       double reco_E = sqrt(reco_p*reco_p + reco_mass * reco_mass);
 
       part.vecPart.SetPxPyPzE(reco_px, reco_py, reco_pz, sqrt(reco_p*reco_p + reco_mass*reco_mass));
 
 
-      //      cout  << "\t\t\t track  " << Form(" %4.2f %4.2f %4.2f true id %4d imc %3d mcid %3d \n",reco_px,reco_py,reco_pz,tracks_trueID[ireco],imc,part.mcID);
+      cout  << "\t\t\t track  " << Form(" %4.2f %4.2f %4.2f true id %4d imc %3d mcid %3d \n",reco_px,reco_py,reco_pz,tracks_trueID[ireco],imc,part.mcID);
       
       // add to `recopart` and hadronic final state sums only if there is a matching truth particle
       if(part.mcID > 0) {       
@@ -257,6 +290,7 @@ void AnalysisEcce::Execute()
 	  //  cout  << "\t\t\t add  to hadfs  \n" ;
 	  recopart.push_back(part);
 	  kin->AddToHFS(part.vecPart);
+	  kin->hfspid[kin->nHFS - 1] = pid_;
 	}
       }
 
@@ -292,7 +326,10 @@ void AnalysisEcce::Execute()
     if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
     if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
 
-
+    //fill HFS tree here?
+    if( writeHFSTree && kin->nHFS > 0) HFST->FillTree(1.0);
+    
+    
     // loop over reconstructed particles again
     /* - calculate hadron kinematics
      * - fill output data structures (Histos, SimpleTree, etc.)

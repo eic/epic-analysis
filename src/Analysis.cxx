@@ -89,8 +89,9 @@ Analysis::Analysis(
   // - these settings can be set at the macro level
   verbose         = false;
   writeSimpleTree = false;
-  maxEvents       = 0;
-  useBreitJets    = false;
+  writeHFSTree = true;
+  maxEvents = 0;
+  useBreitJets = false;
   errorCntMax     = 1000;
 
   weight = new WeightsUniform();
@@ -309,6 +310,8 @@ void Analysis::Prepare() {
   }
 #endif
 
+  HFST = new HFSTree("hfstree",kin,kinTrue);
+  
   // if there are no final states defined, default to definitions here:
   if(BinScheme("finalState")->GetNumBins()==0) {
     std::cout << "NOTE: adding pi+ tracks for final state, since you specified none" << std::endl;
@@ -623,6 +626,7 @@ void Analysis::Finish() {
   cout << "writing ROOT file..." << endl;
   outFile->cd();
   if(writeSimpleTree) ST->WriteTree();
+  if(writeHFSTree) HFST->WriteTree();
   HD->Payload([this](Histos *H){ H->WriteHists(outFile); }); HD->ExecuteAndClearOps();
   HD->Payload([this](Histos *H){ H->Write(); }); HD->ExecuteAndClearOps();
   std::vector<Double_t> vec_wTrackTotal { wTrackTotal };
