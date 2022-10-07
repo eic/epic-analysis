@@ -150,7 +150,7 @@ class Analysis : public TNamed
     std::map<int,TString> PIDtoFinalState;
     std::set<TString> activeFinalStates;
 
-    // check if Q2 `val` is between `min` and `max` if `max==0`, only `val>=min` is checked
+    // check if Q2 `val` is between `min` and `max`; if `max==0`, only `val>=min` is checked
     template<class T> bool InQ2Range(T val, T min, T max, bool ignoreZero=false) {
       if (ignoreZero && !(val>0)) return true;
       if (max>0.0) return val>=min && val<=max;

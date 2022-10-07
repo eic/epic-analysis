@@ -110,5 +110,7 @@ if [ "$mode" == "c" -o "$mode" == "a" ]; then
 fi
 
 # output some info
-status "done building config file at:"
-echo "     $configFile"
+if [ "$mode" == "c" -o "$mode" == "a" ]; then
+  status "done building config file at:"
+  echo "     $configFile"
+fi
