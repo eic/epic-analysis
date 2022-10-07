@@ -3,9 +3,12 @@ R__LOAD_LIBRARY(Sidis-eic)
 /* draw Q2 distribution, useful to check Q2 weights
  */
 void q2_distribution(
-    TString configFile="datarec/tutorial/10x100/delphes.config", TString outfilePrefix="q2dist.delphes"
-    // TString configFile="datarec/ecce/22.1/10x100/files.config", TString outfilePrefix="q2dist.ecce"
-    // TString configFile="datarec/athena/deathvalley-v1.0/10x100/files.config", TString outfilePrefix="q2dist.athena"
+    TString configFile="datarec/delphes/5x41/delphes.config",   TString outfilePrefix="q2dist.delphes.5x41"
+    // TString configFile="datarec/delphes/10x100/delphes.config", TString outfilePrefix="q2dist.delphes.10x100"
+    // TString configFile="datarec/delphes/18x275/delphes.config", TString outfilePrefix="q2dist.delphes.18x275"
+    // TString configFile="datarec/ecce/22.1/5x41/files.config",   TString outfilePrefix="q2dist.ecce.5x41"
+    // TString configFile="datarec/ecce/22.1/10x100/files.config", TString outfilePrefix="q2dist.ecce.10x100"
+    // TString configFile="datarec/ecce/22.1/18x275/files.config", TString outfilePrefix="q2dist.ecce.18x275"
 ) {
 
   // setup analysis

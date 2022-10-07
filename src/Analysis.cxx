@@ -519,26 +519,19 @@ Double_t Analysis::GetEventQ2Weight(Double_t Q2, Int_t guess) {
   }
 }
 
-// get the `idx` for this value of `Q2`
+// get the `idx` for this value of `Q2`; tries to find the most restrictive Q2 range
+// that contains the given `Q2` value, in order to assign the correct weight
 Int_t Analysis::GetEventQ2Idx(Double_t Q2, Int_t guess) {
-  Int_t idx = guess;
-  // generally prefer the most restrictive Q2 range we have
-  if (!InQ2Range(Q2,Q2mins[idx],Q2maxs[idx])) {
-    // if Q2 is not in the expected range, try a less restrictive one
-    do {
-      idx -= 1;
-    } while (idx >= 0 && !InQ2Range(Q2,Q2mins[idx],Q2maxs[idx]));
-    // fmt::print("SCANNED DOWN to less restrictive Q2 range: Q2={}, guess={}, return idx={}\n",Q2,guess,idx);
-    return idx;
-  } else {
-    // look for the most restrictive Q2 range that contains this Q2
-    for (int k=idx+1; k<Q2mins.size(); k++) {
-      if (InQ2Range(Q2,Q2mins[k],Q2maxs[k]))
-        idx = k;
-    }
-    // if(idx!=guess) fmt::print("SCANNED UP to more restrictive Q2 range: Q2={}, guess={}, return idx={}\n",Q2,guess,idx);
-    return idx;
+  // return guess; // just use the Q2 range, according to which ROOT file the event came from
+  Int_t idx = -1;
+  for (int k=0; k<Q2mins.size(); k++) {
+    if (InQ2Range(Q2,Q2mins[k],Q2maxs[k])) idx = k;
   }
+  if (idx<0) {
+    // fmt::print(stderr,"WARNING: Q2={} not in any Q2 range\n",Q2); // usually just below the smallest Q2 min
+    idx = 0; // assume the least-restrictive range
+  }
+  return idx;
 }
 
 
