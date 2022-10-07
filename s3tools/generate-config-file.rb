@@ -24,7 +24,7 @@ end
 # parse arguments
 globalSettings = Hash.new
 configFile = ARGV[0]
-globalSettings[:eleBeamEn], globalSettings[:ionBeamEn] = ARGV[1].split 'x'
+globalSettings[:eleBeamEn], globalSettings[:ionBeamEn] = ARGV[1].split('x').map{ |e| e.gsub /-.*/, '' }
 listFiles = ARGV[2..]
 globalSettings[:crossingAngle] = CrossingAngle
 puts "="*50, "generating config file".upcase, "="*50

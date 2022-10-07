@@ -64,6 +64,10 @@ $(mc ls $releaseDir | sed 's;.* ep-;                ;' | sed 's;/$;;' | sed 's;-
     release:      $release
     releaseDir:   $releaseDir
     eventEvalDir: $eventEvalDir
+
+  NOTE: Lambda directories are ignored, but if you want one, append
+        '-Lambda' to [energy]; for example:
+          $0 18x275-Lambda ecce.lambdas s 3
   """
   exit 2
 fi
@@ -77,7 +81,11 @@ if [ $# -ge 5 ]; then configFile=$5; fi
 
 ### get list of subdirectories associated to this beam energy; each subdirectory has a different Q2 range
 echo "Querying S3 for available data directories..."
-subdirList=$(mc ls $releaseDir | grep $energy | awk '{print $NF}' | sed 's;/$;;')
+if [[ "$energy" =~ "-" ]]; then
+  subdirList=$(mc ls $releaseDir | grep $energy | awk '{print $NF}' | sed 's;/$;;')
+else
+  subdirList=$(mc ls $releaseDir | grep $energy | awk '{print $NF}' | sed 's;/$;;' | grep -v Lambda)
+fi
 printf "\nSubdirectories:\n"
 for subdir in $subdirList; do echo "  $subdir"; done
 
