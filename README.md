@@ -11,6 +11,8 @@ fast simulations, including the following features:
   etc.); see [Kinematics Documentation](doc/kinematics.md) for more information
 - Calculations of SIDIS variables, such as `PhiH` and `qT`, for single
   particles, as well as jet variables
+- Automation for downloading or streaming simulation data from S3, along with
+  the capability to combine data from varying Q2 ranges using weights
 - Ability to specify arbitrary multi-dimensional binning schemes and cuts
   using [Adage](https://github.com/c-dilks/adage)
 - Output data structures include multi-dimensionally binned histogram sets,
