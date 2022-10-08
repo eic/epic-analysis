@@ -1,19 +1,13 @@
 R__LOAD_LIBRARY(Sidis-eic)
 
 void analysis_phi_crosscheck(
-    TString infiles="datarec/tutorial.config", /* list of input files */
-    Double_t eleBeamEn=5, /* electron beam energy [GeV] */
-    Double_t ionBeamEn=41, /* ion beam energy [GeV] */
-    Double_t crossingAngle=-25, /* crossing angle [mrad] */
+    TString configFile="datarec/tutorial.config", /* list of input files */
     TString outfilePrefix="phi.crosscheck" /* output filename prefix*/
 ) {
 
   // setup analysis ========================================
   AnalysisDelphes *A = new AnalysisDelphes(
-      infiles,
-      eleBeamEn,
-      ionBeamEn,
-      crossingAngle,
+      configFile,
       outfilePrefix
       );
 

@@ -13,7 +13,8 @@ One top-level script automates all the work:
   - running with no arguments will print the usage guide
   - output:
     - config file, with file names, Q2 minima, and cross sections; used as
-      input to the analysis macros
+      input to the analysis macros; see [doc/example.config](../doc/example.config)
+      for a sample config file
     - the downloaded full simulation files, if you chose to download from S3
   - this script contains some settings such as directory paths to data on S3,
     for the convenience of SIDIS full simulation analysis
@@ -39,7 +40,7 @@ Two options:
   - similar to full simulations, you need to have the S3 access and secret
     environment variables set in order to download `hepmc` files
 - alternatively, if you already have a directory of Delphes output ROOT files,
-  use use `make-fastsim-local-config.sh` to create a config file
+  use `make-fastsim-local-config.sh` to create a config file
 
 ## Accessing S3 Files
 - first, download the [MinIO client](https://docs.min.io/docs/minio-client-complete-guide)
@@ -67,23 +68,9 @@ Next we need to make a "config file", which consists of the file name, and
 additional columns such as cross section and minimum Q2. Follow the next sections,
 whether you plan to stream from S3 or download.
 
-### Config File Format
-The config files require the following columns, in this order:
-- file name (relative to the top-level directory, unless you use an absolute
-  path)
-- the number of events for the weighting and cross section
-  - set to `0` for all
-  - this is not related to `Analysis::maxEvents`, which limits how
-    many events to process
-- cross section (can be obtained from Pythia output logs, for example)
-- minimum Q2
-
-**Patch**: the above format is the original format, however, the current minimum Q2
-weighting implementation requires a new format. In case we revert to using the
-above old format, we temporarily use the script `reformat-config.sh` to
-transform the above old format into the new format. See comments in
-`reformat-config.sh` for details. Execute:
-  - `s3tools/reformat-config.sh files.config files.new.config`
+The config file includes settings such as beam energy, cross sections, and
+Q2 ranges. See [doc/example.config](../doc/example.config) for an example
+config file, and documentation.
 
 ### Cross Sections
 - cross sections are stored in `datarec/xsec/xsec.dat`; use `read-xsec-table.sh`
@@ -103,14 +90,7 @@ transform the above old format into the new format. See comments in
 To stream, we need to make a list of URLs.
 - run `generate-s3-list.sh` to generate a list of files
   - running it with no arguments will print the usage and required arguments
-  - the file list should appear in `stdout`; pipe the output somewhere, for example:
-    - directly to a text file:
-      `generate-s3-list.sh S3/.../... > files.txt`
-    - add columns for `numEvents` (0, for all events), cross section (3e-4), and
-      Q2min (1), to build a "config" file for an analysis:
-      `generate-s3-list.sh S3/.../... 0 3e-4 1 > files.config`
-    - use `grep` to remove files that have `"OLD"` in their filename:
-      `generate-s3-list.sh S3/.../... 0 3e-4 1 | grep -v OLD > files.config`
+  - the file list should appear in `stdout`; pipe the output somewhere, for example, a text file
 
 ### Download from S3
 Instead of URLs, we make a list of local files, together with the columns needed to

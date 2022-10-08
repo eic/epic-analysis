@@ -2,24 +2,18 @@ R__LOAD_LIBRARY(Sidis-eic)
 
 // analysis in bins of (x,Q2)
 void analysis_x_q2(
-    TString infiles="testconfig/delphes.config", // default, for manual local testing of fastsim
-    // TString infiles="testconfig/s3files.config", // default, for manual local testing of fullsim
-    Double_t eleBeamEn=10,
-    Double_t ionBeamEn=100,
-    Double_t crossingAngle=-25,
-    TString outfilePrefix="resolution.fastsim",
-    // TString outfilePrefix="resolution.fullsim",
-    // TString outfilePrefix="coverage.fastsim",
-    // TString outfilePrefix="coverage.fullsim",
+    TString configFile,
+    TString outfilePrefix,
     TString reconMethod="Ele"
-) {
+    )
+{
 
   // setup analysis ========================================
   Analysis *A;
-  if     (outfilePrefix.Contains("athena")) A = new AnalysisAthena( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
-  else if(outfilePrefix.Contains("ecce"))   A = new AnalysisEcce(   infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+  if     (outfilePrefix.Contains("athena")) A = new AnalysisAthena( configFile, outfilePrefix );
+  else if(outfilePrefix.Contains("ecce"))   A = new AnalysisEcce(   configFile, outfilePrefix );
 #ifndef EXCLUDE_DELPHES
-  else A = new AnalysisDelphes( infiles, eleBeamEn, ionBeamEn, crossingAngle, outfilePrefix );
+  else A = new AnalysisDelphes( configFile, outfilePrefix );
 #endif
 
   A->SetReconMethod(reconMethod); // set reconstruction method

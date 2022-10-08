@@ -13,7 +13,6 @@ defaults:
 env:
   ebeam_en: 10
   pbeam_en: 100
-  cross_ang: -25
   root: root -b -q
   root_no_delphes: root -b -q macro/ci/define_exclude_delphes.C 
 
@@ -119,7 +118,7 @@ jobs:
             echo "====="
             ls -lh datarec
             echo "[CI] make config file"
-            s3tools/make-fastsim-local-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} datarec delphes.config
+            s3tools/make-fastsim-local-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 0 datarec delphes.config
             echo "====="
             cat delphes.config
       - uses: actions/upload-artifact@v3
@@ -129,6 +128,7 @@ jobs:
           path: |
             datarec/*.root
             delphes.config
+            delphes.config.list
 
 # DOWNLOAD FULLSIM ---------------------------------------------------------------------------
 
@@ -140,7 +140,7 @@ jobs:
       matrix:
         include:
           - { detector: athena, num_files: 20 }
-          - { detector: ecce,   num_files: 20 }
+          - { detector: ecce,   num_files: 40 }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -154,7 +154,7 @@ jobs:
           run: |
             echo "[CI] download files from S3"
             s3tools/add-host.sh
-            s3tools/make-${{matrix.detector}}-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} d ${{matrix.num_files}} s3files.config
+            s3tools/make-${{matrix.detector}}-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.detector}} d ${{matrix.num_files}} s3files.config
             echo "[CI] cat config file"
             cat s3files.config
       - uses: actions/upload-artifact@v3
@@ -217,12 +217,12 @@ jobs:
             echo "[CI] flatten tree of Delphes files"
             find -name "*.root" -print | tee tmp.list
             cat tmp.list | while read f; do mv -v $f datarec/; done
-            cat x_fastsim_delphes*/delphes.config > delphes.config
-            sort -nr -o delphes.config{,}
+            echo "[CI] generate combined config file"
+            s3tools/generate-config-file.rb delphes.config ${{env.ebeam_en}}x${{env.pbeam_en}} x_fastsim_delphes*/delphes.config.list
             echo "[CI] cat delphes.config"
             cat delphes.config
             echo "[CI] ANALYSIS MACRO"
-            ${{env.root}} 'macro/ci/analysis_${{matrix.aname}}.C("delphes.config",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"fastsim.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
+            ${{env.root}} 'macro/ci/analysis_${{matrix.aname}}.C("delphes.config","fastsim.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
       - uses: actions/upload-artifact@v3
         with:
           name: root_analysis_fastsim_${{matrix.aname}}_${{matrix.recon}}
@@ -272,7 +272,7 @@ jobs:
             echo "[CI] cat s3files.config"
             cat s3files.config
             echo "[CI] ANALYSIS MACRO"
-            ${{env.root_no_delphes}} 'macro/ci/analysis_${{matrix.aname}}.C("s3files.config",${{env.ebeam_en}},${{env.pbeam_en}},${{env.cross_ang}},"${{matrix.detector}}.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
+            ${{env.root_no_delphes}} 'macro/ci/analysis_${{matrix.aname}}.C("s3files.config","${{matrix.detector}}.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
       - uses: actions/upload-artifact@v3
         with:
           name: root_analysis_${{matrix.detector}}_${{matrix.aname}}_${{matrix.recon}}

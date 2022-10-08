@@ -5,19 +5,13 @@ R__LOAD_LIBRARY(Sidis-eic)
  * - observe how the resulting histograms differ in each (x,Q2) bin
  */
 void analysis_PvsEta(
-    TString infiles="datarec/in.config", /* delphes tree(s) */
-    Double_t eleBeamEn=10, /* electron beam energy [GeV] */
-    Double_t ionBeamEn=100, /* ion beam energy [GeV] */
-    Double_t crossingAngle=-25, /* crossing angle [mrad] */
+    TString configFile="datarec/in.config", /* delphes tree(s) */
     TString outfilePrefix="coverage_pVsEtabins" /* output filename prefix*/
 ) {
 
   // setup analysis ========================================
   AnalysisDelphes *A = new AnalysisDelphes(
-      infiles,
-      eleBeamEn,
-      ionBeamEn,
-      crossingAngle,
+      configFile,
       outfilePrefix
       );
 

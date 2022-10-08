@@ -9,22 +9,15 @@ using std::cerr;
 using std::endl;
 
 // constructor
-AnalysisDelphes::AnalysisDelphes(
-  TString infileName_,
-  Double_t eleBeamEn_,
-  Double_t ionBeamEn_,
-  Double_t crossingAngle_,
-  TString outfilePrefix_
-) : Analysis(
-  infileName_,
-  eleBeamEn_,
-  ionBeamEn_,
-  crossingAngle_,
-  outfilePrefix_
-) {
+AnalysisDelphes::AnalysisDelphes(TString configFileName_, TString outfilePrefix_) :
+  Analysis(configFileName_, outfilePrefix_)
+{
   // delphes-specific settings defaults
   /* ... none defined yet ... */
 };
+
+// destructor
+AnalysisDelphes::~AnalysisDelphes() { };
 
 
 //=============================================
@@ -39,7 +32,7 @@ void AnalysisDelphes::Execute() {
   TChain *chain = new TChain("Delphes");
   for(Int_t idx=0; idx<infiles.size(); ++idx) {
     for(std::size_t idxF=0; idxF<infiles[idx].size(); ++idxF) {
-      std::cout << "Adding " << infiles[idx][idxF] << " with " << inEntries[idx][idxF] << std::endl;
+      // std::cout << "Adding " << infiles[idx][idxF] << " with " << inEntries[idx][idxF] << std::endl;
       chain->Add(infiles[idx][idxF].c_str(), inEntries[idx][idxF]);
     }
   }
@@ -278,9 +271,3 @@ void AnalysisDelphes::Execute() {
   Finish();
   //cout << "DEBUG PID in HFS: nSmeared=" << kin->countPIDsmeared << "  nNotSmeared=" << kin->countPIDtrue << endl;
 };
-
-
-// destructor
-AnalysisDelphes::~AnalysisDelphes() {
-};
-

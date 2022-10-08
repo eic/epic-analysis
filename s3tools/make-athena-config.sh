@@ -12,9 +12,9 @@ releaseDir="S3/eictest/ATHENA/RECO/$release/DIS/NC"
 #######################################################
 
 # usage:
-if [ $# -lt 2 ]; then
+if [ $# -lt 3 ]; then
   echo """
-  USAGE: $0 [energy] [mode(d/s/c)] [limit(optional)] [outputFile(optional)]
+  USAGE: $0 [energy] [local_dir] [mode] [limit(optional)] [config_file(optional)]
 
    - [energy]: 5x41      | - see below for available datasets
                5x100     | - data from different Q2minima are combined,
@@ -22,6 +22,8 @@ if [ $# -lt 2 ]; then
                10x275
                18x275
                
+   - [local_dir]: output directory name: datarec/[local_dir]
+
    - [mode]:   s - make config file for streaming from S3
                d - download from S3, then make the local config file
                c - just make the local config file, for local files
@@ -29,13 +31,9 @@ if [ $# -lt 2 ]; then
    - [limit]   integer>0 : only stream/download this many files per Q2 min
                0         : stream/download all files
                default=5
-   
-   - [outputFile]: output file name (optional)
-                   - default name is based on release version 
-                   - relative paths will be relative to main dir
-   
-   Examples: $0 5x41 d       # download
-             $0 18x275 s     # stream
+
+   - [config_file]  name of the config file; if not specified, the
+                    config file will be in datarec/[local_dir]
 
    See script for local and remote file path settings; they are
    configured for a specific set of data, but you may want to change
@@ -49,19 +47,21 @@ if [ $# -lt 2 ]; then
   exit 2
 fi
 energy=$1
-mode=$2
+locDir=$2
+mode=$3
 limit=5
-outFile=""
-if [ $# -ge 3 ]; then limit=$3; fi
-if [ $# -ge 4 ]; then outFile=$4; fi
+configFile=""
+if [ $# -ge 4 ]; then limit=$4; fi
+if [ $# -ge 5 ]; then configFile=$5; fi
 
 # cd to the main directory 
 pushd $(dirname $(realpath $0))/..
 
 # settings #############################################################
 sourceDir="$releaseDir/$energy"
-targetDir="datarec/athena/$release/$energy"
-Q2minima=( 1000 100 10 1 ) # should be decreasing order
+targetDir="datarec/$locDir/$release/$energy"
+Q2minima=( 1000 100 10 1 )
+Q2max=0 # no maximum
 ########################################################################
 
 # download files from S3
@@ -80,29 +80,24 @@ fi
 # build a config file
 status "build config file..."
 mkdir -p $targetDir
-if [ -z "$outFile" ]; then configFile=$targetDir/files.config
-else configFile=$outFile; fi
-> $configFile
+if [ -z "$configFile" ]; then configFile=$targetDir/files.config; fi
+> $configFile.list
 for Q2min in ${Q2minima[@]}; do
   crossSection=$(s3tools/read-xsec-table.sh "pythia8:$energy/minQ2=$Q2min")
   if [ "$mode" == "d" -o "$mode" == "c" ]; then
-    s3tools/generate-local-list.sh "$targetDir/minQ2=$Q2min" 0 $crossSection $Q2min | tee -a $configFile
+    s3tools/generate-local-list.sh "$targetDir/minQ2=$Q2min" $crossSection $Q2min $Q2max | tee -a $configFile.list
   elif [ "$mode" == "s" ]; then
     if [ $limit -gt 0 ]; then
-      s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" 0 $crossSection $Q2min | head -n$limit | tee -a $configFile
+      s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" $crossSection $Q2min $Q2max | head -n$limit | tee -a $configFile.list
     else
-      s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" 0 $crossSection $Q2min | tee -a $configFile
+      s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" $crossSection $Q2min $Q2max | tee -a $configFile.list
     fi
   else
     echo "ERROR: unknown mode"
     exit 1
   fi
 done
-
-# PATCH: convert config file to one-line-per-Q2min format
-status "reformatting config file to one-line-per-Q2min format..."
-mv -v $configFile{,.bak}
-s3tools/reformat-config.sh $configFile{.bak,}
+s3tools/generate-config-file.rb $configFile $energy $configFile.list
 
 # output some info
 #status "files in target directory:"
@@ -110,10 +105,8 @@ s3tools/reformat-config.sh $configFile{.bak,}
 popd
 status "done building config file at:"
 echo "     $configFile"
-status "run root macros with parameters:"
-echo "     '(\"$configFile\",$(echo $energy|sed 's/x/,/'))'"
 echo ""
-if [ -n "$(grep UNKNOWN $configFile)" ]; then
+if [ -n "$(grep UNKNOWN $configFile.list)" ]; then
   >&2 echo "ERROR: missing some cross sections"
   exit 1
 fi

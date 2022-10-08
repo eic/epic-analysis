@@ -2,21 +2,12 @@ R__LOAD_LIBRARY(Sidis-eic)
 
 // test DAG implementation
 void analysis_testDAG(
-    TString infiles="tutorial/delphes.config", /* list of input files */
-    Double_t eleBeamEn=10, /* electron beam energy [GeV] */
-    Double_t ionBeamEn=100, /* ion beam energy [GeV] */
-    Double_t crossingAngle=-25, /* crossing angle [mrad] */
-    TString outfilePrefix="testDAG" /* output filename prefix*/
+    TString configFile="tutorial/delphes.config", // input config file
+    TString outfilePrefix="testDAG"               // output filename prefix
 ) {
 
   // setup analysis ========================================
-  AnalysisDelphes *A = new AnalysisDelphes(
-      infiles,
-      eleBeamEn,
-      ionBeamEn,
-      crossingAngle,
-      outfilePrefix
-      );
+  AnalysisDelphes *A = new AnalysisDelphes(configFile, outfilePrefix);
 
   //A->maxEvents = 100;
 

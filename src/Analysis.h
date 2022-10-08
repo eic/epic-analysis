@@ -12,6 +12,7 @@
 #include <set>
 #include <stdexcept>
 #include <functional>
+#include <fmt/format.h>
 
 // root
 #include "TChain.h"
@@ -34,10 +35,7 @@ class Analysis : public TNamed
 {
   public:
     Analysis(
-        TString infileName_="",
-        Double_t eleBeamEn_=5,
-        Double_t ionBeamEn_=41,
-        Double_t crossingAngle_=0,
+        TString configFileName_="",
         TString outfilePrefix_=""
         );
     ~Analysis();
@@ -63,10 +61,15 @@ class Analysis : public TNamed
     // set kinematics reconstruction method; see constructor for available methods
     void SetReconMethod(TString reconMethod_) { reconMethod=reconMethod_; }; 
 
-    // add files to the TChain; this is called by `Prepare()`, but you can use these public
-    // methods to add more files if you want
-    // add single file `fileName` with given Q2 range and xs.
-    bool AddFile(std::vector<std::string> fileNames, std::vector<Long64_t> entries, Double_t xs, Double_t Q2min);
+    // add a group of files to the analysis, where all of these files have a
+    // common cross section `xs`, and Q2 range `Q2min` to `Q2max`
+    void AddFileGroup(
+        std::vector<std::string> fileNames,
+        std::vector<Long64_t> entries,
+        Double_t xs,
+        Double_t Q2min,
+        Double_t Q2max
+        );
 
     // access HistosDAG
     HistosDAG *GetHistosDAG() { return HD; };
@@ -107,7 +110,6 @@ class Analysis : public TNamed
     Weights const* weight;
     Weights const* weightJet;
     Double_t wTrackTotal, wJetTotal;
-    Double_t xsecTot;
     Long64_t entriesTot;
     const TString sep = "--------------------------------------------";
 
@@ -117,15 +119,16 @@ class Analysis : public TNamed
     // A lookup index for guessing which Q2 range an event belongs to.
     std::vector<std::size_t> inLookup;
     std::vector<Double_t> Q2xsecs;
-    std::vector<Double_t> Q2xsecsTot;
     std::vector<Double_t> Q2mins;
+    std::vector<Double_t> Q2maxs;
     std::vector<Long64_t> Q2entries;
     std::vector<Double_t> Q2weights;
-    TString infileName,outfileName,outfilePrefix;
+    TString configFileName,outfileName,outfilePrefix;
     TFile *outFile;
-    Double_t eleBeamEn = 5; // GeV
-    Double_t ionBeamEn = 41; // GeV
-    Double_t crossingAngle = 0; // mrad
+    Double_t eleBeamEn; // GeV
+    Double_t ionBeamEn; // GeV
+    Double_t crossingAngle; // mrad
+    Double_t totalCrossSection;
     TString reconMethod;
 
     // event loop objects
@@ -143,9 +146,38 @@ class Analysis : public TNamed
     std::map<TString,TString> availableBinSchemes;
     std::map<TString,BinSet*> binSchemes;
     std::map<TString,TString> reconMethodToTitle;
-    std::map<TString, TString> finalStateToTitle;
-    std::map<int, TString> PIDtoFinalState;
+    std::map<TString,TString> finalStateToTitle;
+    std::map<int,TString> PIDtoFinalState;
     std::set<TString> activeFinalStates;
+
+    // check if Q2 `val` is between `min` and `max`; if `max==0`, only `val>=min` is checked
+    template<class T> bool InQ2Range(T val, T min, T max, bool ignoreZero=false) {
+      if (ignoreZero && !(val>0)) return true;
+      if (max>0.0) return val>=min && val<=max;
+      else         return val>=min;
+    }
+
+    // container printing
+    // mostly for debugging; if we need more than this, switch to using a common pretty printer library
+    template<class O> void PrintStdVector(std::vector<O> vec, std::string name="") {
+      if(name!="") fmt::print("{}: ",name);
+      fmt::print("[ ");
+      for(const auto elem : vec) fmt::print("{}, ",elem);
+      fmt::print("]\n");
+    }
+    template<class O> void PrintStdVector2D(std::vector<std::vector<O>> vec, std::string name="") {
+      if(name!="") fmt::print("{} = ",name);
+      fmt::print("[\n");
+      for(const auto elem : vec) PrintStdVector(elem,"  ");
+      fmt::print("]\n");
+    }
+    template<class K, class V> void PrintStdMap(std::map<K,V> hash, std::string name="") {
+      if(name!="") fmt::print("{} = ",name);
+      fmt::print("{{\n");
+      for(const auto [key,val] : hash) fmt::print("  {} => {},\n",key,val);
+      fmt::print("}}\n");
+    }
+
 
   ClassDef(Analysis,1);
 };

@@ -6,26 +6,14 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-AnalysisEcce::AnalysisEcce(
-    TString infileName_,
-    Double_t eleBeamEn_,
-    Double_t ionBeamEn_,
-    Double_t crossingAngle_,
-    TString outfilePrefix_
-    ) : Analysis(
-      infileName_,
-      eleBeamEn_,
-      ionBeamEn_,
-      crossingAngle_,
-      outfilePrefix_
-      ),
-    trackSource(0) // default track source is "all tracks"
-{
-};
+// constructor
+AnalysisEcce::AnalysisEcce(TString configFileName_, TString outfilePrefix_) :
+  Analysis(configFileName_, outfilePrefix_),
+  trackSource(0) // default track source is "all tracks"
+{ };
 
 // destructor
-AnalysisEcce::~AnalysisEcce() {
-};
+AnalysisEcce::~AnalysisEcce() { };
 
 
 //=============================================
@@ -40,7 +28,7 @@ void AnalysisEcce::Execute()
   TChain *chain = new TChain("event_tree");
   for(Int_t idx=0; idx<infiles.size(); ++idx) {
     for(std::size_t idxF=0; idxF<infiles[idx].size(); ++idxF) {
-      std::cout << "Adding " << infiles[idx][idxF] << " with " << inEntries[idx][idxF] << std::endl;
+      // std::cout << "Adding " << infiles[idx][idxF] << " with " << inEntries[idx][idxF] << std::endl;
       chain->Add(infiles[idx][idxF].c_str(), inEntries[idx][idxF]);
     }
   }

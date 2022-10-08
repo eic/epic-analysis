@@ -2,30 +2,23 @@
 
 ClassImp(Analysis)
 
-using std::map;
-using std::vector;
-using std::string;
-using std::stringstream;
 using std::cout;
 using std::cerr;
 using std::endl;
-using std::ifstream;
 
 // constructor
 Analysis::Analysis(
-  TString infileName_,
-  Double_t eleBeamEn_,
-  Double_t ionBeamEn_,
-  Double_t crossingAngle_,
+  TString configFileName_,
   TString outfilePrefix_
 )
-  : infileName(infileName_)
-  , eleBeamEn(eleBeamEn_)
-  , ionBeamEn(ionBeamEn_)
-  , crossingAngle(crossingAngle_)
+  : configFileName(configFileName_)
   , outfilePrefix(outfilePrefix_)
   , reconMethod("")
   , finalStateID("")
+  , eleBeamEn(10.0)
+  , ionBeamEn(100.0)
+  , crossingAngle(-25.0)
+  , totalCrossSection(1e6)
 {
   // available variables for binning
   // - availableBinSchemes is a map from variable name to variable title
@@ -106,114 +99,186 @@ Analysis::Analysis(
 
 // input files
 //------------------------------------
-// add a single file
-bool Analysis::AddFile(std::vector<std::string> fileNames, std::vector<Long64_t> entries, Double_t xs, Double_t Q2min) {
-  cout << "AddFile: " << Q2min << ", " << xs << ", ";
-  for (string fileName : fileNames) {
-      cout << fileName << ", ";
-  }
-  cout << endl;
-  // insert in order of Q2min
-  std::size_t insertIdx = 0;
-  for (std::size_t idx = 0; idx < infiles.size(); ++idx) {
-    if (Q2min == Q2mins[idx]) {
-      cerr << "Q2min " << Q2min << "appears twice in config file" << endl;
-      return false;
-    } else if (Q2min < Q2mins[idx]) {
-      break;
-    } else {
-      insertIdx += 1;
-    }
-  }
-  infiles.insert(infiles.begin() + insertIdx, fileNames);
-  Q2xsecs.insert(Q2xsecs.begin() + insertIdx, xs);
-  Q2xsecsTot.insert(Q2xsecsTot.begin() + insertIdx, xs);
-  Q2mins.insert(Q2mins.begin() + insertIdx, Q2min);
-  inEntries.insert(inEntries.begin() + insertIdx, entries);
+// add a group of files
+void Analysis::AddFileGroup(
+    std::vector<std::string> fileNames,
+    std::vector<Long64_t> entries,
+    Double_t xs,
+    Double_t Q2min,
+    Double_t Q2max
+    )
+{
+  // print
+  fmt::print("-> AddFileGroup:  crossSection={},  Q2range = {} to {}\n",
+      xs,
+      Q2min,
+      Q2max>Q2min ? std::to_string(Q2max) : "inf"
+      );
+  for (auto fileName : fileNames) fmt::print("   - {}\n", fileName);
+
+  // fill vectors
+  infiles.push_back(fileNames);
+  Q2xsecs.push_back(xs);
+  Q2mins.push_back(Q2min);
+  Q2maxs.push_back(Q2max);
+  inEntries.push_back(entries);
+
+  // get total entries
   Long64_t totalEntry = 0;
-  for (Long64_t entry : entries) {
-      totalEntry += entry;
-  }
-  Q2entries.insert(Q2entries.begin() + insertIdx, totalEntry);
-  // adjust cross-sections to account for overlapping regions
-  for (std::size_t idx = infiles.size() - 1; idx > insertIdx; --idx) {
-    Q2xsecs[insertIdx] -= Q2xsecs[idx];
-  }
-  if (insertIdx > 0) {
-    Q2xsecs[insertIdx - 1] -= Q2xsecs[insertIdx];
-  }
-  for (std::size_t idx = 0; idx < Q2xsecs.size(); ++idx) {
-    if (Q2xsecs[idx] < 0.) {
-      cerr << "Cross-sections must strictly decrease with stricter Q2min cuts" << endl;
-      return false;
+  for (Long64_t entry : entries) totalEntry += entry;
+  Q2entries.push_back(totalEntry);
+
+  // check if the cross section for each group decreases; this is preferred
+  // to make sure that `GetEventQ2Idx` behaves correctly
+  for (std::size_t idx = 0; idx+1 < Q2xsecs.size(); ++idx) {
+    if (Q2xsecs[idx] < Q2xsecs[idx+1] ) {
+      cerr << "WARNING: Cross-sections should strictly decrease with stricter Q2min cuts; re-arrange your config file" << endl;
+      PrintStdVector(Q2xsecs,"   cross sections");
     }
   }
+
+  // lookup table, for tree number -> vector indices
   inLookup.clear();
   std::size_t total = 0;
   for (std::size_t idx = 0; idx < infiles.size(); ++idx) {
     total += infiles[idx].size();
     inLookup.resize(total, idx);
   }
-  return true;
 }
 
 
 // prepare for the analysis
 //------------------------------------
 void Analysis::Prepare() {
-  ifstream fin(infileName);
-  string line;
-  while (std::getline(fin, line)) {
-    stringstream ss(line);
-    std::vector<string> fileNames;
+
+  // parse config file --------------------
+  std::ifstream fin(configFileName);
+  std::string line;
+  bool debugParser = false;
+  fmt::print("[+++] PARSING CONFIG FILE {}\n",configFileName);
+
+  // vars
+  Double_t xsec  = totalCrossSection;
+  Double_t Q2min = 1.0;
+  Double_t Q2max = 0.0;
+  std::vector<std::string> fileNames;
+  bool readingListOfFiles = false;
+
+  /* lambda to add a list of files to this analysis; wraps `Analysis::AddFileGroup`,
+   * and checks the files beforehand
+   */
+  auto AddFiles = [this, &fileNames, &xsec, &Q2min, &Q2max] () {
+    // get the number of entries, and check the file
     std::vector<Long64_t> entries;
-    Double_t xs, Q2min;
-    ss >> Q2min >> xs;
-    if (!ss) {
-      continue;
-    }
-    while (true) {
-      std::string fileName;
-      Long64_t entry;
-      ss >> fileName >> entry;
-      if (ss) {
-        fileNames.push_back(fileName);
-        entries.push_back(entry);
-      } else {
-        break;
+    for(auto fileName : fileNames) {
+      auto file = TFile::Open(fileName.c_str());
+      if (file->IsZombie()) {
+        fmt::print(stderr,"ERROR: Couldn't open input file '{}'\n",fileName);
+        return;
       }
-    }
-    for (std::size_t idx = 0; idx < fileNames.size(); ++idx) {
-      if (entries[idx] <= 0) {
-        TFile* file = TFile::Open(fileNames[idx].c_str());
-        if (file->IsZombie()) {
-          cerr << "ERROR: Couldn't open input file '" << fileNames[idx] << "'" << endl;
-          return;
-        }
-        TTree* tree = file->Get<TTree>("Delphes");
-        if (tree == nullptr) tree = file->Get<TTree>("events");
-        if (tree == nullptr) tree = file->Get<TTree>("event_tree");
-        if (tree == nullptr) {
-          cerr << "ERROR: Couldn't find Delphes or events tree in file '" << fileNames[idx] << "'" << endl;
-          entries[idx] = 0;
-        }
-        else entries[idx] = tree->GetEntries();
-        file->Close();
+      TTree *tree = file->Get<TTree>("Delphes");                  // fastsim
+      if (tree == nullptr) tree = file->Get<TTree>("events");     // ATHENA, EPIC
+      if (tree == nullptr) tree = file->Get<TTree>("event_tree"); // ECCE
+      if (tree == nullptr) {
+        fmt::print(stderr,"ERROR: Couldn't find tree in file '{}'\n",fileName);
+        entries.push_back(0);
       }
+      else entries.push_back(tree->GetEntries());
+      file->Close();
     }
-    if (!AddFile(fileNames, entries, xs, Q2min)) {
-      cerr << "ERROR: Couldn't add files ";
-      for (std::string fileName : fileNames) {
-        cerr << fileName << " ";
+    // add the file group
+    AddFileGroup(fileNames, entries, xsec, Q2min, Q2max);
+  };
+
+  // loop over lines
+  while (std::getline(fin, line)) {
+
+    // chomp comments
+    auto lineChomped = line.substr(0,line.find("#"));
+    if(debugParser) fmt::print("\nlineChomped = \"{}\"\n",lineChomped);
+
+    // each line will be parsed as one of the following:
+    enum parseAs_enum { kNone, kSetting, kRootFile };
+    int parseAs = kNone;
+
+    // tokenize the line
+    std::string token, bufferKey, bufferVal;
+    std::stringstream lineStream(lineChomped);
+    while (std::getline(lineStream, token, ' ')) {
+      // classify `parseAs` and fill buffers
+      if (token.rfind(":",0)==0) { // parse as setting name
+        parseAs   = kSetting;
+        bufferKey = token;
       }
-      cerr << endl;
-      return;
+      else if (parseAs==kSetting) { // parse as setting value
+        if (token!="" && bufferVal=="") bufferVal = token;
+      }
+      else { // parse as root file name
+        parseAs   = kRootFile;
+        bufferKey = token;
+      }
+      // if(debugParser) fmt::print("  token = \"{}\"\n",token);
+    } // tokenize
+
+    // parse buffers
+    if (parseAs==kSetting) {
+      // if we were reading a list of files, we're done with this list; add the files and reset
+      if(readingListOfFiles) {
+        if(debugParser) fmt::print("-> new setting, add current list of `fileNames`, then reset\n");
+        AddFiles();
+        readingListOfFiles = false;
+        xsec  = totalCrossSection;
+        Q2min = 1.0;
+        Q2max = 0.0;
+        fileNames.clear();
+      }
+      // parse setting value(s)
+      if      (bufferKey==":eleBeamEn")         eleBeamEn         = std::stod(bufferVal);
+      else if (bufferKey==":ionBeamEn")         ionBeamEn         = std::stod(bufferVal);
+      else if (bufferKey==":crossingAngle")     crossingAngle     = std::stod(bufferVal);
+      else if (bufferKey==":totalCrossSection") totalCrossSection = std::stod(bufferVal);
+      else if (bufferKey==":q2min")             Q2min             = std::stod(bufferVal);
+      else if (bufferKey==":q2max")             Q2max             = std::stod(bufferVal);
+      else if (bufferKey==":crossSection")      xsec              = std::stod(bufferVal);
+      else
+        fmt::print(stderr,"WARNING: unkown setting \"{}\"\n",bufferKey);
+      if(debugParser) fmt::print("  setting:  \"{}\" = \"{}\"\n",bufferKey,bufferVal);
     }
-  }
+    else if (parseAs==kRootFile) {
+      readingListOfFiles = true;
+      fileNames.push_back(bufferKey);
+      if(debugParser) fmt::print("  rootFile: \"{}\"\n",bufferKey);
+    }
+
+  } // loop over lines
+
+  // add last list of files
+  if(debugParser) fmt::print("-> EOF; add last list of `fileNames`\n");
+  AddFiles();
+  fmt::print("[+++] PARSING COMPLETE\n\n");
+
   if (infiles.empty()) {
     cerr << "ERROR: no input files have been specified" << endl;
     return;
   }
+
+  // print configuration ----------------------------------
+  fmt::print("{:=<50}\n","CONFIGURATION: ");
+  fmt::print("{:>30} = {} GeV\n",  "eleBeamEn",         eleBeamEn);
+  fmt::print("{:>30} = {} GeV\n",  "ionBeamEn",         ionBeamEn);
+  fmt::print("{:>30} = {} mrad\n", "crossingAngle",     crossingAngle);
+  fmt::print("{:>30} = {}\n",      "totalCrossSection", totalCrossSection);
+  fmt::print("{:>30} = {}\n",      "reconMethod",       reconMethod);
+  fmt::print("{:-<50}\n","");
+  PrintStdVector(Q2mins,"Q2mins");
+  PrintStdVector(Q2maxs,"Q2maxs");
+  PrintStdVector(Q2xsecs,"Q2xsecs");
+  PrintStdVector(Q2entries,"Q2entries");
+  // PrintStdVector2D(inEntries,"inEntries");
+  // PrintStdVector(inLookup,"inLookup");
+  fmt::print("{:-<50}\n","");
+  PrintStdMap(availableBinSchemes,"availableBinSchemes");
+  fmt::print("{:=<50}\n","");
 
   // set output file name
   outfileName = "out/"+outfilePrefix+".root";
@@ -298,7 +363,7 @@ void Analysis::Prepare() {
         NBINS,1,3000,
         true,true
         );
-    HS->DefineHist1D("Q","Q","GeV",NBINS,1.0,55.0,true,true);
+    HS->DefineHist1D("Q2","Q2","GeV",NBINS,1.0,3000,true,true);
     HS->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
     HS->DefineHist1D("y","y","",NBINS,1e-3,1,true);
     HS->DefineHist1D("W","W","GeV",NBINS,0,50);
@@ -341,7 +406,7 @@ void Analysis::Prepare() {
     HS->DefineHist2D("depolWAvsQ2", "Q^{2}", "W/A",      "GeV^{2}", "", NBINS, 1, 3000, NBINS, 0, 2.5, true, false);
     // -- single-hadron cross sections
     //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
-    HS->DefineHist1D("Q_xsec","Q","GeV",10,1.0,10.0,true,true); // log
+    HS->DefineHist1D("Q_xsec","Q","GeV",NBINS,1.0,3000,true,true); // log
     HS->Hist("Q_xsec")->SetMinimum(1e-10);
     // -- resolutions
     HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -0.5, 0.5);
@@ -419,26 +484,28 @@ void Analysis::CalculateEventQ2Weights() {
   for (Long64_t entry : Q2entries) {
     entriesTot += entry;
   }
-  xsecTot = Q2xsecsTot.front();
   cout << "Q2 weighting info:" << endl;
   for (Int_t idx = 0; idx < Q2xsecs.size(); ++idx) {
-    Double_t xsecFactor = Q2xsecs[idx] / xsecTot;
-    Double_t entries = 0.;
-    for (Int_t idxC = 0; idxC <= idx; ++idxC) {
-      // estimate how many events from this file lie in the given Q2 range
-      entries += Q2entries[idxC] * (Q2xsecs[idx] / Q2xsecsTot[idxC]);
+    // calculate total luminosity, and the luminosity that contains this Q2 range
+    Double_t lumiTotal = Double_t(entriesTot)     / totalCrossSection;
+    Double_t lumiThis  = Double_t(Q2entries[idx]) / Q2xsecs[idx];
+    //// alternative `lumiThis`: try to correct for overlapping Q2 ranges
+    lumiThis = 0.; // reset
+    for (Int_t j = 0; j < Q2xsecs.size(); ++j) {
+      // check if Q2 range `j` contains the Q2 range `idx`; if so, include its luminosity
+      if (InQ2Range(Q2mins[idx], Q2mins[j], Q2maxs[j]) &&
+          InQ2Range(Q2maxs[idx], Q2mins[j], Q2maxs[j], true))
+      {
+        lumiThis += Double_t(Q2entries[j]) / Q2xsecs[j];
+      }
     }
-    Double_t numFactor = entries / entriesTot;
-    Q2weights[idx] = xsecFactor / numFactor;
-    cout << "\tQ2 > " << Q2mins[idx] << ":" << endl;
-    cout << "\t\t";
-    for (Int_t idxF = 0; idxF < infiles[idx].size(); ++idxF) {
-      cout << infiles[idx][idxF] << "; ";
-    }
-    cout << endl;
+    // calculate the weight for this Q2 range
+    Q2weights[idx] = lumiTotal / lumiThis;
+    cout << "\tQ2 > "     << Q2mins[idx];
+    if(Q2maxs[idx]>0) cout << " && Q2 < " << Q2maxs[idx];
+    cout << ":" << endl;
     cout << "\t\tcount    = " << Q2entries[idx] << endl;
     cout << "\t\txsec     = " << Q2xsecs[idx] << endl;
-    cout << "\t\txsec_tot = " << Q2xsecsTot[idx] << endl;
     cout << "\t\tweight   = " << Q2weights[idx] << endl;
   }
 }
@@ -452,19 +519,19 @@ Double_t Analysis::GetEventQ2Weight(Double_t Q2, Int_t guess) {
   }
 }
 
+// get the `idx` for this value of `Q2`; tries to find the most restrictive Q2 range
+// that contains the given `Q2` value, in order to assign the correct weight
 Int_t Analysis::GetEventQ2Idx(Double_t Q2, Int_t guess) {
-  Int_t idx = guess;
-  if (Q2 < Q2mins[idx]) {
-    do {
-      idx -= 1;
-    } while (idx >= 0 && Q2 < Q2mins[idx]);
-    return idx;
-  } else {
-    while (idx + 1 < Q2mins.size() && Q2 >= Q2mins[idx + 1]) {
-      idx += 1;
-    }
-    return idx;
+  // return guess; // just use the Q2 range, according to which ROOT file the event came from
+  Int_t idx = -1;
+  for (int k=0; k<Q2mins.size(); k++) {
+    if (InQ2Range(Q2,Q2mins[k],Q2maxs[k])) idx = k;
   }
+  if (idx<0) {
+    // fmt::print(stderr,"WARNING: Q2={} not in any Q2 range\n",Q2); // usually just below the smallest Q2 min
+    idx = 0; // assume the least-restrictive range
+  }
+  return idx;
 }
 
 
@@ -477,7 +544,7 @@ void Analysis::Finish() {
   HD->ClearOps();
 
   // calculate integrated luminosity
-  Double_t lumi = wTrackTotal/xsecTot; // [nb^-1]
+  Double_t lumi = wTrackTotal/totalCrossSection; // [nb^-1]
   cout << "Integrated Luminosity:       " << lumi << "/nb" << endl;
   cout << sep << endl;
 
@@ -507,7 +574,7 @@ void Analysis::Finish() {
   HD->Payload([this](Histos *H){ H->Write(); }); HD->ExecuteAndClearOps();
   std::vector<Double_t> vec_wTrackTotal { wTrackTotal };
   std::vector<Double_t> vec_wJetTotal { wJetTotal };
-  outFile->WriteObject(&Q2xsecsTot, "XsTotal");
+  outFile->WriteObject(&Q2xsecs, "XsTotal");
   outFile->WriteObject(&vec_wTrackTotal, "WeightTotal");
   outFile->WriteObject(&vec_wJetTotal, "WeightJetTotal");
 
@@ -585,7 +652,7 @@ void Analysis::FillHistosTracks() {
     H->Hist4("full_xsec")->Fill(kin->x,kin->Q2,kin->pT,kin->z,wTrack);
     // DIS kinematics
     dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,wTrack);
-    H->Hist("Q")->Fill(TMath::Sqrt(kin->Q2),wTrack);
+    H->Hist("Q2")->Fill(kin->Q2,wTrack);
     H->Hist("x")->Fill(kin->x,wTrack);
     H->Hist("W")->Fill(kin->W,wTrack);
     H->Hist("y")->Fill(kin->y,wTrack);

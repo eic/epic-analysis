@@ -35,13 +35,7 @@ class ParticlesEE
 class AnalysisEcce : public Analysis
 {
   public:
-    AnalysisEcce(
-        TString infileName_="",
-        Double_t eleBeamEn_=5,
-        Double_t ionBeamEn_=41,
-        Double_t crossingAngle_=0,
-        TString outfilePrefix_=""
-        );
+    AnalysisEcce(TString configFileName_="", TString outfilePrefix_="");
     ~AnalysisEcce();
 
     void Execute() override;

@@ -3,19 +3,13 @@ R__LOAD_LIBRARY(Sidis-eic)
 
 // cross section in pT bins
 void analysis_xsecPT(
-    TString infiles="datarec/arc/crossCheck*.root", /* delphes tree(s) */
-    Double_t eleBeamEn=5, /* electron beam energy [GeV] */
-    Double_t ionBeamEn=41, /* ion beam energy [GeV] */
-    Double_t crossingAngle=0, /* crossing angle [mrad] */
+    TString configFile="datarec/arc/crossCheck*.root", /* delphes tree(s) */
     TString outfilePrefix="xsecPT" /* output filename prefix*/
 ) {
 
   // setup analysis ========================================
   AnalysisDelphes *A = new AnalysisDelphes(
-      infiles,
-      eleBeamEn,
-      ionBeamEn,
-      crossingAngle,
+      configFile,
       outfilePrefix
       );
 

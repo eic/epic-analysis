@@ -2,21 +2,12 @@ R__LOAD_LIBRARY(Sidis-eic)
 
 // run in Q2 bins, for two pT ranges
 void analysis_qbins(
-    TString infiles="tutorial/delphes.config", /* list of input files */
-    Double_t eleBeamEn=10, /* electron beam energy [GeV] */
-    Double_t ionBeamEn=100, /* ion beam energy [GeV] */
-    Double_t crossingAngle=-25, /* crossing angle [mrad] */
-    TString outfilePrefix="tutorial.qbins" /* output filename prefix*/
+    TString configFile="tutorial/delphes.config", // input config file
+    TString outfilePrefix="tutorial.qbins"        // output filename prefix
 ) {
 
   // setup analysis ========================================
-  AnalysisDelphes *A = new AnalysisDelphes(
-      infiles,
-      eleBeamEn,
-      ionBeamEn,
-      crossingAngle,
-      outfilePrefix
-      );
+  AnalysisDelphes *A = new AnalysisDelphes(configFile, outfilePrefix);
 
   //A->maxEvents = 30000; // use this to limit the number of events
   A->SetReconMethod("Ele"); // set reconstruction method

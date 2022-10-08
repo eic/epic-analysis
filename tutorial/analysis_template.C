@@ -5,26 +5,18 @@ R__LOAD_LIBRARY(Sidis-eic)
  * - useful if you want to use your own analysis code
  */
 void analysis_template(
-    TString infiles="tutorial/delphes.config", /* list of input files */
-    Double_t eleBeamEn=10, /* electron beam energy [GeV] */
-    Double_t ionBeamEn=100, /* ion beam energy [GeV] */
-    Double_t crossingAngle=-25, /* crossing angle [mrad] */
-    TString outfilePrefix="tutorial.template" /* output filename prefix*/
+    TString configFile="tutorial/delphes.config", // input config file
+    TString outfilePrefix="tutorial.template"     // output filename prefix
 ) {
 
   // setup analysis ========================================
-  AnalysisDelphes *A = new AnalysisDelphes(
-      infiles,
-      eleBeamEn,
-      ionBeamEn,
-      crossingAngle,
-      outfilePrefix
-      );
+  AnalysisDelphes *A = new AnalysisDelphes(configFile, outfilePrefix);
+  // use a different `Analysis`-derived class to handle different data streams:
+  // AnalysisEpic *A = new AnalysisEpic(configFile, outfilePrefix);     // EPIC Single Software Stack
+  // AnalysisEcce *A = new AnalysisEcce(configFile, outfilePrefix);     // ECCE Fun4all + EventEvaluator
+  // AnalysisAthena *A = new AnalysisAthena(configFile, outfilePrefix); // ATHENA DD4hep + Juggler
+
   //A->maxEvents = 10000; // use this to limit the number of events
-  /* this `maxEvents` limit should only be applied for quick tests;
-   * you should not set it if you are using the number of events
-   * column in `infiles` (the input files table)
-   */
   A->writeSimpleTree = true; // write SimpleTree (for one bin)
 
   // set reconstruction method =============================

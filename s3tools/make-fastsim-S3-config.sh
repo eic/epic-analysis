@@ -10,7 +10,7 @@
 # usage:
 if [ $# -lt 3 ]; then
   echo """
-  USAGE: $0 [energy] [local_dir] [mode] [limit(optional)]
+  USAGE: $0 [energy] [local_dir] [mode] [limit(optional)] [config_file(optional)]
 
   provides automation for downloading hepmc files from S3, running
   Delphes on them (one thread per Q2min), and finally the generation
@@ -35,6 +35,9 @@ if [ $# -lt 3 ]; then
                - default=5
                - limit only applies to downloading
 
+   - [config_file]  name of the config file; if not specified, the
+                    config file will be in datarec/[local_dir]
+
   """
   exit 2
 fi
@@ -42,13 +45,16 @@ energy=$1
 locDir=$2
 mode=$3
 limit=5
+configFile=""
 if [ $# -ge 4 ]; then limit=$4; fi
+if [ $# -ge 5 ]; then configFile=$5; fi
 
 # settings
-Q2minima=( 1000 100 10 1 ) # should be decreasing order
+Q2minima=( 1000 100 10 1 )
+Q2max=0 # no max
 genDir=datagen/$locDir/$energy
 recDir=datarec/$locDir/$energy
-configFile=$recDir/delphes.config
+if [ -z "$configFile" ]; then configFile=$recDir/delphes.config; fi
 
 # download hepmc files from S3
 function status { echo ""; echo "[+] $1"; }
@@ -92,28 +98,19 @@ fi
 
 # generate config file
 if [ "$mode" == "c" -o "$mode" == "a" ]; then
+  listFiles=""
   for Q2min in ${Q2minima[@]}; do
-    status "make config file for $recDir/minQ2=$Q2min"
-    s3tools/make-fastsim-local-config.sh $energy $Q2min $recDir/minQ2=$Q2min{,/delphes.config}
+    configDir=$recDir/minQ2=$Q2min
+    configFilePart=$configDir/delphes.config
+    listFiles="$listFiles $configFilePart.list"
+    status "make config file for $configDir"
+    s3tools/make-fastsim-local-config.sh $energy $Q2min $Q2max $configDir $configFilePart
   done
-  status "concatenate config files to target config file: $configFile"
-  > $configFile
-  for Q2min in ${Q2minima[@]}; do
-    cat $recDir/minQ2=$Q2min/delphes.config >> $configFile
-  done
+  s3tools/generate-config-file.rb $configFile $energy $listFiles
 fi
 
 # output some info
-status "done building config file at:"
-echo "     $configFile"
-status "run root macros with parameters:"
-echo "     '(\"$configFile\",$(echo $energy|sed 's/x/,/'))'"
-echo ""
-if [ -n "$(grep UNKNOWN $configFile)" ]; then
-  >&2 echo "ERROR: missing some cross sections... removing these lines from config file:"
-  grep UNKNOWN $configFile
-  mv $configFile{,.tmp}
-  grep -v UNKNOWN $configFile.tmp > $configFile
-  rm $configFile.tmp
-  exit 1
+if [ "$mode" == "c" -o "$mode" == "a" ]; then
+  status "done building config file at:"
+  echo "     $configFile"
 fi
