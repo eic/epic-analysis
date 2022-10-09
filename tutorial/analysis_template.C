@@ -23,6 +23,15 @@ void analysis_template(
   // - see `Analysis` constructor for methods
   A->SetReconMethod("Ele");
 
+  // decide which output sets to include ===================
+  // - by default, only single-hadron data are included
+  // - to look at jets, we need to make sure they are included
+  A->includeOutputSet["jets"] = true;
+  // - additional example settings; see `src/Analysis.cxx` for more
+  //A->includeOutputSet["1h"] = false;
+  //A->includeOutputSet["inclusive"] = false;
+  //A->includeOutputSet["depolarization"] = true;
+
   // define cuts ====================================
   // - cuts are defined the same way as bins are defined; be mindful
   //   of what bins you are defining vs. what cuts you are defining.
@@ -41,8 +50,9 @@ void analysis_template(
   /* do nothing -> single bin histograms */
 
   // final states =========================================
-  // - define final states; if you define none, default sets will
-  //   be defined
+  // - define final states; if you define none, default sets will be defined
+  // - although jets are included in `includeOutputSet`, we still need to
+  //   included them in the list of final states here
   A->AddFinalState("pipTrack");
   //A->AddFinalState("pimTrack");
   //A->AddFinalState("KpTrack");

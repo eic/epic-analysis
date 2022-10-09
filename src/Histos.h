@@ -130,6 +130,23 @@ class Histos : public TNamed
       ofile->cd("/");
     };
 
+    // fill a histogram, iff it is defined
+    template <typename... VALS> void FillHist1D(TString histName, VALS... values) {
+      auto hist = Hist(histName,true);
+      if(hist) hist->Fill(values...);
+    }
+    template <typename... VALS> void FillHist2D(TString histName, VALS... values) {
+      auto hist = Hist(histName,true);
+      if(hist) dynamic_cast<TH2*>(hist)->Fill(values...);
+    }
+    template <typename... VALS> void FillHist3D(TString histName, VALS... values) {
+      auto hist = Hist(histName,true);
+      if(hist) dynamic_cast<TH3*>(hist)->Fill(values...);
+    }
+    template <typename... VALS> void FillHist4D(TString histName, VALS... values) {
+      auto hist = Hist4(histName,true);
+      if(hist) hist->Fill(values...);
+    }
 
   private:
     TString setname,settitle;

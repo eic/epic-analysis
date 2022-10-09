@@ -19,6 +19,7 @@ void analysis_depolarization(
 
   A->SetReconMethod("Ele"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
+  A->includeOutputSet["depolarization"] = true; // include depolarization plots
 
   /// SIDIS common cuts
   A->AddBinScheme("w");     A->BinScheme("w")->BuildBin("Min",3.0);         // W > 3 GeV

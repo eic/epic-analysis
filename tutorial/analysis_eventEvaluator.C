@@ -29,6 +29,14 @@ void analysis_eventEvaluator(
   // - see `Analysis` constructor for methods (or other tutorials)
   A->SetReconMethod("Ele");
 
+  // decide which output sets to include ===================
+  // - by default, only single-hadron data are included in the output
+  // - see `src/Analysis.cxx` for all available settings
+  //A->includeOutputSet["jets"] = true;
+  //A->includeOutputSet["1h"] = false;
+  //A->includeOutputSet["inclusive"] = false;
+  //A->includeOutputSet["depolarization"] = true;
+
   A->AddFinalState("pipTrack");
   //A->AddFinalState("pimTrack");
   //A->AddFinalState("KpTrack");
