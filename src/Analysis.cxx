@@ -485,19 +485,27 @@ void Analysis::Prepare() {
 
     // -- depolarization
     if(includeOutputSet["depolarization"]) {
-      HS->DefineHist2D("epsilonVsQ2", "Q^{2}", "#epsilon", "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 1.5, true, false);
-      HS->DefineHist2D("depolAvsQ2",  "Q^{2}", "A",        "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
-      HS->DefineHist2D("depolBvsQ2",  "Q^{2}", "B",        "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
-      HS->DefineHist2D("depolBAvsQ2", "Q^{2}", "B/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
-      HS->DefineHist2D("depolCAvsQ2", "Q^{2}", "C/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
-      HS->DefineHist2D("depolVAvsQ2", "Q^{2}", "V/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
-      HS->DefineHist2D("depolWAvsQ2", "Q^{2}", "W/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
-      HS->DefineHist2D("depolAvsY",   "y",     "A",        "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
-      HS->DefineHist2D("depolBvsY",   "y",     "B",        "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
-      HS->DefineHist2D("depolBAvsY",  "y",     "B/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
-      HS->DefineHist2D("depolCAvsY",  "y",     "C/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
-      HS->DefineHist2D("depolVAvsY",  "y",     "V/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
-      HS->DefineHist2D("depolWAvsY",  "y",     "W/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
+      std::map<TString,TString> depols = {
+        { "epsilon", "#epsilon" },
+        { "depolA",  "A"        },
+        { "depolB",  "B"        },
+        { "depolBA", "B/A"      },
+        { "depolCA", "C/A"      },
+        { "depolVA", "V/A"      },
+        { "depolWA", "W/A"      }
+      };
+      for(auto [name,title] : depols) {
+        HS->DefineHist2D(name+"vsQ2", "Q^{2}", title, "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
+        HS->DefineHist2D(name+"vsY",  "y",     title, "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
+        HS->DefineHist3D(name+"vsQ2vsX",
+            "x",   "Q^{2}",   title,
+            "",    "GeV^{2}", "",
+            NBINS, 1e-3,      1,
+            NBINS, 1,         3000,
+            NBINS, 0,         2.5,
+            true,  true,      false
+            );
+      }
     }
 
   });
@@ -714,19 +722,22 @@ void Analysis::FillHistosTracks() {
     H->FillHist2D("etaVsP",       kin->pLab, kin->etaLab, wTrack); // TODO: lab-frame p, or some other frame?
     H->FillHist2D("etaVsPcoarse", kin->pLab, kin->etaLab, wTrack);
     // depolarization
-    H->FillHist2D("epsilonVsQ2", kin->Q2, kin->epsilon, wTrack);
-    H->FillHist2D("depolAvsQ2",  kin->Q2, kin->depolA,  wTrack);
-    H->FillHist2D("depolBvsQ2",  kin->Q2, kin->depolB,  wTrack);
-    H->FillHist2D("depolBAvsQ2", kin->Q2, kin->depolP1, wTrack);
-    H->FillHist2D("depolCAvsQ2", kin->Q2, kin->depolP2, wTrack);
-    H->FillHist2D("depolVAvsQ2", kin->Q2, kin->depolP3, wTrack);
-    H->FillHist2D("depolWAvsQ2", kin->Q2, kin->depolP4, wTrack);
-    H->FillHist2D("depolAvsY",   kin->y,  kin->depolA,  wTrack);
-    H->FillHist2D("depolBvsY",   kin->y,  kin->depolB,  wTrack);
-    H->FillHist2D("depolBAvsY",  kin->y,  kin->depolP1, wTrack);
-    H->FillHist2D("depolCAvsY",  kin->y,  kin->depolP2, wTrack);
-    H->FillHist2D("depolVAvsY",  kin->y,  kin->depolP3, wTrack);
-    H->FillHist2D("depolWAvsY",  kin->y,  kin->depolP4, wTrack);
+    if(includeOutputSet["depolarization"]) { // not necessary, but done for performance
+      std::map<TString,Double_t> depols = {
+        { "epsilon", kin->epsilon },
+        { "depolA",  kin->depolA  },
+        { "depolB",  kin->depolB  },
+        { "depolBA", kin->depolP1 },
+        { "depolCA", kin->depolP2 },
+        { "depolVA", kin->depolP3 },
+        { "depolWA", kin->depolP4 }
+      };
+      for(auto [name,val] : depols) {
+        H->FillHist2D(name+"vsQ2",    kin->Q2, val,     wTrack);
+        H->FillHist2D(name+"vsY",     kin->Q2, val,     wTrack);
+        H->FillHist3D(name+"vsQ2vsX", kin->x,  kin->Q2, val, wTrack);
+      }
+    }
     // cross sections (divide by lumi after all events processed)
     H->FillHist1D("Q_xsec", TMath::Sqrt(kin->Q2), wTrack);
     // resolutions

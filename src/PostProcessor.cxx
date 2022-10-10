@@ -240,8 +240,9 @@ void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat, 
   canv->SetBottomMargin(0.15);
   canv->SetLeftMargin(0.15);
 
-  TProfile *prof;
+  // profile for 2D plot
   if(profileAxis>0 && hist->GetDimension()==2) {
+    TProfile *prof;
     switch(profileAxis) {
       case 1: prof = ((TH2*)hist)->ProfileX(); break;
       case 2: prof = ((TH2*)hist)->ProfileY(); break;
@@ -253,6 +254,20 @@ void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat, 
       prof->GetYaxis()->SetRangeUser(hist->GetYaxis()->GetXmin(),hist->GetYaxis()->GetXmax());
       prof->Draw();
     } else prof->Draw("same");
+    outfile->cd("/");
+    prof->Write();
+  }
+
+  // profile for 3D plot
+  if(profileAxis>0 && hist->GetDimension()==3) {
+    TProfile2D *prof = ((TH3*)hist)->Project3DProfile("yx"); // FIXME: generalize for other axes
+    prof->GetXaxis()->SetRangeUser(hist->GetXaxis()->GetXmin(),hist->GetXaxis()->GetXmax());
+    prof->GetYaxis()->SetRangeUser(hist->GetYaxis()->GetXmin(),hist->GetYaxis()->GetXmax());
+    prof->GetZaxis()->SetRangeUser(hist->GetZaxis()->GetXmin(),hist->GetZaxis()->GetXmax());
+    prof->GetXaxis()->SetTitle(hist->GetXaxis()->GetTitle());
+    prof->GetYaxis()->SetTitle(hist->GetYaxis()->GetTitle());
+    prof->GetZaxis()->SetTitle(hist->GetZaxis()->GetTitle());
+    prof->Draw(drawFormat);
     outfile->cd("/");
     prof->Write();
   }

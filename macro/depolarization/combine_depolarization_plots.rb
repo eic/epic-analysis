@@ -21,6 +21,7 @@ energyHash.keys.each do |energy|
   plotList = Array.new
   PyCall.iterable(rootFile.GetListOfKeys).each do |key|
     if key.GetName.match? /^histos/
+      next if plotName.match?(/Q2vsX/)
       plotName = key.GetName.split('_').find{|tok|tok.match?(/^depol|^epsilon/)}
       plots[plotName] = Hash.new if plots[plotName].nil?
       plots[plotName][energy] = key.ReadObj

@@ -14,6 +14,7 @@
 #include "TGaxis.h"
 #include "TLegend.h"
 #include "TProfile.h"
+#include "TProfile2D.h"
 
 // adage
 #include "adage/CutDef.h"
