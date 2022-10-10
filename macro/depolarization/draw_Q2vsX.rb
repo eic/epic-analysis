@@ -90,7 +90,7 @@ lines = [
   r.TLine.new(0, 0.33, 1, 0.33),
   r.TLine.new(0, 0.67, 1, 0.67),
 ].each do |l|
-  l.SetLineWidth 8 
+  l.SetLineWidth 2
   l.SetLineColor r.kGray+1
   l.SetNDC
   l.Draw
@@ -105,4 +105,4 @@ placePol.call 1, 'UU'
 placePol.call 4, 'UL, UT'
 placePol.call 7, 'LU, LL, LT'
 
-canv.SaveAs rootFileName.gsub(/root$/,"Q2vsX.png")
+canv.SaveAs rootFileName.gsub(/root$/,"Q2vsX.pdf")
