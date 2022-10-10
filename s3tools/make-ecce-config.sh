@@ -143,12 +143,12 @@ for subdir in $subdirList; do
   Q2min=$(getQ2min $subdir)
   Q2max=$(getQ2max $subdir)
   if [ "$mode" == "d" -o "$mode" == "c" ]; then
-    s3tools/generate-local-list.sh "$targetDir/$subdir" $crossSection $Q2min $Q2max | tee -a $configFile.list
+    s3tools/generate-local-list.sh "$targetDir/$subdir" $crossSection $Q2min $Q2max | grep -v UNKNOWN | tee -a $configFile.list
   elif [ "$mode" == "s" ]; then
     if [ $limit -gt 0 ]; then
-      s3tools/generate-s3-list.sh "$sourceDir" $crossSection $Q2min $Q2max | grep -E $eventEvalFileRegex | head -n$limit | tee -a $configFile.list
+      s3tools/generate-s3-list.sh "$sourceDir" $crossSection $Q2min $Q2max | grep -E $eventEvalFileRegex | head -n$limit | grep -v UNKNOWN | tee -a $configFile.list
     else
-      s3tools/generate-s3-list.sh "$sourceDir" $crossSection $Q2min $Q2max | grep -E $eventEvalFileRegex | tee -a $configFile.list
+      s3tools/generate-s3-list.sh "$sourceDir" $crossSection $Q2min $Q2max | grep -E $eventEvalFileRegex | grep -v UNKNOWN | tee -a $configFile.list
     fi
   else
     echo "ERROR: unknown mode"

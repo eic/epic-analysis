@@ -85,12 +85,12 @@ if [ -z "$configFile" ]; then configFile=$targetDir/files.config; fi
 for Q2min in ${Q2minima[@]}; do
   crossSection=$(s3tools/read-xsec-table.sh "pythia8:$energy/minQ2=$Q2min")
   if [ "$mode" == "d" -o "$mode" == "c" ]; then
-    s3tools/generate-local-list.sh "$targetDir/minQ2=$Q2min" $crossSection $Q2min $Q2max | tee -a $configFile.list
+    s3tools/generate-local-list.sh "$targetDir/minQ2=$Q2min" $crossSection $Q2min $Q2max | grep -v UNKNOWN | tee -a $configFile.list
   elif [ "$mode" == "s" ]; then
     if [ $limit -gt 0 ]; then
-      s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" $crossSection $Q2min $Q2max | head -n$limit | tee -a $configFile.list
+      s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" $crossSection $Q2min $Q2max | grep -v UNKNOWN | head -n$limit | tee -a $configFile.list
     else
-      s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" $crossSection $Q2min $Q2max | tee -a $configFile.list
+      s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" $crossSection $Q2min $Q2max | grep -v UNKNOWN | tee -a $configFile.list
     fi
   else
     echo "ERROR: unknown mode"
