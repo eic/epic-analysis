@@ -736,7 +736,7 @@ void Analysis::FillHistosTracks() {
       };
       for(auto [name,val] : depols) {
         H->FillHist2D(name+"vsQ2",    kin->Q2, val,     wTrack);
-        H->FillHist2D(name+"vsY",     kin->Q2, val,     wTrack);
+        H->FillHist2D(name+"vsY",     kin->y,  val,     wTrack);
         H->FillHist3D(name+"vsQ2vsX", kin->x,  kin->Q2, val, wTrack);
       }
     }
