@@ -82,6 +82,14 @@ Analysis::Analysis(
   reconMethodToTitle.insert({ "Sigma",  "Sigma method"           });
   reconMethodToTitle.insert({ "eSigma", "eSigma method"          });
 
+  // output sets to include
+  // - use these to turn on/off certain sets of variables
+  // - the default settings are set here; override them at the macro level
+  includeOutputSet.insert({ "inclusive",      true  }); // inclusive kinematics
+  includeOutputSet.insert({ "1h",             true  }); // single hadron kinematics
+  includeOutputSet.insert({ "jets",           false }); // jet kinematics
+  includeOutputSet.insert({ "depolarization", false }); // depolarization factors & ratios
+
   // common settings defaults
   // - these settings can be set at the macro level
   writeSimpleTree = false;
@@ -276,8 +284,8 @@ void Analysis::Prepare() {
   PrintStdVector(Q2entries,"Q2entries");
   // PrintStdVector2D(inEntries,"inEntries");
   // PrintStdVector(inLookup,"inLookup");
-  fmt::print("{:-<50}\n","");
-  PrintStdMap(availableBinSchemes,"availableBinSchemes");
+  // fmt::print("{:-<50}\n",""); PrintStdMap(availableBinSchemes,"availableBinSchemes");
+  fmt::print("{:-<50}\n",""); PrintStdMap(includeOutputSet,"includeOutputSet");
   fmt::print("{:=<50}\n","");
 
   // set output file name
@@ -345,137 +353,153 @@ void Analysis::Prepare() {
 
 
   // DEFINE HISTOGRAMS ------------------------------------
+  // - whether they are defined is controlled by `includeOutputSet` settings
+  // - `Histos::Hist` calls should check for existence
   HD->Payload([this](Histos *HS){
-    // -- Full phase space histogram
-    HS->DefineHist4D(
-        "full_xsec",
-        "x","Q^{2}","z","p_{T}",
-        "","GeV^{2}","","GeV",
-        NBINS_FULL,1e-3,1,
-        NBINS_FULL,1,100,
-        NBINS_FULL,0,1,
-        NBINS_FULL,0,2,
-        true,true
-        );
-    // -- DIS kinematics
-    HS->DefineHist2D("Q2vsX","x","Q^{2}","","GeV^{2}",
-        NBINS,1e-3,1,
-        NBINS,1,3000,
-        true,true
-        );
-    HS->DefineHist1D("Q2","Q2","GeV",NBINS,1.0,3000,true,true);
-    HS->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
-    HS->DefineHist1D("y","y","",NBINS,1e-3,1,true);
-    HS->DefineHist1D("W","W","GeV",NBINS,0,50);
-    // -- hadron 4-momentum
-    HS->DefineHist1D("pLab","p_{lab}","GeV",NBINS,0,10);
-    HS->DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
-    HS->DefineHist1D("etaLab","#eta_{lab}","",NBINS,-5,5);
-    HS->DefineHist1D("phiLab","#phi_{lab}","",NBINS,-TMath::Pi(),TMath::Pi());
-    // -- hadron kinematics
-    HS->DefineHist1D("z","z","",NBINS,0,1);
-    HS->DefineHist1D("pT","p_{T}","GeV",NBINS,1e-2,3,true);
-    HS->DefineHist1D("qT","q_{T}","GeV",NBINS,1e-2,5,true);
-    HS->DefineHist1D("qTq","q_{T}/Q","",NBINS,1e-2,3,true);
-    HS->DefineHist1D("mX","m_{X}","GeV",NBINS,0,40);
-    HS->DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
-    HS->DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
-    HS->DefineHist2D("phiHvsPhiS","#phi_{S}","#phi_{h}","","",
-        25,-TMath::Pi(),TMath::Pi(),
-        25,-TMath::Pi(),TMath::Pi());
-    HS->DefineHist1D("phiSivers","#phi_{Sivers}","",NBINS,-TMath::Pi(),TMath::Pi());
-    HS->DefineHist1D("phiCollins","#phi_{Collins}","",NBINS,-TMath::Pi(),TMath::Pi());
-    HS->DefineHist2D("etaVsP","p","#eta","GeV","",
-        NBINS,0.1,100,
-        NBINS,-4,4,
-        true,false
-        );
-    Double_t etabinsCoarse[] = {-4.0,-1.0,1.0,4.0};
-    Double_t pbinsCoarse[] = {0.1,1,10,100};
-    HS->DefineHist2D("etaVsPcoarse","p","#eta","GeV","",
-        3, pbinsCoarse,
-        3, etabinsCoarse,
-        true,false
-        );
-    // -- depolarization
-    HS->DefineHist2D("epsilonVsQ2", "Q^{2}", "#epsilon", "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 1.5, true, false);
-    HS->DefineHist2D("depolAvsQ2",  "Q^{2}", "A",        "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolBvsQ2",  "Q^{2}", "B",        "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolBAvsQ2", "Q^{2}", "B/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolCAvsQ2", "Q^{2}", "C/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolVAvsQ2", "Q^{2}", "V/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolWAvsQ2", "Q^{2}", "W/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolAvsY",   "y",     "A",        "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolBvsY",   "y",     "B",        "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolBAvsY",  "y",     "B/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolCAvsY",  "y",     "C/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolVAvsY",  "y",     "V/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolWAvsY",  "y",     "W/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
-    // -- single-hadron cross sections
-    //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
-    HS->DefineHist1D("Q_xsec","Q","GeV",NBINS,1.0,3000,true,true); // log
-    HS->Hist("Q_xsec")->SetMinimum(1e-10);
-    // -- resolutions
-    HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -0.5, 0.5);
-    HS->DefineHist1D("y_Res","y-y_{true}","", NBINS, -0.2, 0.2);
-    HS->DefineHist1D("Q2_Res","Q2-Q2_{true}","GeV^{2}", NBINS, -20, 20);
-    HS->DefineHist1D("W_Res","W-W_{true}","GeV", NBINS, -20, 20);
-    HS->DefineHist1D("Nu_Res","#nu-#nu_{true}","GeV", NBINS, -100, 100);
-    HS->DefineHist1D("phiH_Res","#phi_{h}-#phi_{h}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
-    HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
-    HS->DefineHist1D("pT_Res","pT-pT^{true}","GeV", NBINS, -1.5, 1.5);
-    HS->DefineHist1D("z_Res","z-z^{true}","", NBINS, -1.5, 1.5);
-    HS->DefineHist1D("mX_Res","mX-mX^{true}","GeV", NBINS, -10, 10);
-    HS->DefineHist1D("xF_Res","xF-xF^{true}","", NBINS, -1.5, 1.5);
-    HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
-        20,1e-4,1,
-        10,1,1e4,
-        true,true
-        );
-    HS->DefineHist2D("Q2vsXpurity","x","Q^{2}","","GeV^{2}",
-        20,1e-4,1,
-        10,1,1e4,
-        true,true
-        );
-    HS->DefineHist2D("Q2vsX_zres","x","Q^{2}","","GeV^{2}",
-        20,1e-4,1,
-        10,1,1e4,
-        true,true
-        );
-    HS->DefineHist2D("Q2vsX_pTres","x","Q^{2}","","GeV^{2}",
-        20,1e-4,1,
-        10,1,1e4,
-        true,true
-        );
-    HS->DefineHist2D("Q2vsX_phiHres","x","Q^{2}","","GeV^{2}",
-        20,1e-4,1,
-        10,1,1e4,
-        true,true
-        );
-    // -- reconstructed vs. generated
-    HS->DefineHist2D("x_RvG","generated x","reconstructed x","","",
-        NBINS,1e-3,1,
-        NBINS,1e-3,1,
-        true,true
-        );
-    HS->DefineHist2D("phiH_RvG","generated #phi_{h}","reconstructed #phi_{h}","","",
-        NBINS,-TMath::Pi(),TMath::Pi(),
-        NBINS,-TMath::Pi(),TMath::Pi()
-        );
-    HS->DefineHist2D("phiS_RvG","generated #phi_{S}","reconstructed #phi_{S}","","",
-        NBINS,-TMath::Pi(),TMath::Pi(),
-        NBINS,-TMath::Pi(),TMath::Pi()
-        );
+    // -- inclusive kinematics
+    if(includeOutputSet["inclusive"]) {
+      // -- Full phase space histogram
+      HS->DefineHist4D(
+          "full_xsec",
+          "x","Q^{2}","z","p_{T}",
+          "","GeV^{2}","","GeV",
+          NBINS_FULL,1e-3,1,
+          NBINS_FULL,1,100,
+          NBINS_FULL,0,1,
+          NBINS_FULL,0,2,
+          true,true
+          );
+      // -- DIS kinematics
+      HS->DefineHist2D("Q2vsX","x","Q^{2}","","GeV^{2}",
+          NBINS,1e-3,1,
+          NBINS,1,3000,
+          true,true
+          );
+      HS->DefineHist1D("Q2","Q2","GeV",NBINS,1.0,3000,true,true);
+      HS->DefineHist1D("x","x","",NBINS,1e-3,1.0,true,true);
+      HS->DefineHist1D("y","y","",NBINS,1e-3,1,true);
+      HS->DefineHist1D("W","W","GeV",NBINS,0,50);
+    }
+
+    // -- single hadron kinematics
+    if(includeOutputSet["1h"]) {
+      // -- hadron 4-momentum
+      HS->DefineHist1D("pLab","p_{lab}","GeV",NBINS,0,10);
+      HS->DefineHist1D("pTlab","p_{T}^{lab}","GeV",NBINS,1e-2,3,true);
+      HS->DefineHist1D("etaLab","#eta_{lab}","",NBINS,-5,5);
+      HS->DefineHist1D("phiLab","#phi_{lab}","",NBINS,-TMath::Pi(),TMath::Pi());
+      // -- hadron kinematics
+      HS->DefineHist1D("z","z","",NBINS,0,1);
+      HS->DefineHist1D("pT","p_{T}","GeV",NBINS,1e-2,3,true);
+      HS->DefineHist1D("qT","q_{T}","GeV",NBINS,1e-2,5,true);
+      HS->DefineHist1D("qTq","q_{T}/Q","",NBINS,1e-2,3,true);
+      HS->DefineHist1D("mX","m_{X}","GeV",NBINS,0,40);
+      HS->DefineHist1D("phiH","#phi_{h}","",NBINS,-TMath::Pi(),TMath::Pi());
+      HS->DefineHist1D("phiS","#phi_{S}","",NBINS,-TMath::Pi(),TMath::Pi());
+      HS->DefineHist2D("phiHvsPhiS","#phi_{S}","#phi_{h}","","",
+          25,-TMath::Pi(),TMath::Pi(),
+          25,-TMath::Pi(),TMath::Pi());
+      HS->DefineHist1D("phiSivers","#phi_{Sivers}","",NBINS,-TMath::Pi(),TMath::Pi());
+      HS->DefineHist1D("phiCollins","#phi_{Collins}","",NBINS,-TMath::Pi(),TMath::Pi());
+      HS->DefineHist2D("etaVsP","p","#eta","GeV","",
+          NBINS,0.1,100,
+          NBINS,-4,4,
+          true,false
+          );
+      Double_t etabinsCoarse[] = {-4.0,-1.0,1.0,4.0};
+      Double_t pbinsCoarse[] = {0.1,1,10,100};
+      HS->DefineHist2D("etaVsPcoarse","p","#eta","GeV","",
+          3, pbinsCoarse,
+          3, etabinsCoarse,
+          true,false
+          );
+      // -- single-hadron cross sections
+      //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
+      HS->DefineHist1D("Q_xsec","Q","GeV",NBINS,1.0,3000,true,true); // log
+      HS->Hist("Q_xsec")->SetMinimum(1e-10);
+      // -- resolutions
+      HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -0.5, 0.5);
+      HS->DefineHist1D("y_Res","y-y_{true}","", NBINS, -0.2, 0.2);
+      HS->DefineHist1D("Q2_Res","Q2-Q2_{true}","GeV^{2}", NBINS, -20, 20);
+      HS->DefineHist1D("W_Res","W-W_{true}","GeV", NBINS, -20, 20);
+      HS->DefineHist1D("Nu_Res","#nu-#nu_{true}","GeV", NBINS, -100, 100);
+      HS->DefineHist1D("phiH_Res","#phi_{h}-#phi_{h}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
+      HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
+      HS->DefineHist1D("pT_Res","pT-pT^{true}","GeV", NBINS, -1.5, 1.5);
+      HS->DefineHist1D("z_Res","z-z^{true}","", NBINS, -1.5, 1.5);
+      HS->DefineHist1D("mX_Res","mX-mX^{true}","GeV", NBINS, -10, 10);
+      HS->DefineHist1D("xF_Res","xF-xF^{true}","", NBINS, -1.5, 1.5);
+      HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
+          20,1e-4,1,
+          10,1,1e4,
+          true,true
+          );
+      HS->DefineHist2D("Q2vsXpurity","x","Q^{2}","","GeV^{2}",
+          20,1e-4,1,
+          10,1,1e4,
+          true,true
+          );
+      HS->DefineHist2D("Q2vsX_zres","x","Q^{2}","","GeV^{2}",
+          20,1e-4,1,
+          10,1,1e4,
+          true,true
+          );
+      HS->DefineHist2D("Q2vsX_pTres","x","Q^{2}","","GeV^{2}",
+          20,1e-4,1,
+          10,1,1e4,
+          true,true
+          );
+      HS->DefineHist2D("Q2vsX_phiHres","x","Q^{2}","","GeV^{2}",
+          20,1e-4,1,
+          10,1,1e4,
+          true,true
+          );
+      // -- reconstructed vs. generated
+      HS->DefineHist2D("x_RvG","generated x","reconstructed x","","",
+          NBINS,1e-3,1,
+          NBINS,1e-3,1,
+          true,true
+          );
+      HS->DefineHist2D("phiH_RvG","generated #phi_{h}","reconstructed #phi_{h}","","",
+          NBINS,-TMath::Pi(),TMath::Pi(),
+          NBINS,-TMath::Pi(),TMath::Pi()
+          );
+      HS->DefineHist2D("phiS_RvG","generated #phi_{S}","reconstructed #phi_{S}","","",
+          NBINS,-TMath::Pi(),TMath::Pi(),
+          NBINS,-TMath::Pi(),TMath::Pi()
+          );
+    }
+
     // -- jet kinematics
 #ifndef EXCLUDE_DELPHES
-    HS->DefineHist1D("pT_jet","jet p_{T}","GeV", NBINS, 1e-2, 50);
-    HS->DefineHist1D("mT_jet","jet m_{T}","GeV", NBINS, 1e-2, 20);
-    HS->DefineHist1D("z_jet","jet z","", NBINS,0, 1);
-    HS->DefineHist1D("eta_jet","jet #eta_{lab}","", NBINS,-5,5);
-    HS->DefineHist1D("qT_jet","jet q_{T}", "GeV", NBINS, 0, 10.0);
-    HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
-    HS->DefineHist1D("qTQ_jet","jet q_{T}/Q","", NBINS, 0, 3.0);
+    if(includeOutputSet["jets"]) {
+      HS->DefineHist1D("pT_jet","jet p_{T}","GeV", NBINS, 1e-2, 50);
+      HS->DefineHist1D("mT_jet","jet m_{T}","GeV", NBINS, 1e-2, 20);
+      HS->DefineHist1D("z_jet","jet z","", NBINS,0, 1);
+      HS->DefineHist1D("eta_jet","jet #eta_{lab}","", NBINS,-5,5);
+      HS->DefineHist1D("qT_jet","jet q_{T}", "GeV", NBINS, 0, 10.0);
+      HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
+      HS->DefineHist1D("qTQ_jet","jet q_{T}/Q","", NBINS, 0, 3.0);
+    }
 #endif
+
+    // -- depolarization
+    if(includeOutputSet["depolarization"]) {
+      HS->DefineHist2D("epsilonVsQ2", "Q^{2}", "#epsilon", "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 1.5, true, false);
+      HS->DefineHist2D("depolAvsQ2",  "Q^{2}", "A",        "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
+      HS->DefineHist2D("depolBvsQ2",  "Q^{2}", "B",        "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
+      HS->DefineHist2D("depolBAvsQ2", "Q^{2}", "B/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
+      HS->DefineHist2D("depolCAvsQ2", "Q^{2}", "C/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
+      HS->DefineHist2D("depolVAvsQ2", "Q^{2}", "V/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
+      HS->DefineHist2D("depolWAvsQ2", "Q^{2}", "W/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
+      HS->DefineHist2D("depolAvsY",   "y",     "A",        "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
+      HS->DefineHist2D("depolBvsY",   "y",     "B",        "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
+      HS->DefineHist2D("depolBAvsY",  "y",     "B/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
+      HS->DefineHist2D("depolCAvsY",  "y",     "C/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
+      HS->DefineHist2D("depolVAvsY",  "y",     "V/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
+      HS->DefineHist2D("depolWAvsY",  "y",     "W/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
+    }
+
   });
   HD->ExecuteAndClearOps();
 
@@ -559,16 +583,23 @@ void Analysis::Finish() {
   HD->Initial([this](){ cout << sep << endl << "Histogram Entries:" << endl; });
   HD->Final([this](){ cout << sep << endl; });
   HD->Payload([&lumi](Histos *H){
-    cout << H->GetSetTitle() << " ::: "
-         << H->Hist("Q2vsX")->GetEntries()
-         << endl;
+    auto h_Q2vsX       = H->Hist("Q2vsX",true);
+    auto h_Q_xsec      = H->Hist("Q_xsec",true);
+    auto h_Q2vsXpurity = H->Hist("Q2vsXpurity",true);
+    if(h_Q2vsX) {
+      cout << H->GetSetTitle() << " ::: "
+           << h_Q2vsX->GetEntries()
+           << endl;
+    }
     // calculate cross sections
-    H->Hist("Q_xsec")->Scale(1./lumi); // TODO: generalize (`if (name contains "xsec") ...`)
+    if(h_Q_xsec) h_Q_xsec->Scale(1./lumi); // TODO: generalize (`if (name contains "xsec") ...`)
     // divide resolution plots by true counts per x-Q2 bin
-    H->Hist("Q2vsXpurity")->Divide(H->Hist("Q2vsXtrue"));
-    H->Hist("Q2vsX_zres")->Divide(H->Hist("Q2vsXtrue"));
-    H->Hist("Q2vsX_pTres")->Divide(H->Hist("Q2vsXtrue"));
-    H->Hist("Q2vsX_phiHres")->Divide(H->Hist("Q2vsXtrue"));        
+    if(h_Q2vsXpurity) {
+      H->Hist("Q2vsXpurity")->Divide(H->Hist("Q2vsXtrue"));
+      H->Hist("Q2vsX_zres")->Divide(H->Hist("Q2vsXtrue"));
+      H->Hist("Q2vsX_pTres")->Divide(H->Hist("Q2vsXtrue"));
+      H->Hist("Q2vsX_phiHres")->Divide(H->Hist("Q2vsXtrue"));        
+    }
   });
   HD->ExecuteAndClearOps();
 
@@ -650,78 +681,83 @@ void Analysis::AddFinalState(TString finalStateN) {
 // tracks (single particles)
 void Analysis::FillHistosTracks() {
 
-  // check which bins to fill
+  // check which bins to fill, and activate the ones for which all defined cuts pass
+  // (activates their corresponding `HistosDAG` nodes)
   HD->CheckBins();
 
   // fill histograms, for activated bins only
   HD->Payload([this](Histos *H){
     // Full phase space.
-    H->Hist4("full_xsec")->Fill(kin->x,kin->Q2,kin->pT,kin->z,wTrack);
+    H->FillHist4D("full_xsec", kin->x, kin->Q2, kin->pT, kin->z, wTrack);
     // DIS kinematics
-    dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,wTrack);
-    H->Hist("Q2")->Fill(kin->Q2,wTrack);
-    H->Hist("x")->Fill(kin->x,wTrack);
-    H->Hist("W")->Fill(kin->W,wTrack);
-    H->Hist("y")->Fill(kin->y,wTrack);
+    H->FillHist2D("Q2vsX", kin->x,  kin->Q2, wTrack);
+    H->FillHist1D("Q2",    kin->Q2, wTrack);
+    H->FillHist1D("x",     kin->x,  wTrack);
+    H->FillHist1D("W",     kin->W,  wTrack);
+    H->FillHist1D("y",     kin->y,  wTrack);
     // hadron 4-momentum
-    H->Hist("pLab")->Fill(kin->pLab,wTrack);
-    H->Hist("pTlab")->Fill(kin->pTlab,wTrack);
-    H->Hist("etaLab")->Fill(kin->etaLab,wTrack);
-    H->Hist("phiLab")->Fill(kin->phiLab,wTrack);
+    H->FillHist1D("pLab",   kin->pLab,   wTrack);
+    H->FillHist1D("pTlab",  kin->pTlab,  wTrack);
+    H->FillHist1D("etaLab", kin->etaLab, wTrack);
+    H->FillHist1D("phiLab", kin->phiLab, wTrack);
     // hadron kinematics
-    H->Hist("z")->Fill(kin->z,wTrack);
-    H->Hist("pT")->Fill(kin->pT,wTrack);
-    H->Hist("qT")->Fill(kin->qT,wTrack);
-    if(kin->Q2!=0) H->Hist("qTq")->Fill(kin->qT/TMath::Sqrt(kin->Q2),wTrack);
-    H->Hist("mX")->Fill(kin->mX,wTrack);
-    H->Hist("phiH")->Fill(kin->phiH,wTrack);
-    H->Hist("phiS")->Fill(kin->phiS,wTrack);
-    dynamic_cast<TH2*>(H->Hist("phiHvsPhiS"))->Fill(kin->phiS,kin->phiH,wTrack);
-    H->Hist("phiSivers")->Fill(Kinematics::AdjAngle(kin->phiH - kin->phiS),wTrack);
-    H->Hist("phiCollins")->Fill(Kinematics::AdjAngle(kin->phiH + kin->phiS),wTrack);
-    dynamic_cast<TH2*>(H->Hist("etaVsP"))->Fill(kin->pLab,kin->etaLab,wTrack); // TODO: lab-frame p, or some other frame?
-    dynamic_cast<TH2*>(H->Hist("etaVsPcoarse"))->Fill(kin->pLab,kin->etaLab,wTrack); 
+    H->FillHist1D("z",  kin->z,  wTrack);
+    H->FillHist1D("pT", kin->pT, wTrack);
+    H->FillHist1D("qT", kin->qT, wTrack);
+    if(kin->Q2!=0) H->FillHist1D("qTq",kin->qT/TMath::Sqrt(kin->Q2),wTrack);
+    H->FillHist1D("mX",         kin->mX,   wTrack);
+    H->FillHist1D("phiH",       kin->phiH, wTrack);
+    H->FillHist1D("phiS",       kin->phiS, wTrack);
+    H->FillHist2D("phiHvsPhiS", kin->phiS, kin->phiH, wTrack);
+    H->FillHist1D("phiSivers",  Kinematics::AdjAngle(kin->phiH - kin->phiS), wTrack);
+    H->FillHist1D("phiCollins", Kinematics::AdjAngle(kin->phiH + kin->phiS), wTrack);
+    H->FillHist2D("etaVsP",       kin->pLab, kin->etaLab, wTrack); // TODO: lab-frame p, or some other frame?
+    H->FillHist2D("etaVsPcoarse", kin->pLab, kin->etaLab, wTrack);
     // depolarization
-    dynamic_cast<TH2*>( H->Hist("epsilonVsQ2") )->Fill( kin->Q2, kin->epsilon, wTrack );
-    dynamic_cast<TH2*>( H->Hist("depolAvsQ2")  )->Fill( kin->Q2, kin->depolA,  wTrack );
-    dynamic_cast<TH2*>( H->Hist("depolBvsQ2")  )->Fill( kin->Q2, kin->depolB,  wTrack );
-    dynamic_cast<TH2*>( H->Hist("depolBAvsQ2") )->Fill( kin->Q2, kin->depolP1, wTrack );
-    dynamic_cast<TH2*>( H->Hist("depolCAvsQ2") )->Fill( kin->Q2, kin->depolP2, wTrack );
-    dynamic_cast<TH2*>( H->Hist("depolVAvsQ2") )->Fill( kin->Q2, kin->depolP3, wTrack );
-    dynamic_cast<TH2*>( H->Hist("depolWAvsQ2") )->Fill( kin->Q2, kin->depolP4, wTrack );
-    dynamic_cast<TH2*>( H->Hist("depolAvsY")   )->Fill( kin->y,  kin->depolA,  wTrack );
-    dynamic_cast<TH2*>( H->Hist("depolBvsY")   )->Fill( kin->y,  kin->depolB,  wTrack );
-    dynamic_cast<TH2*>( H->Hist("depolBAvsY")  )->Fill( kin->y,  kin->depolP1, wTrack );
-    dynamic_cast<TH2*>( H->Hist("depolCAvsY")  )->Fill( kin->y,  kin->depolP2, wTrack );
-    dynamic_cast<TH2*>( H->Hist("depolVAvsY")  )->Fill( kin->y,  kin->depolP3, wTrack );
-    dynamic_cast<TH2*>( H->Hist("depolWAvsY")  )->Fill( kin->y,  kin->depolP4, wTrack );
+    H->FillHist2D("epsilonVsQ2", kin->Q2, kin->epsilon, wTrack);
+    H->FillHist2D("depolAvsQ2",  kin->Q2, kin->depolA,  wTrack);
+    H->FillHist2D("depolBvsQ2",  kin->Q2, kin->depolB,  wTrack);
+    H->FillHist2D("depolBAvsQ2", kin->Q2, kin->depolP1, wTrack);
+    H->FillHist2D("depolCAvsQ2", kin->Q2, kin->depolP2, wTrack);
+    H->FillHist2D("depolVAvsQ2", kin->Q2, kin->depolP3, wTrack);
+    H->FillHist2D("depolWAvsQ2", kin->Q2, kin->depolP4, wTrack);
+    H->FillHist2D("depolAvsY",   kin->y,  kin->depolA,  wTrack);
+    H->FillHist2D("depolBvsY",   kin->y,  kin->depolB,  wTrack);
+    H->FillHist2D("depolBAvsY",  kin->y,  kin->depolP1, wTrack);
+    H->FillHist2D("depolCAvsY",  kin->y,  kin->depolP2, wTrack);
+    H->FillHist2D("depolVAvsY",  kin->y,  kin->depolP3, wTrack);
+    H->FillHist2D("depolWAvsY",  kin->y,  kin->depolP4, wTrack);
     // cross sections (divide by lumi after all events processed)
-    H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),wTrack);
+    H->FillHist1D("Q_xsec", TMath::Sqrt(kin->Q2), wTrack);
     // resolutions
-    H->Hist("x_Res")->Fill( kin->x - kinTrue->x, wTrack );
-    H->Hist("y_Res")->Fill( kin->y - kinTrue->y, wTrack );
-    H->Hist("Q2_Res")->Fill( kin->Q2 - kinTrue->Q2, wTrack );
-    H->Hist("W_Res")->Fill( kin->W - kinTrue->W, wTrack );
-    H->Hist("Nu_Res")->Fill( kin->Nu - kinTrue->Nu, wTrack );
-    H->Hist("phiH_Res")->Fill( Kinematics::AdjAngle(kin->phiH - kinTrue->phiH), wTrack );
-    H->Hist("phiS_Res")->Fill( Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wTrack );
-    H->Hist("pT_Res")->Fill( kin->pT - kinTrue->pT, wTrack );
-    H->Hist("z_Res")->Fill( kin->z - kinTrue->z, wTrack );
-    H->Hist("mX_Res")->Fill( kin->mX - kinTrue->mX, wTrack );
-    H->Hist("xF_Res")->Fill( kin->xF - kinTrue->xF, wTrack );
-    dynamic_cast<TH2*>(H->Hist("Q2vsXtrue"))->Fill(kinTrue->x,kinTrue->Q2,wTrack);
-    if(kinTrue->z!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_zres"))->Fill(
-      kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->z - kin->z)/(kinTrue->z) ) );
-    if(kinTrue->pT!=0) dynamic_cast<TH2*>(H->Hist("Q2vsX_pTres"))->Fill(
-      kinTrue->x,kinTrue->Q2,wTrack*( fabs(kinTrue->pT - kin->pT)/(kinTrue->pT) ) );
-    dynamic_cast<TH2*>(H->Hist("Q2vsX_phiHres"))->Fill(kinTrue->x,kinTrue->Q2,wTrack*( fabs(Kinematics::AdjAngle(kinTrue->phiH - kin->phiH) ) ) );
+    H->FillHist1D("x_Res",  kin->x - kinTrue->x,   wTrack );
+    H->FillHist1D("y_Res",  kin->y - kinTrue->y,   wTrack );
+    H->FillHist1D("Q2_Res", kin->Q2 - kinTrue->Q2, wTrack );
+    H->FillHist1D("W_Res",  kin->W - kinTrue->W,   wTrack );
+    H->FillHist1D("Nu_Res", kin->Nu - kinTrue->Nu, wTrack );
+    H->FillHist1D("phiH_Res",  Kinematics::AdjAngle(kin->phiH - kinTrue->phiH), wTrack );
+    H->FillHist1D("phiS_Res",  Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wTrack );
+    H->FillHist1D("pT_Res",    kin->pT - kinTrue->pT, wTrack );
+    H->FillHist1D("z_Res",     kin->z - kinTrue->z,   wTrack );
+    H->FillHist1D("mX_Res",    kin->mX - kinTrue->mX, wTrack );
+    H->FillHist1D("xF_Res",    kin->xF - kinTrue->xF, wTrack );
+    H->FillHist2D("Q2vsXtrue", kinTrue->x,            kinTrue->Q2, wTrack);
+    if(kinTrue->z!=0)
+      H->FillHist2D("Q2vsX_zres", kinTrue->x, kinTrue->Q2, wTrack*( fabs(kinTrue->z - kin->z)/(kinTrue->z) ) );
+    if(kinTrue->pT!=0)
+      H->FillHist2D("Q2vsX_pTres", kinTrue->x, kinTrue->Q2, wTrack*( fabs(kinTrue->pT - kin->pT)/(kinTrue->pT) ) );
+    H->FillHist2D("Q2vsX_phiHres", kinTrue->x, kinTrue->Q2, wTrack*( fabs(Kinematics::AdjAngle(kinTrue->phiH - kin->phiH) ) ) );
     
-    if( (H->Hist("Q2vsXtrue"))->FindBin(kinTrue->x,kinTrue->Q2) == (H->Hist("Q2vsXtrue"))->FindBin(kin->x,kin->Q2) ) dynamic_cast<TH2*>(H->Hist("Q2vsXpurity"))->Fill(kin->x,kin->Q2,wTrack);
+    auto htrue = H->Hist("Q2vsXtrue",true);
+    if(htrue!=nullptr) {
+      if( htrue->FindBin(kinTrue->x,kinTrue->Q2) == htrue->FindBin(kin->x,kin->Q2) )
+        H->FillHist2D("Q2vsXpurity", kin->x, kin->Q2, wTrack);
+    }
     
     // -- reconstructed vs. generated
-    dynamic_cast<TH2*>(H->Hist("x_RvG"))->Fill(kinTrue->x,kin->x,wTrack);
-    dynamic_cast<TH2*>(H->Hist("phiH_RvG"))->Fill(kinTrue->phiH,kin->phiH,wTrack);
-    dynamic_cast<TH2*>(H->Hist("phiS_RvG"))->Fill(kinTrue->phiS,kin->phiS,wTrack);
+    H->FillHist2D("x_RvG",    kinTrue->x,    kin->x,    wTrack);
+    H->FillHist2D("phiH_RvG", kinTrue->phiH, kin->phiH, wTrack);
+    H->FillHist2D("phiS_RvG", kinTrue->phiS, kin->phiS, wTrack);
   });
   // execute the payload
   // - save time and don't call `ClearOps` (next loop will overwrite lambda)
@@ -740,16 +776,16 @@ void Analysis::FillHistosJets() {
 
   // fill histograms, for activated bins only
   HD->Payload([this](Histos *H){
-    dynamic_cast<TH2*>(H->Hist("Q2vsX"))->Fill(kin->x,kin->Q2,wJet);
+    H->FillHist2D("Q2vsX",   kin->x,     kin->Q2, wJet);
     // jet kinematics
-    H->Hist("pT_jet")->Fill(kin->pTjet,wJet);
-    H->Hist("mT_jet")->Fill(jet.mt(),wJet);
-    H->Hist("z_jet")->Fill(kin->zjet,wJet);
-    H->Hist("eta_jet")->Fill(jet.eta(),wJet);
-    H->Hist("qT_jet")->Fill(kin->qTjet,wJet);
-    if(kin->Q2!=0) H->Hist("qTQ_jet")->Fill(kin->qTjet/sqrt(kin->Q2),wJet);
+    H->FillHist1D("pT_jet",  kin->pTjet, wJet);
+    H->FillHist1D("mT_jet",  jet.mt(),   wJet);
+    H->FillHist1D("z_jet",   kin->zjet,  wJet);
+    H->FillHist1D("eta_jet", jet.eta(),  wJet);
+    H->FillHist1D("qT_jet",  kin->qTjet, wJet);
+    if(kin->Q2!=0) H->FillHist1D("qTQ_jet", kin->qTjet/sqrt(kin->Q2), wJet);
     for(int j = 0; j < kin->jperp.size(); j++) {
-      H->Hist("jperp")->Fill(kin->jperp[j],wJet);
+      H->FillHist1D("jperp", kin->jperp[j], wJet);
     };
   });
   // execute the payload

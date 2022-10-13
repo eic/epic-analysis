@@ -350,13 +350,15 @@ void AnalysisEcce::Execute()
       wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
       wTrackTotal += wTrack;
 
-      // fill track histograms in activated bins
-      FillHistosTracks();
+      if(includeOutputSet["1h"]) {
+        // fill track histograms in activated bins
+        FillHistosTracks();
 
-      // fill simple tree
-      // - not binned
-      // - `IsActiveEvent()` is only true if at least one bin gets filled for this track
-      if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
+        // fill simple tree
+        // - not binned
+        // - `IsActiveEvent()` is only true if at least one bin gets filled for this track
+        if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
+      }
 
     }//hadron loop
 

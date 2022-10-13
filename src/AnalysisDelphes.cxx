@@ -214,13 +214,15 @@ void AnalysisDelphes::Execute() {
       wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
       wTrackTotal += wTrack;
 
-      // fill track histograms in activated bins
-      FillHistosTracks();
+      if(includeOutputSet["1h"]) {
+        // fill track histograms in activated bins
+        FillHistosTracks();
 
-      // fill simple tree
-      // - not binned
-      // - `IsActiveEvent()` is only true if at least one bin gets filled for this track
-      if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
+        // fill simple tree
+        // - not binned
+        // - `IsActiveEvent()` is only true if at least one bin gets filled for this track
+        if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
+      }
 
       // tests
       //kin->ValidateHeadOnFrame();
@@ -230,7 +232,9 @@ void AnalysisDelphes::Execute() {
 
     // jet loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     finalStateID = "jet";
-    if(activeFinalStates.find(finalStateID)!=activeFinalStates.end()) {
+    // FIXME: probably don't need both a `finalStateID` and `includeOutputSet` to control whether
+    //        we do anything with jets or not
+    if(activeFinalStates.find(finalStateID)!=activeFinalStates.end() && includeOutputSet["jets"]) {
 
 #ifdef INCLUDE_CENTAURO
       if(useBreitJets) kin->GetBreitFrameJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);

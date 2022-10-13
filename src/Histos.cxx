@@ -198,7 +198,7 @@ TH1 *Histos::Hist(TString histName, Bool_t silence) {
   catch(const std::out_of_range &ex) {
     if(!silence)
       cerr << "ERROR: histMap does not have " 
-           << histName << "histogram" << endl;
+           << histName << " histogram" << endl;
     return nullptr;
   };
   return retHist;
@@ -210,7 +210,7 @@ Hist4D *Histos::Hist4(TString histName, Bool_t silence) {
   catch(const std::out_of_range &ex) {
     if(!silence)
       cerr << "ERROR: hist4Map does not have " 
-           << histName << "histogram" << endl;
+           << histName << " histogram" << endl;
     return nullptr;
   };
   return retHist;
