@@ -2,10 +2,10 @@ R__LOAD_LIBRARY(Sidis-eic)
 
 void analysis_depolarization(
     // Double_t eleBeamEn=5,
-    // Double_t ionBeamEn=41,
+    // Double_t ionBeamEn=41
     /**/
     Double_t eleBeamEn=18,
-    Double_t ionBeamEn=275,
+    Double_t ionBeamEn=275
     )
 {
 

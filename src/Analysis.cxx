@@ -398,12 +398,19 @@ void Analysis::Prepare() {
         true,false
         );
     // -- depolarization
-    HS->DefineHist2D("epsilonVsQ2", "Q^{2}", "#epsilon", "GeV^{2}", "", NBINS, 1, 3000, NBINS, 0, 1.5, true, false);
-    HS->DefineHist2D("depolAvsQ2",  "Q^{2}", "A",        "GeV^{2}", "", NBINS, 1, 3000, NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolBAvsQ2", "Q^{2}", "B/A",      "GeV^{2}", "", NBINS, 1, 3000, NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolCAvsQ2", "Q^{2}", "C/A",      "GeV^{2}", "", NBINS, 1, 3000, NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolVAvsQ2", "Q^{2}", "V/A",      "GeV^{2}", "", NBINS, 1, 3000, NBINS, 0, 2.5, true, false);
-    HS->DefineHist2D("depolWAvsQ2", "Q^{2}", "W/A",      "GeV^{2}", "", NBINS, 1, 3000, NBINS, 0, 2.5, true, false);
+    HS->DefineHist2D("epsilonVsQ2", "Q^{2}", "#epsilon", "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 1.5, true, false);
+    HS->DefineHist2D("depolAvsQ2",  "Q^{2}", "A",        "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
+    HS->DefineHist2D("depolBvsQ2",  "Q^{2}", "B",        "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
+    HS->DefineHist2D("depolBAvsQ2", "Q^{2}", "B/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
+    HS->DefineHist2D("depolCAvsQ2", "Q^{2}", "C/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
+    HS->DefineHist2D("depolVAvsQ2", "Q^{2}", "V/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
+    HS->DefineHist2D("depolWAvsQ2", "Q^{2}", "W/A",      "GeV^{2}", "", NBINS, 1,    3000, NBINS, 0, 2.5, true, false);
+    HS->DefineHist2D("depolAvsY",   "y",     "A",        "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
+    HS->DefineHist2D("depolBvsY",   "y",     "B",        "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
+    HS->DefineHist2D("depolBAvsY",  "y",     "B/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
+    HS->DefineHist2D("depolCAvsY",  "y",     "C/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
+    HS->DefineHist2D("depolVAvsY",  "y",     "V/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
+    HS->DefineHist2D("depolWAvsY",  "y",     "W/A",      "",        "", NBINS, 5e-3, 1,    NBINS, 0, 2.5, true, false);
     // -- single-hadron cross sections
     //HS->DefineHist1D("Q_xsec","Q","GeV",10,0.5,10.5,false,true); // linear
     HS->DefineHist1D("Q_xsec","Q","GeV",NBINS,1.0,3000,true,true); // log
@@ -675,12 +682,19 @@ void Analysis::FillHistosTracks() {
     dynamic_cast<TH2*>(H->Hist("etaVsP"))->Fill(kin->pLab,kin->etaLab,wTrack); // TODO: lab-frame p, or some other frame?
     dynamic_cast<TH2*>(H->Hist("etaVsPcoarse"))->Fill(kin->pLab,kin->etaLab,wTrack); 
     // depolarization
-    dynamic_cast<TH2*>(H->Hist("epsilonVsQ2"))->Fill(kin->Q2,kin->epsilon,wTrack); 
-    dynamic_cast<TH2*>(H->Hist("depolAvsQ2"))->Fill(kin->Q2,kin->depolA,wTrack); 
-    dynamic_cast<TH2*>(H->Hist("depolBAvsQ2"))->Fill(kin->Q2,kin->depolP1,wTrack); 
-    dynamic_cast<TH2*>(H->Hist("depolCAvsQ2"))->Fill(kin->Q2,kin->depolP2,wTrack); 
-    dynamic_cast<TH2*>(H->Hist("depolVAvsQ2"))->Fill(kin->Q2,kin->depolP3,wTrack); 
-    dynamic_cast<TH2*>(H->Hist("depolWAvsQ2"))->Fill(kin->Q2,kin->depolP4,wTrack); 
+    dynamic_cast<TH2*>( H->Hist("epsilonVsQ2") )->Fill( kin->Q2, kin->epsilon, wTrack );
+    dynamic_cast<TH2*>( H->Hist("depolAvsQ2")  )->Fill( kin->Q2, kin->depolA,  wTrack );
+    dynamic_cast<TH2*>( H->Hist("depolBvsQ2")  )->Fill( kin->Q2, kin->depolB,  wTrack );
+    dynamic_cast<TH2*>( H->Hist("depolBAvsQ2") )->Fill( kin->Q2, kin->depolP1, wTrack );
+    dynamic_cast<TH2*>( H->Hist("depolCAvsQ2") )->Fill( kin->Q2, kin->depolP2, wTrack );
+    dynamic_cast<TH2*>( H->Hist("depolVAvsQ2") )->Fill( kin->Q2, kin->depolP3, wTrack );
+    dynamic_cast<TH2*>( H->Hist("depolWAvsQ2") )->Fill( kin->Q2, kin->depolP4, wTrack );
+    dynamic_cast<TH2*>( H->Hist("depolAvsY")   )->Fill( kin->y,  kin->depolA,  wTrack );
+    dynamic_cast<TH2*>( H->Hist("depolBvsY")   )->Fill( kin->y,  kin->depolB,  wTrack );
+    dynamic_cast<TH2*>( H->Hist("depolBAvsY")  )->Fill( kin->y,  kin->depolP1, wTrack );
+    dynamic_cast<TH2*>( H->Hist("depolCAvsY")  )->Fill( kin->y,  kin->depolP2, wTrack );
+    dynamic_cast<TH2*>( H->Hist("depolVAvsY")  )->Fill( kin->y,  kin->depolP3, wTrack );
+    dynamic_cast<TH2*>( H->Hist("depolWAvsY")  )->Fill( kin->y,  kin->depolP4, wTrack );
     // cross sections (divide by lumi after all events processed)
     H->Hist("Q_xsec")->Fill(TMath::Sqrt(kin->Q2),wTrack);
     // resolutions
