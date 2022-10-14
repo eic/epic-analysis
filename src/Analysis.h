@@ -30,6 +30,7 @@
 #include "Kinematics.h"
 #include "SimpleTree.h"
 #include "Weights.h"
+#include "CommonConstants.h"
 
 class Analysis : public TNamed
 {
@@ -53,6 +54,7 @@ class Analysis : public TNamed
     void AddFinalState(TString finalStateN);
 
     // common settings
+    Bool_t verbose; // if true, print a lot more information
     Bool_t writeSimpleTree; // if true, write SimpleTree (not binned)
     Long64_t maxEvents; /* default=0, which runs all events;
                          * if > 0, run a maximum number of `maxEvents` events (useful for quick tests)
@@ -62,6 +64,8 @@ class Analysis : public TNamed
     void SetReconMethod(TString reconMethod_) { reconMethod=reconMethod_; }; 
     // choose which output sets to include
     std::map<TString,Bool_t> includeOutputSet;
+    // maximum number of errors to print
+    Long64_t errorCntMax;
 
     // add a group of files to the analysis, where all of these files have a
     // common cross section `xs`, and Q2 range `Q2min` to `Q2max`
@@ -99,6 +103,9 @@ class Analysis : public TNamed
     // finish the analysis; call `Analysis::Finish()` at the end of derived `Execute()` methods
     void Finish();
 
+    // print an error; if more than `errorCntMax` errors are printed, printing is suppressed
+    void ErrorPrint(std::string message);
+
     // FillHistos methods: fill histograms
     void FillHistosTracks();
 #ifndef EXCLUDE_DELPHES
@@ -113,6 +120,7 @@ class Analysis : public TNamed
     Weights const* weightJet;
     Double_t wTrackTotal, wJetTotal;
     Long64_t entriesTot;
+    Long64_t errorCnt;
     const TString sep = "--------------------------------------------";
 
     // setup / common settings

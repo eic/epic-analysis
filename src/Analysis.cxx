@@ -92,9 +92,11 @@ Analysis::Analysis(
 
   // common settings defaults
   // - these settings can be set at the macro level
+  verbose         = false;
   writeSimpleTree = false;
-  maxEvents = 0;
-  useBreitJets = false;
+  maxEvents       = 0;
+  useBreitJets    = false;
+  errorCntMax     = 1000;
 
   weight = new WeightsUniform();
   weightJet = new WeightsUniform();
@@ -102,6 +104,7 @@ Analysis::Analysis(
   // miscellaneous
   infiles.clear();
   entriesTot = 0;
+  errorCnt = 0;
 };
 
 
@@ -809,6 +812,12 @@ void Analysis::FillHistosJets() {
 };
 #endif
 
+// print an error; if more than `errorCntMax` errors are printed, printing is suppressed
+void Analysis::ErrorPrint(std::string message) {
+  errorCnt++;
+  if(errorCnt <= errorCntMax) fmt::print(stderr,"{}\n",message);
+  if(errorCnt == errorCntMax) fmt::print(stderr,"... {} errors printed; suppressing the rest ...\n",errorCnt);
+}
 
 // destructor
 Analysis::~Analysis() {

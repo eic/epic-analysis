@@ -38,9 +38,7 @@ void AnalysisDelphes::Execute() {
   }
   ExRootTreeReader *tr = new ExRootTreeReader(chain);
   ENT = tr->GetEntries();
-
-  // calculate cross section
-  if(maxEvents>0) ENT = maxEvents; // limiter
+  if(maxEvents>0) ENT = std::min(maxEvents,ENT);
 
   // branch iterators
   TObjArrayIter itTrack(tr->UseBranch("Track"));
@@ -57,11 +55,11 @@ void AnalysisDelphes::Execute() {
   TObjArrayIter itdualRICHagTrack(tr->UseBranch("dualRICHagTrack"));
   TObjArrayIter itdualRICHcfTrack(tr->UseBranch("dualRICHcfTrack"));
 
+  // calculate Q2 weights
   CalculateEventQ2Weights();
 
   // event loop =========================================================
   cout << "begin event loop..." << endl;
-  int errorCount=0;
   for(Long64_t e=0; e<ENT; e++) {
     if(e>0&&e%10000==0) cout << (Double_t)e/ENT*100 << "%" << endl;
     tr->ReadEntry(e);
@@ -112,7 +110,7 @@ void AnalysisDelphes::Execute() {
               part->Mass
               );
         }else{
-          if(++errorCount<100) cerr << "ERROR: Found two beam electrons in one event" << endl;
+          ErrorPrint("ERROR: Found two beam electrons in one event");
         };
       };
       if(part->PID != 11 && part->Status == 4){
@@ -125,17 +123,16 @@ void AnalysisDelphes::Execute() {
               part->Mass
               );
         }else{
-          if(++errorCount<100) cerr << "ERROR: Found two beam ions in one event" << endl;
+          ErrorPrint("ERROR: Found two beam ions in one event");
         };
       };
     };
     if(!found_elec){
-      if(++errorCount<100) cerr << "ERROR: Didn't find beam electron in event" << endl;
+      ErrorPrint("ERROR: Didn't find beam electron in event");
     };
     if(!found_ion){
-      if(++errorCount<100) cerr << "ERROR: Didn't find beam ion in event" << endl;
+      ErrorPrint("ERROR: Didn't find beam ion in event");
     }
-    if(errorCount>=100 && errorCount<1000) { cerr << "ERROR: .... suppressing beam finder errors ...." << endl; errorCount=1000; };
 
     // get hadronic final state variables
     kin->GetHFS(

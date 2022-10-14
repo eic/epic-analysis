@@ -74,8 +74,8 @@ void AnalysisEcce::Execute()
   CalculateEventQ2Weights();
 
   // counters
-  Long64_t numNoBeam, numEle, numNoEle, numNoHadrons, numProxMatched, errorCount;
-  numNoBeam = numEle = numNoEle = numNoHadrons = numProxMatched = errorCount = 0;
+  Long64_t numNoBeam, numEle, numNoEle, numNoHadrons, numProxMatched;
+  numNoBeam = numEle = numNoEle = numNoHadrons = numProxMatched = 0;
 
   // event loop =========================================================
   cout << "begin event loop..." << endl;
@@ -190,7 +190,7 @@ void AnalysisEcce::Execute()
             kinTrue->vecEleBeam.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
 	    //	    cout  << "\t\t\t found beam electron  " << Form(" %4.2f %4.2f %4.2f \n",px_,py_,pz_);
           }
-          else { if(++errorCount<100) cerr << "ERROR: Found two beam electrons in one event" << endl; }
+          else { ErrorPrint("ERROR: Found two beam electrons in one event"); }
         }
         else { // ion beam
           if(!foundBeamIon) {
@@ -198,14 +198,13 @@ void AnalysisEcce::Execute()
             kinTrue->vecIonBeam.SetPxPyPzE(px_, py_, pz_, sqrt(p_*p_ + mass_*mass_));
 	    //	    cout  << "\t\t\t found beam ion  " << Form(" %4.2f %4.2f %4.2f \n",px_,py_,pz_);
           }
-          else { if(++errorCount<100) cerr << "ERROR: Found two beam ions in one event" << endl; }
+          else { ErrorPrint("ERROR: Found two beam ions in one event"); }
         }
       }
     } // end truth loop
 
     // check beam finding
     if(!foundBeamElectron || !foundBeamIon) { numNoBeam++; continue; };
-    if(errorCount>=100 && errorCount<1000) { cerr << "ERROR: .... suppressing beam finder errors ...." << endl; errorCount=1000; };
 
 
     // reconstructed particles loop
@@ -275,7 +274,7 @@ void AnalysisEcce::Execute()
       numNoEle++;
       continue; // TODO: only need to skip if we are using a recon method that needs it (`if reconMethod==...`)
     }
-    else if(recEleFound>1) cerr << "WARNING: found " << recEleFound << " (more than 1) reconstructed scattered electrons in an event" << endl;
+    else if(recEleFound>1) ErrorPrint("WARNING: found more than 1 reconstructed scattered electron in an event");
     else numEle++;
 
     // subtract electron from hadronic final state variables

@@ -16,6 +16,9 @@ DEPS = -I$(shell root-config --incdir)
 LIBS = $(shell root-config --glibs)
 #LIBS += -lMinuit -lRooFitCore -lRooFit -lRooStats -lProof -lMathMore
 
+# Data Model (PODIO + EDM4hep + EDM4eic)
+LIBS += -L/usr/local/lib -lpodio -lpodioRootIO -ledm4hep -ledm4eic
+
 # Miscellaneous
 LIBS += -lfmt
 
