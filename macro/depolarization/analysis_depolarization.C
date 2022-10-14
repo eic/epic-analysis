@@ -1,22 +1,20 @@
 R__LOAD_LIBRARY(Sidis-eic)
 
 void analysis_depolarization(
-    // Double_t eleBeamEn=5,
-    // Double_t ionBeamEn=41
+    Double_t eleBeamEn=5,
+    Double_t ionBeamEn=41
     /**/
-    Double_t eleBeamEn=18,
-    Double_t ionBeamEn=275
+    // Double_t eleBeamEn=18,
+    // Double_t ionBeamEn=275
     )
 {
 
-  TString configFile = Form("datarec/delphes.%dx%d.config",(int)eleBeamEn,(int)ionBeamEn);
-  TString outfilePrefix = Form("depol.%dx%d",(int)eleBeamEn,(int)ionBeamEn);
+  //// delphes analysis
+  TString configFile = Form("datarec/delphes/%dx%d/delphes.config",(int)eleBeamEn,(int)ionBeamEn);
+  TString outfilePrefix = Form("depol.delphes.%dx%d",(int)eleBeamEn,(int)ionBeamEn);
+  AnalysisDelphes *A = new AnalysisDelphes(configFile, outfilePrefix);
 
-  AnalysisDelphes *A = new AnalysisDelphes(
-      configFile,
-      outfilePrefix
-      );
-
+  // A->maxEvents = 100000; // use this to limit the number of events
   A->SetReconMethod("Ele"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
   A->includeOutputSet["depolarization"] = true; // include depolarization plots
@@ -29,7 +27,7 @@ void analysis_depolarization(
   A->AddBinScheme("ptLab"); A->BinScheme("ptLab")->BuildBin("Min",0.1);     // pT_lab > 0.1 GeV (tracking limit)
 
   /// additional cuts
-  A->AddBinScheme("x"); A->BinScheme("x")->BuildBin("CenterDelta", 0.3, 0.1 );
+  // A->AddBinScheme("x"); A->BinScheme("x")->BuildBin("CenterDelta", 0.3, 0.1 );
 
   /// run
   A->Execute();

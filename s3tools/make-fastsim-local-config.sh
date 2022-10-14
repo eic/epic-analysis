@@ -33,7 +33,7 @@ function status { echo ""; echo "[+] $1"; }
 status "build config file..."
 > $configFile.list
 crossSection=$(s3tools/read-xsec-table.sh "pythia8:$energy/minQ2=$Q2min")
-s3tools/generate-local-list.sh "$sourceDir" $crossSection $Q2min $Q2max | tee -a $configFile.list
+s3tools/generate-local-list.sh "$sourceDir" $crossSection $Q2min $Q2max | grep -v UNKNOWN | tee -a $configFile.list
 s3tools/generate-config-file.rb $configFile $energy $configFile.list
 
 # output some info
