@@ -1,8 +1,10 @@
 R__LOAD_LIBRARY(Sidis-eic)
 
-//
-// this is currently a script to support development of AnalysisEpic;
-// when AnalysisEpic is ready, this will become the tutorial script
+/////////////////////////////////////////////////////////////////////////
+// this is currently a script to support development of AnalysisEpic;  //
+// when AnalysisEpic is ready, this will become the tutorial script    //
+/////////////////////////////////////////////////////////////////////////
+
 //
 // currently testing with files produced from benchmarks:
 //   repo:        physics_benchmarks, from https://eicweb.phy.anl.gov/EIC/benchmarks/physics_benchmarks
@@ -14,7 +16,7 @@ R__LOAD_LIBRARY(Sidis-eic)
 // 1. download this artifact from a recent pipeline, and store in `datarec/epic_test/`
 // 2. run this macro
 //
-// if you use a different artifact, edit `tutorial/s3files.epic.config`
+// if you use a different artifact, edit `tutorial/test.epic.config`
 //
 //
 
@@ -24,27 +26,18 @@ R__LOAD_LIBRARY(Sidis-eic)
  *   between fast and full simulations
  */
 void analysis_epic(
-    TString  infiles="tutorial/s3files.epic.config", // list of input files
-    Double_t eleBeamEn=10,                           // electron beam energy [GeV]
-    Double_t ionBeamEn=100,                          // ion beam energy [GeV]
-    Double_t crossingAngle=-25,                      // crossing angle [mrad]
-    TString  outfilePrefix="tutorial.epic"           // output filename prefix
+    TString  infiles="tutorial/test.epic.config", // list of input files
+    TString  outfilePrefix="tutorial.epic"        // output filename prefix
     )
 {
 
   // setup analysis ========================================
   // - define `AnalysisEpic` instead of `AnalysisDelphes`
-  AnalysisEpic *A = new AnalysisEpic(
-      infiles,
-      eleBeamEn,
-      ionBeamEn,
-      crossingAngle,
-      outfilePrefix
-      );
+  AnalysisEpic *A = new AnalysisEpic(infiles, outfilePrefix);
 
   // settings
   A->crossCheckKinematics = true;   // enable cross check with upstream kinematics
-  A->verbose              = false;
+  A->verbose              = true;   // print event-by-event information
   A->maxEvents            = 300000; // use this to limit the number of events
   A->writeSimpleTree      = true;
 

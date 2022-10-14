@@ -1,19 +1,8 @@
 #include "AnalysisEpic.h"
 
-AnalysisEpic::AnalysisEpic(
-    TString infileName_,
-    Double_t eleBeamEn_,
-    Double_t ionBeamEn_,
-    Double_t crossingAngle_,
-    TString outfilePrefix_
-    ) : Analysis(
-      infileName_,
-      eleBeamEn_,
-      ionBeamEn_,
-      crossingAngle_,
-      outfilePrefix_
-      )
-    , crossCheckKinematics(false)
+AnalysisEpic::AnalysisEpic(TString infileName_, TString outfilePrefix_)
+  : Analysis(infileName_, outfilePrefix_)
+  , crossCheckKinematics(false)
 {};
 
 AnalysisEpic::~AnalysisEpic() {};
