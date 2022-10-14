@@ -64,6 +64,8 @@ class Analysis : public TNamed
     void SetReconMethod(TString reconMethod_) { reconMethod=reconMethod_; }; 
     // choose which output sets to include
     std::map<TString,Bool_t> includeOutputSet;
+    // maximum number of errors to print
+    Long64_t errorCntMax;
 
     // add a group of files to the analysis, where all of these files have a
     // common cross section `xs`, and Q2 range `Q2min` to `Q2max`
