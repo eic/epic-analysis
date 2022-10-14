@@ -16,6 +16,8 @@
 
 // analysis objects
 #pragma link C++ class Kinematics+;
+#pragma link C++ class Dihadron+;
+#pragma link C++ class DihadronSet+;
 #pragma link C++ class SimpleTree+;
 #pragma link C++ class HFSTree+;
 #pragma link C++ class ParticleTree+;

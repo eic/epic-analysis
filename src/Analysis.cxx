@@ -53,6 +53,15 @@ Analysis::Analysis(
   availableBinSchemes.insert({ "JetEta", "jet eta" });
   availableBinSchemes.insert({ "JetE", "jet energy" });
 #endif
+  /* dihadrons */
+  availableBinSchemes.insert({ "DihMh",     "M_{h}"    });
+  availableBinSchemes.insert({ "DihMX",     "M_{X}"    });
+  availableBinSchemes.insert({ "DihZ",      "Z"        });
+  availableBinSchemes.insert({ "DihPhPerp", "P_{h,T}"  });
+  availableBinSchemes.insert({ "DihTheta",  "#theta"   });
+  availableBinSchemes.insert({ "DihPhiH",   "#phi_{h}" });
+  availableBinSchemes.insert({ "DihPhiR",   "#phi_{R}" });
+  availableBinSchemes.insert({ "DihPhiS",   "#phi_{S}" });
 
   // available final states
   // - specify which final states you want to include using `AddFinalState(TString name)`
@@ -87,6 +96,7 @@ Analysis::Analysis(
   // - the default settings are set here; override them at the macro level
   includeOutputSet.insert({ "inclusive",      true  }); // inclusive kinematics
   includeOutputSet.insert({ "1h",             true  }); // single hadron kinematics
+  includeOutputSet.insert({ "2h",             false }); // dihadron kinematics
   includeOutputSet.insert({ "jets",           false }); // jet kinematics
   includeOutputSet.insert({ "depolarization", false }); // depolarization factors & ratios
 
@@ -310,7 +320,7 @@ void Analysis::Prepare() {
   outFile = new TFile(outfileName,"RECREATE");
 
   // instantiate shared objects
-  kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
+  kin     = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
   kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
   ST   = new SimpleTree("tree",kin,kinTrue);
   HFST = new HFSTree("hfstree",kin,kinTrue);
@@ -328,8 +338,35 @@ void Analysis::Prepare() {
   includeOutputSet.insert({ "inclusive_only",
       includeOutputSet["inclusive"]
       && !includeOutputSet["1h"]
+      && !includeOutputSet["2h"]
       && !includeOutputSet["jets"]
       });
+
+  // if including dihadrons, define a dihadron final state
+  if(includeOutputSet["2h"]) {
+    if(activeFinalStates.size()!=2) {
+      fmt::print(stderr,"ERROR: cannot include dihadron outputSet, since there should only be 2 final states defined\n");
+      includeOutputSet["2h"] = false;
+    } else {
+      // add to dihSet
+      dihSet = new DihadronSet();
+      // set finalStateID and title
+      TString dihadronFinalState = "";
+      TString dihadronTitle      = "";
+      for(auto state : activeFinalStates) {
+        dihadronFinalState += state + "_";
+        dihadronTitle      += finalStateToTitle.at(state);
+        dihadronTitle(TRegexp(" .*")) = "";
+        dihSet->IncludeHadron(state);
+      }
+      dihadronFinalState(TRegexp("_$")) = "";
+      dihadronTitle += " dihadrons";
+      // add the new dihadron final state
+      finalStateToTitle.insert({dihadronFinalState,dihadronTitle});
+      AddFinalState(dihadronFinalState);
+      dihSet->SetFinalStateID(dihadronFinalState);
+    }
+  }
 
   // if there are no final states defined, default to definitions here:
   if(BinScheme("finalState")->GetNumBins()==0) {
@@ -369,6 +406,15 @@ void Analysis::Prepare() {
   HD->SetBinSchemeValue("phiS",  [this](){ return kin->phiS;                    });
   HD->SetBinSchemeValue("tSpin", [this](){ return (Double_t)kin->tSpin;         });
   HD->SetBinSchemeValue("lSpin", [this](){ return (Double_t)kin->lSpin;         });
+  /* dihadron */
+  HD->SetBinSchemeValue("DihMh",     [this](){ return dih->Mh;     });
+  HD->SetBinSchemeValue("DihMX",     [this](){ return dih->MX;     });
+  HD->SetBinSchemeValue("DihZ",      [this](){ return dih->Z;      });
+  HD->SetBinSchemeValue("DihPhPerp", [this](){ return dih->PhPerp; });
+  HD->SetBinSchemeValue("DihTheta",  [this](){ return dih->Theta;  });
+  HD->SetBinSchemeValue("DihPhiH",   [this](){ return dih->PhiH;   });
+  HD->SetBinSchemeValue("DihPhiR",   [this](){ return dih->PhiR;   });
+  HD->SetBinSchemeValue("DihPhiS",   [this](){ return dih->PhiS;   });
   /* jets */
 #ifndef EXCLUDE_DELPHES
   HD->SetBinSchemeValue("JetPT", [this](){ return kin->pTjet;                   });
@@ -499,7 +545,26 @@ void Analysis::Prepare() {
           NBINS,-TMath::Pi(),TMath::Pi()
           );
     }
-
+    // -- dihadron kinematics
+    if(includeOutputSet["2h"]) {
+      HS->DefineHist1D("DihMh",     "M_{h}",    "GeV", 2*NBINS, 0,            5);
+      HS->DefineHist1D("DihMX",     "M_{X}",    "GeV", NBINS,   0,            40);
+      HS->DefineHist1D("DihZ",      "Z",        "",    NBINS,   0,            1);
+      HS->DefineHist1D("DihPhPerp", "P_{h,T}",  "GeV", NBINS,   1e-2,         3, true);
+      HS->DefineHist1D("DihTheta",  "#theta",   "",    NBINS,   0,            TMath::Pi());
+      HS->DefineHist1D("DihPhiH",   "#phi_{h}", "",    NBINS,   -TMath::Pi(), TMath::Pi());
+      HS->DefineHist1D("DihPhiR",   "#phi_{R}", "",    NBINS,   -TMath::Pi(), TMath::Pi());
+      HS->DefineHist1D("DihPhiS",   "#phi_{S}", "",    NBINS,   -TMath::Pi(), TMath::Pi());
+      HS->DefineHist2D("DihPhiHvsPhiR", "#phi_{R}", "#phi_{h}", "", "",
+          NBINS, -TMath::Pi(), TMath::Pi(),
+          NBINS, -TMath::Pi(), TMath::Pi()
+          );
+      HS->DefineHist2D("DihThetaVsPh", "P_{h}", "#theta", "GeV", "",
+          NBINS, 1e-2, 40,
+          NBINS, 0, TMath::Pi(),
+          true
+          );
+    }
     // -- jet kinematics
 #ifndef EXCLUDE_DELPHES
     if(includeOutputSet["jets"]) {
@@ -730,8 +795,15 @@ void Analysis::AddFinalState(TString finalStateN) {
     return;
   };
   BinScheme("finalState")->BuildExternalBin(finalStateN,finalStateT);
-  activeFinalStates.insert(finalStateN);
+  activeFinalStates.push_back(finalStateN);
   fmt::print("AddFinalState: name='{}'\n               title='{}'\n",finalStateN,finalStateT);
+};
+
+
+// check if this final state bin has been added
+//----------------------------------------------
+Bool_t Analysis::IsFinalState(TString finalState) {
+  return std::find( activeFinalStates.begin(), activeFinalStates.end(), finalState) != activeFinalStates.end();
 };
 
 
@@ -841,6 +913,24 @@ void Analysis::FillHistos1h(Double_t wgt) {
   };
   FillHistos(fill_payload);
 };
+
+// fill 2h (dihadron) histograms
+void Analysis::FillHistosDihadrons() {
+  HD->CheckBins();
+  HD->Payload([this](Histos *H){
+    H->FillHist1D("DihMh",     dih->Mh,     wTrack);
+    H->FillHist1D("DihMX",     dih->MX,     wTrack);
+    H->FillHist1D("DihZ",      dih->Z,      wTrack);
+    H->FillHist1D("DihPhPerp", dih->PhPerp, wTrack);
+    H->FillHist1D("DihTheta",  dih->Theta,  wTrack);
+    H->FillHist1D("DihPhiH",   dih->PhiH,   wTrack);
+    H->FillHist1D("DihPhiR",   dih->PhiR,   wTrack);
+    H->FillHist1D("DihPhiS",   dih->PhiS,   wTrack);
+    H->FillHist2D("DihPhiHvsPhiR", dih->PhiR, dih->PhiH,  wTrack);
+    H->FillHist2D("DihThetaVsPh",  dih->Ph,   dih->Theta, wTrack);
+    });
+  HD->ExecuteOps(true);
+}
 
 // fill jet histograms
 void Analysis::FillHistosJets(Double_t wgt) {

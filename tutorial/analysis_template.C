@@ -32,6 +32,7 @@ void analysis_template(
   A->includeOutputSet["jets"] = true;
   // - additional example settings; see `src/Analysis.cxx` for more
   //A->includeOutputSet["1h"] = false;
+  //A->includeOutputSet["2h"] = true;
   //A->includeOutputSet["inclusive"] = false;
   //A->includeOutputSet["depolarization"] = true;
 
