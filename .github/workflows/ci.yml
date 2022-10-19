@@ -105,9 +105,12 @@ jobs:
             echo "[CI] add S3 host"
             s3tools/add-host.sh
             echo "[CI] generate list of HEPMC files"
-            s3tools/generate-hepmc-list.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 6 | tee hepmc.list
+            s3tools/generate-hepmc-list.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 1 | tee hepmc.list
             echo "[CI] download HEPMC files"
-            while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
+            # while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
+            while read hepmc; do mc head --lines 3000000 $hepmc > datagen/$(basename $hepmc); done < hepmc.list # truncate the hepmc file
+            for hepmc in datagen/*.hepmc; do s3tools/trim_hepmc.rb $hepmc hepmc.trimmed; done # remove the final, partial event
+            for hepmc in datagen/*.hepmc; do mv -v $hepmc.trimmed $hepmc; done
             echo "====="
             ls -lh datagen
             echo "[CI] install delphes"

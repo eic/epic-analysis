@@ -17,9 +17,19 @@ minQ2=$2
 limit=0
 if [ $# -ge 3 ]; then limit=$3; fi
 
-evgenDir="S3/eictest/ATHENA/EVGEN/DIS/NC/$energy/minQ2=$minQ2"
+### ATHENA Pythia8 files
+# evgenDir="S3/eictest/ATHENA/EVGEN/DIS/NC/$energy/minQ2=$minQ2"
+# if [ $limit -gt 0 ]; then
+#   mc ls $evgenDir | grep -E 'hepmc.gz$' | grep -v GiB | grep vtxfix | head -n$limit | sed "s;^.* ;$evgenDir/;g"
+# else
+#   mc ls $evgenDir | grep -E 'hepmc.gz$' | grep -v GiB | grep vtxfix | sed "s;^.* ;$evgenDir/;g"
+# fi
+
+### EPIC
+evgenDir="S3/eictest/EPIC/EVGEN/DIS/NC/$energy/noradcor"
+# evgenDir="S3/eictest/EPIC/EVGEN/DIS/NC/$energy/radcor"
 if [ $limit -gt 0 ]; then
-  mc ls $evgenDir | grep -E 'hepmc.gz$' | grep -v GiB | grep vtxfix | head -n$limit | sed "s;^.* ;$evgenDir/;g"
+  mc ls $evgenDir | grep "q2_${minQ2}_"| grep -E '\.hepmc$' | head -n$limit | sed "s;^.* ;$evgenDir/;g"
 else
-  mc ls $evgenDir | grep -E 'hepmc.gz$' | grep -v GiB | grep vtxfix | sed "s;^.* ;$evgenDir/;g"
+  mc ls $evgenDir | grep "q2_${minQ2}_"| grep -E '\.hepmc$'                 | sed "s;^.* ;$evgenDir/;g"
 fi
