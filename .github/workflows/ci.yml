@@ -117,7 +117,7 @@ jobs:
             deps/install_delphes.sh
             echo "[CI] RUN DELPHES"
             chmod u+x deps/delphes/DelphesHepMC3
-            for hepmc in datagen/*.hepmc.gz; do deps/run_delphes.sh $hepmc; done
+            for hepmc in datagen/*.hepmc; do deps/run_delphes.sh $hepmc; done
             echo "====="
             ls -lh datarec
             echo "[CI] make config file"
