@@ -109,15 +109,15 @@ jobs:
             echo "[CI] download HEPMC files"
             # while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
             while read hepmc; do mc head --lines 3000000 $hepmc > datagen/$(basename $hepmc); done < hepmc.list # truncate the hepmc file
-            for hepmc in datagen/*.hepmc; do s3tools/trim_hepmc.rb $hepmc $hepmc.trimmed; done # remove the final, partial event
-            for hepmc in datagen/*.hepmc; do mv -v $hepmc.trimmed $hepmc; done
+            for hepmc in $(ls datagen/*.hepmc); do s3tools/trim_hepmc.rb $hepmc $hepmc.trimmed; done # remove the final, partial event
+            for hepmc in $(ls datagen/*.hepmc); do mv -v $hepmc.trimmed $hepmc; done
             echo "====="
             ls -lh datagen
             echo "[CI] install delphes"
             deps/install_delphes.sh
             echo "[CI] RUN DELPHES"
             chmod u+x deps/delphes/DelphesHepMC3
-            for hepmc in datagen/*.hepmc; do deps/run_delphes.sh $hepmc; done
+            for hepmc in $(ls datagen/*.hepmc); do deps/run_delphes.sh $hepmc; done
             echo "====="
             ls -lh datarec
             echo "[CI] make config file"
