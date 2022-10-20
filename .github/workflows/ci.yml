@@ -106,6 +106,7 @@ jobs:
             s3tools/add-host.sh
             echo "[CI] generate list of HEPMC files"
             s3tools/generate-hepmc-list.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 1 | tee hepmc.list
+          if [ $(cat hepmc.list|wc -l) -eq 0 ]; then echo "WARNING: NO HEPMC FILES FOUND; skipping this job..."; exit 0; fi
             echo "[CI] download HEPMC files"
             # while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
             while read hepmc; do mc head --lines 3000000 $hepmc > datagen/$(basename $hepmc); done < hepmc.list # truncate the hepmc file
