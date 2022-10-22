@@ -41,7 +41,6 @@ void analysis_dd4hep(
   //A->AddFinalState("pimTrack");
   //A->AddFinalState("KpTrack");
   //A->AddFinalState("KmTrack");
-  //A->AddFinalState("jet"); // (TODO)
 
 
   // define cuts ====================================
