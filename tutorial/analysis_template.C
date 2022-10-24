@@ -25,7 +25,7 @@ void analysis_template(
 
   // decide which output sets to include ===================
   // - by default, only single-hadron data are included
-  // - to look at jets, we need to make sure they are included
+  // - to include jets, we just need to make sure they are included in the output
   A->includeOutputSet["jets"] = true;
   // - additional example settings; see `src/Analysis.cxx` for more
   //A->includeOutputSet["1h"] = false;
@@ -39,6 +39,8 @@ void analysis_template(
   //   Q2 bins below, you may be creating more bins than you actually
   //   need, since the Q2 minimum cut actually defines another bin;
   //   in this case, your Q2 bins effectively define a Q2 minimum.
+  // - the cuts listed here are for single-hadrons only; similar cuts can be
+  //   defined for jets
   A->AddBinScheme("w");  A->BinScheme("w")->BuildBin("Min",3.0); // W > 3 GeV
   A->AddBinScheme("y");  A->BinScheme("y")->BuildBin("Range",0.01,0.95); // 0.01 < y < 0.95
   A->AddBinScheme("z");  A->BinScheme("z")->BuildBin("Range",0.2,0.9); // 0.2 < z < 0.9
@@ -50,14 +52,12 @@ void analysis_template(
   /* do nothing -> single bin histograms */
 
   // final states =========================================
-  // - define final states; if you define none, default sets will be defined
-  // - although jets are included in `includeOutputSet`, we still need to
-  //   included them in the list of final states here
+  // - define single-hadron final states; if you define none, default sets will be defined
+  // - note: if you included jets above, there will also be a final state for jets, automatically defined
   A->AddFinalState("pipTrack");
   //A->AddFinalState("pimTrack");
   //A->AddFinalState("KpTrack");
   //A->AddFinalState("KmTrack");
-  A->AddFinalState("jet");
 
   // perform the analysis ==================================
   A->Execute();

@@ -19,7 +19,6 @@ void analysis_PvsEta(
   A->SetReconMethod("Ele"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
   A->AddFinalState("KpTrack"); // kaon final state
-  //A->AddFinalState("jet"); // jets
 
 
   // define cuts ====================================

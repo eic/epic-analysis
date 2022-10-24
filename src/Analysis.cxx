@@ -43,7 +43,11 @@ Analysis::Analysis(
   availableBinSchemes.insert({ "phiS",  "#phi_{S}"    });
   availableBinSchemes.insert({ "tSpin", "spin"        });
   availableBinSchemes.insert({ "lSpin", "spinL"       });
-
+  /* jets */
+#ifndef EXCLUDE_DELPHES
+  availableBinSchemes.insert({ "JetPT", "jet p_{T}" });
+  availableBinSchemes.insert({ "JetZ",  "jet z"     });
+#endif
 
   // available final states
   // - specify which final states you want to include using `AddFinalState(TString name)`
@@ -62,15 +66,6 @@ Analysis::Analysis(
   PIDtoFinalState.insert({  321,  "KpTrack"  });
   PIDtoFinalState.insert({ -321,  "KmTrack"  });
   PIDtoFinalState.insert({  2212, "pTrack"   });
-
-  // jets
-#ifndef EXCLUDE_DELPHES
-  // available variables for binning
-  availableBinSchemes.insert({ "ptJet", "jet p_{T}" });
-  availableBinSchemes.insert({ "zJet",  "jet z"     });
-  // available final states
-  finalStateToTitle.insert({ "jet", "jets" });
-#endif
 
   // kinematics reconstruction methods
   // - choose one of these methods using `SetReconMethod(TString name)`
@@ -303,6 +298,13 @@ void Analysis::Prepare() {
   kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
   ST = new SimpleTree("tree",kin,kinTrue);
 
+  // if including jets, define a `jet` final state
+#ifndef EXCLUDE_DELPHES
+  if(includeOutputSet["jets"]) {
+    finalStateToTitle.insert({ "jet", "jets" });
+    AddFinalState("jet");
+  }
+#endif
 
   // if there are no final states defined, default to definitions here:
   if(BinScheme("finalState")->GetNumBins()==0) {
@@ -310,13 +312,11 @@ void Analysis::Prepare() {
     AddFinalState("pipTrack");
   };
 
-
   // if no reconstruction method is set, choose a default here
   if(reconMethod=="") {
     std::cout << "NOTE: no recon method specified, default to electron method" << std::endl;
     SetReconMethod("Ele");
   };
-
 
   // build HistosDAG with specified binning
   HD = new HistosDAG();
@@ -346,8 +346,8 @@ void Analysis::Prepare() {
   HD->SetBinSchemeValue("lSpin", [this](){ return (Double_t)kin->lSpin;         });
   /* jets */
 #ifndef EXCLUDE_DELPHES
-  HD->SetBinSchemeValue("ptJet", [this](){ return kin->pTjet;                   });
-  HD->SetBinSchemeValue("zJet",  [this](){ return kin->zjet;                    });
+  HD->SetBinSchemeValue("JetPT", [this](){ return kin->pTjet;                   });
+  HD->SetBinSchemeValue("JetZ",  [this](){ return kin->zjet;                    });
 #endif
 
   // some bin schemes values are checked here, instead of by CutDef checks ("External" cut type)
@@ -476,13 +476,13 @@ void Analysis::Prepare() {
     // -- jet kinematics
 #ifndef EXCLUDE_DELPHES
     if(includeOutputSet["jets"]) {
-      HS->DefineHist1D("pT_jet","jet p_{T}","GeV", NBINS, 1e-2, 50);
-      HS->DefineHist1D("mT_jet","jet m_{T}","GeV", NBINS, 1e-2, 20);
-      HS->DefineHist1D("z_jet","jet z","", NBINS,0, 1);
-      HS->DefineHist1D("eta_jet","jet #eta_{lab}","", NBINS,-5,5);
-      HS->DefineHist1D("qT_jet","jet q_{T}", "GeV", NBINS, 0, 10.0);
-      HS->DefineHist1D("jperp","j_{#perp}","GeV", NBINS, 0, 3.0);
-      HS->DefineHist1D("qTQ_jet","jet q_{T}/Q","", NBINS, 0, 3.0);
+      HS->DefineHist1D("JetPT",    "jet p_{T}",      "GeV", NBINS, 1e-2, 50,  true, true);
+      HS->DefineHist1D("JetMT",    "jet m_{T}",      "GeV", NBINS, 1e-2, 20,  true, true);
+      HS->DefineHist1D("JetZ",     "jet z",          "",    NBINS, 0,    1);
+      HS->DefineHist1D("JetEta",   "jet #eta_{lab}", "",    NBINS, -5,   5);
+      HS->DefineHist1D("JetQT",    "jet q_{T}",      "GeV", NBINS, 0,    10.0);
+      HS->DefineHist1D("JetJperp", "j_{#perp}",      "GeV", NBINS, 1e-2, 3.0, true, true);
+      HS->DefineHist1D("JetQTQ",   "jet q_{T}/Q",    "",    NBINS, 0,    3.0);
     }
 #endif
 
@@ -683,6 +683,7 @@ void Analysis::AddFinalState(TString finalStateN) {
   };
   BinScheme("finalState")->BuildExternalBin(finalStateN,finalStateT);
   activeFinalStates.insert(finalStateN);
+  fmt::print("AddFinalState: name='{}'\n               title='{}'\n",finalStateN,finalStateT);
 };
 
 
@@ -794,14 +795,14 @@ void Analysis::FillHistosJets() {
   HD->Payload([this](Histos *H){
     H->FillHist2D("Q2vsX",   kin->x,     kin->Q2, wJet);
     // jet kinematics
-    H->FillHist1D("pT_jet",  kin->pTjet, wJet);
-    H->FillHist1D("mT_jet",  jet.mt(),   wJet);
-    H->FillHist1D("z_jet",   kin->zjet,  wJet);
-    H->FillHist1D("eta_jet", jet.eta(),  wJet);
-    H->FillHist1D("qT_jet",  kin->qTjet, wJet);
-    if(kin->Q2!=0) H->FillHist1D("qTQ_jet", kin->qTjet/sqrt(kin->Q2), wJet);
+    H->FillHist1D("JetPT",  kin->pTjet, wJet);
+    H->FillHist1D("JetMT",  jet.mt(),   wJet);
+    H->FillHist1D("JetZ",   kin->zjet,  wJet);
+    H->FillHist1D("JetEta", jet.eta(),  wJet);
+    H->FillHist1D("JetQT",  kin->qTjet, wJet);
+    if(kin->Q2!=0) H->FillHist1D("JetQTQ", kin->qTjet/sqrt(kin->Q2), wJet);
     for(int j = 0; j < kin->jperp.size(); j++) {
-      H->FillHist1D("jperp", kin->jperp[j], wJet);
+      H->FillHist1D("JetJperp", kin->jperp[j], wJet);
     };
   });
   // execute the payload

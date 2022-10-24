@@ -14,7 +14,6 @@ void analysis_coverage(
   A->SetReconMethod("Ele"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
   //A->AddFinalState("KpTrack"); // kaon final state
-  //A->AddFinalState("jet"); // jets
 
 
   // define cuts ====================================

@@ -153,7 +153,8 @@ void AnalysisDelphes::Execute() {
 
     // get vector of jets
     // TODO: should this have an option for clustering method?
-    kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
+    if(includeOutputSet["jets"])
+      kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
    
     // track loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     itTrack.Reset();
@@ -228,10 +229,8 @@ void AnalysisDelphes::Execute() {
 
 
     // jet loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    finalStateID = "jet";
-    // FIXME: probably don't need both a `finalStateID` and `includeOutputSet` to control whether
-    //        we do anything with jets or not
-    if(activeFinalStates.find(finalStateID)!=activeFinalStates.end() && includeOutputSet["jets"]) {
+    if(includeOutputSet["jets"]) {
+      finalStateID = "jet";
 
 #ifdef INCLUDE_CENTAURO
       if(useBreitJets) kin->GetBreitFrameJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
