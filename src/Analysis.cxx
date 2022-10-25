@@ -239,7 +239,10 @@ void Analysis::Prepare() {
         fileNames.clear();
       }
       // parse setting value(s)
-      if      (bufferKey==":eleBeamEn")         eleBeamEn         = std::stod(bufferVal);
+      if(debugParser) fmt::print("  parse as setting: bufferKey='{}' bufferVal='{}'\n",bufferKey,bufferVal);
+      if(bufferVal=="")
+        fmt::print(stderr,"ERROR: setting '{}' has no associated value\n",bufferKey);
+      else if (bufferKey==":eleBeamEn")         eleBeamEn         = std::stod(bufferVal);
       else if (bufferKey==":ionBeamEn")         ionBeamEn         = std::stod(bufferVal);
       else if (bufferKey==":crossingAngle")     crossingAngle     = std::stod(bufferVal);
       else if (bufferKey==":totalCrossSection") totalCrossSection = std::stod(bufferVal);
@@ -247,7 +250,7 @@ void Analysis::Prepare() {
       else if (bufferKey==":q2max")             Q2max             = std::stod(bufferVal);
       else if (bufferKey==":crossSection")      xsec              = std::stod(bufferVal);
       else
-        fmt::print(stderr,"WARNING: unkown setting \"{}\"\n",bufferKey);
+        fmt::print(stderr,"ERROR: unkown setting \"{}\"\n",bufferKey);
       if(debugParser) fmt::print("  setting:  \"{}\" = \"{}\"\n",bufferKey,bufferVal);
     }
     else if (parseAs==kRootFile) {
