@@ -11,8 +11,8 @@ defaults:
     shell: bash
 
 env:
-  ebeam_en: 5
-  pbeam_en: 41
+  ebeam_en: 18
+  pbeam_en: 275
   root: root -b -q
   root_no_delphes: root -b -q macro/ci/define_exclude_delphes.C 
 
@@ -105,20 +105,20 @@ jobs:
             echo "[CI] add S3 host"
             s3tools/add-host.sh
             echo "[CI] generate list of HEPMC files"
-            s3tools/generate-hepmc-list.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 1 | tee hepmc.list
+            s3tools/generate-hepmc-list.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 2 | tee hepmc.list
             if [ $(cat hepmc.list|wc -l) -eq 0 ]; then echo "WARNING: NO HEPMC FILES FOUND; skipping this job..."; touch delphes.config.list; exit 0; fi
             echo "[CI] download HEPMC files"
-            # while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
-            while read hepmc; do mc head --lines 3000000 $hepmc > datagen/$(basename $hepmc); done < hepmc.list # truncate the hepmc file
-            for hepmc in $(ls datagen/*.hepmc); do s3tools/trim_hepmc.rb $hepmc $hepmc.trimmed; done # remove the final, partial event
-            for hepmc in $(ls datagen/*.hepmc); do mv -v $hepmc.trimmed $hepmc; done
+            while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
+            # while read hepmc; do mc head --lines 3000000 $hepmc > datagen/$(basename $hepmc); done < hepmc.list # truncate the hepmc file
+            # for hepmc in $(ls datagen/*.hepmc); do s3tools/trim_hepmc.rb $hepmc $hepmc.trimmed; done # remove the final, partial event
+            # for hepmc in $(ls datagen/*.hepmc); do mv -v $hepmc.trimmed $hepmc; done
             echo "====="
             ls -lh datagen
             echo "[CI] install delphes"
             deps/install_delphes.sh
             echo "[CI] RUN DELPHES"
             chmod u+x deps/delphes/DelphesHepMC3
-            for hepmc in $(ls datagen/*.hepmc); do deps/run_delphes.sh $hepmc; done
+            for hepmc in $(ls datagen/*.hepmc.gz); do deps/run_delphes.sh $hepmc; done
             echo "====="
             ls -lh datarec
             echo "[CI] make config file"

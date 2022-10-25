@@ -26,10 +26,10 @@ if [ $# -ge 3 ]; then limit=$3; fi
 # fi
 
 ### EPIC
-evgenDir="S3/eictest/EPIC/EVGEN/DIS/NC/$energy/noradcor"
-# evgenDir="S3/eictest/EPIC/EVGEN/DIS/NC/$energy/radcor"
+# evgenDir="S3/eictest/EPIC/EVGEN/DIS/NC/$energy/noradcor"
+evgenDir="S3/eictest/EPIC/EVGEN/DIS/NC/$energy/radcor"
 if [ $limit -gt 0 ]; then
-  mc ls $evgenDir | grep "q2_${minQ2}_"| grep -E '\.hepmc$' | head -n$limit | sed "s;^.* ;$evgenDir/;g"
+  mc ls $evgenDir | grep "q2_${minQ2}_"| grep -E '\.hepmc.gz$' | head -n$limit | sed "s;^.* ;$evgenDir/;g"
 else
-  mc ls $evgenDir | grep "q2_${minQ2}_"| grep -E '\.hepmc$'                 | sed "s;^.* ;$evgenDir/;g"
+  mc ls $evgenDir | grep "q2_${minQ2}_"| grep -E '\.hepmc.gz$'                 | sed "s;^.* ;$evgenDir/;g"
 fi
