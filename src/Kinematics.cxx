@@ -461,6 +461,8 @@ void Kinematics::SubtractElectronFromHFS() {
         break;
     }
     countHadrons--;
+    ar.Remove( &vecElectron );
+    nHFS--;
   } else {
     cerr << "ERROR: electron energy is NaN" << endl;
     // TODO: kill event

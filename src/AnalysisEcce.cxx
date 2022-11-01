@@ -121,12 +121,12 @@ void AnalysisEcce::Execute()
      * - find beam particles
      */
     std::vector<ParticlesEE> mcpart;
-    double maxP = 0;
+    double maxPt = 0;
     int genEleID = -1;
     bool foundBeamElectron = false;
     bool foundBeamIon = false;
     int genEleBCID = -1;
-    cout << tr.GetCurrentEntry() << endl;
+
     for(int imc=0; imc<hepmcp_PDG.GetSize(); imc++) {
       
       int pid_ = hepmcp_PDG[imc];
@@ -139,6 +139,7 @@ void AnalysisEcce::Execute()
       double e_  = hepmcp_E[imc];
       
       double p_ = sqrt(pow(hepmcp_psx[imc],2) + pow(hepmcp_psy[imc],2) + pow(hepmcp_psz[imc],2));
+      double pt_ = sqrt(pow(hepmcp_psx[imc],2) + pow(hepmcp_psy[imc],2));
       double mass_ = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;      
 
       // add to `mcpart`
@@ -163,6 +164,7 @@ void AnalysisEcce::Execute()
 	  pz_ = mcpart_psz[imcpart];
 	  e_  = mcpart_E[imcpart];	  
 	  p_ = sqrt(pow(mcpart_psx[imcpart],2) + pow(mcpart_psy[imcpart],2) + pow(mcpart_psz[imcpart],2));
+	  pt_ = sqrt(pow(mcpart_psx[imcpart],2) + pow(mcpart_psy[imcpart],2));
 	  part.mcID = mcpart_ID[imcpart];
 	}
 	  else
@@ -181,8 +183,8 @@ void AnalysisEcce::Execute()
 
 	  // identify scattered electron by max momentum
 	  if(pid_ == 11) {
-	    if(p_ > maxP) {
-	      maxP = p_;
+	    if(pt_ > maxPt) {
+	      maxPt = pt_;
 	      kinTrue->vecElectron.SetPxPyPzE(px_, py_, pz_, e_);
 	      genEleID = part.mcID; //mcpart_ID[imc];
 	      genEleBCID = hepmcp_BCID[imc];
@@ -282,10 +284,10 @@ void AnalysisEcce::Execute()
       part.vecPart.SetPxPyPzE(reco_px, reco_py, reco_pz, sqrt(reco_p*reco_p + reco_mass*reco_mass));
 
 
-      cout  << "\t\t\t track  " << Form(" %4.2f %4.2f %4.2f true id %4d imc %3d mcid %3d \n",reco_px,reco_py,reco_pz,tracks_trueID[ireco],imc,part.mcID);
+      //cout  << "\t\t\t track  " << Form(" %4.2f %4.2f %4.2f true id %4d imc %3d mcid %3d \n",reco_px,reco_py,reco_pz,tracks_trueID[ireco],imc,part.mcID);
       
       // add to `recopart` and hadronic final state sums only if there is a matching truth particle
-      if(part.mcID > 0) {       
+      if(part.mcID > 0) { 
 	if(imc>-1) {
 	  //  cout  << "\t\t\t add  to hadfs  \n" ;
 	  recopart.push_back(part);

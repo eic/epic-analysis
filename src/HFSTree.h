@@ -28,9 +28,6 @@ class HFSTree : public TObject
     Kinematics *GetKinematics() { return K; };
     Kinematics *GetKinematicsTrue() { return Ktrue; };
     void FillTree(Double_t w) { weight = w;
-      for(int i = 0; i < K->nHFS; i++){
-	cout << i << " " << K->hfspx[i] << " " << K->hfspy[i] << " "<< K->hfspz[i] << " "<< K->hfsE[i] << endl;
-      }
       T->Fill(); };
     void WriteTree() { T->Write(); };
   
