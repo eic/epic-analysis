@@ -47,6 +47,8 @@ Analysis::Analysis(
 #ifndef EXCLUDE_DELPHES
   availableBinSchemes.insert({ "JetPT", "jet p_{T}" });
   availableBinSchemes.insert({ "JetZ",  "jet z"     });
+  availableBinSchemes.insert({ "JetEta", "jet eta" });
+  availableBinSchemes.insert({ "JetE", "jet energy" });
 #endif
 
   // available final states
@@ -92,6 +94,10 @@ Analysis::Analysis(
   maxEvents       = 0;
   useBreitJets    = false;
   errorCntMax     = 1000;
+  jetAlg          = 0; // Default to kT Algorithm
+  jetRad          = 0.8;
+  jetMin          = 1.0; // Minimum Jet pT
+  jetMatchDR      = 0.5; // Delta R between true and reco jet to be considered matched
 
   weight = new WeightsUniform();
   weightJet = new WeightsUniform();
@@ -351,6 +357,8 @@ void Analysis::Prepare() {
 #ifndef EXCLUDE_DELPHES
   HD->SetBinSchemeValue("JetPT", [this](){ return kin->pTjet;                   });
   HD->SetBinSchemeValue("JetZ",  [this](){ return kin->zjet;                    });
+  HD->SetBinSchemeValue("JetEta", [this](){ return kin->etajet;                 });
+  HD->SetBinSchemeValue("JetE", [this](){ return kin->ejet;           });
 #endif
 
   // some bin schemes values are checked here, instead of by CutDef checks ("External" cut type)
@@ -486,6 +494,22 @@ void Analysis::Prepare() {
       HS->DefineHist1D("JetQT",    "jet q_{T}",      "GeV", NBINS, 0,    10.0);
       HS->DefineHist1D("JetJperp", "j_{#perp}",      "GeV", NBINS, 1e-2, 3.0, true, true);
       HS->DefineHist1D("JetQTQ",   "jet q_{T}/Q",    "",    NBINS, 0,    3.0);
+      HS->DefineHist1D("JetE","jet Energy","GeV", NBINS, 1e-2, 100);
+      HS->DefineHist1D("JetM","jet Mass","GeV", NBINS, 1e-2, 20);
+
+      HS->DefineHist2D("JetPTVsEta","Eta","pT","GeV","",100,-5,5,100,0,50,false,false);
+
+      // Resolution Plos
+      HS->DefineHist1D("JetDeltaR","deltaR between matched reco and truth jet","",1000,-2.,10.);
+ 
+      HS->DefineHist2D("JetPTTrueVsReco","Reco pT","True pT","GeV","GeV",100,0.,50.,100,0.,50.,false,false);
+      HS->DefineHist2D("JetETrueVsReco","Reco E","True E","GeV","GeV",100,0.,100.,100,0.,100.,false,false);
+ 
+      HS->DefineHist2D("JetResPTVsTruePT","True pT","(Reco-True)/True pT","GeV","",100,0.,50.,10000,-10.,10.,false,false);
+      HS->DefineHist2D("JetResEVsTrueE","True E","(Reco-True)/True E","GeV","",100,0.,100.,10000,-10.,10.,false,false);
+      
+      HS->DefineHist2D("JetResPTVsRecoPT","Reco pT","(Reco-True)/True pT","GeV","",100,0.,50.,10000,-10.,10.,false,false);
+      HS->DefineHist2D("JetResEVsRecoE","Reco E","(Reco-True)/True E","GeV","",100,0.,100.,10000,-10.,10.,false,false);
     }
 #endif
 
@@ -798,11 +822,28 @@ void Analysis::FillHistosJets() {
   HD->Payload([this](Histos *H){
     H->FillHist2D("Q2vsX",   kin->x,     kin->Q2, wJet);
     // jet kinematics
-    H->FillHist1D("JetPT",  kin->pTjet, wJet);
-    H->FillHist1D("JetMT",  jet.mt(),   wJet);
-    H->FillHist1D("JetZ",   kin->zjet,  wJet);
-    H->FillHist1D("JetEta", jet.eta(),  wJet);
-    H->FillHist1D("JetQT",  kin->qTjet, wJet);
+    H->FillHist1D("JetPT",  kin->pTjet,  wJet);
+    H->FillHist1D("JetMT",  kin->mTjet,  wJet);
+    H->FillHist1D("JetZ",   kin->zjet,   wJet);
+    H->FillHist1D("JetEta", kin->etajet, wJet);
+    H->FillHist1D("JetQT",  kin->qTjet,  wJet);
+    H->FillHist1D("JetE",   kin->ejet,   wJet);
+    H->FillHist1D("JetM",   kin->mjet,   wJet);
+
+    H->FillHist2D("JetPTVsEta", kin->etajet, kin->pTjet, wJet);
+
+    // Fill Resolution Histos
+    H->FillHist1D("JetDeltaR", kin->deltaRjet, wJet);
+
+    H->FillHist2D("JetPTTrueVsReco", kin->pTjet, kin->pTmtjet, wJet);
+    H->FillHist2D("JetETrueVsReco", kin->ejet, kin->emtjet, wJet);
+
+    H->FillHist2D("JetResPTVsTruePT", kin->pTmtjet, (kin->pTjet - kin->pTmtjet)/(kin->pTmtjet), wJet);
+    H->FillHist2D("JetResEVsTrueE", kin->emtjet, (kin->ejet - kin->emtjet)/(kin->emtjet), wJet);
+ 
+    H->FillHist2D("JetResPTVsRecoPT", kin->pTjet, (kin->pTjet - kin->pTmtjet)/(kin->pTmtjet), wJet);
+    H->FillHist2D("JetResEVsRecoE", kin->ejet, (kin->ejet - kin->emtjet)/(kin->emtjet), wJet);
+
     if(kin->Q2!=0) H->FillHist1D("JetQTQ", kin->qTjet/sqrt(kin->Q2), wJet);
     for(int j = 0; j < kin->jperp.size(); j++) {
       H->FillHist1D("JetJperp", kin->jperp[j], wJet);

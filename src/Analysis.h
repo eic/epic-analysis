@@ -67,6 +67,11 @@ class Analysis : public TNamed
     // maximum number of errors to print
     Long64_t errorCntMax;
 
+    // Jet Definition Quantities
+    int jetAlg;
+    double jetRad, jetMin;
+    double jetMatchDR;
+
     // add a group of files to the analysis, where all of these files have a
     // common cross section `xs`, and Q2 range `Q2min` to `Q2max`
     void AddFileGroup(

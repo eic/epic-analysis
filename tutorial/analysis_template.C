@@ -55,11 +55,11 @@ void analysis_template(
   //A->AddBinScheme("z");  A->BinScheme("z")->BuildBin("Range",0.2,0.9); // 0.2 < z < 0.9
   //A->AddBinScheme("xF"); A->BinScheme("xF")->BuildBin("Min",0.0); // xF > 0
   //A->AddBinScheme("ptLab");  A->BinScheme("ptLab")->BuildBin("Min",0.1); A->BinScheme("ptLab")->BuildBin("Min",5.0); // pT_lab > 0.1 GeV (tracking limit)
-  A->AddBinScheme("ptJet"); A->BinScheme("ptJet")->BuildBin("Min",5.0);
-  A->AddBinScheme("etaJet"); A->BinScheme("etaJet")->BuildBin("Range",-5.0,5.0);
-  A->AddBinScheme("etaJet"); A->BinScheme("etaJet")->BuildBin("Range",-5.0,-1.0);
-  A->AddBinScheme("etaJet"); A->BinScheme("etaJet")->BuildBin("Range",-1.0,1.0);
-  A->AddBinScheme("etaJet"); A->BinScheme("etaJet")->BuildBin("Range",1.0,5.0);
+  A->AddBinScheme("JetPT"); A->BinScheme("JetPT")->BuildBin("Min",5.0);
+  A->AddBinScheme("JetEta"); A->BinScheme("JetEta")->BuildBin("Range",-5.0,5.0);
+  A->AddBinScheme("JetEta"); A->BinScheme("JetEta")->BuildBin("Range",-5.0,-1.0);
+  A->AddBinScheme("JetEta"); A->BinScheme("JetEta")->BuildBin("Range",-1.0,1.0);
+  A->AddBinScheme("JetEta"); A->BinScheme("JetEta")->BuildBin("Range",1.0,5.0);
 
   // set binning scheme ====================================
   // - see `Analysis` constructor for available bin variables
@@ -73,7 +73,7 @@ void analysis_template(
   //A->AddFinalState("pimTrack");
   //A->AddFinalState("KpTrack");
   //A->AddFinalState("KmTrack");
-  A->AddFinalState("jet");
+  //A->AddFinalState("jet");
 
   // perform the analysis ==================================
   A->Execute();
