@@ -7,9 +7,10 @@
 ###################
 
 # RELEASE TAG AND RECO DIR: ###########################
-release="22.10.0/epic_arches"
-# release="22.10.0/epic_brycecanyon"
-releaseDir="S3/eictest/EPIC/RECO/$release/SINGLE/pi-/5GeV/130to177deg"
+detector_config="epic_arches"
+# detector_config="epic_brycecanyon"
+release="22.11.0"
+releaseDir="S3/eictest/EPIC/RECO/$release/$detector_config/DIS/NC"
 filter='eicrecon'
 # filter='juggler'
 #######################################################
@@ -62,34 +63,25 @@ if [ $# -ge 5 ]; then configFile=$5; fi
 pushd $(dirname $(realpath $0))/..
 
 # settings #############################################################
-# sourceDir="$releaseDir/$energy"
-# targetDir="datarec/$locDir/$release/$energy"
-# Q2minima=( 1000 100 10 1 )
-# Q2max=0 # no maximum
-# FIXME: currently testing single-particle simulations:
-sourceDir="$releaseDir"
-targetDir="datarec/$locDir/$release"
+sourceDir="$releaseDir/$energy"
+targetDir="datarec/$locDir/$release/$energy"
+Q2minima=( 1000 100  10  1  )
+Q2maxima=( 0    1000 100 10 )
 ########################################################################
 
 # download files from S3
+function q2subdir { echo $1/minQ2=$2; }
 function status { echo ""; echo "[+] $1"; }
 if [ "$mode" == "d" ]; then
   status "downloading files from S3..."
-  ### FIXME: no Q2 minima yet ##############
-  # for Q2min in ${Q2minima[@]}; do
-  #   if [ $limit -gt 0 ]; then
-  #     s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" | head -n$limit | grep -E $filter | s3tools/download.sh "$targetDir/minQ2=$Q2min"
-  #   else
-  #     s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" |                 grep -E $filter | s3tools/download.sh "$targetDir/minQ2=$Q2min"
-  #   fi
-  # done
-  ##########################################
-  if [ $limit -gt 0 ]; then
-    s3tools/generate-s3-list.sh "$sourceDir" | head -n$limit | grep -E $filter | s3tools/download.sh "$targetDir"
-  else
-    s3tools/generate-s3-list.sh "$sourceDir" |                 grep -E $filter | s3tools/download.sh "$targetDir"
-  fi
-  ##########################################
+  for Q2min in ${Q2minima[@]}; do
+    echo " sourceDir = `q2subdir $sourceDir $Q2min`"
+    echo " targetDir = `q2subdir $targetDir $Q2min`"
+    s3tools/generate-s3-list.sh  `q2subdir $sourceDir $Q2min`   | \
+      { if [ $limit -gt 0 ]; then head -n$limit; else cat; fi } | \
+      grep -E $filter                                           | \
+      s3tools/download.sh `q2subdir $targetDir $Q2min`
+  done
 fi
 
 # build a config file
@@ -97,42 +89,24 @@ status "build config file..."
 mkdir -p $targetDir
 if [ -z "$configFile" ]; then configFile=$targetDir/files.config; fi
 > $configFile.list
-### FIXME: no Q2minima yet ############################3
-# for Q2min in ${Q2minima[@]}; do
-#   crossSection=$(s3tools/read-xsec-table.sh "pythia8:$energy/minQ2=$Q2min")
-#   if [ "$mode" == "d" -o "$mode" == "c" ]; then
-#     s3tools/generate-local-list.sh "$targetDir/minQ2=$Q2min" $crossSection $Q2min $Q2max | grep -v UNKNOWN | tee -a $configFile.list
-#   elif [ "$mode" == "s" ]; then
-#     if [ $limit -gt 0 ]; then
-#       s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" $crossSection $Q2min $Q2max | grep -v UNKNOWN | head -n$limit | tee -a $configFile.list
-#     else
-#       s3tools/generate-s3-list.sh "$sourceDir/minQ2=$Q2min" $crossSection $Q2min $Q2max | grep -v UNKNOWN | tee -a $configFile.list
-#     fi
-#   else
-#     echo "ERROR: unknown mode"
-#     exit 1
-#   fi
-# done
-#######################################################3
-crossSection=$(s3tools/read-xsec-table.sh "pythia8:$energy/minQ2=1") # just pick any cross section
-if [ "$mode" == "d" -o "$mode" == "c" ]; then
-  s3tools/generate-local-list.sh "$targetDir" $crossSection 1 0 | grep -v UNKNOWN | tee -a $configFile.list
-elif [ "$mode" == "s" ]; then
-  if [ $limit -gt 0 ]; then
-    s3tools/generate-s3-list.sh "$sourceDir" $crossSection 1 0 | grep -v UNKNOWN | head -n$limit | tee -a $configFile.list
-  else
-    s3tools/generate-s3-list.sh "$sourceDir" $crossSection 1 0 | grep -v UNKNOWN | tee -a $configFile.list
-  fi
-else
-  echo "ERROR: unknown mode"
-  exit 1
-fi
-#######################################################3
+for (( i=0; i<${#Q2minima[@]}; i++)); do
+  Q2min=${Q2minima[$i]}
+  Q2max=${Q2maxima[$i]}
+  crossSection=$(s3tools/read-xsec-table.sh "pythia8:$energy/minQ2=$Q2min")
+  case $mode in
+    d) listScript=s3tools/generate-local-list.sh; listDir=`q2subdir $targetDir $Q2min`; ;;
+    c) listScript=s3tools/generate-local-list.sh; listDir=`q2subdir $targetDir $Q2min`; ;;
+    s) listScript=s3tools/generate-s3-list.sh;    listDir=`q2subdir $sourceDir $Q2min`; ;;
+    *) echo "ERROR: unknown mode" >&2; exit 1;    ;;
+  esac
+  $listScript $listDir $crossSection $Q2min $Q2max            | \
+    grep -v UNKNOWN                                           | \
+    { if [ $limit -gt 0 ]; then head -n$limit; else cat; fi } | \
+    tee -a $configFile.list
+done
 s3tools/generate-config-file.rb $configFile $energy $configFile.list
 
-# output some info
-#status "files in target directory:"
-#tree $targetDir
+# finalize
 popd
 status "done building config file at:"
 echo "     $configFile"
