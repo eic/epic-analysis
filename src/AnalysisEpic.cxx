@@ -74,8 +74,8 @@ void AnalysisEpic::Execute()
     
     // read particle collections for this event
     const auto& simParts    = evStore.get<edm4hep::MCParticleCollection>("MCParticles");
-    const auto& recParts    = evStore.get<edm4eic::ReconstructedParticleCollection>("ReconstructedParticles");
-    const auto& mcRecAssocs = evStore.get<edm4eic::MCRecoParticleAssociationCollection>("ReconstructedParticlesAssoc");
+    const auto& recParts    = evStore.get<edm4eic::ReconstructedParticleCollection>("ReconstructedChargedParticles");
+    const auto& mcRecAssocs = evStore.get<edm4eic::MCRecoParticleAssociationCollection>("ReconstructedChargedParticlesAssociations");
 
     // data objects
     edm4hep::MCParticle mcPartEleBeam;

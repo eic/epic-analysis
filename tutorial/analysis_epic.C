@@ -26,14 +26,15 @@ R__LOAD_LIBRARY(Sidis-eic)
  *   between fast and full simulations
  */
 void analysis_epic(
-    TString  infiles="tutorial/test.epic.config", // list of input files
+    // TString  configFile="tutorial/test.epic.config", // list of input files
+    TString  configFile="datarec/epic.single/22.10.0/epic_arches/files.config", // list of input files
     TString  outfilePrefix="tutorial.epic"        // output filename prefix
     )
 {
 
   // setup analysis ========================================
   // - define `AnalysisEpic` instead of `AnalysisDelphes`
-  AnalysisEpic *A = new AnalysisEpic(infiles, outfilePrefix);
+  AnalysisEpic *A = new AnalysisEpic(configFile, outfilePrefix);
 
   // settings
   A->crossCheckKinematics = true;   // enable cross check with upstream kinematics
