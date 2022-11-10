@@ -27,7 +27,7 @@ R__LOAD_LIBRARY(Sidis-eic)
  */
 void analysis_epic(
     // TString  configFile="tutorial/test.epic.config", // list of input files
-    TString  configFile="datarec/epic.single/22.10.0/epic_arches/files.config", // list of input files
+    TString  configFile="datarec/epic.22.11.0/22.11.0/18x275/files.config", // list of input files
     TString  outfilePrefix="tutorial.epic"        // output filename prefix
     )
 {
