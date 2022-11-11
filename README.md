@@ -40,7 +40,7 @@ upstream simulation output:
 These are common dependencies used for the upstream simulation, some of which
 are needed for `sidis-eic` as well.
 
-Follow [eic-container documentation](https://eicweb.phy.anl.gov/containers/eic_container)
+Follow the [EIC Software Environment Setup Guide](https://eic.github.io/tutorial-setting-up-environment/index.html)
 to obtain and install the EIC software image.
 
 - The `eic-shell` script is used to start a container shell
