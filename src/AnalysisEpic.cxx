@@ -55,8 +55,8 @@ void AnalysisEpic::Execute()
     if(e%10000==0) fmt::print("{} events...\n",e);
     if(verbose) fmt::print("\n\n{:=<70}\n",fmt::format("EVENT {} ",e));
 
-    // next event
-    // FIXME: check that we analyze ALL of the events: do we miss the first or last one?
+    // read next event
+    // FIXME: is this correct? are we actually reading all of the events?
     if(e>0) {
       evStore.clear();
       podioReader.endOfEvent();
@@ -71,11 +71,15 @@ void AnalysisEpic::Execute()
     int num_ion_beams        = 0;
     int num_sim_electrons    = 0;
     int num_rec_electrons    = 0;
+
+    // clear caches
+    useCachedPDG = false;
+    pdgCache.clear();
     
     // read particle collections for this event
     const auto& simParts    = evStore.get<edm4hep::MCParticleCollection>("MCParticles");
     const auto& recParts    = evStore.get<edm4eic::ReconstructedParticleCollection>("ReconstructedChargedParticles");
-    const auto& mcRecAssocs = evStore.get<edm4eic::MCRecoParticleAssociationCollection>("ReconstructedChargedParticlesAssociations");
+    // const auto& mcRecAssocs = evStore.get<edm4eic::MCRecoParticleAssociationCollection>("ReconstructedChargedParticlesAssociations"); // FIXME: broken
 
     // data objects
     edm4hep::MCParticle mcPartEleBeam;
@@ -158,7 +162,7 @@ void AnalysisEpic::Execute()
       kin->AddToHFS(GetP4(recPart));
     };
     if(verbose) fmt::print("\n{:-<60}\n","MC<->Reco ASSOCIATIONS ");
-    LoopMCRecoAssocs(mcRecAssocs, AllRecPartsToHFS, verbose);
+    // LoopMCRecoAssocs(mcRecAssocs, AllRecPartsToHFS, verbose); // FIXME: relations unavailable
 
     // find reconstructed electron
     // ============================================================================
@@ -176,15 +180,17 @@ void AnalysisEpic::Execute()
         kin->vecElectron = GetP4(recPart);
       };
     };
-    LoopMCRecoAssocs(mcRecAssocs, FindRecoEleByTruth);
+    LoopMCRecoAssocs(mcRecAssocs, FindRecoEleByTruth); // FIXME: relations unavailable
     */
 
     // use electron finder from upstream algorithm `InclusiveKinematics*`
+    // FIXME: `InclusiveKinematics` collections are not yet available
     // FIXME: is the correct upstream electron finder used here? The
     // `InclusiveKinematics*` recon algorithms seem to rely on
     // `Jug::Base::Beam::find_first_scattered_electron(mcParts)` and matching
     // to truth; this guarantees we get the correct reconstructed scattered
     // electron
+    /*
     const auto& disCalcs = evStore.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematicsElectron");
     if(disCalcs.size() != 1) ErrorPrint(fmt::format("WARNING: disCalcs.size = {} != 1 for this event",disCalcs.size()));
     for(const auto& calc : disCalcs) {
@@ -196,6 +202,7 @@ void AnalysisEpic::Execute()
       num_rec_electrons++;
       kin->vecElectron = GetP4(ele);
     }
+    */
 
     // check for found reconstructed scattered electron
     if(num_rec_electrons == 0) { ErrorPrint("WARNING: reconstructed scattered electron not found"); continue; };
@@ -250,11 +257,13 @@ void AnalysisEpic::Execute()
       // - `IsActiveEvent()` is only true if at least one bin gets filled for this track
       if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
     };
-    LoopMCRecoAssocs(mcRecAssocs, SidisOutput);
+    // LoopMCRecoAssocs(mcRecAssocs, SidisOutput); // FIXME: relations unavailable
 
 
     // read kinematics calculations from upstream /////////////////////////
+    // FIXME: `InclusiveKinematics` collections are not yet available
     // TODO: cross check these with our calculations from `Kinematics`
+    /*
     if(crossCheckKinematics) {
       auto PrintRow = [] <typename T> (std::string name, std::vector<T> vals, bool header=false) {
         fmt::print("  {:>16}",name);
@@ -307,6 +316,7 @@ void AnalysisEpic::Execute()
       }
       else fmt::print("{:-<75}\n  method \"{}\" is not available upstream\n","DIFFERENCE: ",reconMethod);
     } // if crossCheckKinematics
+    */
 
   } // event loop
   fmt::print("end event loop\n");
@@ -340,12 +350,15 @@ void AnalysisEpic::PrintParticle(const edm4hep::MCParticle& P) {
       P.getVertex().y,
       P.getVertex().z
       );
-  fmt::print("  {:>20}:\n", "Parents");
-  for(const auto& parent : P.getParents())
-    fmt::print("    {:>20}: {}\n", "PDG", parent.getPDG());
-  fmt::print("  {:>20}:\n", "Daughters");
-  for(const auto& daughter : P.getDaughters())
-    fmt::print("    {:>20}: {}\n", "PDG", daughter.getPDG());
+  // FIXME: relations unavailable
+  // fmt::print("  {:>20}:\n", "Parents");
+  // for(const auto& parent : P.getParents()) {
+  //   // fmt::print("    {:>20}: {}\n", "PDG", parent.getPDG());
+  //   fmt::print("    {:>20}: {}\n", "id", parent.id());
+  // }
+  // fmt::print("  {:>20}:\n", "Daughters");
+  // for(const auto& daughter : P.getDaughters())
+  //   fmt::print("    {:>20}: {}\n", "PDG", daughter.getPDG());
 }
 
 void AnalysisEpic::PrintParticle(const edm4eic::ReconstructedParticle& P) {
@@ -368,12 +381,29 @@ void AnalysisEpic::PrintParticle(const edm4eic::ReconstructedParticle& P) {
   fmt::print("  {:>20}: {}\n", "# of tracks",   P.tracks_size()      );
   fmt::print("  {:>20}: {}\n", "# of PIDs",     P.particleIDs_size() );
   fmt::print("  {:>20}: {}\n", "# of recParts", P.particles_size()   );
+  // FIXME: relations unavailable
   // for(const auto& track : P.getTracks()) {
   //   // ...
   // }
   // for(const auto& cluster : P.getClusters()) {
   //   // ...
   // }
+}
+
+// print out a reconstructed particle, and its matching truth 
+void AnalysisEpic::PrintAssociatedParticles(
+    const edm4hep::MCParticle& simPart,
+    const edm4eic::ReconstructedParticle& recPart
+    )
+{
+  fmt::print("\n   {:->35}\n"," reconstructed particle:");
+  PrintParticle(recPart);
+  fmt::print("\n   {:.>35}\n"," truth match:");
+  if(simPart.isAvailable())
+    PrintParticle(simPart);
+  else
+    fmt::print("     {:>35}\n","NO MATCH");
+  fmt::print("\n");
 }
 
 
@@ -393,63 +423,62 @@ void AnalysisEpic::LoopMCRecoAssocs(
 {
   for(const auto& assoc : mcRecAssocs ) {
 
+    // FIXME: relations unavailable
     // get reconstructed and simulated particles, and check for matching
     auto recPart = assoc.getRec(); // reconstructed particle
     auto simPart = assoc.getSim(); // simulated (truth) particle
     // if(!simPart.isAvailable()) continue; // FIXME: consider using this once we have matching
 
-    // print out this reconstructed particle, and its matching truth 
-    if(printParticles) {
-      fmt::print("\n   {:->35}\n"," reconstructed particle:");
-      PrintParticle(recPart);
-      fmt::print("\n   {:.>35}\n"," truth match:");
-      if(simPart.isAvailable())
-        PrintParticle(simPart);
-      else
-        fmt::print("     {:>35}\n","NO MATCH");
-      fmt::print("\n");
-    }
+    // print associations
+    if(printParticles) PrintAssociatedParticles(simPart,recPart);
 
     // get reconstructed PDG from PID
-    bool usedTruthPID = false;
-    auto recPDG = GetReconstructedPDG(simPart, recPart, usedTruthPID);
-    if(verbose) fmt::print("   GetReconstructedPDG = {}\n",recPDG);
-    // if(usedTruthPID) continue; // FIXME: consider using this once we have decent PID
-
+    auto recPDG = GetReconstructedPDG(simPart, recPart);
     // run payload
     payload(simPart, recPart, recPDG);
 
-  } // end loop over Reco<->MC associations
-} // end LoopMCRecoAssocs
+  }
+  useCachedPDG = true; // looped once, enable PDG caching
+}
 
 
-// get PDG from reconstructed particle; resort to true PDG, if
-// PID is unavailable (sets `usedTruth` to true)
+// get PDG of reconstructed particle
 int AnalysisEpic::GetReconstructedPDG(
     const edm4hep::MCParticle& simPart,
-    const edm4eic::ReconstructedParticle& recPart,
-    bool& usedTruth
+    const edm4eic::ReconstructedParticle& recPart
     )
 {
   int pdg = 0;
-  usedTruth = false;
 
-  // if using edm4hep::ReconstructedParticle:
-  /*
-  if(recPart.getParticleIDUsed().isAvailable()) // FIXME: not available
-    pdg = recPart.getParticleIDUsed().getPDG();
-  */
-  
-  // if using edm4eic::ReconstructedParticle:
-  // pdg = recPart.getPDG(); // FIXME: not available either
-
-  // if reconstructed PID is unavailable, use MC PDG
-  if(pdg==0) {
-    usedTruth = true;
-    if(simPart.isAvailable())
-      pdg = simPart.getPDG();
+  // get it from the cache, if we already have it
+  // FIXME: check this, this has not yet been tested
+  if(useCachedPDG) {
+    try {
+      pdg = pdgCache.at({simPart.id(),recPart.id()});
+      return pdg;
+    } catch(const std::out_of_range &e) {
+      ErrorPrint("WARNING: a PDG value was not cached");
+    }
   }
 
+  /* // FIXME: relations unavailable
+  pdg = recPart.getPDG(); // if using edm4eic::ReconstructedParticle
+  if(recPart.getParticleIDUsed().isAvailable())
+    pdg = recPart.getParticleIDUsed().getPDG(); // if using edm4hep::ReconstructedParticle
+  */
+
+  // instead, use PID smearing
+  //   TODO  TODO  TODO
+  //   TODO  TODO  TODO
+  //   TODO  TODO  TODO
+
+  // if reconstructed PID is unavailable, use MC PDG
+  if(pdg==0 && simPart.isAvailable())
+    pdg = simPart.getPDG();
+
+  // cache this PDG value and return it
+  if(verbose) fmt::print("   caching PDG = id({},{}) -> {}\n",simPart.id(),recPart.id(),pdg);
+  pdgCache.insert({{simPart.id(),recPart.id()},pdg});
   return pdg;
 }
 

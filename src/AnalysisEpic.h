@@ -42,6 +42,10 @@ class AnalysisEpic : public Analysis
     // printers
     void PrintParticle(const edm4hep::MCParticle& P);
     void PrintParticle(const edm4eic::ReconstructedParticle& P);
+    void PrintAssociatedParticles(
+        const edm4hep::MCParticle& simPart,
+        const edm4eic::ReconstructedParticle& recPart
+        );
 
 
   protected:
@@ -49,10 +53,9 @@ class AnalysisEpic : public Analysis
     // get PDG from reconstructed particle
     int GetReconstructedPDG(
         const edm4hep::MCParticle& simPart,
-        const edm4eic::ReconstructedParticle& recPart,
-        bool& usedTruth
+        const edm4eic::ReconstructedParticle& recPart
         );
-    // common loop over Reconstructed Particle <-> MC Particle associations
+    // run `payload` for all [Reconstructed Particle] <-> [MC Particle] associations
     // payload signature: (simPart, recPart, reconstructed PDG)
     void LoopMCRecoAssocs(
         const edm4eic::MCRecoParticleAssociationCollection& mcRecAssocs,
@@ -63,6 +66,10 @@ class AnalysisEpic : public Analysis
   private:
     podio::ROOTReader podioReader;
     podio::EventStore evStore;
+
+    // reconstructed PDG cache table
+    bool useCachedPDG;
+    std::map<std::pair<unsigned int,unsigned int>, int> pdgCache; // map : {simPart.id(),recPart.id()} -> recPDG
 
     ClassDefOverride(AnalysisEpic,1);
 };
