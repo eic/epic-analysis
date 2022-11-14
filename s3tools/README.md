@@ -43,15 +43,18 @@ Two options:
   use `make-fastsim-local-config.sh` to create a config file
 
 ## Accessing S3 Files
-- first, download the [MinIO client](https://docs.min.io/docs/minio-client-complete-guide)
-  - if you are using the Singularity or Docker container (`eic-shell`), it is already installed
+- The [MinIO client](https://docs.min.io/docs/minio-client-complete-guide) is required
+  - if you are using the Singularity or Docker container (`eic-shell`), it is already installed,
+    otherwise you will have to install it
   - the main command is `mc`
 - next, setup your client to connect to our S3 host (ask someone for credentials):
   - first set env vars `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password:
     - `export=S3_ACCESS_KEY=*****`
     - `export=S3_SECRET_KEY=*****`
-  - then add our S3 host to MinIO client: `add-host.sh`
-    - this only needs to be done once on your machine or container
+- then add our S3 host to MinIO client: `add-host.sh`
+  - this only needs to be done once on your machine or container
+
+### MinIO Client Usage
 - find a directory on S3 with full simulation files; example S3 navigation commands:
   - top-level ATHENA directory list: `mc ls S3/eictest/ATHENA`
   - show directory tree: `mc tree S3/eictest/ATHENA/RECO/acadia-v2.1/DIS/NC/`
