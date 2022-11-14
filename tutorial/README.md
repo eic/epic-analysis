@@ -13,9 +13,9 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
   but is not required to use
 - the following sub-sections describe how to obtain these files from the common
   storage area
-  - this requires access to S3, the common storage area
-  - environment variables `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` must contain
-    the login and password; follow [s3tools documentation](../s3tools/README.md) for guidance
+  - this requires access to S3, the common storage area: follow
+    [s3tools documentation](../s3tools/README.md#accessing-s3-files) for guidance, 
+    in particular, the "Accessing S3 Files" section
 - a set of files, together with settings such as beam energy and Q2 ranges, are
   specified by config files; see [doc/example.config](../doc/example.config) for an example
   config file and more details
