@@ -45,7 +45,7 @@ Two options:
 ## Accessing S3 Files
 - The [MinIO client](https://docs.min.io/docs/minio-client-complete-guide) is required
   - if you are using the Singularity or Docker container (`eic-shell`), it is already installed,
-    otherwise you wil have to install it
+    otherwise you will have to install it
   - the main command is `mc`
 - next, setup your client to connect to our S3 host (ask someone for credentials):
   - first set env vars `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password:
