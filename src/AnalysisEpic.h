@@ -1,6 +1,13 @@
 #ifndef AnalysisEpic_
 #define AnalysisEpic_
 
+// TEMP FIX:
+// New includes
+
+#include "TTreeReader.h"
+#include "TTreeReaderValue.h"
+#include "TTreeReaderArray.h"
+
 // data model
 #include "podio/EventStore.h"
 #include "podio/ROOTReader.h"

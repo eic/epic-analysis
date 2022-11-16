@@ -1,4 +1,5 @@
 #include "AnalysisEpic.h"
+#include "AnalysisEcce.h"
 
 AnalysisEpic::AnalysisEpic(TString infileName_, TString outfilePrefix_)
   : Analysis(infileName_, outfilePrefix_)
@@ -12,320 +13,378 @@ void AnalysisEpic::Execute()
   // setup
   Prepare();
 
-  // produce flat list of files from `infiles`
-  std::vector<std::string> infilesFlat;
-  for(const auto fileList : infiles)
-    for(const auto fileName : fileList)
-      infilesFlat.push_back(fileName);
+  // read EventEvaluator tree
+  TChain *chain = new TChain("events");
+  for(Int_t idx=0; idx<infiles.size(); ++idx) {
+    for(std::size_t idxF=0; idxF<infiles[idx].size(); ++idxF) {
+      // std::cout << "Adding " << infiles[idx][idxF] << " with " << inEntries[idx][idxF] << std::endl;
+      chain->Add(infiles[idx][idxF].c_str(), inEntries[idx][idxF]);
+    }
+  }
 
-  // create PODIO event store
-  podioReader.openFiles(infilesFlat);
-  evStore.setReader(&podioReader);
-  ENT = podioReader.getEntries();
-  if(maxEvents>0) ENT = std::min(maxEvents,ENT);
+  TTreeReader tr(chain);
+
+  TTreeReaderArray<Int_t> hepmcp_status(tr, "GeneratedParticles.type");
+  TTreeReaderArray<Int_t> hepmcp_PDG(tr,    "GeneratedParticles.PDG");
+  TTreeReaderArray<Float_t> hepmcp_E(tr,      "GeneratedParticles.energy");
+  TTreeReaderArray<Float_t> hepmcp_psx(tr,    "GeneratedParticles.momentum.x");
+  TTreeReaderArray<Float_t> hepmcp_psy(tr,    "GeneratedParticles.momentum.y");
+  TTreeReaderArray<Float_t> hepmcp_psz(tr,    "GeneratedParticles.momentum.z");
+
   
+
+  // All true particles (including secondaries, etc)
+  TTreeReaderArray<Int_t> mcpart_PDG(tr,      "MCParticles.PDG");
+  TTreeReaderArray<Int_t> mcpart_genStat(tr,         "MCParticles.generatorStatus");
+  TTreeReaderArray<Int_t> mcpart_simStat(tr,         "MCParticles.simulatorStatus");
+  TTreeReaderArray<Double_t> mcpart_m(tr,         "MCParticles.mass");
+  TTreeReaderArray<Float_t> mcpart_psx(tr,       "MCParticles.momentum.x");
+  TTreeReaderArray<Float_t> mcpart_psy(tr,       "MCParticles.momentum.y");
+  TTreeReaderArray<Float_t> mcpart_psz(tr,       "MCParticles.momentum.z");
+
+
+  // Reco tracks
+  TTreeReaderArray<Int_t> tracks_type(tr,  "ReconstructedChargedParticles.type"); // needs to be made an int eventually in actual EE code
+  TTreeReaderArray<Float_t> tracks_e(tr, "ReconstructedChargedParticles.energy");
+  TTreeReaderArray<Float_t> tracks_p_x(tr, "ReconstructedChargedParticles.momentum.x");
+  TTreeReaderArray<Float_t> tracks_p_y(tr, "ReconstructedChargedParticles.momentum.y");
+  TTreeReaderArray<Float_t> tracks_p_z(tr, "ReconstructedChargedParticles.momentum.z");
+  TTreeReaderArray<Int_t> tracks_PDG(tr,  "ReconstructedChargedParticles.PDG");
+  TTreeReaderArray<Float_t> tracks_CHI2PID(tr,  "ReconstructedChargedParticles.goodnessOfPID");
+  
+  // RecoAssociations
+  TTreeReaderArray<UInt_t> assoc_simID(tr, "ReconstructedChargedParticlesAssociations.simID");
+  TTreeReaderArray<UInt_t> assoc_recID(tr, "ReconstructedChargedParticlesAssociations.recID");
+  TTreeReaderArray<Float_t> assoc_weight(tr, "ReconstructedChargedParticlesAssociations.weight");
+  // TTreeReaderArray<Short_t> tracks_charge(tr,  "tracks_charge");
+  int trackSource = 0; // default track source is "all tracks"
+
   // calculate Q2 weights
   CalculateEventQ2Weights();
 
-  // upstream reconstruction methods
-  // - list of upstream methods
-  const std::vector<std::string> upstreamReconMethodList = {
-    "Truth",
-    "Electron",
-    "DA",
-    "JB",
-    "Sigma"
-  };
-  // - association of `Kinematics::CalculateDIS` reconstruction method with upstream;
-  //   for those unavailable upstream, use `"NONE"`
-  const std::map<TString,std::string> associatedUpstreamMethodMap = {
-    { "Ele",    "Electron" },
-    { "DA",     "DA"       },
-    { "JB",     "JB"       },
-    { "Sigma",  "Sigma"    },
-    { "Mixed",  "NONE"     },
-    { "eSigma", "NONE"     }
-  };
-  // - get upstream method associated with `reconMethod`
-  const auto& associatedUpstreamMethod = associatedUpstreamMethodMap.at(reconMethod);
+  // counters
+  Long64_t numNoBeam, numEle, numNoEle, numNoHadrons, numProxMatched;
+  numNoBeam = numEle = numNoEle = numNoHadrons = numProxMatched = 0;
 
-  // event loop =========================================================
-  fmt::print("begin event loop...\n");
-  for(unsigned e=0; e<ENT; e++) {
-    if(e%10000==0) fmt::print("{} events...\n",e);
-    if(verbose) fmt::print("\n\n{:=<70}\n",fmt::format("EVENT {} ",e));
+  
 
-    // read next event
-    // FIXME: is this correct? are we actually reading all of the events?
-    if(e>0) {
-      evStore.clear();
-      podioReader.endOfEvent();
-    }
+  tr.SetEntriesRange(1,maxEvents);
+  do{
 
     // resets
     kin->ResetHFS();
     kinTrue->ResetHFS();
-    double mcPartElectronP   = 0.0;
-    bool double_counted_beam = false;
-    int num_ele_beams        = 0;
-    int num_ion_beams        = 0;
-    int num_sim_electrons    = 0;
-    int num_rec_electrons    = 0;
 
-    // clear caches
-    useCachedPDG = false;
-    pdgCache.clear();
     
-    // read particle collections for this event
-    const auto& simParts    = evStore.get<edm4hep::MCParticleCollection>("MCParticles");
-    const auto& recParts    = evStore.get<edm4eic::ReconstructedParticleCollection>("ReconstructedChargedParticles");
-    // const auto& mcRecAssocs = evStore.get<edm4eic::MCRecoParticleAssociationCollection>("ReconstructedChargedParticlesAssociations"); // FIXME: broken
+    double maxP = 0;
+    int genEleID = -1;
+    bool foundBeamElectron = false;
+    bool foundBeamIon = false;
 
-    // data objects
-    edm4hep::MCParticle mcPartEleBeam;
-    edm4hep::MCParticle mcPartIonBeam;
-    edm4hep::MCParticle mcPartElectron;
+    // Index maps for particle sets
+    std::map <double,int> genidmap; // <pz, index_gen>
+    std::map <int,int> mcidmap; // <index_mc, index_gen>
+    std::map <int,int>    trackidmap; // <index, index_mc>  
 
-    // loop over generated particles
-    if(verbose) fmt::print("\n{:-<60}\n","MCParticles ");
-    for(auto simPart : simParts) {
+    // ParticleEE vectors
+    // The index of the vectors correspond to their for loop idx
+    std::vector<ParticlesEE> genpart;    // mcID --> igen
+    std::vector<ParticlesEE> mcpart;     // mcID --> imc
+    std::vector<ParticlesEE> trackpart;  // mcID --> (imc of matching mcpart) or (-1 if no match is found)
 
-      // print out this MCParticle
-      // if(verbose) PrintParticle(simPart);
-
-      // generated particle properties
-      auto simPDG = simPart.getPDG();
-
-      // add to Hadronic Final State (HFS) sums
-      kinTrue->AddToHFS(GetP4(simPart));
-
-      // filter for beam particles
-      if(simPart.getGeneratorStatus() == constants::statusBeam) {
-        switch(simPDG) {
-          case constants::pdgElectron:
-            if(num_ele_beams>0) double_counted_beam = true;
-            mcPartEleBeam = simPart;
-            num_ele_beams++;
-            break;
-          case constants::pdgProton:
-            if(num_ion_beams>0) double_counted_beam = true;
-            mcPartIonBeam = simPart;
-            num_ion_beams++;
-            break;
-          default:
-            ErrorPrint(fmt::format("WARNING: Unknown beam particle with PDG={}",simPDG));
-        }
-      }
-
-      // filter for scattered electron: select the one with the highest |p|
-      if(simPart.getGeneratorStatus() == constants::statusFinal) {
-        if(simPDG == constants::pdgElectron) {
-          auto eleP = edm4hep::utils::p(simPart);
-          if(eleP>mcPartElectronP) {
-            mcPartElectron  = simPart;
-            mcPartElectronP = eleP;
-            num_sim_electrons++;
-          }
-        }
-      }
-
-    } // end loop over generated particles
-
-    // check for found generated particles
-    if(num_ele_beams==0)     { ErrorPrint("WARNING: missing MC electron beam");      continue; };
-    if(num_ion_beams==0)     { ErrorPrint("WARNING: missing MC ion beam");           continue; };
-    if(num_sim_electrons==0) { ErrorPrint("WARNING: missing scattered electron");    continue; };
-    if(double_counted_beam)  { ErrorPrint("WARNING: found multiple beam particles"); continue; };
-
-    // set Kinematics 4-momenta
-    kinTrue->vecEleBeam  = GetP4(mcPartEleBeam);
-    kinTrue->vecIonBeam  = GetP4(mcPartIonBeam);
-    kinTrue->vecElectron = GetP4(mcPartElectron);
-
-    // print beam particles
-    if(verbose) {
-      if(verbose) fmt::print("\n{:-<60}\n","GENERATED BEAMS ");
-      PrintParticle(mcPartEleBeam);
-      PrintParticle(mcPartIonBeam);
-      if(verbose) fmt::print("\n{:-<60}\n","GENERATED SCATTERED ELECTRON ");
-      PrintParticle(mcPartElectron);
-    }
-
-    // add reconstructed particles to Hadronic Final State (HFS)
-    /* the following will run loops over Reconstructed Particle <-> MC Particle associations
-     * - uses high-order function `LoopMCRecoAssocs` for common tasks, such as quality cuts
-     *   and getting the reconstructed PID (PDG)
-     * - first define a first-order function (`payload`), then call `LoopMCRecoAssocs`
-     * - see `LoopMCRecoAssocs` for `payload` signature
-     */
-    auto AllRecPartsToHFS = [&] (auto& simPart, auto& recPart, auto recPDG) {
-      kin->AddToHFS(GetP4(recPart));
-    };
-    if(verbose) fmt::print("\n{:-<60}\n","MC<->Reco ASSOCIATIONS ");
-    // LoopMCRecoAssocs(mcRecAssocs, AllRecPartsToHFS, verbose); // FIXME: relations unavailable
-
-    // find reconstructed electron
-    // ============================================================================
-    /* FIXME: need realistic electron finder; all of the following options rely
-     * on MC-truth matching; is there any common upstream realistic electron finder
-     */
-
-    // find scattered electron by simply matching to truth
-    // FIXME: not working, until we have truth matching and/or reconstructed PID
-    // FIXME: does `simPart==mcPartElectron` work as expected?
     /*
-    auto FindRecoEleByTruth = [&] (auto& simPart, auto& recPart, auto recPDG) {
-      if(recPDG==constants::pdgElectron && simPart==mcPartElectron) {
-        num_rec_electrons++;
-        kin->vecElectron = GetP4(recPart);
-      };
-    };
-    LoopMCRecoAssocs(mcRecAssocs, FindRecoEleByTruth); // FIXME: relations unavailable
+      GenParticles loop
     */
 
-    // use electron finder from upstream algorithm `InclusiveKinematics*`
-    // FIXME: `InclusiveKinematics` collections are not yet available
-    // FIXME: is the correct upstream electron finder used here? The
-    // `InclusiveKinematics*` recon algorithms seem to rely on
-    // `Jug::Base::Beam::find_first_scattered_electron(mcParts)` and matching
-    // to truth; this guarantees we get the correct reconstructed scattered
-    // electron
-    /*
-    const auto& disCalcs = evStore.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematicsElectron");
-    if(disCalcs.size() != 1) ErrorPrint(fmt::format("WARNING: disCalcs.size = {} != 1 for this event",disCalcs.size()));
-    for(const auto& calc : disCalcs) {
-      auto ele = calc.getScat();
-      if( ! ele.isAvailable()) {
-        ErrorPrint("WARNING: `disCalcs` scattered electron unavailable");
-        continue;
-      }
-      num_rec_electrons++;
-      kin->vecElectron = GetP4(ele);
+    for(int igen=0; igen<hepmcp_PDG.GetSize(); igen++) {
+
+      int pid_ = hepmcp_PDG[igen];
+
+      double px_ = hepmcp_psx[igen];
+      double py_ = hepmcp_psy[igen];
+      double pz_ = hepmcp_psz[igen];
+      double e_  = hepmcp_E[igen];
+     
+      double p_ = sqrt(pow(hepmcp_psx[igen],2) + pow(hepmcp_psy[igen],2) + pow(hepmcp_psz[igen],2));
+      double mass_ = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;
+
+      // Add to genpart
+      ParticlesEE part;
+
+      part.pid=pid_;
+      part.charge = (pid_ == 211 || pid_ == 321 || pid_ == 2212 || pid_ == -11 || pid_ == -13)?1:(pid_ == -211 || pid_ == -321 || pid_ == -2212 || pid_ == 11 || pid_ == 13)?-1:0;
+      part.mcID=igen;
+      part.vecPart.SetPxPyPzE(px_,py_,pz_,e_);
+      genpart.push_back(part);
+      
+      genidmap.insert({pz_,igen});
+
     }
+
+    /*
+      MCParticles loop
     */
 
-    // check for found reconstructed scattered electron
-    if(num_rec_electrons == 0) { ErrorPrint("WARNING: reconstructed scattered electron not found"); continue; };
-    if(num_rec_electrons >  1) { ErrorPrint("WARNING: found more than 1 reconstructed scattered electron"); };
+    for(int imc=0; imc < mcpart_PDG.GetSize(); imc++){
 
-    // subtract electron from hadronic final state variables
+      int pid_ = mcpart_PDG[imc];
+      double px_ = mcpart_psx[imc];
+      double py_ = mcpart_psy[imc];
+      double pz_ = mcpart_psz[imc];
+      double m_ = mcpart_m[imc];
+      double e_ = sqrt(px_*px_+py_*py_+pz_*pz_+m_*m_);
+
+      // Add to mcpart
+      ParticlesEE part;
+
+      part.pid=pid_;
+      part.charge = (pid_ == 211 || pid_ == 321 || pid_ == 2212 || pid_ == -11 || pid_ == -13)?1:(pid_ == -211 || pid_ == -321 || pid_ == -2212 || pid_ == 11 || pid_ == 13)?-1:0;
+      part.mcID=imc;
+      part.vecPart.SetPxPyPzE(px_,py_,pz_,e_);
+      mcpart.push_back(part);
+      
+      int igen=-1;
+      if(auto search = genidmap.find(pz_); search != genidmap.end())
+	igen=search->second; //index of the GeneratedParticle
+      
+      mcidmap.insert({imc,igen});
+
+    }
+
+    /*
+      ReconstructedParticles loop
+      - Add all particles to the std::vector<> of particles
+      - Identify the 
+      - Identify closest matching MCParticle in theta,phi,E space
+
+    */
+
+   
+      
+    for(int itrack=0; itrack < tracks_PDG.GetSize(); itrack++){
+
+      int pid_ = tracks_PDG[itrack];
+      double px_ = tracks_p_x[itrack];
+      double py_ = tracks_p_y[itrack];
+      double pz_ = tracks_p_z[itrack];
+      double e_ = tracks_e[itrack];
+      double m_ = sqrt(e_*e_-px_*px_+py_*py_+pz_*pz_);
+      
+      // Add to trackpart
+      ParticlesEE part;
+
+      part.pid=pid_;
+      part.charge = (pid_ == 211 || pid_ == 321 || pid_ == 2212 || pid_ == -11 || pid_ == -13)?1:(pid_ == -211 || pid_ == -321 || pid_ == -2212 || pid_ == 11 || pid_ == 13)?-1:0;
+      part.vecPart.SetPxPyPzE(px_,py_,pz_,e_);
+
+      /*
+	Read through Associations to match particles
+	By default, we assume no association, so mcID --> -1
+	assoc_recID --> itrack (index of the RecoParticle)
+	assoc_simID --> imc (index of the MCParticle)
+      */
+
+
+      part.mcID=-1;
+      for(int iassoc = 0 ; iassoc < assoc_simID.GetSize() ; iassoc++){
+	int idx_recID = assoc_recID[iassoc]; 
+	int idx_simID = assoc_simID[iassoc];
+	if(itrack==idx_recID){ // This track has an association
+	  part.mcID=idx_simID;
+	  break; // Only one association per particle
+	}
+      }
+
+      trackpart.push_back(part);
+      trackidmap.insert({itrack,part.mcID}); 
+      
+    }
+
+
+
+    /*
+      With the GeneratedParticles, MCParticles, and ReconstructedParticles filled,
+      we can begin to search for the beam particles and hadronic final state (HFS)
+      This is done for both the Truth and Reconstructed Particles
+    */
+
+    /*
+      Loop over MCParticles
+    */
+
+    for(ParticlesEE mcpart_: mcpart){
+
+      int imc = mcpart_.mcID;
+      /* Beam particles have a MCParticles.generatorStatus of 4 */
+      int genStat_ = mcpart_genStat[imc];
+      if(mcpart_.pid==11 && genStat_ == 4){
+	foundBeamElectron=true;
+	kinTrue->vecEleBeam = mcpart_.vecPart;
+      }
+      else if(mcpart_.pid==2212 && genStat_ == 4){
+	foundBeamIon=true;
+	kinTrue->vecIonBeam = mcpart_.vecPart;
+      }
+      else if(genStat_==4){
+	cout << "Warning...unknown beam particle with generatorStatus == 4 found...Continuing..." << endl;
+      }
+
+      /* Assume the scattered electron is the pid==11 final state particle with the most energy */
+      if(mcpart_.pid==11 && genStat_ == 1 && mcpart_.vecPart.P() > maxP)
+	{
+	  maxP=mcpart_.vecPart.P();
+	  kinTrue->vecElectron = mcpart_.vecPart;
+	  genEleID = mcpart_.mcID; 
+	}
+
+      /*
+	Only append MCParticles to the HFS if they are matched with a GeneratedParticle
+       */
+      
+      else if(genStat_ == 1 && mcidmap[mcpart_.mcID]>-1){ 
+	kinTrue->AddToHFS(mcpart_.vecPart);
+      }
+    
+    }
+
+    //check beam finding
+    if(!foundBeamElectron || !foundBeamIon) { numNoBeam++; continue;};
+
+    /*
+      Loop over RecoParticles
+    */
+
+    int itrack = 0;
+    bool recEleFound=false;
+    for(ParticlesEE trackpart_ : trackpart){
+      // Skip if there is no matching MCParticle
+      if(trackidmap[itrack]==-1) continue;
+      // If the trackidmap is linked to the genEleID (generated scattered electron), identify this reco particle as the electron
+      if(trackidmap[itrack]==genEleID){	
+	recEleFound=true;
+	kin->vecElectron= trackpart_.vecPart;
+      }
+      // Add the final state particle to the HFS
+      kin->AddToHFS(trackpart_.vecPart);
+      itrack++;
+    }
+
+    // Skip event if the reco scattered electron was missing
+    if(recEleFound==false){
+      numNoEle++;
+      continue;
+    }
+
+    // subtrct electron from hadronic final state variables
     kin->SubtractElectronFromHFS();
     kinTrue->SubtractElectronFromHFS();
 
     // skip the event if there are no reconstructed particles (other than the
     // electron), otherwise hadronic recon methods will fail
-    if(kin->countHadrons == 0) { ErrorPrint("WARNING: no hadrons"); };
-  
-    // calculate DIS kinematics; skip the event if the calculation did not go well
-    if( ! kin->CalculateDIS(reconMethod)     ) continue; // reconstructed
-    if( ! kinTrue->CalculateDIS(reconMethod) ) continue; // generated (truth)
-
-
-
-    // loop over Reco<->MC associations again
-    /* - calculate SIDIS kinematics
-     * - fill output data structures
-     */
-    auto SidisOutput = [&] (auto& simPart, auto& recPart, auto recPDG) {
-
-      // final state cut
-      // - check PID, to see if it's a final state we're interested in
-      auto kv = PIDtoFinalState.find(recPDG);
-      if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else return;
-      if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) return;
-
-      // set SIDIS particle 4-momenta, and calculate their kinematics
-      kinTrue->vecHadron = GetP4(simPart);
-      kinTrue->CalculateHadronKinematics();
-      kin->vecHadron = GetP4(recPart);
-      kin->CalculateHadronKinematics();
-
-      // weighting
-      //   FIXME: we are in a podio::EventStore event loop, thus we need an
-      //          alternative to `chain->GetTreeNumber()`; currently disabling weighting
-      //          for now, by setting `wTrack=1.0`
-      // Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
-      // wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
-      wTrack = 1.0; // FIXME
-      wTrackTotal += wTrack;
-
-      // fill track histograms in activated bins
-      FillHistosTracks();
-
-      // fill simple tree
-      // - not binned
-      // - `IsActiveEvent()` is only true if at least one bin gets filled for this track
-      if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
+    if(kin->countHadrons == 0) {
+      numNoHadrons++;
+      continue;
     };
-    // LoopMCRecoAssocs(mcRecAssocs, SidisOutput); // FIXME: relations unavailable
+   
+    // calculate DIS kinematics
+    if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
+    if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
 
 
-    // read kinematics calculations from upstream /////////////////////////
-    // FIXME: `InclusiveKinematics` collections are not yet available
-    // TODO: cross check these with our calculations from `Kinematics`
     /*
-    if(crossCheckKinematics) {
-      auto PrintRow = [] <typename T> (std::string name, std::vector<T> vals, bool header=false) {
-        fmt::print("  {:>16}",name);
-        if(header) { for(auto val : vals) fmt::print(" {:>8}",   val); }
-        else       { for(auto val : vals) fmt::print(" {:8.4f}", val); }
-        fmt::print("\n");
-      };
-      // upstream calculations
-      fmt::print("\n{:-<75}\n","KINEMATICS, calculated from upstream: ");
-      PrintRow("", std::vector<std::string>({ "x", "Q2", "W", "y", "nu" }), true);
-      for(const auto upstreamReconMethod : upstreamReconMethodList)
-        for(const auto& calc : evStore.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematics"+upstreamReconMethod) )
-          PrintRow( upstreamReconMethod, std::vector<float>({
-              calc.getX(),
-              calc.getQ2(),
-              calc.getW(),
-              calc.getY(),
-              calc.getNu()
-              }));
-      // local calculations
-      fmt::print("{:-<75}\n",fmt::format("KINEMATICS, calculated locally in SIDIS-EIC, with method \"{}\": ",reconMethod));
-      auto PrintKinematics = [&PrintRow] (std::string name, Kinematics *K) {
-        PrintRow( name, std::vector<Double_t>({
-            K->x,
-            K->Q2,
-            K->W,
-            K->y,
-            K->Nu
-            }));
-      };
-      PrintKinematics("Truth",kinTrue);
-      PrintKinematics("Reconstructed",kin);
-      // compare upstream and local
-      if(associatedUpstreamMethod != "NONE") {
-        fmt::print("{:-<75}\n",fmt::format("DIFFERENCE: upstream({}) - local({}): ",associatedUpstreamMethod,reconMethod));
-        for(const auto upstreamMethod : std::vector<std::string>({"Truth",associatedUpstreamMethod})) {
-          const auto& upstreamCalcs = evStore.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematics"+upstreamMethod);
-          for(const auto& upstreamCalc : upstreamCalcs) {
-            auto K    = upstreamMethod=="Truth" ? kinTrue : kin;
-            auto name = upstreamMethod=="Truth" ? "Truth" : "Reconstructed";
-            PrintRow( name, std::vector<Double_t>({
-                upstreamCalc.getX()  - K->x,
-                upstreamCalc.getQ2() - K->Q2,
-                upstreamCalc.getW()  - K->W,
-                upstreamCalc.getY()  - K->y,
-                upstreamCalc.getNu() - K->Nu
-                }));
-          }
-        }
-      }
-      else fmt::print("{:-<75}\n  method \"{}\" is not available upstream\n","DIFFERENCE: ",reconMethod);
-    } // if crossCheckKinematics
+      Loop again over the reconstructed particles
+      Calculate Hasdron Kinematics
+      Fill output data structures (Histos, SimpleTree, etc.)
     */
 
-  } // event loop
-  fmt::print("end event loop\n");
+    for(ParticlesEE part : trackpart){
 
+      int pid_ = part.pid;
+      int mcid_ = part.mcID;
+
+      // final state cut
+      // - check PID, to see if it's a final state we're interested in for
+      //   histograms; if not, proceed to next track
+      auto kv = PIDtoFinalState.find(pid_);
+      if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
+      if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
+
+      // calculate reconstructed hadron kinematics
+      kin->vecHadron = part.vecPart;
+      kin->CalculateHadronKinematics();
+
+      // find the matching truth hadron using mcID, and calculate its kinematics
+      if(mcid_ > 0) {
+	for(auto imc : mcpart) {
+	  if(mcid_ == imc.mcID) {
+	    kinTrue->vecHadron = imc.vecPart;
+	    break;
+	  }
+	}
+      }
+
+      kinTrue->CalculateHadronKinematics();
+
+      // weighting
+      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
+      wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+      wTrackTotal += wTrack;
+
+      if(includeOutputSet["1h"]) {
+	// fill track histograms in activated bins
+	FillHistosTracks();
+
+	// fill simple tree
+	// - not binned
+	// - `IsActiveEvent()` is only true if at least one bin gets filled for this track
+	if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
+      }
+
+    }//hadron loop
+    
+    
+    
+    // =======================================
+    // DEBUG PRINT STATEMENTS
+    // =======================================
+    
+    int ipart = 0;
+    for(ParticlesEE trackpart_: trackpart) {
+      cout << trackpart_.pid << "|" << trackpart_.vecPart.E() << "\t";
+      ParticlesEE genpart_;
+      ParticlesEE mcpart_;
+      int mcpart_idx=trackidmap[ipart];
+      if(mcpart_idx>-1){ // Found MCParticle
+	mcpart_ = mcpart.at(mcpart_idx);
+	cout << mcpart_.pid << "|" << mcpart_.vecPart.E() << "\t";
+	int genpart_idx=mcidmap[mcpart_.mcID];
+	if(genpart_idx>-1){ // Found GeneratedParticle
+	  genpart_ = genpart.at(genpart_idx);
+	  cout << genpart_.pid << "|" << genpart_.vecPart.E() << "\t";	  
+	}
+      }
+      ipart++;
+      cout<<"\n";
+    }
+    cout << "\n ============================================================ \n" <<endl;
+    
+
+  } while(tr.Next());
+
+  
   // finish execution
-  evStore.clear();
-  podioReader.endOfEvent();
-  podioReader.closeFile();
   Finish();
+
+  // final printout
+  cout << "Total number of scattered electrons found: " << numEle << endl;
+  if(numNoEle>0)
+    cerr << "WARNING: skipped " << numNoEle << " events which had no reconstructed scattered electron" << endl;
+  if(numNoHadrons>0)
+    cerr << "WARNING: skipped " << numNoHadrons << " events which had no reconstructed hadrons" << endl;
+  if(numNoBeam>0)
+    cerr << "WARNING: skipped " << numNoBeam << " events which had no beam particles" << endl;
+  if(numProxMatched>0)
+    cerr << "WARNING: " << numProxMatched << " recon. particles were proximity matched to truth (when mcID match failed)" << endl;
 }
 
 
