@@ -9,20 +9,24 @@ ClassImp(Kinematics)
 Kinematics::Kinematics(
     Double_t enEleBeam, /*GeV*/
     Double_t enIonBeam, /*GeV*/
-    Double_t crossAng /*mrad*/
+    Double_t crossAng /*mrad*/    
     )
 {
-
+  // initiate TMVA
+  py::scoped_interpreter guard{};
+  keras = py::module_::import("keras");
+  model = keras.attr("models.load_model")(modelname);
+  
   // set ion mass
   IonMass = ProtonMass();
-
+  
   // revise crossing angle
   crossAng *= 1e-3; // mrad -> rad
   crossAng = -1*TMath::Abs(crossAng); // take -1*abs(crossAng) to enforce the correct sign
 
   // TEST SETTINGS - for debugging calculations ///////////////
   // set main frame, used for calculations where there is ambiguity which frame is the correct frame to use
-  mainFrame = fHeadOn; // fLab, fHeadOn
+  mainFrame = fLab; // fLab, fHeadOn
   // set method for determining `vecQ` 4-momentum components for certain recon methods (JB,DA,(e)Sigma)
   qComponentsMethod = qQuadratic; // qQuadratic, qHadronic, qElectronic
   /////////////////////////////////////////////////////////////
@@ -193,6 +197,50 @@ void Kinematics::GetQWNu_electronic(){
   Nu = vecIonBeam.Dot(vecQ) / IonMass;
 };
 
+void Kinematics::GetQWNu_ML(){
+  cout << "starting ML pred " << endl;
+  hfsinfo.clear();
+  std::vector<float> partHold;
+  for(int i = 0; i < nHFS; i++){
+    partHold.push_back(hfspx[i]);
+    partHold.push_back(hfspy[i]);
+    partHold.push_back(hfspz[i]);
+    partHold.push_back(hfsE[i]);
+    partHold.push_back(hfseta[i]);
+    partHold.push_back(hfsphi[i]);
+    cout << "added first particle info" << endl;
+    hfsinfo.push_back(partHold);
+    cout << "added particle to 2d vector " << endl;
+    partHold.clear();
+  }
+  globalinfo.clear();
+  this->CalculateDISbyElectron();
+  globalinfo.push_back(vecQ.Px());
+  globalinfo.push_back(vecQ.Py());
+  globalinfo.push_back(vecQ.Pz());
+  globalinfo.push_back(vecQ.E());
+  globalinfo.push_back(Q2);
+  globalinfo.push_back(x);
+  this->CalculateDISbyDA();
+  globalinfo.push_back(Q2);
+  globalinfo.push_back(x);
+  this->CalculateDISbyJB();
+  globalinfo.push_back(Q2);
+  globalinfo.push_back(x);
+
+  cout << " calculated all methods " << endl;
+  py::array_t<float> nnoutput = model(hfsinfo, globalinfo);
+  cout << " ran through model " << endl;
+  std::vector<float> nnvecq = nnoutput.cast<std::vector<float>>();
+  cout << " cast model output " << endl;
+  vecQ.SetPxPyPzE(nnvecq[0],nnvecq[1],nnvecq[2],nnvecq[3]);
+  vecW = vecEleBeam + vecIonBeam - vecElectron; 
+  W = vecW.M();
+  Nu = vecIonBeam.Dot(vecQ) / IonMass;
+  cout << vecQ.Px() << " " << vecQ.Py() << " " << vecQ.Pz() << " " << vecQ.E() << endl;
+
+}
+
 // ------------------------------------------------------
 
 
@@ -214,6 +262,7 @@ Bool_t Kinematics::CalculateDIS(TString recmethod){
   else if(recmethod.CompareTo( "Mixed", TString::kIgnoreCase)==0)  { this->CalculateDISbyMixed(); }
   else if(recmethod.CompareTo( "Sigma", TString::kIgnoreCase)==0)  { this->CalculateDISbySigma(); }
   else if(recmethod.CompareTo( "eSigma", TString::kIgnoreCase)==0) { this->CalculateDISbyeSigma(); }
+  else if(recmethod.CompareTo( "ML", TString::kIgnoreCase)==0) { this->CalculateDISbyML(); }
   else {
     cerr << "ERROR: unknown reconstruction method" << endl;
     return false;
@@ -349,6 +398,12 @@ void Kinematics::CalculateDISbyeSigma(){
   }
 };
 
+void Kinematics::CalculateDISbyML() {
+  this->GetQWNu_ML(); // set `vecQ`, `vecW`, `W`, `Nu`   
+  Q2 = -1 * vecQ.M2();
+  x = Q2 / ( 2 * vecQ.Dot(vecIonBeam) );
+  y = vecIonBeam.Dot(vecQ) / vecIonBeam.Dot(vecEleBeam);
+};
 
 
 // calculate hadron kinematics
@@ -441,6 +496,12 @@ void Kinematics::AddToHFS(TLorentzVector p4_) {
   nHFS++;
 };
 
+void Kinematics::AddPion(TLorentzVector p4_){
+  TLorentzVector p4 = p4_;
+  if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(p4,p4);
+  new(arpi[nPi]) TLorentzVector(p4);
+  nPi++;
+};
 
 // subtract electron from hadronic final state variables
 void Kinematics::SubtractElectronFromHFS() {
@@ -476,7 +537,17 @@ void Kinematics::ResetHFS() {
   hadronSumVec.SetPxPyPzE(0,0,0,0);
   countHadrons = 0;
   nHFS = 0;
+  nPi = 0;
   ar.Clear();
+  arpi.Clear();
+#ifdef MLRECO
+  for(int i = 0; i < 100; i++){
+    for(int j = 0; j < 7; j++){
+      hfsinfo[i][j] = 0;
+    }
+  }
+  for(int i = 0; i < 6; i++) globalinfo[i]=0;
+#endif
 };
 
 
