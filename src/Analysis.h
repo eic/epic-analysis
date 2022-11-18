@@ -87,8 +87,8 @@ class Analysis : public TNamed
 
 
     // set weights // TODO: are these used yet?
-    void SetWeights(Weights const* w) { weight = w; }
-    void SetWeightsJet(Weights const* w) { weightJet = w; }
+    // void SetWeightsTrack(Weights const* w) { weightTrack = w; }
+    // void SetWeightsJet(Weights const* w) { weightJet = w; }
 
     Double_t GetEventQ2Weight(Double_t Q2, Int_t guess=0);
     // after adding all files, estimate the weights for events in each Q2 range
@@ -111,19 +111,19 @@ class Analysis : public TNamed
     // print an error; if more than `errorCntMax` errors are printed, printing is suppressed
     void ErrorPrint(std::string message);
 
-    // FillHistos methods: fill histograms
-    void FillHistosTracks();
-#ifndef EXCLUDE_DELPHES
-    void FillHistosJets();
-#endif
+    // `FillHistos(weight)` methods: fill histograms
+    void FillHistosInclusive(Double_t wgt); // inclusive kinematics
+    void FillHistos1h(Double_t wgt);        // single-hadron kinematics
+    void FillHistosJets(Double_t wgt);      // jet kinematics
 
     // shared objects
     SimpleTree *ST;
     Kinematics *kin, *kinTrue;
     HistosDAG *HD;
-    Weights const* weight;
+    Weights const* weightInclusive;
+    Weights const* weightTrack;
     Weights const* weightJet;
-    Double_t wTrackTotal, wJetTotal;
+    Double_t wInclusiveTotal, wTrackTotal, wJetTotal;
     Long64_t entriesTot;
     Long64_t errorCnt;
     const TString sep = "--------------------------------------------";
@@ -152,7 +152,6 @@ class Analysis : public TNamed
     Double_t elePtrue, maxElePtrue;
     int pid;
     TString finalStateID;
-    Double_t wTrack,wJet;
 #ifndef EXCLUDE_DELPHES
     fastjet::PseudoJet jet;
 #endif
@@ -193,6 +192,10 @@ class Analysis : public TNamed
       fmt::print("}}\n");
     }
 
+  private:
+
+    // fill histograms, according to `fill_payload`
+    void FillHistos(std::function<void(Histos*)> fill_payload);
 
   ClassDef(Analysis,1);
 };

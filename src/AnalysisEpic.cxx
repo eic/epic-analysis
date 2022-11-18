@@ -213,7 +213,20 @@ void AnalysisEpic::Execute()
     if( ! kin->CalculateDIS(reconMethod)     ) continue; // reconstructed
     if( ! kinTrue->CalculateDIS(reconMethod) ) continue; // generated (truth)
 
+    // Get the weight for this event's Q2
+    //   FIXME: we are in a podio::EventStore event loop, thus we need an
+    //          alternative to `chain->GetTreeNumber()`; currently disabling weighting
+    //          for now, by setting `wTrack=1.0`
+    // auto Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
+    auto Q2weightFactor = 1.0;
 
+    // fill inclusive histograms, if only `inclusive` is included in output
+    // (otherwise they will be filled in track and jet loops)
+    if(includeOutputSet["inclusive_only"]) {
+      auto wInclusive = Q2weightFactor * weightInclusive->GetWeight(*kinTrue);
+      wInclusiveTotal += wInclusive;
+      FillHistosInclusive(wInclusive);
+    }
 
     // loop over Reco<->MC associations again
     /* - calculate SIDIS kinematics
@@ -234,16 +247,12 @@ void AnalysisEpic::Execute()
       kin->CalculateHadronKinematics();
 
       // weighting
-      //   FIXME: we are in a podio::EventStore event loop, thus we need an
-      //          alternative to `chain->GetTreeNumber()`; currently disabling weighting
-      //          for now, by setting `wTrack=1.0`
-      // Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
-      // wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
-      wTrack = 1.0; // FIXME
+      auto wTrack = Q2weightFactor * weightTrack->GetWeight(*kinTrue);
       wTrackTotal += wTrack;
 
-      // fill track histograms in activated bins
-      FillHistosTracks();
+      // fill single-hadron histograms in activated bins
+      FillHistos1h(wTrack);
+      FillHistosInclusive(wTrack);
 
       // fill simple tree
       // - not binned
