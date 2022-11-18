@@ -35,6 +35,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/embed.h>
+#include <pybind11/stl.h>
 namespace py = pybind11;
 
 using std::map;
@@ -168,7 +169,7 @@ class Kinematics : public TObject
     //py::object modelload;// = keras.attr("models.load_model");
     //const char* modelname = "pfn_testEpic_000-2_vecQele_nHFS2_500_bs10k_bestValLoss";
     //py::object model;// = modelload(modelname);
-    
+    py::object numpy;
     std::vector<std::vector<float>> hfsinfo;
     std::vector<float> globalinfo;
   //Double_t hfsinfo[100][7];
@@ -329,11 +330,12 @@ class Kinematics : public TObject
     Double_t rotAboutX, rotAboutY;
     // other
     TLorentzVector vecSpin, IvecSpin;
-    py::object keras;// = py::module_::import("keras");                                                                                                                                                                     
-    py::object modelload;// = keras.attr("models.load_model");                                                                                                                                                              
-    const char* modelname = "pfn_testEpic_000-2_vecQele_nHFS2_500_bs10k_bestValLoss";
-    py::object model;// = modelload(modelname);                                                                                                                                                                             
-
+    py::object keras, tensorflow;// = py::module_::import("keras");
+    py::object efnpackage;
+    py::function pfnimport;                                                   
+    py::object modelload;// = keras.attr("models.load_model");                       
+    std::string modelname = "pfn_testEpic_000-2_vecQele_nHFS2_500_bs10k_bestValLoss";
+    py::object model;// = modelload(modelname);       
 
   ClassDef(Kinematics,1);
 };

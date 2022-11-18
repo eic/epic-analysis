@@ -3,7 +3,7 @@
  */
 
 #include "Kinematics.h"
-
+#include <pybind11/stl.h>
 ClassImp(Kinematics)
 
 Kinematics::Kinematics(
@@ -12,10 +12,10 @@ Kinematics::Kinematics(
     Double_t crossAng /*mrad*/    
     )
 {
-  // initiate TMVA
-  py::scoped_interpreter guard{};
-  keras = py::module_::import("keras");
-  model = keras.attr("models.load_model")(modelname);
+  srand(time(NULL));
+  
+  efnpackage = py::module_::import("testEFlowimport");
+  pfnimport = efnpackage.attr("eflowPredict");
   
   // set ion mass
   IonMass = ProtonMass();
@@ -198,47 +198,80 @@ void Kinematics::GetQWNu_electronic(){
 };
 
 void Kinematics::GetQWNu_ML(){
-  cout << "starting ML pred " << endl;
   hfsinfo.clear();
-  std::vector<float> partHold;
-  for(int i = 0; i < nHFS; i++){
-    partHold.push_back(hfspx[i]);
-    partHold.push_back(hfspy[i]);
-    partHold.push_back(hfspz[i]);
-    partHold.push_back(hfsE[i]);
-    partHold.push_back(hfseta[i]);
-    partHold.push_back(hfsphi[i]);
-    cout << "added first particle info" << endl;
-    hfsinfo.push_back(partHold);
-    cout << "added particle to 2d vector " << endl;
-    partHold.clear();
+  if(nHFS >= 2){
+    std::vector<float> partHold;
+    //py::array_t<float> arr;
+    for(int i = 0; i < nHFS; i++){
+      partHold.push_back(hfspx[i]);
+      partHold.push_back(hfspy[i]);
+      partHold.push_back(hfspz[i]);
+      partHold.push_back(hfsE[i]);
+      partHold.push_back(hfseta[i]);
+      partHold.push_back(hfsphi[i]);
+      partHold.push_back(hfspid[i]);
+      hfsinfo.push_back(partHold);
+      partHold.clear();
+    }
+    globalinfo.clear();
+    this->CalculateDISbyElectron();
+    globalinfo.push_back(vecQ.Px());
+    globalinfo.push_back(vecQ.Py());
+    globalinfo.push_back(vecQ.Pz());
+    globalinfo.push_back(vecQ.E());
+    if( Q2 > 0 && Q2 < 1000){
+      globalinfo.push_back(log10(Q2));
+    }
+    else{
+      globalinfo.push_back((float) (rand()) / (float) (RAND_MAX/1000.0));
+    }
+    if(x>0 && x < 1){
+      globalinfo.push_back(-1*log10(x));
+    }
+    else{
+      globalinfo.push_back( (float) (rand()) / (float) (RAND_MAX/1.0)  );
+    }
+    this->CalculateDISbyDA();
+    if( Q2 > 0 && Q2 < 1000){
+      globalinfo.push_back(log10(Q2));
+    }
+    else{
+      globalinfo.push_back((float) (rand()) / (float) (RAND_MAX/1000.0));
+    }
+    if(x>0 && x < 1){
+      globalinfo.push_back(-1*log10(x));
+    }
+    else{
+      globalinfo.push_back( (float) (rand()) / (float) (RAND_MAX/1.0)  );
+    }
+    this->CalculateDISbyJB();
+    if( Q2 > 0 && Q2 < 1000){
+      globalinfo.push_back(log10(Q2));
+    }
+    else{
+      globalinfo.push_back((float) (rand()) / (float) (RAND_MAX/1000.0));
+    }
+    if(x>0 && x < 1){
+      globalinfo.push_back(-1*log10(x));
+    }
+    else{
+      globalinfo.push_back( (float) (rand()) / (float) (RAND_MAX/1.0)  );
+    }    
+    
+    py::object nnoutput = pfnimport(hfsinfo, globalinfo);
+    
+    std::vector<float> nnvecq = nnoutput.cast<std::vector<float>>();
+    
+    vecQ.SetPxPyPzE(nnvecq[0],nnvecq[1],nnvecq[2],nnvecq[3]);
   }
-  globalinfo.clear();
-  this->CalculateDISbyElectron();
-  globalinfo.push_back(vecQ.Px());
-  globalinfo.push_back(vecQ.Py());
-  globalinfo.push_back(vecQ.Pz());
-  globalinfo.push_back(vecQ.E());
-  globalinfo.push_back(Q2);
-  globalinfo.push_back(x);
-  this->CalculateDISbyDA();
-  globalinfo.push_back(Q2);
-  globalinfo.push_back(x);
-  this->CalculateDISbyJB();
-  globalinfo.push_back(Q2);
-  globalinfo.push_back(x);
-
-  cout << " calculated all methods " << endl;
-  py::array_t<float> nnoutput = model(hfsinfo, globalinfo);
-  cout << " ran through model " << endl;
-  std::vector<float> nnvecq = nnoutput.cast<std::vector<float>>();
-  cout << " cast model output " << endl;
-  vecQ.SetPxPyPzE(nnvecq[0],nnvecq[1],nnvecq[2],nnvecq[3]);
+  else{
+    this->CalculateDISbyElectron();
+  }
   vecW = vecEleBeam + vecIonBeam - vecElectron; 
   W = vecW.M();
   Nu = vecIonBeam.Dot(vecQ) / IonMass;
-  cout << vecQ.Px() << " " << vecQ.Py() << " " << vecQ.Pz() << " " << vecQ.E() << endl;
-
+  cout << "vecQpred: " << vecQ.Px() << " " << vecQ.Py() << " " << vecQ.Pz() << " " << vecQ.E() << endl;
+  
 }
 
 // ------------------------------------------------------

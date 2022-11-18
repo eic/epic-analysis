@@ -287,7 +287,7 @@ void AnalysisEcce::Execute()
       //cout  << "\t\t\t track  " << Form(" %4.2f %4.2f %4.2f true id %4d imc %3d mcid %3d \n",reco_px,reco_py,reco_pz,tracks_trueID[ireco],imc,part.mcID);
       
       // add to `recopart` and hadronic final state sums only if there is a matching truth particle
-      if(part.mcID > 0) { 
+      if(part.mcID > 0 && part.mcID != genEleID) { 
 	if(imc>-1) {
 	  //  cout  << "\t\t\t add  to hadfs  \n" ;
 	  recopart.push_back(part);
