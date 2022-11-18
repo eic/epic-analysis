@@ -154,7 +154,8 @@ void AnalysisDelphes::Execute() {
     // get vector of jets
     // TODO: should this have an option for clustering method?
     if(includeOutputSet["jets"])
-      kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
+      //kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
+      kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle, jetAlg, jetRad, jetMin);
    
     // track loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     itTrack.Reset();
@@ -254,6 +255,9 @@ void AnalysisDelphes::Execute() {
         } else {
           jet = kin->jetsRec[i];
           kin->CalculateJetKinematics(jet);
+
+	  // Match Reco Jet to Nearest Truth Jet (Specify DR matching limit between jets)
+	  kin->CalculateJetResolution(jetMatchDR);
         };
 
         // fill jet histograms in activated bins
