@@ -27,7 +27,7 @@ void analysis_jets(
   A->includeOutputSet["jets"] = true;
   // - additional example settings; see `src/Analysis.cxx` for more
   A->includeOutputSet["1h"] = false;
-  A->includeOutputSet["inclusive"] = false;
+  A->includeOutputSet["inclusive"] = true;
   A->includeOutputSet["depolarization"] = false;
 
   // Define Jet Parameters ==================================
@@ -44,10 +44,11 @@ void analysis_jets(
   
   // Define Jet Level Cuts
   A->AddBinScheme("JetPT"); A->BinScheme("JetPT")->BuildBin("Min",5.0);
-  A->AddBinScheme("JetEta"); A->BinScheme("JetEta")->BuildBin("Range",-5.0,5.0);
-  A->AddBinScheme("JetEta"); A->BinScheme("JetEta")->BuildBin("Range",-5.0,-1.0);
-  A->AddBinScheme("JetEta"); A->BinScheme("JetEta")->BuildBin("Range",-1.0,1.0);
-  A->AddBinScheme("JetEta"); A->BinScheme("JetEta")->BuildBin("Range",1.0,5.0);
+  A->AddBinScheme("JetEta");
+  A->BinScheme("JetEta")->BuildBin("Range",-5.0,5.0);
+  A->BinScheme("JetEta")->BuildBin("Range",-5.0,-1.0);
+  A->BinScheme("JetEta")->BuildBin("Range",-1.0,1.0);
+  A->BinScheme("JetEta")->BuildBin("Range",1.0,5.0);
 
   // set binning scheme ====================================
   // - see `Analysis` constructor for available bin variables
