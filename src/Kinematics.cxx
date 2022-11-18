@@ -199,64 +199,86 @@ void Kinematics::GetQWNu_electronic(){
 
 void Kinematics::GetQWNu_ML(){
   hfsinfo.clear();
+  float pidadj = 0;
   if(nHFS >= 2){
     std::vector<float> partHold;
     //py::array_t<float> arr;
     for(int i = 0; i < nHFS; i++){
+      double pidsgn=(hfspid[i]/abs(hfspid[i]));
+      if(abs(hfspid[i])==211) pidadj = 0.4*pidsgn;
+      if(abs(hfspid[i])==22) pidadj = 0.2*pidsgn;
+      if(abs(hfspid[i])==321) pidadj = 0.6*pidsgn;
+      if(abs(hfspid[i])==2212) pidadj = 0.8*pidsgn;
+      if(abs(hfspid[i])==11) pidadj = 1.0*pidsgn;
+      partHold.push_back(hfseta[i]);
+      partHold.push_back(hfsphi[i]);
       partHold.push_back(hfspx[i]);
       partHold.push_back(hfspy[i]);
       partHold.push_back(hfspz[i]);
       partHold.push_back(hfsE[i]);
-      partHold.push_back(hfseta[i]);
-      partHold.push_back(hfsphi[i]);
-      partHold.push_back(hfspid[i]);
+      partHold.push_back(pidadj);
       hfsinfo.push_back(partHold);
       partHold.clear();
     }
+    // order in current training (fix):
+    //  ['Q2DA','Q2Ele','Q2JB','xDA','xEle','xJB',
+    //	 'vecQElePx','vecQElePy',
+    //   'vecQElePz','vecQEleE']
+
+    double Q2ele, Q2DA, Q2JB;
+    double xele, xDA, xJB;
+    TLorentzVector vecQEle;
     globalinfo.clear();
     this->CalculateDISbyElectron();
-    globalinfo.push_back(vecQ.Px());
-    globalinfo.push_back(vecQ.Py());
-    globalinfo.push_back(vecQ.Pz());
-    globalinfo.push_back(vecQ.E());
-    if( Q2 > 0 && Q2 < 1000){
-      globalinfo.push_back(log10(Q2));
-    }
-    else{
-      globalinfo.push_back((float) (rand()) / (float) (RAND_MAX/1000.0));
-    }
-    if(x>0 && x < 1){
-      globalinfo.push_back(-1*log10(x));
-    }
-    else{
-      globalinfo.push_back( (float) (rand()) / (float) (RAND_MAX/1.0)  );
-    }
+    vecQEle.SetPxPyPzE(vecQ.Px(), vecQ.Py(), vecQ.Pz(), vecQ.E());
+    Q2ele = Q2;
+    xele = x;
     this->CalculateDISbyDA();
-    if( Q2 > 0 && Q2 < 1000){
-      globalinfo.push_back(log10(Q2));
-    }
-    else{
-      globalinfo.push_back((float) (rand()) / (float) (RAND_MAX/1000.0));
-    }
-    if(x>0 && x < 1){
-      globalinfo.push_back(-1*log10(x));
-    }
-    else{
-      globalinfo.push_back( (float) (rand()) / (float) (RAND_MAX/1.0)  );
-    }
+    Q2DA = Q2;
+    xDA = x;
     this->CalculateDISbyJB();
-    if( Q2 > 0 && Q2 < 1000){
-      globalinfo.push_back(log10(Q2));
+    Q2JB = Q2;
+    xJB = x;    
+    if( Q2DA > 0 && Q2DA < 1000){
+      globalinfo.push_back(log10(Q2DA));
     }
     else{
-      globalinfo.push_back((float) (rand()) / (float) (RAND_MAX/1000.0));
+      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/1000.0)));
     }
-    if(x>0 && x < 1){
-      globalinfo.push_back(-1*log10(x));
+    if( Q2ele > 0 && Q2ele < 1000){
+      globalinfo.push_back(log10(Q2ele));
     }
     else{
-      globalinfo.push_back( (float) (rand()) / (float) (RAND_MAX/1.0)  );
-    }    
+      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/1000.0)));
+    }
+    if( Q2JB > 0 && Q2JB < 1000){
+      globalinfo.push_back(log10(Q2JB));
+    }
+    else{
+      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/1000.0)));
+    }        
+    if(xDA>0 && xDA < 1){
+      globalinfo.push_back(-1*log10(xDA));
+    }
+    else{
+      globalinfo.push_back(-1*log10( (float) (rand()) / (float) (RAND_MAX/1.0)  ));
+    }
+    if(xele>0 && xele < 1){
+      globalinfo.push_back(-1*log10(xele));
+    }
+    else{
+      globalinfo.push_back(-1*log10( (float) (rand()) / (float) (RAND_MAX/1.0)  ));
+    }
+    if(xJB>0 && xJB < 1){
+      globalinfo.push_back(-1*log10(xJB));
+    }
+    else{
+      globalinfo.push_back( -1*log10((float) (rand()) / (float) (RAND_MAX/1.0) ) );
+    }
+    globalinfo.push_back(vecQEle.Px());
+    globalinfo.push_back(vecQEle.Py());
+    globalinfo.push_back(vecQEle.Pz());
+    globalinfo.push_back(vecQEle.E());
     
     py::object nnoutput = pfnimport(hfsinfo, globalinfo);
     
