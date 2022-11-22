@@ -835,7 +835,6 @@ void Analysis::FillHistos1h(Double_t wgt) {
 void Analysis::FillHistosJets(Double_t wgt) {
 #ifndef EXCLUDE_DELPHES
   auto fill_payload = [this,wgt] (Histos *H) {
-    H->FillHist2D("Q2vsX",   kin->x,     kin->Q2, wgt);
     // jet kinematics
     H->FillHist1D("JetPT",  kin->pTjet,  wgt);
     H->FillHist1D("JetMT",  kin->mTjet,  wgt);
