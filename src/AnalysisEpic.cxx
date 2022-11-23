@@ -337,7 +337,7 @@ void AnalysisEpic::Execute()
 
       if(includeOutputSet["1h"]) {
         // fill single-hadron histograms in activated bins
-        auto wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+        auto wTrack = Q2weightFactor * weightTrack->GetWeight(*kinTrue);
         wTrackTotal += wTrack;
         FillHistos1h(wTrack);
         FillHistosInclusive(wTrack);
