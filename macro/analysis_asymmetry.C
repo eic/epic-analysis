@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Duane Byer, Christopher Dilks
+
 R__LOAD_LIBRARY(Sidis-eic)
 
 struct WeightsProkudin : public WeightsSivers {

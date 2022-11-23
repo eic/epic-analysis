@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Copyright (C) 2022 Christopher Dilks
+
 # flatten artifact subdirectories (`mv *.images/* ./`)
 if [ $# -ne 1 ]; then echo "USAGE: $0 [artifacts-dir]"; exit 2; fi
 pushd $1

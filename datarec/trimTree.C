@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Christopher Dilks
+
 // copy numEntries entries of a TTree to another file
 void trimTree(TString inFileName, TString treeName, Long64_t numEntries) {
   TFile *inFile = new TFile(inFileName,"READ");

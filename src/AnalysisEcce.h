@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Ralf Seidl, Sanghwa Park, Christopher Dilks
+
 #ifndef AnalysisEcce_
 #define AnalysisEcce_
 

@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Christopher Dilks, Connor Pecar
+
 /* NOTE:
  * if you make changes, MAINTAIN DOCUMENTATION IN ../doc/kinematics.md
  */

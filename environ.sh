@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Copyright (C) 2022 Christopher Dilks
+
+
 ### SIDIS-EIC
 if [ -z "${BASH_SOURCE[0]}" ]; then
   export SIDIS_EIC_HOME=$(dirname $(realpath $0))
