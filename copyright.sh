@@ -36,6 +36,7 @@ git ls-files |\
   grep -vE '^grids/' |\
   grep -v '\.dat' |\
   grep -v '\.tmp' |\
+  grep -v 'copyright.sh' |\
   while read f; do
 
     case `get_ext $f` in
@@ -59,5 +60,6 @@ git ls-files |\
         rm $f.code
         ;;
     esac
+    chmod --reference=$f $f.tmp
     mv $f.tmp $f
   done
