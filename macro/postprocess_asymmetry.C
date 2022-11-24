@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-// Copyright (C) 2022 Duane Byer, Christopher Dilks
+// Copyright (C) 2022 Duane Byer
 
 R__LOAD_LIBRARY(Sidis-eic)
 

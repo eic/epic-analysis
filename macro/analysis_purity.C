@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-// Copyright (C) 2022 Connor Pecar, Christopher Dilks
+// Copyright (C) 2022 Connor Pecar
 
 R__LOAD_LIBRARY(Sidis-eic)
 
