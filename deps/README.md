@@ -16,6 +16,10 @@ while the others must be downloaded separately.
 - `adage`, from [c-dilks/adage](https://github.com/c-dilks/adage):
   analysis framework for multi-dimensional binning
 
+Notice
+======
+These dependencies (subdirectories) may have a different license than `sidis-eic` itself. Since they are git subrepos, they have been
+copied as is from their original source; the license and copyright used by `sidis-eic` does not apply to these subdirectories.
 
 Subrepo Maintenance
 ===================
