@@ -139,6 +139,7 @@ jobs:
       fail-fast: true
       matrix:
         include:
+          - { detector: epic,   num_files: 8  }
           - { detector: athena, num_files: 20 }
           - { detector: ecce,   num_files: 40 }
     steps:
@@ -238,11 +239,16 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        detector: [athena, ecce]
+        detector: [epic, athena, ecce]
         aname: [x_q2, p_eta, yRatio]
         recon: [Ele]
         include: # enable other recon methods for `aname==x_q2` only
-        - { aname: x_q2, recon: Mixed,  detector: athena } # FIXME: not sure how to avoid being repetitive... 
+        - { aname: x_q2, recon: Mixed,  detector: epic } # FIXME: not sure how to avoid being repetitive... 
+        - { aname: x_q2, recon: JB,     detector: epic }
+        - { aname: x_q2, recon: DA,     detector: epic }
+        - { aname: x_q2, recon: Sigma,  detector: epic }
+        - { aname: x_q2, recon: eSigma, detector: epic }
+        - { aname: x_q2, recon: Mixed,  detector: athena }
         - { aname: x_q2, recon: JB,     detector: athena }
         - { aname: x_q2, recon: DA,     detector: athena }
         - { aname: x_q2, recon: Sigma,  detector: athena }
@@ -292,6 +298,7 @@ jobs:
       matrix:
         mode:
           - fastsim
+          - epic
           - athena
           - ecce
         pname: # list only jobs which will only use one (primary) recon method
@@ -311,6 +318,12 @@ jobs:
           - { mode: fastsim, pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: fastsim, pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: fastsim, pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic,    pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic,    pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic,    pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic,    pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic,    pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic,    pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: athena,  pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: athena,  pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: athena,  pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
@@ -402,6 +415,10 @@ jobs:
           path: out
       - uses: actions/download-artifact@v3
         with:
+          name: root_analysis_epic_${{matrix.aname}}_${{matrix.recon}}
+          path: out
+      - uses: actions/download-artifact@v3
+        with:
           name: root_analysis_athena_${{matrix.aname}}_${{matrix.recon}}
           path: out
       - uses: actions/download-artifact@v3
@@ -423,10 +440,12 @@ jobs:
             echo "[CI] COMPARATOR MACRO"
             ls out
             mv -v out/fastsim.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
+            mv -v out/epic.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
             mv -v out/athena.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
             mv -v out/ecce.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
-            ${{env.root_no_delphes}} 'macro/ci/comparator.C("out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root","out/athena.${{matrix.pname}}.${{matrix.recon}}.root","out/ecce.${{matrix.pname}}.${{matrix.recon}}.root","out/comparison.${{matrix.pname}}.${{matrix.recon}}","${{matrix.xvar}}","${{matrix.yvar}}")'
+            ${{env.root_no_delphes}} 'macro/ci/comparator.C("out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root","out/epic.${{matrix.pname}}.${{matrix.recon}}.root","out/athena.${{matrix.pname}}.${{matrix.recon}}.root","out/ecce.${{matrix.pname}}.${{matrix.recon}}.root","out/comparison.${{matrix.pname}}.${{matrix.recon}}","${{matrix.xvar}}","${{matrix.yvar}}")'
             rm -v out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
+            rm -v out/epic.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
             rm -v out/athena.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
             rm -v out/ecce.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
       - uses: actions/upload-artifact@v3
