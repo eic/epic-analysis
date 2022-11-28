@@ -37,7 +37,7 @@ void analysis_epic(
   // settings
   A->crossCheckKinematics = true;   // enable cross check with upstream kinematics
   A->verbose              = true;   // print event-by-event information
-  A->maxEvents            = 1000; // use this to limit the number of events
+  //A->maxEvents            = 1000; // use this to limit the number of events
   A->writeSimpleTree      = true; // write event-by-event info into TTree
   A->writeParticleTree    = true; // write particle level info into TTree
 
