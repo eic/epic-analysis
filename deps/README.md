@@ -18,8 +18,13 @@ while the others must be downloaded separately.
 
 Notice
 ======
-These dependencies (subdirectories) may have a different license than `sidis-eic` itself. Since they are git subrepos, they have been
-copied as is from their original source; the license and copyright used by `sidis-eic` does not apply to these subdirectories.
+
+These dependencies (subdirectories) may have a different license than
+`sidis-eic` itself. The license and copyright used by `sidis-eic` does not
+apply to these subdirectories. Since they are git subrepos, they have been
+copied as is from their original source. Changes to any code in these
+dependencies must be accepted in the corresponding public Git repositories
+before being mirrored here.
 
 Subrepo Maintenance
 ===================
