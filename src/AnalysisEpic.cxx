@@ -274,6 +274,8 @@ void AnalysisEpic::Execute()
       numNoEle++;
       continue;
     }
+    else
+      numEle++;
 
     // subtrct electron from hadronic final state variables
     kin->SubtractElectronFromHFS();
@@ -346,8 +348,30 @@ void AnalysisEpic::Execute()
 	// - not binned
 	// - `IsActiveEvent()` is only true if at least one bin gets filled for this track
 	if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
-      }
 
+	// fill particle tree
+	if( writeParticleTree && HD->IsActiveEvent() )
+	  {
+	    int ipart = 0;
+	    for(ParticlesEE trackpart_: trackpart){
+	      ParticlesEE mcpart_;                  
+	      int mcpart_idx=trackidmap[ipart];     // Map idx to the matched MCParticle
+	      int genStat_ = -1;                    // Default Generator Status of MCParticle is -1 (no match)
+	      if(mcpart_idx>-1){                    // RecoParticle has an MCParticle match
+		int imc = mcpart_.mcID;          
+		genStat_ = mcpart_genStat[imc];     // Get Generator status of MCParticle
+		mcpart_ = mcpart.at(mcpart_idx);    // Get MCParticle
+	      }
+	      PT->FillTree(trackpart_.vecPart,      // Fill Tree
+			   mcpart_.vecPart,
+			   trackpart_.pid,
+			   genStat_,
+			   wTrack);
+	      ipart++;
+	    }
+	  }
+      }
+      
     }//hadron loop
     
     
@@ -355,7 +379,7 @@ void AnalysisEpic::Execute()
     // =======================================
     // DEBUG PRINT STATEMENTS
     // =======================================
-    
+    /*    
     int ipart = 0;
     for(ParticlesEE trackpart_: trackpart) {
       cout << trackpart_.pid << "|" << trackpart_.vecPart.E() << "\t";
@@ -375,7 +399,7 @@ void AnalysisEpic::Execute()
       cout<<"\n";
     }
     cout << "\n ============================================================ \n" <<endl;
-    
+    */
 
   } while(tr.Next());
 
