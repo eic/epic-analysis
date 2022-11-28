@@ -1,5 +1,4 @@
-#ifndef AnalysisEpic_
-#define AnalysisEpic_
+#pragma once
 
 // data model
 #include "podio/EventStore.h"
@@ -17,11 +16,11 @@
 #include "Analysis.h"
 
 
-class AnalysisEpic : public Analysis
+class AnalysisEpicPodio : public Analysis
 {
   public:
-    AnalysisEpic(TString infileName_="", TString outfilePrefix_="");
-    ~AnalysisEpic();
+    AnalysisEpicPodio(TString infileName_="", TString outfilePrefix_="");
+    ~AnalysisEpicPodio();
 
     void Execute() override;
 
@@ -64,7 +63,5 @@ class AnalysisEpic : public Analysis
     podio::ROOTReader podioReader;
     podio::EventStore evStore;
 
-    ClassDefOverride(AnalysisEpic,1);
+    ClassDefOverride(AnalysisEpicPodio,1);
 };
-
-#endif

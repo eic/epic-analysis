@@ -1,13 +1,13 @@
-#include "AnalysisEpic.h"
+#include "AnalysisEpicPodio.h"
 
-AnalysisEpic::AnalysisEpic(TString infileName_, TString outfilePrefix_)
+AnalysisEpicPodio::AnalysisEpicPodio(TString infileName_, TString outfilePrefix_)
   : Analysis(infileName_, outfilePrefix_)
   , crossCheckKinematics(false)
 {};
 
-AnalysisEpic::~AnalysisEpic() {};
+AnalysisEpicPodio::~AnalysisEpicPodio() {};
 
-void AnalysisEpic::Execute()
+void AnalysisEpicPodio::Execute()
 {
   // setup
   Prepare();
@@ -330,7 +330,7 @@ void AnalysisEpic::Execute()
 
 // particle printers //////////////////////////////////////////////
 
-void AnalysisEpic::PrintParticle(const edm4hep::MCParticle& P) { 
+void AnalysisEpicPodio::PrintParticle(const edm4hep::MCParticle& P) { 
   fmt::print("\n");
   fmt::print("  {:>20}: {}\n", "PDG",          P.getPDG()             );
   fmt::print("  {:>20}: {}\n", "Status",       P.getGeneratorStatus() );
@@ -357,7 +357,7 @@ void AnalysisEpic::PrintParticle(const edm4hep::MCParticle& P) {
     fmt::print("    {:>20}: {}\n", "PDG", daughter.getPDG());
 }
 
-void AnalysisEpic::PrintParticle(const edm4eic::ReconstructedParticle& P) {
+void AnalysisEpicPodio::PrintParticle(const edm4eic::ReconstructedParticle& P) {
   fmt::print("\n");
   fmt::print("  {:>20}: ", "PDG");
   if(P.getParticleIDUsed().isAvailable()) fmt::print("{}\n", P.getParticleIDUsed().getPDG());
@@ -394,7 +394,7 @@ void AnalysisEpic::PrintParticle(const edm4eic::ReconstructedParticle& P) {
  * - execute `payload`
 //     payload signature: (simPart, recPart, reconstructed PDG)
  */
-void AnalysisEpic::LoopMCRecoAssocs(
+void AnalysisEpicPodio::LoopMCRecoAssocs(
     const edm4eic::MCRecoParticleAssociationCollection& mcRecAssocs,
     std::function<void(const edm4hep::MCParticle&, const edm4eic::ReconstructedParticle&, int)> payload,
     bool printParticles
@@ -434,7 +434,7 @@ void AnalysisEpic::LoopMCRecoAssocs(
 
 // get PDG from reconstructed particle; resort to true PDG, if
 // PID is unavailable (sets `usedTruth` to true)
-int AnalysisEpic::GetReconstructedPDG(
+int AnalysisEpicPodio::GetReconstructedPDG(
     const edm4hep::MCParticle& simPart,
     const edm4eic::ReconstructedParticle& recPart,
     bool& usedTruth
