@@ -9,7 +9,7 @@
 # RELEASE TAG AND RECO DIR: ###########################
 detector_config="epic_arches"
 # detector_config="epic_brycecanyon"
-release="22.11.0"
+release="22.11.2"
 releaseDir="S3/eictest/EPIC/RECO/$release/$detector_config/DIS/NC"
 filter='eicrecon'
 # filter='juggler'

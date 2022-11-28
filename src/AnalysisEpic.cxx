@@ -84,7 +84,8 @@ void AnalysisEpic::Execute()
     // Index maps for particle sets
     std::map <double,int> genidmap; // <pz, index_gen>
     std::map <int,int> mcidmap; // <index_mc, index_gen>
-    std::map <int,int>    trackidmap; // <index, index_mc>  
+    std::map <int,int> trackidmap; // <index, index_mc>  
+    std::map <int,int> trackstatmap; // <index, genstatus>
 
     // ParticleEE vectors
     // The index of the vectors correspond to their for loop idx
@@ -305,7 +306,7 @@ void AnalysisEpic::Execute()
 
     /*
       Loop again over the reconstructed particles
-      Calculate Hasdron Kinematics
+      Calculate Hadron Kinematics
       Fill output data structures (Histos, SimpleTree, etc.)
     */
 
@@ -358,9 +359,11 @@ void AnalysisEpic::Execute()
 	      int mcpart_idx=trackidmap[ipart];     // Map idx to the matched MCParticle
 	      int genStat_ = -1;                    // Default Generator Status of MCParticle is -1 (no match)
 	      if(mcpart_idx>-1){                    // RecoParticle has an MCParticle match
+ 		mcpart_ = mcpart.at(mcpart_idx);        // Get MCParticle
 		int imc = mcpart_.mcID;          
-		genStat_ = mcpart_genStat[imc];     // Get Generator status of MCParticle
-		mcpart_ = mcpart.at(mcpart_idx);    // Get MCParticle
+		genStat_ = mcpart_genStat[imc];         // Get Generator status of MCParticle
+		if(imc==genEleID)                       // If MCParticle was scattered electron, set status to 2
+		  genStat_=2;
 	      }
 	      PT->FillTree(trackpart_.vecPart,      // Fill Tree
 			   mcpart_.vecPart,

@@ -26,21 +26,20 @@ R__LOAD_LIBRARY(Sidis-eic)
  *   between fast and full simulations
  */
 void analysis_epic(
-    // TString  configFile="tutorial/test.epic.config", // list of input files
-    TString  configFile="datarec/epic.22.11.0/22.11.0/18x275/files.config", // list of input files
+    TString  configFile="datarec/epic.22.11.2/22.11.2/10x100/files.config", // list of input files
     TString  outfilePrefix="tutorial.epic"        // output filename prefix
     )
 {
 
   // setup analysis ========================================
-  // - define `AnalysisEpic` instead of `AnalysisDelphes`
   AnalysisEpic *A = new AnalysisEpic(configFile, outfilePrefix);
 
   // settings
   A->crossCheckKinematics = true;   // enable cross check with upstream kinematics
   A->verbose              = true;   // print event-by-event information
-  A->maxEvents            = 300000; // use this to limit the number of events
-  A->writeSimpleTree      = true;
+  A->maxEvents            = 1000; // use this to limit the number of events
+  A->writeSimpleTree      = true; // write event-by-event info into TTree
+  A->writeParticleTree    = true; // write particle level info into TTree
 
   // set reconstruction method and final states =============================
   // - see `Analysis` constructor for methods (or other tutorials)

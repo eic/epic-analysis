@@ -29,6 +29,7 @@
 #include "HistosDAG.h"
 #include "Kinematics.h"
 #include "SimpleTree.h"
+#include "ParticleTree.h"
 #include "Weights.h"
 #include "CommonConstants.h"
 

@@ -308,7 +308,7 @@ void Analysis::Prepare() {
   kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
   kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
   ST = new SimpleTree("tree",kin,kinTrue);
-  PT = new ParticleTree("ptree",kin,kinTrue);
+  PT = new ParticleTree("ptree");
 
   // if including jets, define a `jet` final state
 #ifndef EXCLUDE_DELPHES
