@@ -105,7 +105,7 @@ jobs:
             echo "[CI] add S3 host"
             s3tools/add-host.sh
             echo "[CI] generate list of HEPMC files"
-            s3tools/generate-hepmc-list.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 6 | tee hepmc.list
+            s3tools/generate-hepmc-list.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 24 | tee hepmc.list
             echo "[CI] download HEPMC files"
             while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
             echo "====="
@@ -139,9 +139,9 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - { detector: epic,   num_files: 8  }
-          - { detector: athena, num_files: 20 }
-          - { detector: ecce,   num_files: 40 }
+          - { detector: epic,   num_files: 32 }
+          - { detector: athena, num_files: 80 }
+          - { detector: ecce,   num_files: 160 }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
