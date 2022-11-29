@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Copyright (C) 2022 Christopher Dilks
+
 # organize artifacts by combining directories from different recon methods
 # - execute in CI pipelines from top-level directory, after all artifacts
 #   have been collected into one directory, specified by argument

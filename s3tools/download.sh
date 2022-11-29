@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Copyright (C) 2022 Christopher Dilks
+
 # download list of files from S3
 
 # arguments and usage

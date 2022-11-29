@@ -1,4 +1,8 @@
 #!/usr/bin/env ruby
+
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Copyright (C) 2022 Christopher Dilks
+
 # generate a config file, from a set of `list` files
 # this script is generally called by `s3tools/make-*-config.sh` scripts
 

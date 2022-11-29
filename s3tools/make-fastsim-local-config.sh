@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Copyright (C) 2022 Christopher Dilks
+
+
 ###################
 # TOP-LEVEL SCRIPT to automate the creation of a config file for fastsim files
 # - see also s3tools/make-fastsim-S3-config.sh, to automate S3 downloading and delphes execution
