@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Gregory Matousek
+
 /* ParticleTree
  * - provides a particle tree for storing reconstructed particle kinematics + pid
  * - helpful for debugging matching algorithm
