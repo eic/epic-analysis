@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# SPDX-License-Identifier: LGPL-3.0-or-later
+# Copyright (C) 2022 Christopher Dilks
+
 # generate config file for a local directory of simulation files
 
 # arguments and usage

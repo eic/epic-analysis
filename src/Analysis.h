@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Christopher Dilks, Connor Pecar, Duane Byer, Sanghwa Park, Matthew McEneaney, Brian Page
+
 #ifndef Analysis_
 #define Analysis_
 
