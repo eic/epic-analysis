@@ -164,18 +164,10 @@ class Kinematics : public TObject
     TClonesArray &ar = *hfsp4;
     TClonesArray *pip4 = new TClonesArray("TLorentzVector");
     TClonesArray &arpi = *pip4;
-  // TMVA for ML sidis reconstruction
-    //py::object keras;// = py::module_::import("keras");
-    //py::object modelload;// = keras.attr("models.load_model");
-    //const char* modelname = "pfn_testEpic_000-2_vecQele_nHFS2_500_bs10k_bestValLoss";
-    //py::object model;// = modelload(modelname);
+    // TMVA for ML sidis reconstruction
     py::object numpy;
     std::vector<std::vector<float>> hfsinfo;
     std::vector<float> globalinfo;
-  //Double_t hfsinfo[100][7];
-  //Double_t globalinfo[6];
-  //TMVA::Reader *TMVAReader;
-   //Double_t nnoutput[4];
 
     // particle masses
     static Double_t ElectronMass() { return 0.000511; };
@@ -330,12 +322,14 @@ class Kinematics : public TObject
     Double_t rotAboutX, rotAboutY;
     // other
     TLorentzVector vecSpin, IvecSpin;
+
     py::object keras, tensorflow;// = py::module_::import("keras");
     py::object efnpackage;
-    py::function pfnimport;                                                   
+    py::function pfnimport;
+    py::object model;
     py::object modelload;// = keras.attr("models.load_model");                       
     std::string modelname = "pfn_testEpic_000-2_vecQele_nHFS2_500_bs10k_bestValLoss";
-    py::object model;// = modelload(modelname);       
+  
 
   ClassDef(Kinematics,1);
 };

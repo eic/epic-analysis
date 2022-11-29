@@ -13,9 +13,16 @@ Kinematics::Kinematics(
     )
 {
   srand(time(NULL));
-  
+  // working version (slow):
   efnpackage = py::module_::import("testEFlowimport");
   pfnimport = efnpackage.attr("eflowPredict");
+  
+  //tensorflow = py::module_::import("tensorflow");
+  //keras = tensorflow.attr("keras");
+  //efnpackage = py::module_::import("energyflow");
+  //pfnimport = efnpackage.attr("archs");
+  //numpy = py::module_::import("numpy");
+  //model = keras.attr("models").attr("load_model")(modelname);
   
   // set ion mass
   IonMass = ProtonMass();
@@ -202,7 +209,6 @@ void Kinematics::GetQWNu_ML(){
   float pidadj = 0;
   if(nHFS >= 2){
     std::vector<float> partHold;
-    //py::array_t<float> arr;
     for(int i = 0; i < nHFS; i++){
       double pidsgn=(hfspid[i]/abs(hfspid[i]));
       if(abs(hfspid[i])==211) pidadj = 0.4*pidsgn;
@@ -220,11 +226,11 @@ void Kinematics::GetQWNu_ML(){
       hfsinfo.push_back(partHold);
       partHold.clear();
     }
-    // order in current training (fix):
+    // order in current model (needs fixed):
     //  ['Q2DA','Q2Ele','Q2JB','xDA','xEle','xJB',
     //	 'vecQElePx','vecQElePy',
     //   'vecQElePz','vecQEleE']
-
+    // obviously should have NN to predict Q2, x as well
     double Q2ele, Q2DA, Q2JB;
     double xele, xDA, xJB;
     TLorentzVector vecQEle;
@@ -279,11 +285,11 @@ void Kinematics::GetQWNu_ML(){
     globalinfo.push_back(vecQEle.Py());
     globalinfo.push_back(vecQEle.Pz());
     globalinfo.push_back(vecQEle.E());
-    
+
     py::object nnoutput = pfnimport(hfsinfo, globalinfo);
-    
+
     std::vector<float> nnvecq = nnoutput.cast<std::vector<float>>();
-    
+
     vecQ.SetPxPyPzE(nnvecq[0],nnvecq[1],nnvecq[2],nnvecq[3]);
   }
   else{
@@ -292,7 +298,7 @@ void Kinematics::GetQWNu_ML(){
   vecW = vecEleBeam + vecIonBeam - vecElectron; 
   W = vecW.M();
   Nu = vecIonBeam.Dot(vecQ) / IonMass;
-  cout << "vecQpred: " << vecQ.Px() << " " << vecQ.Py() << " " << vecQ.Pz() << " " << vecQ.E() << endl;
+
   
 }
 
