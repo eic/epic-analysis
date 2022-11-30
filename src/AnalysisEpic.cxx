@@ -57,8 +57,6 @@ void AnalysisEpic::Execute()
   TTreeReaderArray<UInt_t> assoc_simID(tr, "ReconstructedChargedParticlesAssociations.simID");
   TTreeReaderArray<UInt_t> assoc_recID(tr, "ReconstructedChargedParticlesAssociations.recID");
   TTreeReaderArray<Float_t> assoc_weight(tr, "ReconstructedChargedParticlesAssociations.weight");
-  // TTreeReaderArray<Short_t> tracks_charge(tr,  "tracks_charge");
-  int trackSource = 0; // default track source is "all tracks"
 
   // calculate Q2 weights
   CalculateEventQ2Weights();
@@ -69,8 +67,10 @@ void AnalysisEpic::Execute()
 
   
 
+  cout << "begin event loop..." << endl;
   tr.SetEntriesRange(1,maxEvents);
   do{
+    if(tr.GetCurrentEntry()%10000==0) cout << tr.GetCurrentEntry() << " events..." << endl;
 
     // resets
     kin->ResetHFS();
@@ -88,7 +88,7 @@ void AnalysisEpic::Execute()
     std::map <int,int> trackidmap; // <index, index_mc>  
     std::map <int,int> trackstatmap; // <index, genstatus>
 
-    // ParticleEE vectors
+    // Particles vectors
     // The index of the vectors correspond to their for loop idx
     std::vector<Particles> genpart;    // mcID --> igen
     std::vector<Particles> mcpart;     // mcID --> imc
