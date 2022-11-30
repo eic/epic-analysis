@@ -2,7 +2,6 @@
 // Copyright (C) 2022 Gregory Matousek, Christopher Dilks
 
 #include "AnalysisEpic.h"
-#include "AnalysisEcce.h"
 
 AnalysisEpic::AnalysisEpic(TString infileName_, TString outfilePrefix_)
   : Analysis(infileName_, outfilePrefix_)
@@ -91,9 +90,9 @@ void AnalysisEpic::Execute()
 
     // ParticleEE vectors
     // The index of the vectors correspond to their for loop idx
-    std::vector<ParticlesEE> genpart;    // mcID --> igen
-    std::vector<ParticlesEE> mcpart;     // mcID --> imc
-    std::vector<ParticlesEE> trackpart;  // mcID --> (imc of matching mcpart) or (-1 if no match is found)
+    std::vector<Particles> genpart;    // mcID --> igen
+    std::vector<Particles> mcpart;     // mcID --> imc
+    std::vector<Particles> trackpart;  // mcID --> (imc of matching mcpart) or (-1 if no match is found)
 
     /*
       GenParticles loop
@@ -109,10 +108,10 @@ void AnalysisEpic::Execute()
       double e_  = hepmcp_E[igen];
      
       double p_ = sqrt(pow(hepmcp_psx[igen],2) + pow(hepmcp_psy[igen],2) + pow(hepmcp_psz[igen],2));
-      double mass_ = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;
+      double mass_ = (fabs(pid_)==211)?constants::pimass:(fabs(pid_)==321)?constants::kmass:(fabs(pid_)==11)?constants::emass:(fabs(pid_)==13)?constants::mumass:(fabs(pid_)==2212)?constants::pmass:0.;
 
       // Add to genpart
-      ParticlesEE part;
+      Particles part;
 
       part.pid=pid_;
       part.charge = (pid_ == 211 || pid_ == 321 || pid_ == 2212 || pid_ == -11 || pid_ == -13)?1:(pid_ == -211 || pid_ == -321 || pid_ == -2212 || pid_ == 11 || pid_ == 13)?-1:0;
@@ -138,7 +137,7 @@ void AnalysisEpic::Execute()
       double e_ = sqrt(px_*px_+py_*py_+pz_*pz_+m_*m_);
 
       // Add to mcpart
-      ParticlesEE part;
+      Particles part;
 
       part.pid=pid_;
       part.charge = (pid_ == 211 || pid_ == 321 || pid_ == 2212 || pid_ == -11 || pid_ == -13)?1:(pid_ == -211 || pid_ == -321 || pid_ == -2212 || pid_ == 11 || pid_ == 13)?-1:0;
@@ -174,7 +173,7 @@ void AnalysisEpic::Execute()
       double m_ = sqrt(e_*e_-px_*px_+py_*py_+pz_*pz_);
       
       // Add to trackpart
-      ParticlesEE part;
+      Particles part;
 
       part.pid=pid_;
       part.charge = (pid_ == 211 || pid_ == 321 || pid_ == 2212 || pid_ == -11 || pid_ == -13)?1:(pid_ == -211 || pid_ == -321 || pid_ == -2212 || pid_ == 11 || pid_ == 13)?-1:0;
@@ -215,7 +214,7 @@ void AnalysisEpic::Execute()
       Loop over MCParticles
     */
 
-    for(ParticlesEE mcpart_: mcpart){
+    for(auto mcpart_: mcpart){
 
       int imc = mcpart_.mcID;
       /* Beam particles have a MCParticles.generatorStatus of 4 */
@@ -259,7 +258,7 @@ void AnalysisEpic::Execute()
 
     int itrack = 0;
     bool recEleFound=false;
-    for(ParticlesEE trackpart_ : trackpart){
+    for(auto trackpart_ : trackpart){
       // Skip if there is no matching MCParticle
       if(trackidmap[itrack]==-1) continue;
       // If the trackidmap is linked to the genEleID (generated scattered electron), identify this reco particle as the electron
@@ -312,7 +311,7 @@ void AnalysisEpic::Execute()
       Fill output data structures (Histos, SimpleTree, etc.)
     */
 
-    for(ParticlesEE part : trackpart){
+    for(auto part : trackpart){
 
       int pid_ = part.pid;
       int mcid_ = part.mcID;
@@ -356,8 +355,8 @@ void AnalysisEpic::Execute()
 	if( writeParticleTree && HD->IsActiveEvent() )
 	  {
 	    int ipart = 0;
-	    for(ParticlesEE trackpart_: trackpart){
-	      ParticlesEE mcpart_;                  
+	    for(auto trackpart_: trackpart){
+	      Particles mcpart_;                  
 	      int mcpart_idx=trackidmap[ipart];     // Map idx to the matched MCParticle
 	      int genStat_ = -1;                    // Default Generator Status of MCParticle is -1 (no match)
 	      if(mcpart_idx>-1){                    // RecoParticle has an MCParticle match
@@ -386,10 +385,10 @@ void AnalysisEpic::Execute()
     // =======================================
     /*    
     int ipart = 0;
-    for(ParticlesEE trackpart_: trackpart) {
+    for(Particles trackpart_: trackpart) {
       cout << trackpart_.pid << "|" << trackpart_.vecPart.E() << "\t";
-      ParticlesEE genpart_;
-      ParticlesEE mcpart_;
+      Particles genpart_;
+      Particles mcpart_;
       int mcpart_idx=trackidmap[ipart];
       if(mcpart_idx>-1){ // Found MCParticle
 	mcpart_ = mcpart.at(mcpart_idx);

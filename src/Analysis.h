@@ -28,6 +28,7 @@
 #include "adage/BinSet.h"
 
 // sidis-eic
+#include "DataModel.h"
 #include "Histos.h"
 #include "HistosDAG.h"
 #include "Kinematics.h"

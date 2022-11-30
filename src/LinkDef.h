@@ -15,6 +15,7 @@
 #pragma link C++ class HistosDAG+;
 
 // analysis objects
+#pragma link C++ class DataModel+;
 #pragma link C++ class Kinematics+;
 #pragma link C++ class SimpleTree+;
 #pragma link C++ class ParticleTree+;
