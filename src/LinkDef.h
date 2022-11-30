@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Christopher Dilks, Duane Byer
+
 #ifdef __CINT__
 
 #pragma link off all globals;
@@ -25,6 +28,7 @@
 // analysis event loop classes
 #pragma link C++ class Analysis+;
 #pragma link C++ class AnalysisEpic+;
+#pragma link C++ class AnalysisEpicPodio+;
 #pragma link C++ class AnalysisAthena+;
 #pragma link C++ class AnalysisEcce+;
 #ifndef EXCLUDE_DELPHES

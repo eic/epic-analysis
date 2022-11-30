@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Christopher Dilks, Connor Pecar, Duane Byer, Matthew McEneaney, Brian Page
+
 #include "AnalysisDelphes.h"
 
 ClassImp(AnalysisDelphes)
@@ -151,11 +154,17 @@ void AnalysisDelphes::Execute() {
     if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
     if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
 
-    // get vector of jets
-    // TODO: should this have an option for clustering method?
-    if(includeOutputSet["jets"])
-      kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
-   
+    // Get the weight for this event's Q2
+    auto Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
+
+    // fill inclusive histograms, if only `inclusive` is included in output
+    // (otherwise they will be filled in track and jet loops)
+    if(includeOutputSet["inclusive_only"]) {
+      auto wInclusive = Q2weightFactor * weightInclusive->GetWeight(*kinTrue);
+      wInclusiveTotal += wInclusive;
+      FillHistosInclusive(wInclusive);
+    }
+
     // track loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     itTrack.Reset();
     while(Track *trk = (Track*) itTrack()) {
@@ -207,14 +216,12 @@ void AnalysisDelphes::Execute() {
       //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
       //kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
   
-      // Get index of file that the event comes from.
-      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
-      wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
-      wTrackTotal += wTrack;
-
       if(includeOutputSet["1h"]) {
-        // fill track histograms in activated bins
-        FillHistosTracks();
+        // fill single-hadron histograms in activated bins
+        auto wTrack = Q2weightFactor * weightTrack->GetWeight(*kinTrue);
+        wTrackTotal += wTrack;
+        FillHistos1h(wTrack);
+        FillHistosInclusive(wTrack);
 
         // fill simple tree
         // - not binned
@@ -230,14 +237,19 @@ void AnalysisDelphes::Execute() {
 
     // jet loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     if(includeOutputSet["jets"]) {
+
+      // get vector of jets
+      // TODO: should this have an option for clustering method?
+      //kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
+      kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle, jetAlg, jetRad, jetMin);
+
       finalStateID = "jet";
 
 #ifdef INCLUDE_CENTAURO
       if(useBreitJets) kin->GetBreitFrameJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
 #endif
 
-      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
-      wJet = Q2weightFactor * weightJet->GetWeight(*kinTrue); // TODO: should we separate weights for breit and non-breit jets?
+      auto wJet = Q2weightFactor * weightJet->GetWeight(*kinTrue); // TODO: should we separate weights for breit and non-breit jets?
       wJetTotal += wJet;
 
       Int_t nJets;
@@ -254,10 +266,14 @@ void AnalysisDelphes::Execute() {
         } else {
           jet = kin->jetsRec[i];
           kin->CalculateJetKinematics(jet);
+
+	  // Match Reco Jet to Nearest Truth Jet (Specify DR matching limit between jets)
+	  kin->CalculateJetResolution(jetMatchDR);
         };
 
         // fill jet histograms in activated bins
-        FillHistosJets();
+        FillHistosJets(wJet);
+        FillHistosInclusive(wJet);
 
       };
     }; // end jet loop

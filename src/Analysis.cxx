@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Christopher Dilks, Connor Pecar, Duane Byer, Sanghwa Park, Matthew McEneaney, Brian Page
+
 #include "Analysis.h"
 
 ClassImp(Analysis)
@@ -47,6 +50,8 @@ Analysis::Analysis(
 #ifndef EXCLUDE_DELPHES
   availableBinSchemes.insert({ "JetPT", "jet p_{T}" });
   availableBinSchemes.insert({ "JetZ",  "jet z"     });
+  availableBinSchemes.insert({ "JetEta", "jet eta" });
+  availableBinSchemes.insert({ "JetE", "jet energy" });
 #endif
 
   // available final states
@@ -93,9 +98,14 @@ Analysis::Analysis(
   maxEvents = 0;
   useBreitJets = false;
   errorCntMax     = 1000;
+  jetAlg          = 0; // Default to kT Algorithm
+  jetRad          = 0.8;
+  jetMin          = 1.0; // Minimum Jet pT
+  jetMatchDR      = 0.5; // Delta R between true and reco jet to be considered matched
 
-  weight = new WeightsUniform();
-  weightJet = new WeightsUniform();
+  weightInclusive = new WeightsUniform();
+  weightTrack     = new WeightsUniform();
+  weightJet       = new WeightsUniform();
 
   // miscellaneous
   infiles.clear();
@@ -301,6 +311,7 @@ void Analysis::Prepare() {
   kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
   kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
   ST = new SimpleTree("tree",kin,kinTrue);
+  HFST = new HFSTree("hfstree",kin,kinTrue);
 
   // if including jets, define a `jet` final state
 #ifndef EXCLUDE_DELPHES
@@ -310,8 +321,13 @@ void Analysis::Prepare() {
   }
 #endif
 
-  HFST = new HFSTree("hfstree",kin,kinTrue);
-  
+  // determine if only including `inclusive` output set
+  includeOutputSet.insert({ "inclusive_only",
+      includeOutputSet["inclusive"]
+      && !includeOutputSet["1h"]
+      && !includeOutputSet["jets"]
+      });
+
   // if there are no final states defined, default to definitions here:
   if(BinScheme("finalState")->GetNumBins()==0) {
     std::cout << "NOTE: adding pi+ tracks for final state, since you specified none" << std::endl;
@@ -354,6 +370,8 @@ void Analysis::Prepare() {
 #ifndef EXCLUDE_DELPHES
   HD->SetBinSchemeValue("JetPT", [this](){ return kin->pTjet;                   });
   HD->SetBinSchemeValue("JetZ",  [this](){ return kin->zjet;                    });
+  HD->SetBinSchemeValue("JetEta", [this](){ return kin->etajet;                 });
+  HD->SetBinSchemeValue("JetE", [this](){ return kin->ejet;           });
 #endif
 
   // some bin schemes values are checked here, instead of by CutDef checks ("External" cut type)
@@ -489,6 +507,22 @@ void Analysis::Prepare() {
       HS->DefineHist1D("JetQT",    "jet q_{T}",      "GeV", NBINS, 0,    10.0);
       HS->DefineHist1D("JetJperp", "j_{#perp}",      "GeV", NBINS, 1e-2, 3.0, true, true);
       HS->DefineHist1D("JetQTQ",   "jet q_{T}/Q",    "",    NBINS, 0,    3.0);
+      HS->DefineHist1D("JetE","jet Energy","GeV", NBINS, 1e-2, 100);
+      HS->DefineHist1D("JetM","jet Mass","GeV", NBINS, 1e-2, 20);
+
+      HS->DefineHist2D("JetPTVsEta","Eta","pT","GeV","",100,-5,5,100,0,50,false,false);
+
+      // Resolution Plos
+      HS->DefineHist1D("JetDeltaR","deltaR between matched reco and truth jet","",1000,-2.,10.);
+ 
+      HS->DefineHist2D("JetPTTrueVsReco","Reco pT","True pT","GeV","GeV",100,0.,50.,100,0.,50.,false,false);
+      HS->DefineHist2D("JetETrueVsReco","Reco E","True E","GeV","GeV",100,0.,100.,100,0.,100.,false,false);
+ 
+      HS->DefineHist2D("JetResPTVsTruePT","True pT","(Reco-True)/True pT","GeV","",100,0.,50.,10000,-10.,10.,false,false);
+      HS->DefineHist2D("JetResEVsTrueE","True E","(Reco-True)/True E","GeV","",100,0.,100.,10000,-10.,10.,false,false);
+      
+      HS->DefineHist2D("JetResPTVsRecoPT","Reco pT","(Reco-True)/True pT","GeV","",100,0.,50.,10000,-10.,10.,false,false);
+      HS->DefineHist2D("JetResEVsRecoE","Reco E","(Reco-True)/True E","GeV","",100,0.,100.,10000,-10.,10.,false,false);
     }
 #endif
 
@@ -523,8 +557,9 @@ void Analysis::Prepare() {
 
 
   // initialize total weights
-  wTrackTotal = 0.;
-  wJetTotal = 0.;
+  wInclusiveTotal = 0.;
+  wTrackTotal     = 0.;
+  wJetTotal       = 0.;
 };
 
 void Analysis::CalculateEventQ2Weights() {
@@ -629,11 +664,13 @@ void Analysis::Finish() {
   if(writeHFSTree) HFST->WriteTree();
   HD->Payload([this](Histos *H){ H->WriteHists(outFile); }); HD->ExecuteAndClearOps();
   HD->Payload([this](Histos *H){ H->Write(); }); HD->ExecuteAndClearOps();
-  std::vector<Double_t> vec_wTrackTotal { wTrackTotal };
-  std::vector<Double_t> vec_wJetTotal { wJetTotal };
+  std::vector<Double_t> vec_wInclusiveTotal { wInclusiveTotal };
+  std::vector<Double_t> vec_wTrackTotal     { wTrackTotal     };
+  std::vector<Double_t> vec_wJetTotal       { wJetTotal       };
   outFile->WriteObject(&Q2xsecs, "XsTotal");
-  outFile->WriteObject(&vec_wTrackTotal, "WeightTotal");
-  outFile->WriteObject(&vec_wJetTotal, "WeightJetTotal");
+  outFile->WriteObject(&vec_wInclusiveTotal, "WeightInclusiveTotal");
+  outFile->WriteObject(&vec_wTrackTotal,     "WeightTrackTotal");
+  outFile->WriteObject(&vec_wJetTotal,       "WeightJetTotal");
 
   // write binning schemes
   for(auto const &kv : binSchemes) {
@@ -698,41 +735,56 @@ void Analysis::AddFinalState(TString finalStateN) {
 // - checks which bins the track/jet/etc. falls in
 // - fills the histograms in the associated Histos objects
 //--------------------------------------------------------------------------
-// tracks (single particles)
-void Analysis::FillHistosTracks() {
 
+// fill histograms (called by other specific FillHistos* methods)
+void Analysis::FillHistos(std::function<void(Histos*)> fill_payload) {
   // check which bins to fill, and activate the ones for which all defined cuts pass
   // (activates their corresponding `HistosDAG` nodes)
   HD->CheckBins();
-
   // fill histograms, for activated bins only
-  HD->Payload([this](Histos *H){
+  HD->Payload(fill_payload);
+  // execute the payload
+  // - save time and don't call `ClearOps` (next loop will overwrite lambda)
+  // - called with `activeNodesOnly==true` since we only want to fill bins associated
+  //   with this track
+  HD->ExecuteOps(true);
+};
+
+// fill inclusive histograms
+void Analysis::FillHistosInclusive(Double_t wgt) {
+  auto fill_payload = [this,wgt] (Histos *H) {
+    H->FillHist2D("Q2vsX", kin->x,  kin->Q2, wgt);
+    H->FillHist1D("Q2",    kin->Q2, wgt);
+    H->FillHist1D("x",     kin->x,  wgt);
+    H->FillHist1D("W",     kin->W,  wgt);
+    H->FillHist1D("y",     kin->y,  wgt);
+  };
+  FillHistos(fill_payload);
+};
+
+// fill 1h (single-hadron) histograms
+void Analysis::FillHistos1h(Double_t wgt) {
+  auto fill_payload = [this,wgt] (Histos *H) {
     // Full phase space.
-    H->FillHist4D("full_xsec", kin->x, kin->Q2, kin->pT, kin->z, wTrack);
-    // DIS kinematics
-    H->FillHist2D("Q2vsX", kin->x,  kin->Q2, wTrack);
-    H->FillHist1D("Q2",    kin->Q2, wTrack);
-    H->FillHist1D("x",     kin->x,  wTrack);
-    H->FillHist1D("W",     kin->W,  wTrack);
-    H->FillHist1D("y",     kin->y,  wTrack);
+    H->FillHist4D("full_xsec", kin->x, kin->Q2, kin->pT, kin->z, wgt);
     // hadron 4-momentum
-    H->FillHist1D("pLab",   kin->pLab,   wTrack);
-    H->FillHist1D("pTlab",  kin->pTlab,  wTrack);
-    H->FillHist1D("etaLab", kin->etaLab, wTrack);
-    H->FillHist1D("phiLab", kin->phiLab, wTrack);
+    H->FillHist1D("pLab",   kin->pLab,   wgt);
+    H->FillHist1D("pTlab",  kin->pTlab,  wgt);
+    H->FillHist1D("etaLab", kin->etaLab, wgt);
+    H->FillHist1D("phiLab", kin->phiLab, wgt);
     // hadron kinematics
-    H->FillHist1D("z",  kin->z,  wTrack);
-    H->FillHist1D("pT", kin->pT, wTrack);
-    H->FillHist1D("qT", kin->qT, wTrack);
-    if(kin->Q2!=0) H->FillHist1D("qTq",kin->qT/TMath::Sqrt(kin->Q2),wTrack);
-    H->FillHist1D("mX",         kin->mX,   wTrack);
-    H->FillHist1D("phiH",       kin->phiH, wTrack);
-    H->FillHist1D("phiS",       kin->phiS, wTrack);
-    H->FillHist2D("phiHvsPhiS", kin->phiS, kin->phiH, wTrack);
-    H->FillHist1D("phiSivers",  Kinematics::AdjAngle(kin->phiH - kin->phiS), wTrack);
-    H->FillHist1D("phiCollins", Kinematics::AdjAngle(kin->phiH + kin->phiS), wTrack);
-    H->FillHist2D("etaVsP",       kin->pLab, kin->etaLab, wTrack); // TODO: lab-frame p, or some other frame?
-    H->FillHist2D("etaVsPcoarse", kin->pLab, kin->etaLab, wTrack);
+    H->FillHist1D("z",  kin->z,  wgt);
+    H->FillHist1D("pT", kin->pT, wgt);
+    H->FillHist1D("qT", kin->qT, wgt);
+    if(kin->Q2!=0) H->FillHist1D("qTq",kin->qT/TMath::Sqrt(kin->Q2),wgt);
+    H->FillHist1D("mX",         kin->mX,   wgt);
+    H->FillHist1D("phiH",       kin->phiH, wgt);
+    H->FillHist1D("phiS",       kin->phiS, wgt);
+    H->FillHist2D("phiHvsPhiS", kin->phiS, kin->phiH, wgt);
+    H->FillHist1D("phiSivers",  Kinematics::AdjAngle(kin->phiH - kin->phiS), wgt);
+    H->FillHist1D("phiCollins", Kinematics::AdjAngle(kin->phiH + kin->phiS), wgt);
+    H->FillHist2D("etaVsP",       kin->pLab, kin->etaLab, wgt); // TODO: lab-frame p, or some other frame?
+    H->FillHist2D("etaVsPcoarse", kin->pLab, kin->etaLab, wgt);
     // depolarization
     if(includeOutputSet["depolarization"]) { // not necessary, but done for performance
       std::map<TString,Double_t> depols = {
@@ -746,79 +798,81 @@ void Analysis::FillHistosTracks() {
         { "depolWA", kin->depolP4 }
       };
       for(auto [name,val] : depols) {
-        H->FillHist2D(name+"vsQ2",    kin->Q2, val,     wTrack);
-        H->FillHist2D(name+"vsY",     kin->y,  val,     wTrack);
-        H->FillHist3D(name+"vsQ2vsX", kin->x,  kin->Q2, val, wTrack);
+        H->FillHist2D(name+"vsQ2",    kin->Q2, val,     wgt);
+        H->FillHist2D(name+"vsY",     kin->y,  val,     wgt);
+        H->FillHist3D(name+"vsQ2vsX", kin->x,  kin->Q2, val, wgt);
       }
     }
     // cross sections (divide by lumi after all events processed)
-    H->FillHist1D("Q_xsec", TMath::Sqrt(kin->Q2), wTrack);
+    H->FillHist1D("Q_xsec", TMath::Sqrt(kin->Q2), wgt);
     // resolutions
-    H->FillHist1D("x_Res",  kin->x - kinTrue->x,   wTrack );
-    H->FillHist1D("y_Res",  kin->y - kinTrue->y,   wTrack );
-    H->FillHist1D("Q2_Res", kin->Q2 - kinTrue->Q2, wTrack );
-    H->FillHist1D("W_Res",  kin->W - kinTrue->W,   wTrack );
-    H->FillHist1D("Nu_Res", kin->Nu - kinTrue->Nu, wTrack );
-    H->FillHist1D("phiH_Res",  Kinematics::AdjAngle(kin->phiH - kinTrue->phiH), wTrack );
-    H->FillHist1D("phiS_Res",  Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wTrack );
-    H->FillHist1D("pT_Res",    kin->pT - kinTrue->pT, wTrack );
-    H->FillHist1D("z_Res",     kin->z - kinTrue->z,   wTrack );
-    H->FillHist1D("mX_Res",    kin->mX - kinTrue->mX, wTrack );
-    H->FillHist1D("xF_Res",    kin->xF - kinTrue->xF, wTrack );
-    H->FillHist2D("Q2vsXtrue", kinTrue->x,            kinTrue->Q2, wTrack);
+    H->FillHist1D("x_Res",  kin->x - kinTrue->x,   wgt );
+    H->FillHist1D("y_Res",  kin->y - kinTrue->y,   wgt );
+    H->FillHist1D("Q2_Res", kin->Q2 - kinTrue->Q2, wgt );
+    H->FillHist1D("W_Res",  kin->W - kinTrue->W,   wgt );
+    H->FillHist1D("Nu_Res", kin->Nu - kinTrue->Nu, wgt );
+    H->FillHist1D("phiH_Res",  Kinematics::AdjAngle(kin->phiH - kinTrue->phiH), wgt );
+    H->FillHist1D("phiS_Res",  Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wgt );
+    H->FillHist1D("pT_Res",    kin->pT - kinTrue->pT, wgt );
+    H->FillHist1D("z_Res",     kin->z - kinTrue->z,   wgt );
+    H->FillHist1D("mX_Res",    kin->mX - kinTrue->mX, wgt );
+    H->FillHist1D("xF_Res",    kin->xF - kinTrue->xF, wgt );
+    H->FillHist2D("Q2vsXtrue", kinTrue->x,            kinTrue->Q2, wgt);
     if(kinTrue->z!=0)
-      H->FillHist2D("Q2vsX_zres", kinTrue->x, kinTrue->Q2, wTrack*( fabs(kinTrue->z - kin->z)/(kinTrue->z) ) );
+      H->FillHist2D("Q2vsX_zres", kinTrue->x, kinTrue->Q2, wgt*( fabs(kinTrue->z - kin->z)/(kinTrue->z) ) );
     if(kinTrue->pT!=0)
-      H->FillHist2D("Q2vsX_pTres", kinTrue->x, kinTrue->Q2, wTrack*( fabs(kinTrue->pT - kin->pT)/(kinTrue->pT) ) );
-    H->FillHist2D("Q2vsX_phiHres", kinTrue->x, kinTrue->Q2, wTrack*( fabs(Kinematics::AdjAngle(kinTrue->phiH - kin->phiH) ) ) );
-    
+      H->FillHist2D("Q2vsX_pTres", kinTrue->x, kinTrue->Q2, wgt*( fabs(kinTrue->pT - kin->pT)/(kinTrue->pT) ) );
+    H->FillHist2D("Q2vsX_phiHres", kinTrue->x, kinTrue->Q2, wgt*( fabs(Kinematics::AdjAngle(kinTrue->phiH - kin->phiH) ) ) );
+
     auto htrue = H->Hist("Q2vsXtrue",true);
     if(htrue!=nullptr) {
       if( htrue->FindBin(kinTrue->x,kinTrue->Q2) == htrue->FindBin(kin->x,kin->Q2) )
-        H->FillHist2D("Q2vsXpurity", kin->x, kin->Q2, wTrack);
+        H->FillHist2D("Q2vsXpurity", kin->x, kin->Q2, wgt);
     }
-    
     // -- reconstructed vs. generated
-    H->FillHist2D("x_RvG",    kinTrue->x,    kin->x,    wTrack);
-    H->FillHist2D("phiH_RvG", kinTrue->phiH, kin->phiH, wTrack);
-    H->FillHist2D("phiS_RvG", kinTrue->phiS, kin->phiS, wTrack);
-  });
-  // execute the payload
-  // - save time and don't call `ClearOps` (next loop will overwrite lambda)
-  // - called with `activeNodesOnly==true` since we only want to fill bins associated
-  //   with this track
-  HD->ExecuteOps(true);
+    H->FillHist2D("x_RvG",    kinTrue->x,    kin->x,    wgt);
+    H->FillHist2D("phiH_RvG", kinTrue->phiH, kin->phiH, wgt);
+    H->FillHist2D("phiS_RvG", kinTrue->phiS, kin->phiS, wgt);
+  };
+  FillHistos(fill_payload);
 };
 
-
-// jets
+// fill jet histograms
+void Analysis::FillHistosJets(Double_t wgt) {
 #ifndef EXCLUDE_DELPHES
-void Analysis::FillHistosJets() {
-
-  // check which bins to fill
-  HD->CheckBins();
-
-  // fill histograms, for activated bins only
-  HD->Payload([this](Histos *H){
-    H->FillHist2D("Q2vsX",   kin->x,     kin->Q2, wJet);
+  auto fill_payload = [this,wgt] (Histos *H) {
     // jet kinematics
-    H->FillHist1D("JetPT",  kin->pTjet, wJet);
-    H->FillHist1D("JetMT",  jet.mt(),   wJet);
-    H->FillHist1D("JetZ",   kin->zjet,  wJet);
-    H->FillHist1D("JetEta", jet.eta(),  wJet);
-    H->FillHist1D("JetQT",  kin->qTjet, wJet);
-    if(kin->Q2!=0) H->FillHist1D("JetQTQ", kin->qTjet/sqrt(kin->Q2), wJet);
+    H->FillHist1D("JetPT",  kin->pTjet,  wgt);
+    H->FillHist1D("JetMT",  kin->mTjet,  wgt);
+    H->FillHist1D("JetZ",   kin->zjet,   wgt);
+    H->FillHist1D("JetEta", kin->etajet, wgt);
+    H->FillHist1D("JetQT",  kin->qTjet,  wgt);
+    H->FillHist1D("JetE",   kin->ejet,   wgt);
+    H->FillHist1D("JetM",   kin->mjet,   wgt);
+
+    H->FillHist2D("JetPTVsEta", kin->etajet, kin->pTjet, wgt);
+
+    // Fill Resolution Histos
+    H->FillHist1D("JetDeltaR", kin->deltaRjet, wgt);
+
+    H->FillHist2D("JetPTTrueVsReco", kin->pTjet, kin->pTmtjet, wgt);
+    H->FillHist2D("JetETrueVsReco", kin->ejet, kin->emtjet, wgt);
+
+    H->FillHist2D("JetResPTVsTruePT", kin->pTmtjet, (kin->pTjet - kin->pTmtjet)/(kin->pTmtjet), wgt);
+    H->FillHist2D("JetResEVsTrueE", kin->emtjet, (kin->ejet - kin->emtjet)/(kin->emtjet), wgt);
+
+    H->FillHist2D("JetResPTVsRecoPT", kin->pTjet, (kin->pTjet - kin->pTmtjet)/(kin->pTmtjet), wgt);
+    H->FillHist2D("JetResEVsRecoE", kin->ejet, (kin->ejet - kin->emtjet)/(kin->emtjet), wgt);
+
+    if(kin->Q2!=0) H->FillHist1D("JetQTQ", kin->qTjet/sqrt(kin->Q2), wgt);
     for(int j = 0; j < kin->jperp.size(); j++) {
-      H->FillHist1D("JetJperp", kin->jperp[j], wJet);
+      H->FillHist1D("JetJperp", kin->jperp[j], wgt);
     };
-  });
-  // execute the payload
-  // - save time and don't call `ClearOps` (next loop will overwrite lambda)
-  // - called with `activeNodesOnly==true` since we only want to fill bins associated
-  //   with this jet
-  HD->ExecuteOps(true);
-};
+  };
+  FillHistos(fill_payload);
 #endif
+};
+
 
 // print an error; if more than `errorCntMax` errors are printed, printing is suppressed
 void Analysis::ErrorPrint(std::string message) {

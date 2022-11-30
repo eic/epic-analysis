@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Duane Byer
+
 Double_t const PI = TMath::Pi();
 
 Double_t const bins_x[] = {  0.01, 0.0316, 0.1, 0.316, 1. };

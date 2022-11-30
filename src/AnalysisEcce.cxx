@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Ralf Seidl, Christopher Dilks, Sanghwa Park
+
 #include "AnalysisEcce.h"
 
 using std::map;
@@ -328,10 +331,20 @@ void AnalysisEcce::Execute()
     if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
     if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
 
+    // Get the weight for this event's Q2
+    auto Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
+
     //fill HFS tree here?
     if( writeHFSTree && kin->nHFS > 0) HFST->FillTree(1.0);
-    
-    
+
+    // fill inclusive histograms, if only `inclusive` is included in output
+    // (otherwise they will be filled in track and jet loops)
+    if(includeOutputSet["inclusive_only"]) {
+      auto wInclusive = Q2weightFactor * weightInclusive->GetWeight(*kinTrue);
+      wInclusiveTotal += wInclusive;
+      FillHistosInclusive(wInclusive);
+    }
+
     // loop over reconstructed particles again
     /* - calculate hadron kinematics
      * - fill output data structures (Histos, SimpleTree, etc.)
@@ -384,13 +397,13 @@ void AnalysisEcce::Execute()
       // kin->tSpin = kinTrue->tSpin; // copy to "reconstructed" tSpin
 
       // weighting
-      Double_t Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
-      wTrack = Q2weightFactor * weight->GetWeight(*kinTrue);
+      auto wTrack = Q2weightFactor * weightTrack->GetWeight(*kinTrue);
       wTrackTotal += wTrack;
 
       if(includeOutputSet["1h"]) {
-        // fill track histograms in activated bins
-        FillHistosTracks();
+        // fill single-hadron histograms in activated bins
+        FillHistos1h(wTrack);
+        FillHistosInclusive(wTrack);
 
         // fill simple tree
         // - not binned

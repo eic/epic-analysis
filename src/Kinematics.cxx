@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Christopher Dilks, Connor Pecar, Duane Byer, Sanghwa Park, Brian Page
+
 /* NOTE:
  * if you make changes, MAINTAIN DOCUMENTATION IN ../doc/kinematics.md
  */
@@ -773,7 +776,8 @@ int Kinematics::GetTrackPID(
 
 void Kinematics::GetJets(
     TObjArrayIter itEFlowTrack, TObjArrayIter itEFlowPhoton,
-    TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle
+    TObjArrayIter itEFlowNeutralHadron, TObjArrayIter itParticle,
+    int jetAlgo, double jetRadius, double jetMinPt
     )
 {
   itEFlowTrack.Reset();
@@ -795,15 +799,17 @@ void Kinematics::GetJets(
   // looping over final state particles, adding to particles vector
   while(Track *eflowTrack = (Track*)itEFlowTrack() ){
     TLorentzVector eflowTrackp4 = eflowTrack->P4();
+    GenParticle *trackParticle = (GenParticle*)eflowTrack->Particle.GetObject();
+    int partPID = std::abs(trackParticle->PID);
     if(!isnan(eflowTrackp4.E())){
       if(std::abs(eflowTrack->Eta) < 4.0 && eflowTrack->PT > 0.1){
         this->TransformToHeadOnFrame(eflowTrackp4,eflowTrackp4);
-        particles.push_back(fastjet::PseudoJet(eflowTrackp4.Px(),eflowTrackp4.Py(),eflowTrackp4.Pz(),eflowTrackp4.E()));
+        if(partPID != 11) particles.push_back(fastjet::PseudoJet(eflowTrackp4.Px(),eflowTrackp4.Py(),eflowTrackp4.Pz(),eflowTrackp4.E()));
 
-        GenParticle *trackParticle = (GenParticle*)eflowTrack->Particle.GetObject();
+        //GenParticle *trackParticle = (GenParticle*)eflowTrack->Particle.GetObject();
         TLorentzVector partp4 = trackParticle->P4();
         this->TransformToHeadOnFrame(partp4,partp4);
-        particlesTrue.push_back(fastjet::PseudoJet(partp4.Px(),partp4.Py(),partp4.Pz(),partp4.E()));
+        if(partPID != 11) particlesTrue.push_back(fastjet::PseudoJet(partp4.Px(),partp4.Py(),partp4.Pz(),partp4.E()));
 
         jetConstituents.insert({eflowTrackp4.Px(), eflowTrack->PID});
       }
@@ -845,14 +851,18 @@ void Kinematics::GetJets(
     }
   }
 
-  //double R = 0.8*(M_PI/2.0);
-  double R = 0.8;
-  fastjet::JetDefinition jet_def(fastjet::antikt_algorithm, R);
+  // Set Jet Definition
+  fastjet::JetDefinition jet_def(fastjet::kt_algorithm, jetRadius);
+
+  // Redefine Jet Algo Based on Macro Input
+  // Default is jetAlgo = 0 which is kt_algorithm
+  if(jetAlgo == 1) jet_def.set_jet_algorithm(fastjet::cambridge_algorithm);
+  if(jetAlgo == 2) jet_def.set_jet_algorithm(fastjet::antikt_algorithm);
 
   csRec = fastjet::ClusterSequence(particles, jet_def);
   csTrue = fastjet::ClusterSequence(particlesTrue, jet_def);
-  jetsRec = sorted_by_pt(csRec.inclusive_jets());
-  jetsTrue = sorted_by_pt(csTrue.inclusive_jets());
+  jetsRec = sorted_by_pt(csRec.inclusive_jets(jetMinPt));
+  jetsTrue = sorted_by_pt(csTrue.inclusive_jets(jetMinPt));
 
 };
 
@@ -865,6 +875,11 @@ void Kinematics::CalculateJetKinematics(fastjet::PseudoJet jet){
 
   zjet = (vecIonBeam.Dot(pjet))/((vecIonBeam).Dot(vecQ));
   pTjet = jet.pt(); // lab frame pT
+  mTjet = jet.mt(); // Transverse Mass
+  etajet = jet.eta(); // Jet Pseudorapidity
+  phijet = jet.phi(); // Jet Phi
+  mjet = jet.m(); // Jet Mass
+  ejet = jet.e(); // Jet Energy
 
   jperp.clear();
   zhad_jet.clear();
@@ -894,6 +909,45 @@ void Kinematics::CalculateJetKinematics(fastjet::PseudoJet jet){
       }
     }
   }
+};
+
+
+void Kinematics::CalculateJetResolution(double deltaRCut){
+  // Find Matching Truth-level Jet for each Reco Jet
+  double minDeltaR = 100000.0;
+  double matchIndex = -1;
+  for(unsigned int jt=0; jt<jetsTrue.size(); jt++)
+    {
+      double deltaEta = etajet - jetsTrue[jt].eta();
+      double deltaPhi = TVector2::Phi_mpi_pi(phijet - jetsTrue[jt].phi());
+      double deltaR = TMath::Sqrt(deltaEta*deltaEta + deltaPhi*deltaPhi);
+
+      if(deltaR < minDeltaR)
+	{
+	  minDeltaR = deltaR;
+	  matchIndex = jt;
+	}
+    }
+
+  // Pass DeltaR to Saved Variables
+  if(matchIndex == -1)
+    deltaRjet = -1.0;
+  else
+    deltaRjet = minDeltaR;
+
+  // Calculate Resolution for Matched Jets
+  if(minDeltaR < deltaRCut && matchIndex != -1) matchStatusjet = 0; // Matched Jet Found
+  if(minDeltaR > deltaRCut && matchIndex != -1) matchStatusjet = 1; // True Jet Found, but Outside Match Criteria
+  if(matchIndex == -1) matchStatusjet = 2; // No True Jet Found
+  if(minDeltaR < deltaRCut && matchIndex != -1)
+    {
+      pTmtjet = jetsTrue[matchIndex].pt(); // lab frame matched true jet pT
+      mTmtjet = jetsTrue[matchIndex].mt(); // Matched true Jet Transverse Mass
+      etamtjet = jetsTrue[matchIndex].eta(); // Matched true Jet Pseudorapidity
+      phimtjet = jetsTrue[matchIndex].phi(); // Matched true Jet Phi
+      mmtjet = jetsTrue[matchIndex].m(); // Matched True Jet Mass
+      emtjet= jetsTrue[matchIndex].e(); // Matched true Jet Energy
+    }
 };
 
 

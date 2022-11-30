@@ -56,6 +56,7 @@ For each hadron, set `vecHadron`, the hadron 4-momentum
 #### For Jets
 Currently implemented in `AnalysisDelphes` only!
 - call `GetJets`, which does the work
+- added flags to choose jet algorithm, jet radius, and minimum jet pT
 - alternatively, call `GetBreitFrameJets` (requires Centauro)
 
 ---
@@ -219,6 +220,18 @@ void CalculateBreitJetKinematics(fastjet::PseudoJet jet);
 ---
 
 
+#### Find Truth Jets Matching Reco Jets
+```c
+void CalculateJetResolution(fastjet::PseudoJet jet);
+```
+
+- requires that GetJets and  CalculateJetKinematics has run
+- for the input reconstructed jet, find the closest truth level jet
+- pass the kinematics of the matched truth level jet
+
+---
+
+
 ### Boosts
 
 Several boost methods are available. For all of these, the first
@@ -313,6 +326,9 @@ TLorentzVector vecElectron, vecW, vecQ;
 TLorentzVector vecHadron;
 
 // jet objects
+int jetAlgo;
+double jetRad, jetMinPt; 
+
 std::vector<fastjet::PseudoJet> jetsRec, jetsTrue;
 std::vector<fastjet::PseudoJet> breitJetsRec, breitJetsTrue;
 std::map<double, int> jetConstituents;
@@ -320,7 +336,10 @@ fastjet::ClusterSequence csRec;
 fastjet::ClusterSequence csTrue;
 
 // jet variables
-Double_t zjet, pTjet, qTjet;
+Double_t zjet, pTjet, qTjet, mTjet, etajet, phijet, mjet, ejet;
+Double_t deltaRjet;
+int matchStatusjet;
+Double_t pTmtjet, mTmtjet, etamtjet, phimtjet, mmtjet, emtjet;
 std::vector<double> jperp;
 std::vector<double> zhad_jet;
 Double_t quarkpT; // struck quark information
