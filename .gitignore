@@ -1,5 +1,6 @@
 # main ignores
 .*.sw*
+*~
 *.hepmc*
 *.root
 *.pcm
