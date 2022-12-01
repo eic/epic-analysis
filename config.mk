@@ -19,6 +19,10 @@ LIBS = $(shell root-config --glibs)
 
 # Data Model (PODIO + EDM4hep + EDM4eic)
 LIBS += -L/usr/local/lib -lpodio -lpodioRootIO -ledm4hep -ledm4eic
+
+#PYBIND
+LIBS += -lcrypto -lintl -ldl -lm -lpython3.10
+
 # Miscellaneous
 LIBS += -lfmt
 
@@ -44,9 +48,6 @@ LIBS += -L${MSTWPDF_HOME} -lmstwpdf
 # ADAGE
 DEPS += -I${ADAGE_HOME}/include
 LIBS += -L${ADAGE_HOME}/lib -lAdage
-
-#PYTHON LIBRARY
-LIBS += -L/usr/local/lib -lpython3.10
 
 # SIDIS-EIC
 ifndef SIDIS_EIC_HOME
