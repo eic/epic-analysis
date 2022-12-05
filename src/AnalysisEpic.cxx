@@ -170,7 +170,6 @@ void AnalysisEpic::Execute()
       double py_ = recparts_p_y[irec];
       double pz_ = recparts_p_z[irec];
       double e_ = recparts_e[irec];
-      double m_ = sqrt(e_*e_-px_*px_+py_*py_+pz_*pz_);
       
       // Add to recpart
       Particles part;
@@ -178,6 +177,8 @@ void AnalysisEpic::Execute()
       part.pid=pid_;
       part.charge = (pid_ == 211 || pid_ == 321 || pid_ == 2212 || pid_ == -11 || pid_ == -13)?1:(pid_ == -211 || pid_ == -321 || pid_ == -2212 || pid_ == 11 || pid_ == 13)?-1:0;
       part.vecPart.SetPxPyPzE(px_,py_,pz_,e_);
+
+      double m_ = part.vecPart.M();
 
       /*
 	Read through Associations to match particles
