@@ -4,8 +4,8 @@
 R__LOAD_LIBRARY(Sidis-eic)
 
 // make kinematics coverage plots, such as eta vs. p in bins of (x,Q2)
-void postprocess_dd4hep_draw(
-    TString infile="out/tutorial.dd4hep.root"
+void postprocess_epic_draw(
+    TString infile="out/tutorial.epic.root"
 ) {
 
   // setup postprocessor ========================================

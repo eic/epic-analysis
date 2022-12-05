@@ -40,15 +40,15 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
 
 
 ### Full Simulation
-- full simulation files can be streamed from S3 using `tutorial/s3files.*.config` config files
-- use `s3tools/` scripts to make new config files, download files from S3, and more; for example:
+- use `s3tools/` scripts to make `config` files, download files from S3, and more; for example:
 ```bash
-s3tools/make-athena-config.sh 10x100 tutorial.athena s 8  # stream ATHENA files
-s3tools/make-ecce-config.sh 10x100 tutorial.ecce d 12     # download ECCE files
+s3tools/make-epic-config.sh 10x100 tutorial.epic s 4  # stream EPIC files
+s3tools/make-ecce-config.sh 10x100 tutorial.ecce d 12 # download ECCE files (legacy production from Fun4all+EventEvaluator)
 ```
 - run `s3tools/` scripts with no arguments to print usage guide
 - downloading from S3 is preferred, if disk space is available
-
+- similar to the fast simulations, note where the `config` file is produced; the tutorial
+  macros require this file as an argument
 
 ## Introductory Notes
 
@@ -56,6 +56,7 @@ s3tools/make-ecce-config.sh 10x100 tutorial.ecce d 12     # download ECCE files
 - many of these examples focus on fast simulations; to switch between fast and
   full simulations, change the `Analysis`-derived class in the macro:
   - `AnalysisDelphes` for Delphes trees (fast simulations)
+  - `AnalysisEpic` for trees from the DD4hep+EICrecon stack (EPIC full simulations)
   - `AnalysisAthena` for trees from the DD4hep+Juggler stack (ATHENA full simulations)
   - `AnalysisEcce` for trees from the Fun4all+EventEvaluator stack (ECCE full simulations)
 - note: some extra settings and features differ between these
@@ -98,13 +99,15 @@ Each of these examples has two macros:
     the given binning scheme
 
 3. Full Simulations (all other tutorials are for fast simulations)
-  - `analysis_dd4hep.C`: basically a copy of `analysis_xqbins.C`,
+  - `analysis_epic.C`: basically a copy of `analysis_xqbins.C`,
     but shows how to analyze full simulation data; the main difference
-    is using `AnalysisAthena` instead of `AnalysisDelphes`
-  - `postprocess_dd4hep_draw.C`: clone of `postprocess_xqbins_draw.C`,
+    is using `AnalysisEpic` instead of `AnalysisDelphes`
+  - `postprocess_epic_draw.C`: clone of `postprocess_xqbins_draw.C`,
     specific for this example
   - see also `analysis_eventEvaluator.C` and `postprocess_eventEvaluator_draw.C`
-    for similar full simulation scripts using the `EventEvaluator` output
+    for similar full simulation scripts using the `EventEvaluator` output from
+    ECCE simulations
+  - see also `analysis_athena.C` for the ATHENA version
 
 4. Average kinematics table
   - `analysis_qbins.C`: bin the analysis in several Q2 bins, for a couple

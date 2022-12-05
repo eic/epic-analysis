@@ -3,34 +3,14 @@
 
 R__LOAD_LIBRARY(Sidis-eic)
 
-/////////////////////////////////////////////////////////////////////////
-// this is currently a script to support development of AnalysisEpic;  //
-// when AnalysisEpic is ready, this will become the tutorial script    //
-/////////////////////////////////////////////////////////////////////////
-
-//
-// currently testing with files produced from benchmarks:
-//   repo:        physics_benchmarks, from https://eicweb.phy.anl.gov/EIC/benchmarks/physics_benchmarks
-//   CI stage:    finish
-//   CI job:      summary
-//   CI artifact: results/dis/10on100/minQ2=1/rec-dis_10x100_minQ2=1.root
-// 
-// test procedure:
-// 1. download this artifact from a recent pipeline, and store in `datarec/epic_test/`
-// 2. run this macro
-//
-// if you use a different artifact, edit `tutorial/test.epic.config`
-//
-//
-
 /* EPIC simulation example
  * - note the similarity of the macro to the fast simulation
  * - you only need to swap `AnalysisDelphes` with `AnalysisEpic` to switch
  *   between fast and full simulations
  */
 void analysis_epic(
-    TString  configFile="datarec/epic.22.11.2/22.11.2/10x100/files.config", // list of input files
-    TString  outfilePrefix="tutorial.epic"        // output filename prefix
+    TString configFile="tutorial/s3files.epic.config", // input config file
+    TString outfilePrefix="tutorial.epic"              // output filename prefix
     )
 {
 
