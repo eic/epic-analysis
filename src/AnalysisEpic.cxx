@@ -45,13 +45,13 @@ void AnalysisEpic::Execute()
 
 
   // Reco tracks
-  TTreeReaderArray<Int_t> tracks_type(tr,  "ReconstructedChargedParticles.type"); // needs to be made an int eventually in actual EE code
-  TTreeReaderArray<Float_t> tracks_e(tr, "ReconstructedChargedParticles.energy");
-  TTreeReaderArray<Float_t> tracks_p_x(tr, "ReconstructedChargedParticles.momentum.x");
-  TTreeReaderArray<Float_t> tracks_p_y(tr, "ReconstructedChargedParticles.momentum.y");
-  TTreeReaderArray<Float_t> tracks_p_z(tr, "ReconstructedChargedParticles.momentum.z");
-  TTreeReaderArray<Int_t> tracks_PDG(tr,  "ReconstructedChargedParticles.PDG");
-  TTreeReaderArray<Float_t> tracks_CHI2PID(tr,  "ReconstructedChargedParticles.goodnessOfPID");
+  TTreeReaderArray<Int_t> recparts_type(tr,  "ReconstructedChargedParticles.type"); // needs to be made an int eventually in actual EE code
+  TTreeReaderArray<Float_t> recparts_e(tr, "ReconstructedChargedParticles.energy");
+  TTreeReaderArray<Float_t> recparts_p_x(tr, "ReconstructedChargedParticles.momentum.x");
+  TTreeReaderArray<Float_t> recparts_p_y(tr, "ReconstructedChargedParticles.momentum.y");
+  TTreeReaderArray<Float_t> recparts_p_z(tr, "ReconstructedChargedParticles.momentum.z");
+  TTreeReaderArray<Int_t> recparts_PDG(tr,  "ReconstructedChargedParticles.PDG");
+  TTreeReaderArray<Float_t> recparts_CHI2PID(tr,  "ReconstructedChargedParticles.goodnessOfPID");
   
   // RecoAssociations
   TTreeReaderArray<UInt_t> assoc_simID(tr, "ReconstructedChargedParticlesAssociations.simID");
@@ -85,14 +85,14 @@ void AnalysisEpic::Execute()
     // Index maps for particle sets
     std::map <double,int> genidmap; // <pz, index_gen>
     std::map <int,int> mcidmap; // <index_mc, index_gen>
-    std::map <int,int> trackidmap; // <index, index_mc>  
+    std::map <int,int> recidmap; // <index, index_mc>  
     std::map <int,int> trackstatmap; // <index, genstatus>
 
     // Particles vectors
     // The index of the vectors correspond to their for loop idx
     std::vector<Particles> genpart;    // mcID --> igen
     std::vector<Particles> mcpart;     // mcID --> imc
-    std::vector<Particles> trackpart;  // mcID --> (imc of matching mcpart) or (-1 if no match is found)
+    std::vector<Particles> recpart;  // mcID --> (imc of matching mcpart) or (-1 if no match is found)
 
     /*
       GenParticles loop
@@ -163,16 +163,16 @@ void AnalysisEpic::Execute()
 
    
       
-    for(int itrack=0; itrack < tracks_PDG.GetSize(); itrack++){
+    for(int irec=0; irec < recparts_PDG.GetSize(); irec++){
 
-      int pid_ = tracks_PDG[itrack];
-      double px_ = tracks_p_x[itrack];
-      double py_ = tracks_p_y[itrack];
-      double pz_ = tracks_p_z[itrack];
-      double e_ = tracks_e[itrack];
+      int pid_ = recparts_PDG[irec];
+      double px_ = recparts_p_x[irec];
+      double py_ = recparts_p_y[irec];
+      double pz_ = recparts_p_z[irec];
+      double e_ = recparts_e[irec];
       double m_ = sqrt(e_*e_-px_*px_+py_*py_+pz_*pz_);
       
-      // Add to trackpart
+      // Add to recpart
       Particles part;
 
       part.pid=pid_;
@@ -182,7 +182,7 @@ void AnalysisEpic::Execute()
       /*
 	Read through Associations to match particles
 	By default, we assume no association, so mcID --> -1
-	assoc_recID --> itrack (index of the RecoParticle)
+	assoc_recID --> irec (index of the RecoParticle)
 	assoc_simID --> imc (index of the MCParticle)
       */
 
@@ -191,14 +191,14 @@ void AnalysisEpic::Execute()
       for(int iassoc = 0 ; iassoc < assoc_simID.GetSize() ; iassoc++){
 	int idx_recID = assoc_recID[iassoc]; 
 	int idx_simID = assoc_simID[iassoc];
-	if(itrack==idx_recID){ // This track has an association
+	if(irec==idx_recID){ // This track has an association
 	  part.mcID=idx_simID;
 	  break; // Only one association per particle
 	}
       }
 
-      trackpart.push_back(part);
-      trackidmap.insert({itrack,part.mcID}); 
+      recpart.push_back(part);
+      recidmap.insert({irec,part.mcID}); 
       
     }
 
@@ -256,19 +256,19 @@ void AnalysisEpic::Execute()
       Loop over RecoParticles
     */
 
-    int itrack = 0;
+    int irec = 0;
     bool recEleFound=false;
-    for(auto trackpart_ : trackpart){
+    for(auto recpart_ : recpart){
       // Skip if there is no matching MCParticle
-      if(trackidmap[itrack]==-1) continue;
-      // If the trackidmap is linked to the genEleID (generated scattered electron), identify this reco particle as the electron
-      if(trackidmap[itrack]==genEleID){	
+      if(recidmap[irec]==-1) continue;
+      // If the recidmap is linked to the genEleID (generated scattered electron), identify this reco particle as the electron
+      if(recidmap[irec]==genEleID){	
 	recEleFound=true;
-	kin->vecElectron= trackpart_.vecPart;
+	kin->vecElectron= recpart_.vecPart;
       }
       // Add the final state particle to the HFS
-      kin->AddToHFS(trackpart_.vecPart);
-      itrack++;
+      kin->AddToHFS(recpart_.vecPart);
+      irec++;
     }
 
     // Skip event if the reco scattered electron was missing
@@ -311,7 +311,7 @@ void AnalysisEpic::Execute()
       Fill output data structures (Histos, SimpleTree, etc.)
     */
 
-    for(auto part : trackpart){
+    for(auto part : recpart){
 
       int pid_ = part.pid;
       int mcid_ = part.mcID;
@@ -355,9 +355,9 @@ void AnalysisEpic::Execute()
 	if( writeParticleTree && HD->IsActiveEvent() )
 	  {
 	    int ipart = 0;
-	    for(auto trackpart_: trackpart){
+	    for(auto recpart_: recpart){
 	      Particles mcpart_;                  
-	      int mcpart_idx=trackidmap[ipart];     // Map idx to the matched MCParticle
+	      int mcpart_idx=recidmap[ipart];     // Map idx to the matched MCParticle
 	      int genStat_ = -1;                    // Default Generator Status of MCParticle is -1 (no match)
 	      if(mcpart_idx>-1){                    // RecoParticle has an MCParticle match
  		mcpart_ = mcpart.at(mcpart_idx);        // Get MCParticle
@@ -366,9 +366,9 @@ void AnalysisEpic::Execute()
 		if(imc==genEleID)                       // If MCParticle was scattered electron, set status to 2
 		  genStat_=2;
 	      }
-	      PT->FillTree(trackpart_.vecPart,      // Fill Tree
+	      PT->FillTree(recpart_.vecPart,      // Fill Tree
 			   mcpart_.vecPart,
-			   trackpart_.pid,
+			   recpart_.pid,
 			   genStat_,
 			   wTrack);
 	      ipart++;
@@ -385,11 +385,11 @@ void AnalysisEpic::Execute()
     // =======================================
     /*    
     int ipart = 0;
-    for(Particles trackpart_: trackpart) {
-      cout << trackpart_.pid << "|" << trackpart_.vecPart.E() << "\t";
+    for(Particles recpart_: recpart) {
+      cout << recpart_.pid << "|" << recpart_.vecPart.E() << "\t";
       Particles genpart_;
       Particles mcpart_;
-      int mcpart_idx=trackidmap[ipart];
+      int mcpart_idx=recidmap[ipart];
       if(mcpart_idx>-1){ // Found MCParticle
 	mcpart_ = mcpart.at(mcpart_idx);
 	cout << mcpart_.pid << "|" << mcpart_.vecPart.E() << "\t";
