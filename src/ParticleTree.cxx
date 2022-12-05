@@ -14,7 +14,6 @@ ParticleTree::ParticleTree(TString treeName_)
   T->Branch("mcPart",   "TLorentzVector" , &(mcpart_));    
   T->Branch("pid",      &(pid_)           , "pid/I");
   T->Branch("status",      &(status_)           , "status/I");
-  T->Branch("Weight",   &(weight)        , "Weight/D");
 };
 
 

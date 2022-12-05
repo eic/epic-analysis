@@ -375,11 +375,10 @@ void AnalysisEpic::Execute()
 	    if(imc==genEleID)                       // If MCParticle was scattered electron, set status to 2
 	      genStat_=2;
 	  }
-	  PT->FillTree(part_.vecPart,      // Fill Tree
+	  PT->FillTree(part.vecPart,      // Fill Tree
 		       mcpart_.vecPart,
-		       recpart_.pid,
-		       genStat_,
-		       wTrack);
+		       part.pid,
+		       genStat_);
       } // particle loop
       ipart++;
     }

@@ -26,18 +26,16 @@ class ParticleTree : public TObject
     ~ParticleTree();
 
     TTree *GetTree() { return T; };
-    void FillTree(TLorentzVector recopart, TLorentzVector mcpart, int pid, int status, Double_t w) {
+    void FillTree(TLorentzVector recopart, TLorentzVector mcpart, int pid, int status) {
       recopart_ = recopart;
       mcpart_   = mcpart;
       pid_      = pid;
       status_   = status;
-      weight    = w;
       T->Fill(); };
     void WriteTree() { T->Write(); };
 
   private:
   
-    Double_t weight;
     TTree *T;
     TString treeName;
     TLorentzVector recopart_;
