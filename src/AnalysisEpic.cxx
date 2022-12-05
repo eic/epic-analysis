@@ -330,7 +330,7 @@ void AnalysisEpic::Execute()
       kin->CalculateHadronKinematics();
 
       // find the matching truth hadron using mcID, and calculate its kinematics
-      if(mcid_ > 0) {
+      if(mcid_ >= 0) {
 	for(auto imc : mcpart) {
 	  if(mcid_ == imc.mcID) {
 	    kinTrue->vecHadron = imc.vecPart;
