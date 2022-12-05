@@ -260,16 +260,17 @@ void AnalysisEpic::Execute()
     int irec = 0;
     bool recEleFound=false;
     for(auto recpart_ : recpart){
-      // Skip if there is no matching MCParticle
-      if(recidmap[irec]==-1) continue;
-      // If the recidmap is linked to the genEleID (generated scattered electron), identify this reco particle as the electron
-      if(recidmap[irec]==genEleID){	
-	recEleFound=true;
-	kin->vecElectron= recpart_.vecPart;
+      // If there is a matching MCParticle
+      if(recidmap[irec]!=-1){
+	// If the recidmap is linked to the genEleID (generated scattered electron), identify this reco particle as the electron
+	if(recidmap[irec]==genEleID){	
+	  recEleFound=true;
+	  kin->vecElectron= recpart_.vecPart;
+	}
+	// Add the final state particle to the HFS
+	kin->AddToHFS(recpart_.vecPart);
       }
-      // Add the final state particle to the HFS
-      kin->AddToHFS(recpart_.vecPart);
-      irec++;
+      irec++; // Increment to next particle
     }
 
     // Skip event if the reco scattered electron was missing
