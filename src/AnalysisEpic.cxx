@@ -310,9 +310,10 @@ void AnalysisEpic::Execute()
     /*
       Loop again over the reconstructed particles
       Calculate Hadron Kinematics
-      Fill output data structures (Histos, SimpleTree, etc.)
+      Fill output data structures (Histos)
     */
-
+    
+    int ipart = 0;
     for(auto part : recpart){
 
       int pid_ = part.pid;
@@ -352,61 +353,37 @@ void AnalysisEpic::Execute()
 	// - not binned
 	// - `IsActiveEvent()` is only true if at least one bin gets filled for this track
 	if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
-
-	// fill particle tree
-	if( writeParticleTree && HD->IsActiveEvent() )
-	  {
-	    int ipart = 0;
-	    for(auto recpart_: recpart){
-	      Particles mcpart_;                  
-	      int mcpart_idx=recidmap[ipart];     // Map idx to the matched MCParticle
-	      int genStat_ = -1;                    // Default Generator Status of MCParticle is -1 (no match)
-	      if(mcpart_idx>-1){                    // RecoParticle has an MCParticle match
- 		mcpart_ = mcpart.at(mcpart_idx);        // Get MCParticle
-		int imc = mcpart_.mcID;          
-		genStat_ = mcpart_genStat[imc];         // Get Generator status of MCParticle
-		if(imc==genEleID)                       // If MCParticle was scattered electron, set status to 2
-		  genStat_=2;
-	      }
-	      PT->FillTree(recpart_.vecPart,      // Fill Tree
-			   mcpart_.vecPart,
-			   recpart_.pid,
-			   genStat_,
-			   wTrack);
-	      ipart++;
-	    }
-	  }
       }
-      
-    }//hadron loop
+    } //hadron loop
     
-    
-    
-    // =======================================
-    // DEBUG PRINT STATEMENTS
-    // =======================================
-    /*    
-    int ipart = 0;
-    for(Particles recpart_: recpart) {
-      cout << recpart_.pid << "|" << recpart_.vecPart.E() << "\t";
-      Particles genpart_;
-      Particles mcpart_;
-      int mcpart_idx=recidmap[ipart];
-      if(mcpart_idx>-1){ // Found MCParticle
-	mcpart_ = mcpart.at(mcpart_idx);
-	cout << mcpart_.pid << "|" << mcpart_.vecPart.E() << "\t";
-	int genpart_idx=mcidmap[mcpart_.mcID];
-	if(genpart_idx>-1){ // Found GeneratedParticle
-	  genpart_ = genpart.at(genpart_idx);
-	  cout << genpart_.pid << "|" << genpart_.vecPart.E() << "\t";	  
-	}
-      }
-      ipart++;
-      cout<<"\n";
-    }
-    cout << "\n ============================================================ \n" <<endl;
+    /*
+      Loop again over the reconstructed particles
+      Fill output data structures (ParticleTree)
     */
 
+    // fill particle tree
+    if ( writeParticleTree ) {
+      int ipart = 0;
+      for( auto part: recpart ){
+	  Particles mcpart_;                  
+	  int mcpart_idx=recidmap[ipart];     // Map idx to the matched MCParticle
+	  int genStat_ = -1;                    // Default Generator Status of MCParticle is -1 (no match)
+	  if(mcpart_idx>-1){                    // RecoParticle has an MCParticle match
+	    mcpart_ = mcpart.at(mcpart_idx);        // Get MCParticle
+	    int imc = mcpart_.mcID;          
+	    genStat_ = mcpart_genStat[imc];         // Get Generator status of MCParticle
+	    if(imc==genEleID)                       // If MCParticle was scattered electron, set status to 2
+	      genStat_=2;
+	  }
+	  PT->FillTree(part_.vecPart,      // Fill Tree
+		       mcpart_.vecPart,
+		       recpart_.pid,
+		       genStat_,
+		       wTrack);
+      } // particle loop
+      ipart++;
+    }
+    
   } while(tr.Next());
 
   
