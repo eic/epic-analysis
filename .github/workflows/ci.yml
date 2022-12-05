@@ -142,7 +142,7 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - { detector: epic,   num_files: 8  }
+          - { detector: epic,   num_files: 20 }
           - { detector: athena, num_files: 20 }
           - { detector: ecce,   num_files: 40 }
     steps:
