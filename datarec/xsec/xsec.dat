@@ -1,3 +1,30 @@
+# Pythia 6, for EPIC
+# qbins from 1-10-100-1000-100000 
+# noradcor is without radgen, radcor is including radgen 
+#label                                    cross_section_[pb] relative_uncertainty
+pythia6:ep_noradcor.18x275_q2_1_10        8.089e+05          0.0010      # 20   40.0 M 4.95e+01 nb-1
+pythia6:ep_noradcor.18x275_q2_10_100      7.087e+04          0.0007      # 20   20.0 M 2.82e+02 nb-1
+pythia6:ep_noradcor.18x275_q2_100_1000    3.034e+03          0.0347      # 40   4.0  M 1.32e+03 nb-1
+pythia6:ep_noradcor.18x275_q2_1000_100000 5.697e+01          0.0018      # 20   1.0  M 1.76e+04 nb-1
+pythia6:ep_noradcor.10x100_q2_1_10        5.387e+05          0.0015      # 20   40.0 M 7.42e+01 nb-1
+pythia6:ep_noradcor.10x100_q2_10_100      3.964e+04          0.0005      # 20   20.0 M 5.05e+02 nb-1
+pythia6:ep_noradcor.10x100_q2_100_1000    1.196e+03          0.0819      # 20   2.0  M 1.67e+03 nb-1
+pythia6:ep_noradcor.10x100_q2_1000_100000 4.286e+00          0.0104      # 20   1.0  M 2.33e+05 nb-1
+pythia6:ep_noradcor.5x100_q2_1_10         4.462e+05          0.0010      # 20   40.0 M 8.96e+01 nb-1
+pythia6:ep_noradcor.5x100_q2_10_100       2.902e+04          0.0291      # 20   20.0 M 6.89e+02 nb-1
+pythia6:ep_noradcor.5x100_q2_100_1000     6.471e+02          0.0146      # 20   2.0  M 3.09e+03 nb-1
+pythia6:ep_noradcor.5x100_q2_1000_100000  2.092e-01          0.0245      # 20   0.2  M 9.56e+05 nb-1
+pythia6:ep_noradcor.5x41_q2_1_10          3.433e+05          0.0015      # 20   40.0 M 1.17e+02 nb-1
+pythia6:ep_noradcor.5x41_q2_10_100        1.935e+04          0.0006      # 20   20.0 M 1.03e+03 nb-1
+pythia6:ep_noradcor.5x41_q2_100_1000      2.219e+02          0.0074      # 20   2.0  M 9.01e+03 nb-1
+pythia6:ep_radcor.18x275_q2_1_10          8.540e+05          0.0004      # 20   40.0 M 4.68e+01 nb-1 4.68e+01
+pythia6:ep_radcor.18x275_q2_10_100        1.455e+05          0.1198      # 20   20.0 M 1.37e+02 nb-1 1.38e+02
+pythia6:ep_radcor.18x275_q2_100_1000      6.919e+03          0.0483      # 40   4.0  M 5.78e+02 nb-1 5.78e+02
+pythia6:ep_radcor.18x275_q2_1000_100000   1.212e+02          0.0460      # 20   1.0  M 8.25e+03 nb-1 8.25e+03
+pythia6:ep_radcor.5x41_q2_1_10            3.730e+05          0.0740      # 200  20.0 M 5.36e+01 nb-1 5.36e+01
+pythia6:ep_radcor.5x41_q2_10_100          2.286e+04          0.2940      # 1000 10.0 M 4.37e+02 nb-1 4.37e+02
+pythia6:ep_radcor.5x41_q2_100_1000        2.576e+02          0.0074      # 20   2.0  M 7.76e+03 nb-1 7.76e+03
+
 # Pythia 8, from ATHENA production HEPMC files: S3/eictest/ATHENA/EVGEN/DIS/NC
 #label                     cross_section_[pb]  relative_uncertainty
 pythia8:5x100/minQ2=1000   0.43023             0.00258
@@ -19,6 +46,7 @@ pythia8:18x275/minQ2=1000  79.451              0.00223
 pythia8:18x275/minQ2=100   3370.2              0.00245
 pythia8:18x275/minQ2=10    69275               0.00266
 pythia8:18x275/minQ2=1     7.4167e+05          0.00277
+
 # Pythia 6, from ECCE production files:
 # S3/eictest/ECCE/ProductionInputFiles/SIDIS/pythia6
 # Note: the following are values for noradcor files, radcor 
@@ -33,32 +61,3 @@ pythia6:ep-18x275          8.830e+05           0.0011   # general Q2
 pythia6:ep-18x275-q2-low   8.796e+05           0.0006   # 1 < Q2 < 100
 pythia6:ep-18x275-q2-high  3.092e+03           0.0475   # 100 < Q2
 pythia6:ep-18x275-Lambda   8.830e+05           0.0011   # FIXME: assuming general Q2
-#
-#
-#
-# Pythia 6, for EPIC
-# qbins from 1-10-100-1000-100000 
-# noradcor is without radgen, radcor is including radgen 
-#
-pythia6:ep_noradcor.18x275_q2_1_10		8.089e+05 0.0010 #  20	40.0 M	4.95e+01  nb-1
-pythia6:ep_noradcor.18x275_q2_10_100 		7.087e+04 0.0007 #  20 	20.0 M	2.82e+02  nb-1
-pythia6:ep_noradcor.18x275_q2_100_1000		3.034e+03 0.0347 #  40 	4.0 M 	1.32e+03  nb-1
-pythia6:ep_noradcor.18x275_q2_1000_100000	5.697e+01 0.0018 #  20 	1.0 M 	1.76e+04  nb-1
-pythia6:ep_noradcor.10x100_q2_1_10 		5.387e+05 0.0015 #  20 	40.0 M	7.42e+01  nb-1
-pythia6:ep_noradcor.10x100_q2_10_100 		3.964e+04 0.0005 #  20 	20.0 M	5.05e+02  nb-1
-pythia6:ep_noradcor.10x100_q2_100_1000		1.196e+03 0.0819 #  20 	2.0 M 	1.67e+03  nb-1
-pythia6:ep_noradcor.10x100_q2_1000_100000	4.286e+00 0.0104 #  20 	1.0 M 	2.33e+05  nb-1
-pythia6:ep_noradcor.5x100_q2_1_10 		4.462e+05 0.0010 #  20 	40.0 M	8.96e+01  nb-1
-pythia6:ep_noradcor.5x100_q2_10_100 		2.902e+04 0.0291 #  20 	20.0 M	6.89e+02  nb-1
-pythia6:ep_noradcor.5x100_q2_100_1000		6.471e+02 0.0146 #  20 	2.0 M 	3.09e+03  nb-1
-pythia6:ep_noradcor.5x100_q2_1000_100000	2.092e-01 0.0245 #  20 	0.2 M 	9.56e+05  nb-1
-pythia6:ep_noradcor.5x41_q2_1_10 		3.433e+05 0.0015 #  20 	40.0 M	1.17e+02  nb-1
-pythia6:ep_noradcor.5x41_q2_10_100 		1.935e+04 0.0006 #  20 	20.0 M	1.03e+03  nb-1
-pythia6:ep_noradcor.5x41_q2_100_1000		2.219e+02 0.0074 #  20 	2.0 M 	9.01e+03  nb-1
-pythia6:ep_radcor.18x275_q2_1_10   	  8.540e+05 0.0004 #	20 	40.0 M 4.68e+01  nb-1   4.68e+01
-pythia6:ep_radcor.18x275_q2_10_100	  1.455e+05 0.1198 # 	20 	20.0 M 1.37e+02  nb-1   1.38e+02
-pythia6:ep_radcor.18x275_q2_100_1000	  6.919e+03 0.0483 #	40 	4.0 M  5.78e+02  nb-1   5.78e+02
-pythia6:ep_radcor.18x275_q2_1000_100000	  1.212e+02 0.0460 #	 20 	1.0 M  8.25e+03  nb-1   8.25e+03
-pythia6:ep_radcor.5x41_q2_1_10      	  3.730e+05 0.0740 #	200 	20.0 M 5.36e+01  nb-1   5.36e+01
-pythia6:ep_radcor.5x41_q2_10_100 	  2.286e+04 0.2940 #	1000 	10.0 M 4.37e+02  nb-1   4.37e+02
-pythia6:ep_radcor.5x41_q2_100_1000  	  2.576e+02 0.0074 #	 20 	2.0 M  7.76e+03  nb-1   7.76e+03
