@@ -20,7 +20,7 @@ shift
 columns=$@
 
 # format URLs
-hostURL="https://dtn01.sdcc.bnl.gov:9000"
+hostURL="https://eics3.sdcc.bnl.gov:9000"
 hostURL_esc=$(echo $hostURL | sed 's/\//\\&/g')
 remoteDirURL=$(echo $dataDir | sed "s/^S3/s3$hostURL_esc/")
 
