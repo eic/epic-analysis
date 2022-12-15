@@ -94,6 +94,7 @@ Analysis::Analysis(
   // - these settings can be set at the macro level
   verbose         = false;
   writeSimpleTree = false;
+  writeParticleTree = false;
   maxEvents       = 0;
   useBreitJets    = false;
   errorCntMax     = 1000;
@@ -310,6 +311,7 @@ void Analysis::Prepare() {
   kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
   kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
   ST = new SimpleTree("tree",kin,kinTrue);
+  PT = new ParticleTree("ptree");
 
   // if including jets, define a `jet` final state
 #ifndef EXCLUDE_DELPHES
@@ -659,6 +661,7 @@ void Analysis::Finish() {
   cout << "writing ROOT file..." << endl;
   outFile->cd();
   if(writeSimpleTree) ST->WriteTree();
+  if(writeParticleTree) PT->WriteTree();
   HD->Payload([this](Histos *H){ H->WriteHists(outFile); }); HD->ExecuteAndClearOps();
   HD->Payload([this](Histos *H){ H->Write(); }); HD->ExecuteAndClearOps();
   std::vector<Double_t> vec_wInclusiveTotal { wInclusiveTotal };

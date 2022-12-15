@@ -7,8 +7,9 @@ R__LOAD_LIBRARY(Sidis-eic)
 // - depending on infile, different histograms will be drawn
 void comparator(
     TString infile0="out/resolution.fastsim.root",
-    TString infile1="out/resolution.athena.root",
-    TString infile2="out/resolution.ecce.root",
+    TString infile1="out/resolution.epic.root",
+    TString infile2="out/resolution.athena.root",
+    TString infile3="out/resolution.ecce.root",
     TString outfile="out/resolution.comparison.root",
     TString gx="x", TString gy="q2" // plotgrid vars
     ) {
@@ -76,7 +77,8 @@ void comparator(
   std::vector<TFile*> infiles = {
     new TFile(infile0),
     new TFile(infile1),
-    new TFile(infile2)
+    new TFile(infile2),
+    new TFile(infile3)
   };
   bool first=true;
   Int_t numXbins, numYbins;
@@ -117,9 +119,9 @@ void comparator(
   // set legend labels
   auto makeLegendName = [] (TString infileName) -> TString {
     if     (infileName.Contains("fastsim")) return "Delphes";
+    else if(infileName.Contains("epic"))    return "EPIC";
     else if(infileName.Contains("athena"))  return "ATHENA";
     else if(infileName.Contains("ecce"))    return "ECCE";
-    else if(infileName.Contains("epic"))    return "EPIC";
     return "UNKNOWN";
   };
   for(auto infile : infiles) {

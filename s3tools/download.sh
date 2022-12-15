@@ -23,7 +23,12 @@ while read sourceURL; do
   sourcePath=$(echo $sourceURL | awk '{print $1}' | sed 's/https:\/\///g' | sed 's/^[^\/]*\//S3\//g')
   echo "mc cp $sourcePath $targetPath; echo \"\"" >> $downloadScript
 done
-echo "generated downloader script $downloadScript"
+echo """
+generated downloader script $downloadScript
+===============================================================
+`cat $downloadScript`
+===============================================================
+"""
 
 # download
 echo "now starting download..."
