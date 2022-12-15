@@ -114,7 +114,7 @@ void AnalysisEpic::Execute()
       Particles part;
 
       part.pid=pid_;
-      part.charge = (pid_ == 211 || pid_ == 321 || pid_ == 2212 || pid_ == -11 || pid_ == -13)?1:(pid_ == -211 || pid_ == -321 || pid_ == -2212 || pid_ == 11 || pid_ == 13)?-1:0;
+      // part.charge = // TODO; not used yet
       part.mcID=igen;
       part.vecPart.SetPxPyPzE(px_,py_,pz_,e_);
       genpart.push_back(part);
@@ -140,7 +140,7 @@ void AnalysisEpic::Execute()
       Particles part;
 
       part.pid=pid_;
-      part.charge = (pid_ == 211 || pid_ == 321 || pid_ == 2212 || pid_ == -11 || pid_ == -13)?1:(pid_ == -211 || pid_ == -321 || pid_ == -2212 || pid_ == 11 || pid_ == 13)?-1:0;
+      // part.charge = // TODO; not used yet
       part.mcID=imc;
       part.vecPart.SetPxPyPzE(px_,py_,pz_,e_);
       mcpart.push_back(part);
@@ -175,7 +175,7 @@ void AnalysisEpic::Execute()
       Particles part;
 
       part.pid=pid_;
-      part.charge = (pid_ == 211 || pid_ == 321 || pid_ == 2212 || pid_ == -11 || pid_ == -13)?1:(pid_ == -211 || pid_ == -321 || pid_ == -2212 || pid_ == 11 || pid_ == 13)?-1:0;
+      // part.charge = // TODO; not used yet
       part.vecPart.SetPxPyPzE(px_,py_,pz_,e_);
 
       double m_ = part.vecPart.M();

@@ -7,9 +7,9 @@
 
 class Particles {
   public:
-    int pid;
-    int charge;
-    int mcID;
+    int pid    = 0;
+    int charge = 0;
+    int mcID   = -1;
     TLorentzVector vecPart;
 };
 
