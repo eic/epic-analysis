@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Gregory Matousek, Christopher Dilks
+
+#pragma once
+
+// ROOT
+#include "TTreeReader.h"
+#include "TTreeReaderValue.h"
+#include "TTreeReaderArray.h"
+
+// sidis-eic
+#include "Analysis.h"
+
+class AnalysisEpic : public Analysis
+{
+  public:
+    AnalysisEpic(TString infileName_="", TString outfilePrefix_="");
+    ~AnalysisEpic();
+
+    void Execute() override;
+
+    ClassDefOverride(AnalysisEpic,1);
+};

@@ -26,6 +26,7 @@ results*
 # tmp files
 tutorial/delphes.config
 tutorial/delphes.config.bak
+tutorial/s3files.*.config
 get-files.sh
 *.xsec
 

@@ -50,7 +50,7 @@ void AnalysisEcce::Execute()
   TTreeReaderArray<Int_t> hepmcp_BCID(tr, "hepmcp_BCID");
   TTreeReaderArray<Int_t> hepmcp_m1(tr, "hepmcp_m1"); 
   TTreeReaderArray<Int_t> hepmcp_m2(tr, "hepmcp_m2"); 
-  
+
 
   // All true particles (including secondaries, etc)
   TTreeReaderArray<Int_t> mcpart_ID(tr,        "mcpart_ID");
@@ -123,7 +123,7 @@ void AnalysisEcce::Execute()
      * - find scattered electron
      * - find beam particles
      */
-    std::vector<ParticlesEE> mcpart;
+    std::vector<Particles> mcpart;
     double maxPt = 0;
     int genEleID = -1;
     bool foundBeamElectron = false;
@@ -131,9 +131,9 @@ void AnalysisEcce::Execute()
     int genEleBCID = -1;
 
     for(int imc=0; imc<hepmcp_PDG.GetSize(); imc++) {
-      
+
       int pid_ = hepmcp_PDG[imc];
-            
+
       int genStatus_ = hepmcp_status[imc]; // genStatus 4: beam particle,  1: final state
       
       double px_ = hepmcp_psx[imc];
@@ -143,14 +143,13 @@ void AnalysisEcce::Execute()
       
       double p_ = sqrt(pow(hepmcp_psx[imc],2) + pow(hepmcp_psy[imc],2) + pow(hepmcp_psz[imc],2));
       double pt_ = sqrt(pow(hepmcp_psx[imc],2) + pow(hepmcp_psy[imc],2));
-      double mass_ = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;      
+      double mass_ = (fabs(pid_)==211)?constants::pimass:(fabs(pid_)==321)?constants::kmass:(fabs(pid_)==11)?constants::emass:(fabs(pid_)==13)?constants::mumass:(fabs(pid_)==2212)?constants::pmass:0.;
 
       // add to `mcpart`
-      ParticlesEE part;
+      Particles part;
 
       //cout << genStatus_ << " " << pid_ << " " << part.mcID << " " << hepmcp_BCID[imc] << " " << hepmcp_m1[imc] << " " << hepmcp_m2[imc] << " "
       //      << px_ << " " << py_ << " " << pz_ << " " << e_ << endl;
-
       
       if(genStatus_ == 1) { // final state
 	
@@ -250,7 +249,7 @@ void AnalysisEcce::Execute()
      * - find the scattered electron
      *
      */
-    std::vector<ParticlesEE> recopart;
+    std::vector<Particles> recopart;
     int recEleFound = 0;
     for(int ireco=0; ireco<tracks_id.GetSize(); ireco++) {
 
@@ -270,7 +269,7 @@ void AnalysisEcce::Execute()
       if(pid_ == 0) continue; // pid==0: reconstructed tracks with no matching truth pid
 
       // add reconstructed particle `part` to `recopart`
-      ParticlesEE part;
+      Particles part;
       part.pid = pid_;
       part.mcID = tracks_trueID[ireco];
       //      part.charge = tracks_charge[ireco];
@@ -279,8 +278,8 @@ void AnalysisEcce::Execute()
       double reco_px = tracks_p_x[ireco];
       double reco_py = tracks_p_y[ireco];
       double reco_pz = tracks_p_z[ireco];
-      reco_mass = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;
-      
+      reco_mass = (fabs(pid_)==211)?constants::pimass:(fabs(pid_)==321)?constants::kmass:(fabs(pid_)==11)?constants::emass:(fabs(pid_)==13)?constants::mumass:(fabs(pid_)==2212)?constants::pmass:0.;
+
       double reco_p = sqrt(reco_px*reco_px + reco_py*reco_py + reco_pz*reco_pz);
       double reco_E = sqrt(reco_p*reco_p + reco_mass * reco_mass);
 

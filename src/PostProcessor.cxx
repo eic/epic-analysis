@@ -498,16 +498,16 @@ void PostProcessor::DrawInBins(
             hist->SetFillColor(kGray);
             break;
           case 1:
+            hist->SetLineColor(kAzure);
+            hist->SetLineStyle(1);
+            break;
+          case 2:
             hist->SetLineColor(kRed);
             hist->SetLineStyle(7);
             break;
-          case 2:
+          case 3:
             hist->SetLineColor(kGreen+2);
             hist->SetLineStyle(9);
-            break;
-          case 3:
-            hist->SetLineColor(kAzure);
-            hist->SetLineStyle(1);
             break;
         }
 

@@ -16,9 +16,9 @@ R__LOAD_LIBRARY(Sidis-eic)
  *     - `export S3_SECRET_KEY=<password>`
  *   - a sample config file is `s3files.athena.config`, with a list of S3 URLs
  */
-void analysis_dd4hep(
+void analysis_athena(
     TString configFile="tutorial/s3files.athena.config", // input config file
-    TString outfilePrefix="tutorial.dd4hep"              // output filename prefix
+    TString outfilePrefix="tutorial.athena"              // output filename prefix
 ) {
 
   // setup analysis ========================================

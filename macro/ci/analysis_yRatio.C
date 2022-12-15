@@ -8,11 +8,13 @@ void analysis_yRatio(
     TString configFile,
     TString outfilePrefix,
     TString reconMethod="Ele"
-) {
+    )
+{
 
   // setup analysis ========================================
   Analysis *A;
-  if     (outfilePrefix.Contains("athena")) A = new AnalysisAthena( configFile, outfilePrefix );
+  if   (outfilePrefix.Contains("epic"))     A = new AnalysisEpic(   configFile, outfilePrefix );
+  else if(outfilePrefix.Contains("athena")) A = new AnalysisAthena( configFile, outfilePrefix );
   else if(outfilePrefix.Contains("ecce"))   A = new AnalysisEcce(   configFile, outfilePrefix );
 #ifndef EXCLUDE_DELPHES
   else A = new AnalysisDelphes( configFile, outfilePrefix );
