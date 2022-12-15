@@ -156,9 +156,7 @@ void AnalysisEpic::Execute()
     /*
       ReconstructedParticles loop
       - Add all particles to the std::vector<> of particles
-      - Identify the 
-      - Identify closest matching MCParticle in theta,phi,E space
-
+      - Look up associated MC particle
     */
 
    
