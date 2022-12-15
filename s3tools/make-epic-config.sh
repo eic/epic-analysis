@@ -69,8 +69,8 @@ pushd $(dirname $(realpath $0))/..
 # settings #############################################################
 sourceDir="$releaseDir/$energy"
 targetDir="datarec/$locDir/$release/$energy"
-Q2minima=( 1000 100  10  1  )
-Q2maxima=( 0    1000 100 10 )
+Q2minima=( 1000   100  10  1  )
+Q2maxima=( 100000 1000 100 10 )
 ########################################################################
 
 # download files from S3
@@ -96,7 +96,7 @@ if [ -z "$configFile" ]; then configFile=$targetDir/files.config; fi
 for (( i=0; i<${#Q2minima[@]}; i++)); do
   Q2min=${Q2minima[$i]}
   Q2max=${Q2maxima[$i]}
-  crossSection=$(s3tools/read-xsec-table.sh "pythia8:$energy/minQ2=$Q2min")
+  crossSection=$(s3tools/read-xsec-table.sh "pythia6:ep_noradcor.${energy}_q2_${Q2min}_${Q2max}")
   case $mode in
     d) listScript=s3tools/generate-local-list.sh; listDir=`q2subdir $targetDir $Q2min`; ;;
     c) listScript=s3tools/generate-local-list.sh; listDir=`q2subdir $targetDir $Q2min`; ;;
