@@ -11,8 +11,6 @@ HFSTree::HFSTree(TString treeName_, Kinematics *K_, Kinematics *Ktrue_)
   , K(K_)
   , Ktrue(Ktrue_)
 {
-  // branch names are set to match `brufit` implementation
-  // (see `https://github.com/c-dilks/dispin/tree/master/src`)
   T = new TTree(treeName,treeName);
   T->Branch("vecElectron", &(K->vecElectron));
   T->Branch("vecElectronTrue", &(Ktrue->vecElectron));
@@ -24,6 +22,7 @@ HFSTree::HFSTree(TString treeName_, Kinematics *K_, Kinematics *Ktrue_)
   //T->Branch("hfspz", &(K->hfspz), "hfspz[nHFS]/F");
   //T->Branch("hfsE", &(K->hfsE), "hfsE[nHFS]/F");
   T->Branch("hfspid", &(K->hfspid), "hfspid[nHFS]/F");
+  T->Branch("weight",    &(weight),       "weight/D");
 };
 
 // destructor

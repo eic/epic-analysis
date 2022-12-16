@@ -6,7 +6,6 @@
  */
 
 #include "Kinematics.h"
-#include <pybind11/stl.h>
 ClassImp(Kinematics)
 
 Kinematics::Kinematics(
@@ -247,24 +246,24 @@ void Kinematics::GetQWNu_ML(){
     xDA = x;
     this->CalculateDISbyJB();
     Q2JB = Q2;
-    xJB = x;    
-    if( Q2DA > 0 && Q2DA < 1000){
+    xJB = x;
+    if( Q2DA > 0 && Q2DA < 1e4){
       globalinfo.push_back(log10(Q2DA));
     }
     else{
-      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/1000.0)));
+      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/10000.0)));
     }
-    if( Q2ele > 0 && Q2ele < 1000){
+    if( Q2ele > 0 && Q2ele < 1e4){
       globalinfo.push_back(log10(Q2ele));
     }
     else{
-      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/1000.0)));
+      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/10000.0)));
     }
-    if( Q2JB > 0 && Q2JB < 1000){
+    if( Q2JB > 0 && Q2JB < 1e4){
       globalinfo.push_back(log10(Q2JB));
     }
     else{
-      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/1000.0)));
+      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/10000.0)));
     }        
     if(xDA>0 && xDA < 1){
       globalinfo.push_back(-1*log10(xDA));
@@ -604,14 +603,12 @@ void Kinematics::ResetHFS() {
   nPi = 0;
   ar.Clear();
   arpi.Clear();
-#ifdef MLRECO
   for(int i = 0; i < 100; i++){
     for(int j = 0; j < 7; j++){
       hfsinfo[i][j] = 0;
     }
   }
   for(int i = 0; i < 6; i++) globalinfo[i]=0;
-#endif
 };
 
 

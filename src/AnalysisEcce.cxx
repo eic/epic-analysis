@@ -214,10 +214,12 @@ void AnalysisEcce::Execute()
         }
       }
     } // end truth loop
-    
+
+    // looking for radiated photons (mother particle == scattered electron)
+    // requires that we already know scattered electron index
     for(int imc=0; imc<hepmcp_PDG.GetSize(); imc++) {
       int pid_ = hepmcp_PDG[imc];     
-      int genStatus_ = hepmcp_status[imc]; // genStatus 4: beam particle,  1: final state                                                                            						
+      int genStatus_ = hepmcp_status[imc]; // genStatus 4: beam particle,  1: final state             						
 
       double px_ = hepmcp_psx[imc];
       double py_ = hepmcp_psy[imc];
@@ -225,14 +227,14 @@ void AnalysisEcce::Execute()
       double e_  = hepmcp_E[imc];
       
       double p_ = sqrt(pow(hepmcp_psx[imc],2) + pow(hepmcp_psy[imc],2) + pow(hepmcp_psz[imc],2));
-      double mass_ = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;      
-      // add to `mcpart`                                                                                                                                                                                                                      
-	   int mother = hepmcp_m1[imc];
+      
+      int mother = hepmcp_m1[imc];
       if(pid_ == 22 || pid_ == 23){
 	if(genStatus_ == 1){
 	  if( mother == genEleBCID ){
 	    TLorentzVector FSRmom(px_, py_, pz_, e_);
 	    TLorentzVector eleCorr = kinTrue->vecElectron + FSRmom;
+	    // correcting true scattered electron with FSR
 	    kinTrue->vecElectron.SetPxPyPzE(eleCorr.Px(), eleCorr.Py(), eleCorr.Pz(), eleCorr.E());
 	  }
 	}
@@ -333,9 +335,9 @@ void AnalysisEcce::Execute()
     // Get the weight for this event's Q2
     auto Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
 
-    //fill HFS tree here?
-    if( writeHFSTree && kin->nHFS > 0) HFST->FillTree(1.0);
-
+    //fill HFS tree for event
+    if( writeHFSTree && kin->nHFS > 0) HFST->FillTree(Q2weightFactor);
+    
     // fill inclusive histograms, if only `inclusive` is included in output
     // (otherwise they will be filled in track and jet loops)
     if(includeOutputSet["inclusive_only"]) {

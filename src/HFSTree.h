@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2022 Connor Pecar
 
-/* SimpleTree
- * - provides a simple tree, for common usage in any Analysis or
- *   Analysis derived class; this tree is designed to be compatible
- *   with BruFit for asymmetry analysis
- *   (see `https://github.com/c-dilks/dispin/tree/master/src`)
+/* HFSTree
+   - Produces a tree containing information needed for kinematic
+     reconstruction studies: hadronic final state four-momenta
+     and PID, scattered electron information, and true scattered
+     electron and beam information.
  */
 #ifndef HFSTree_
 #define HFSTree_
