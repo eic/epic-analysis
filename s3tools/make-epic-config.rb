@@ -22,6 +22,13 @@ options.radCor     = false
 CrossSectionTable = 'datarec/xsec/xsec.dat'
 HostURL           = 'https://eics3.sdcc.bnl.gov:9000'
 
+# helpers
+def versionNum(v) # options.version -> version number
+  v.split('.')[1..-1].join('.')
+end
+def ecceQ2range(minQ2,maxQ2) # return file path suffix, for ECCE Q2 ranges
+  { [1,0]=>'', [1,100]=>'-q2-low', [100,0]=>'-q2-high' }[[minQ2,maxQ2]]
+end
 
 # production specifications, latest first
 # PRODUCTION_VERSION => {
@@ -35,7 +42,7 @@ prodSettings = {
   'epic.22.11.3' => {
     :comment         => 'Pythia 6, with & without radiative corrections',
     :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{options.version.sub('epic.','')}/epic_#{options.detector}/SIDIS/pythia6" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/SIDIS/pythia6" },
     :energySubDir    => Proc.new { "ep_#{options.energy}" },
     :dataSubDir      => Proc.new { |radDir|
       if [options.energy,radDir]==['18x275','noradcor']  # correct for S3 disorganization
@@ -48,7 +55,21 @@ prodSettings = {
   'epic.22.11.2' => {
     :comment         => 'Pythia 8',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{options.version.sub('epic.','')}/epic_#{options.detector}/DIS/NC" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
+  'ecce.22.1' => {
+    :comment         => 'Last ECCE Production, August 2022',
+    :crossSectionID  => Proc.new { |minQ2,maxQ2| "pythia6:ep-#{options.energy}#{ecceQ2range(minQ2,maxQ2)}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/Campaigns/#{versionNum(options.version)}/SIDIS/pythia6" },
+    :energySubDir    => Proc.new { "ep-#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2,maxQ2| ecceQ2range(minQ2,maxQ2) }, # (combined with :energySubDir)
+  },
+  'athena.deathvalley-v1.0' => {
+    :comment         => 'ATHENA Proposal production',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/ATHENA/RECO/#{versionNum(options.version)}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
@@ -238,7 +259,7 @@ if ['epic.22.11.3'].include? options.version
   end
 
 
-elsif ['epic.22.11.2'].include? options.version
+elsif ['epic.22.11.2', 'athena.deathvalley-v1.0'].include? options.version
   # print target directory
   puts "Target Dir: #{prod[:targetDir]}"
   # get list of Q2 subdirectories
@@ -270,6 +291,27 @@ elsif ['epic.22.11.2'].include? options.version
     fileList
   end
   prod[:radDir] = '' # not used
+
+
+elsif ['ecce.22.1'].include? options.version
+  prod[:radDir] = '' # not used
+  prod[:q2ranges] = mc_ls(prod[:releaseDir]).grep(/#{options.energy}/).grep_v(/Lambda/).map do |dir|
+    if dir.match? /-q2-high/
+      [100,0]
+    elsif dir.match? /-q2-low/
+      [1,100]
+    else
+      [1,0]
+    end
+  end
+  prod[:dataDirs] = prod[:q2ranges].map do |minQ2,maxQ2|
+    prod[:energyDir] + prod[:dataSubDir].call(minQ2,maxQ2)
+  end
+  prod[:fileLists] = prod[:dataDirs].map do |dataDir|
+    mc_ls(dataDir)
+      .grep(/g4event_eval.root$/)
+      .first(options.limit)
+  end
 
 end # END RELEASE VERSION DEPENDENT CODDE ##################
 
