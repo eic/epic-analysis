@@ -465,7 +465,7 @@ jobs:
           path: out
       - uses: actions/download-artifact@v3
         with:
-          name: root_analysis_epic_${{matrix.aname}}_${{matrix.recon}}
+          name: root_analysis_epic_arches_${{matrix.aname}}_${{matrix.recon}}
           path: out
       - uses: actions/download-artifact@v3
         with:
