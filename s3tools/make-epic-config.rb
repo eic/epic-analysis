@@ -274,9 +274,11 @@ elsif ['epic.22.11.2'].include? options.version
 end # END RELEASE VERSION DEPENDENT CODDE ##################
 
 
+# append the energy to the target directory
+prod[:targetDir] += '/'+options.energy
+FileUtils.mkdir_p prod[:targetDir]
 
 # download or stream the files, and build config file lists
-prod[:targetDir] += '/'+options.energy
 localFileTableName = "#{prod[:targetDir]}/files.config.list"
 localFileTable = File.open localFileTableName, 'w'
 prod[:q2ranges].zip(prod[:dataDirs],prod[:fileLists]).each do |q2range,dataDir,fileList|
