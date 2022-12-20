@@ -136,13 +136,57 @@ jobs:
 # DOWNLOAD FULLSIM ---------------------------------------------------------------------------
 
 # download full simulation files and make config
-  download_fullsim:
+
+  download_fullsim_epic:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
         include:
-          - { detector: epic,   num_files: 20 }
+          - { id: epic_arches,             version: epic.22.11.2, config: arches,      radcor: no-radcor, num_files: 20 }
+          - { id: epic_brycecanyon,        version: epic.22.11.2, config: brycecanyon, radcor: no-radcor, num_files: 20 }
+          # - { id: epic_arches,             version: epic.22.11.3, config: arches,      radcor: no-radcor, num_files: 20 }
+          # - { id: epic_brycecanyon,        version: epic.22.11.3, config: brycecanyon, radcor: no-radcor, num_files: 20 }
+          # - { id: epic_arches_radcor,      version: epic.22.11.3, config: arches,      radcor: radcor,    num_files: 20 }
+          # - { id: epic_brycecanyon_radcor, version: epic.22.11.3, config: brycecanyon, radcor: radcor,    num_files: 20 }
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cvmfs-contrib/github-action-cvmfs@v3
+      - uses: eic/run-cvmfs-osg-eic-shell@main
+        env:
+          S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
+          S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
+        with:
+          platform-release: "jug_xl:nightly"
+          setup: environ.sh
+          run: |
+            echo "[CI] download files from S3"
+            s3tools/add-host.sh
+            s3tools/make-epic-config.rb \
+              -v ${{matrix.version}} \
+              -e ${{env.ebeam_en}}x${{env.pbeam_en}} \
+              -o ${{matrix.id}} \
+              -m d \
+              -l ${{matrix.num_files}} \
+              -c s3files.config \
+              -d ${{matrix.config}} \
+              --${{matrix.radcor}}
+            echo "[CI] cat config file"
+            cat s3files.config
+      - uses: actions/upload-artifact@v3
+        with:
+          name: x_fullsim_${{matrix.id}}
+          retention-days: 1
+          path: |
+            s3files.config
+            datarec
+
+  download_fullsim_legacy:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
           - { detector: athena, num_files: 20 }
           - { detector: ecce,   num_files: 40 }
     steps:
@@ -237,20 +281,21 @@ jobs:
   analysis_fullsim:
     needs: 
       - build_no_delphes
-      - download_fullsim
+      - download_fullsim_epic
+      - download_fullsim_legacy
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
-        detector: [epic, athena, ecce]
+        detector: [epic_arches, epic_brycecanyon, athena, ecce]
         aname: [x_q2, p_eta, yRatio]
         recon: [Ele]
         include: # enable other recon methods for `aname==x_q2` only
-        - { aname: x_q2, recon: Mixed,  detector: epic } # FIXME: not sure how to avoid being repetitive... 
-        - { aname: x_q2, recon: JB,     detector: epic }
-        - { aname: x_q2, recon: DA,     detector: epic }
-        - { aname: x_q2, recon: Sigma,  detector: epic }
-        - { aname: x_q2, recon: eSigma, detector: epic }
+        - { aname: x_q2, recon: Mixed,  detector: epic_arches } # FIXME: not sure how to avoid being repetitive... 
+        - { aname: x_q2, recon: JB,     detector: epic_arches }
+        - { aname: x_q2, recon: DA,     detector: epic_arches }
+        - { aname: x_q2, recon: Sigma,  detector: epic_arches }
+        - { aname: x_q2, recon: eSigma, detector: epic_arches }
         - { aname: x_q2, recon: Mixed,  detector: athena }
         - { aname: x_q2, recon: JB,     detector: athena }
         - { aname: x_q2, recon: DA,     detector: athena }
@@ -301,7 +346,8 @@ jobs:
       matrix:
         mode:
           - fastsim
-          - epic
+          - epic_arches
+          - epic_brycecanyon
           - athena
           - ecce
         pname: # list only jobs which will only use one (primary) recon method
@@ -321,12 +367,13 @@ jobs:
           - { mode: fastsim, pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: fastsim, pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: fastsim, pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic,    pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic,    pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic,    pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic,    pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic,    pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic,    pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_arches,    pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_arches,    pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_arches,    pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_arches,    pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_arches,    pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_arches,    pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_brycecanyon,    pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: athena,  pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: athena,  pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: athena,  pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
@@ -443,12 +490,12 @@ jobs:
             echo "[CI] COMPARATOR MACRO"
             ls out
             mv -v out/fastsim.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
-            mv -v out/epic.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
+            mv -v out/epic_arches.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
             mv -v out/athena.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
             mv -v out/ecce.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
-            ${{env.root_no_delphes}} 'macro/ci/comparator.C("out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root","out/epic.${{matrix.pname}}.${{matrix.recon}}.root","out/athena.${{matrix.pname}}.${{matrix.recon}}.root","out/ecce.${{matrix.pname}}.${{matrix.recon}}.root","out/comparison.${{matrix.pname}}.${{matrix.recon}}","${{matrix.xvar}}","${{matrix.yvar}}")'
+            ${{env.root_no_delphes}} 'macro/ci/comparator.C("out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root","out/epic_arches.${{matrix.pname}}.${{matrix.recon}}.root","out/athena.${{matrix.pname}}.${{matrix.recon}}.root","out/ecce.${{matrix.pname}}.${{matrix.recon}}.root","out/comparison.${{matrix.pname}}.${{matrix.recon}}","${{matrix.xvar}}","${{matrix.yvar}}")'
             rm -v out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
-            rm -v out/epic.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
+            rm -v out/epic_arches.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
             rm -v out/athena.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
             rm -v out/ecce.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
       - uses: actions/upload-artifact@v3
