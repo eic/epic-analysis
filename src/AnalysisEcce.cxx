@@ -38,6 +38,17 @@ void AnalysisEcce::Execute()
 
   TTreeReader tr(chain);
 
+  TBranch        *b_clusters;   //!                                         
+  TBranch        *b_cluster_E;   //!                                        
+  TBranch        *b_cluster_Eta;   //!                                      
+  TBranch        *b_cluster_Phi;   //!                                      
+  TBranch        *b_cluster_NTower;   //!                                   
+  TBranch        *b_cluster_trueID;   //!                                   
+  
+  Int_t           cluster_N;
+  
+
+    
   // Truth
 
   TTreeReaderArray<Int_t> hepmcp_status(tr, "hepmcp_status");
@@ -72,6 +83,11 @@ void AnalysisEcce::Execute()
   TTreeReaderArray<UShort_t> tracks_source(tr,  "tracks_source");
    // TTreeReaderArray<Short_t> tracks_charge(tr,  "tracks_charge");
 
+
+  //define the different calorimeter clusters
+  std::vector<std::string> calos = {"FEMC","CEMC","EEMC","FHCAL","EHCAL","HCALOUT","HCALIN"};
+
+  
 
   // calculate Q2 weights
   CalculateEventQ2Weights();
@@ -123,7 +139,7 @@ void AnalysisEcce::Execute()
      * - find scattered electron
      * - find beam particles
      */
-    std::vector<Particles> mcpart;
+    std::vector<ParticlesEE> mcpart;
     double maxP = 0;
     int genEleID = -1;
     bool foundBeamElectron = false;
@@ -142,10 +158,10 @@ void AnalysisEcce::Execute()
       double e_  = hepmcp_E[imc];
       
       double p_ = sqrt(pow(hepmcp_psx[imc],2) + pow(hepmcp_psy[imc],2) + pow(hepmcp_psz[imc],2));
-      double mass_ = (fabs(pid_)==211)?constants::pimass:(fabs(pid_)==321)?constants::kmass:(fabs(pid_)==11)?constants::emass:(fabs(pid_)==13)?constants::mumass:(fabs(pid_)==2212)?constants::pmass:0.;
+      double mass_ = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;
       
       // add to `mcpart`
-      Particles part;
+      ParticlesEE part;
       
       if(genStatus_ == 1) { // final state
 	
@@ -215,7 +231,7 @@ void AnalysisEcce::Execute()
      * - find the scattered electron
      *
      */
-    std::vector<Particles> recopart;
+    std::vector<ParticlesEE> recopart;
     int recEleFound = 0;
     for(int ireco=0; ireco<tracks_id.GetSize(); ireco++) {
 
@@ -235,7 +251,7 @@ void AnalysisEcce::Execute()
       if(pid_ == 0) continue; // pid==0: reconstructed tracks with no matching truth pid
 
       // add reconstructed particle `part` to `recopart`
-      Particles part;
+      ParticlesEE part;
       part.pid = pid_;
       part.mcID = tracks_trueID[ireco];
       //      part.charge = tracks_charge[ireco];
@@ -244,7 +260,7 @@ void AnalysisEcce::Execute()
       double reco_px = tracks_p_x[ireco];
       double reco_py = tracks_p_y[ireco];
       double reco_pz = tracks_p_z[ireco];
-      reco_mass = (fabs(pid_)==211)?constants::pimass:(fabs(pid_)==321)?constants::kmass:(fabs(pid_)==11)?constants::emass:(fabs(pid_)==13)?constants::mumass:(fabs(pid_)==2212)?constants::pmass:0.;
+      reco_mass = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;
 
       double reco_p = sqrt(reco_px*reco_px + reco_py*reco_py + reco_pz*reco_pz);
       double reco_E = sqrt(reco_p*reco_p + reco_mass * reco_mass);
@@ -272,6 +288,76 @@ void AnalysisEcce::Execute()
 
     } // end reco loop
 
+    //add all clusters for hadronic final state
+    int jentryt = tr.GetCurrentEntry();
+    Long64_t localEntry = chain->LoadTree(jentryt);
+    
+    //loop over all calorimeters with their different names
+    for(auto calo : calos){
+      
+      std::string dummy =  "cluster_"+calo+"_N";
+      if ( chain->GetBranch(dummy.data())){
+	chain->SetBranchAddress(dummy.data(), &cluster_N, &b_clusters);
+      
+	b_clusters->GetEntry(localEntry);
+	b_clusters->SetAutoDelete(kTRUE);
+
+	Float_t         cluster_E[cluster_N];
+	Float_t         cluster_Eta[cluster_N]; 
+	Float_t         cluster_Phi[cluster_N]; 
+	Int_t           cluster_NTower[cluster_N];
+	Int_t           cluster_trueID[cluster_N];
+	dummy = "cluster_"+calo+"_E";
+	chain->SetBranchAddress(dummy.data(), &cluster_E, &b_cluster_E);
+	dummy = "cluster_"+calo+"_Eta";
+	chain->SetBranchAddress(dummy.data(), &cluster_Eta, &b_cluster_Eta);
+	dummy = "cluster_"+calo+"_Phi";
+	chain->SetBranchAddress(dummy.data(), &cluster_Phi, &b_cluster_Phi);
+	dummy = "cluster_"+calo+"_NTower";
+	chain->SetBranchAddress(dummy.data(), &cluster_NTower, &b_cluster_NTower);
+	dummy = "cluster_"+calo+"_trueID";
+	chain->SetBranchAddress(dummy.data(), &cluster_trueID, &b_cluster_trueID);
+	b_cluster_E->GetEntry(localEntry);
+	b_cluster_E->SetAutoDelete(kTRUE);
+	b_cluster_Eta->GetEntry(localEntry);
+	b_cluster_Eta->SetAutoDelete(kTRUE);
+	b_cluster_Phi->GetEntry(localEntry);
+	b_cluster_Phi->SetAutoDelete(kTRUE);
+	b_cluster_NTower->GetEntry(localEntry);
+	b_cluster_NTower->SetAutoDelete(kTRUE);
+	b_cluster_trueID->GetEntry(localEntry);
+	b_cluster_trueID->SetAutoDelete(kTRUE);
+      
+	//loop over clusters of this calorimeter      
+	for ( int iclus=0; iclus < cluster_N; iclus ++){
+
+	  ParticlesEE part;
+	  part.mcID = cluster_trueID[iclus];
+	  part.charge = 0;
+	  TVector3 track3;
+	  track3.SetPtEtaPhi(cluster_E[iclus]/cosh(cluster_Eta[iclus]),cluster_Eta[iclus],cluster_Phi[iclus]);
+	
+	  part.vecPart.SetPxPyPzE(track3.Px(), track3.Py(), track3.Pz(), sqrt(track3.Mag2()));
+
+
+	  // currently use the true PID to select clusters that are not from charged pions, kaons, protons, electrons or muons for the hadronic final state
+	  auto search = mcidmap.find((int)(cluster_trueID[iclus]));
+	  if (search != mcidmap.end()) {        
+	    int imc = search->second;	  
+	    part.pid = (int)(mcpart_PDG[imc]);     
+	    if ( fabs(part.pid) != 11 &&  fabs(part.pid) != 13 && fabs(part.pid) != 211 && fabs(part.pid) != 321 && fabs(part.pid) != 2212 && fabs(part.pid) != 0  ){
+	      // only add to hadronic final state, not to the particle list (could be changed for pi0 in the future
+	      //  recopart.push_back(part);
+	      kin->AddToHFS(part.vecPart);
+	    }
+	  }
+	}
+
+      }
+   
+    }
+
+
     // skip the event if the scattered electron is not found and we need it
     if(recEleFound < 1) {
       numNoEle++;
@@ -290,6 +376,12 @@ void AnalysisEcce::Execute()
       numNoHadrons++;
       continue;
     };
+
+
+
+    /*    printf("hadronic final state %5.2f %5.2f %5.2f %5.2f \n", kin->sigmah, kin->Pxh, kin->Pyh, kin->hadronSumVec.E() );
+    getchar();
+    */
     
     // calculate DIS kinematics
     if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
@@ -374,6 +466,8 @@ void AnalysisEcce::Execute()
 
     }//hadron loop
 
+
+    
   } while(tr.Next()); // tree reader loop
   cout << "end event loop" << endl;
   // event loop end =========================================================
