@@ -139,7 +139,7 @@ void AnalysisEcce::Execute()
      * - find scattered electron
      * - find beam particles
      */
-    std::vector<ParticlesEE> mcpart;
+    std::vector<Particles> mcpart;
     double maxP = 0;
     int genEleID = -1;
     bool foundBeamElectron = false;
@@ -161,7 +161,7 @@ void AnalysisEcce::Execute()
       double mass_ = (fabs(pid_)==211)?pimass:(fabs(pid_)==321)?kmass:(fabs(pid_)==11)?emass:(fabs(pid_)==13)?mumass:(fabs(pid_)==2212)?pmass:0.;
       
       // add to `mcpart`
-      ParticlesEE part;
+      Particles part;
       
       if(genStatus_ == 1) { // final state
 	
@@ -231,7 +231,7 @@ void AnalysisEcce::Execute()
      * - find the scattered electron
      *
      */
-    std::vector<ParticlesEE> recopart;
+    std::vector<Particles> recopart;
     int recEleFound = 0;
     for(int ireco=0; ireco<tracks_id.GetSize(); ireco++) {
 
@@ -251,7 +251,7 @@ void AnalysisEcce::Execute()
       if(pid_ == 0) continue; // pid==0: reconstructed tracks with no matching truth pid
 
       // add reconstructed particle `part` to `recopart`
-      ParticlesEE part;
+      Particles part;
       part.pid = pid_;
       part.mcID = tracks_trueID[ireco];
       //      part.charge = tracks_charge[ireco];
@@ -331,7 +331,7 @@ void AnalysisEcce::Execute()
 	//loop over clusters of this calorimeter      
 	for ( int iclus=0; iclus < cluster_N; iclus ++){
 
-	  ParticlesEE part;
+	  Particles part;
 	  part.mcID = cluster_trueID[iclus];
 	  part.charge = 0;
 	  TVector3 track3;
