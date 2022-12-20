@@ -145,8 +145,8 @@ jobs:
         include:
           - { id: athena,           version: athena.deathvalley-v1.0, config: arches,      radcor: no-radcor, num_files: 20 }
           - { id: ecce,             version: ecce.22.1,               config: arches,      radcor: no-radcor, num_files: 40 }
-          - { id: epic_arches,      version: epic.22.11.2,            config: arches,      radcor: no-radcor, num_files: 20 }
-          - { id: epic_brycecanyon, version: epic.22.11.2,            config: brycecanyon, radcor: no-radcor, num_files: 20 }
+          - { id: epic_arches,      version: epic.22.11.2,            config: arches,      radcor: no-radcor, num_files: 3 }
+          - { id: epic_brycecanyon, version: epic.22.11.2,            config: brycecanyon, radcor: no-radcor, num_files: 3 }
           # - { id: epic_arches,             version: epic.22.11.3, config: arches,      radcor: no-radcor, num_files: 20 }
           # - { id: epic_brycecanyon,        version: epic.22.11.3, config: brycecanyon, radcor: no-radcor, num_files: 20 }
           # - { id: epic_arches_radcor,      version: epic.22.11.3, config: arches,      radcor: radcor,    num_files: 20 }
