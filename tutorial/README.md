@@ -40,11 +40,10 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
 
 
 ### Full Simulation
-- use `s3tools/` scripts to make `config` files, download files from S3, and more; for example:
-```bash
-s3tools/make-epic-config.sh 10x100 tutorial.epic s 4  # stream EPIC files
-s3tools/make-ecce-config.sh 10x100 tutorial.ecce d 12 # download ECCE files (legacy production from Fun4all+EventEvaluator)
-```
+- use `s3tools/` scripts to make `config` files, download files from S3, and more
+  - `s3tools/make-epic-config.rb` for EPIC
+  - `s3tools/make-ecce-config.sh` for ECCE
+  - `s3tools/make-athena-config.sh` for ATHENA
 - run `s3tools/` scripts with no arguments to print usage guide
 - downloading from S3 is preferred, if disk space is available
 - similar to the fast simulations, note where the `config` file is produced; the tutorial
