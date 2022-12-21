@@ -143,14 +143,14 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - { id: athena,           version: athena.deathvalley-v1.0, config: arches,      radcor: no-radcor, num_files: 20 }
-          - { id: ecce,             version: ecce.22.1,               config: arches,      radcor: no-radcor, num_files: 40 }
-          - { id: epic_arches,      version: epic.22.11.2,            config: arches,      radcor: no-radcor, num_files: 3 }
-          - { id: epic_brycecanyon, version: epic.22.11.2,            config: brycecanyon, radcor: no-radcor, num_files: 3 }
           # - { id: epic_arches,             version: epic.22.11.3, config: arches,      radcor: no-radcor, num_files: 20 }
           # - { id: epic_brycecanyon,        version: epic.22.11.3, config: brycecanyon, radcor: no-radcor, num_files: 20 }
           # - { id: epic_arches_radcor,      version: epic.22.11.3, config: arches,      radcor: radcor,    num_files: 20 }
           # - { id: epic_brycecanyon_radcor, version: epic.22.11.3, config: brycecanyon, radcor: radcor,    num_files: 20 }
+          - { id: epic_arches,      version: epic.22.11.2,            config: arches,      radcor: no-radcor, num_files: 3 }
+          - { id: epic_brycecanyon, version: epic.22.11.2,            config: brycecanyon, radcor: no-radcor, num_files: 3 }
+          - { id: ecce,             version: ecce.22.1,               config: arches,      radcor: no-radcor, num_files: 40 }
+          - { id: athena,           version: athena.deathvalley-v1.0, config: arches,      radcor: no-radcor, num_files: 20 }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -178,38 +178,6 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: x_fullsim_${{matrix.id}}
-          retention-days: 1
-          path: |
-            s3files.config
-            datarec
-
-  download_fullsim_legacy:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - { detector: athena, num_files: 20 }
-          - { detector: ecce,   num_files: 40 }
-    steps:
-      - uses: actions/checkout@v3
-      - uses: cvmfs-contrib/github-action-cvmfs@v3
-      - uses: eic/run-cvmfs-osg-eic-shell@main
-        env:
-          S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
-          S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
-        with:
-          platform-release: "jug_xl:nightly"
-          setup: environ.sh
-          run: |
-            echo "[CI] download files from S3"
-            s3tools/add-host.sh
-            s3tools/make-${{matrix.detector}}-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.detector}} d ${{matrix.num_files}} s3files.config
-            echo "[CI] cat config file"
-            cat s3files.config
-      - uses: actions/upload-artifact@v3
-        with:
-          name: x_fullsim_${{matrix.detector}}
           retention-days: 1
           path: |
             s3files.config
