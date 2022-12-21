@@ -85,13 +85,10 @@ void AnalysisEcce::Execute()
   tr.SetEntriesRange(1,maxEvents);
   do {
     if(tr.GetCurrentEntry()%10000==0) cout << tr.GetCurrentEntry() << " events..." << endl;
-  
+
     // resets
     kin->ResetHFS();
     kinTrue->ResetHFS();
-
-
-
 
     // a few maps needed to get the associated info between tracks, true particles, etec
 
@@ -214,7 +211,7 @@ void AnalysisEcce::Execute()
         }
       }
     } // end truth loop
-
+    
     // looking for radiated photons (mother particle == scattered electron)
     // requires that we already know scattered electron index
     for(int imc=0; imc<hepmcp_PDG.GetSize(); imc++) {
@@ -244,7 +241,6 @@ void AnalysisEcce::Execute()
     }
     // check beam finding
     if(!foundBeamElectron || !foundBeamIon) { numNoBeam++; continue; };
-
 
     // reconstructed particles loop
     /* - add reconstructed particle to `recopart`
@@ -308,7 +304,7 @@ void AnalysisEcce::Execute()
       }
 
     } // end reco loop
-
+    
     // skip the event if the scattered electron is not found and we need it
     if(recEleFound < 1) {
       numNoEle++;
@@ -331,7 +327,7 @@ void AnalysisEcce::Execute()
     // calculate DIS kinematics
     if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
     if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
-
+    
     // Get the weight for this event's Q2
     auto Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
 

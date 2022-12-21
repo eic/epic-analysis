@@ -45,10 +45,8 @@ LIBS += -L${MSTWPDF_HOME} -lmstwpdf
 DEPS += -I${ADAGE_HOME}/include
 LIBS += -L${ADAGE_HOME}/lib -lAdage
 
-#PYBIND
-DEPS += -I/usr/._local/4lciz2i3o3tp525sudm44xu6vhqszeil/include/python3.10 -I/usr/._local/4lciz2i3o3tp525sudm44xu6vhqszeil/include/python3.10
-LIBS += -L/usr/._local/4lciz2i3o3tp525sudm44xu6vhqszeil/lib -lcrypto -lintl -ldl  -lm -lm -lpython3.10
-DEPS += -I/w/hallb-scshelf2102/clas12/pecar/eic/sidis-eic/deps/pybind11/include
+#PYTHON LIBRARY
+LIBS += -L/usr/local/lib -lpython3.10
 
 # SIDIS-EIC
 ifndef SIDIS_EIC_HOME

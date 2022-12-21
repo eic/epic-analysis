@@ -603,12 +603,6 @@ void Kinematics::ResetHFS() {
   nPi = 0;
   ar.Clear();
   arpi.Clear();
-  for(int i = 0; i < 100; i++){
-    for(int j = 0; j < 7; j++){
-      hfsinfo[i][j] = 0;
-    }
-  }
-  for(int i = 0; i < 6; i++) globalinfo[i]=0;
 };
 
 
