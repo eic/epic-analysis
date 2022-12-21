@@ -35,7 +35,7 @@ Kinematics::Kinematics(
 
   // TEST SETTINGS - for debugging calculations ///////////////
   // set main frame, used for calculations where there is ambiguity which frame is the correct frame to use
-  mainFrame = fLab; // fLab, fHeadOn
+  mainFrame = fHeadOn; // fLab, fHeadOn
   // set method for determining `vecQ` 4-momentum components for certain recon methods (JB,DA,(e)Sigma)
   qComponentsMethod = qQuadratic; // qQuadratic, qHadronic, qElectronic
   /////////////////////////////////////////////////////////////
@@ -544,19 +544,19 @@ void Kinematics::ValidateHeadOnFrame() {
 // add a 4-momentum to the hadronic final state
 void Kinematics::AddToHFS(TLorentzVector p4_) {
   TLorentzVector p4 = p4_;
-  if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(p4,p4);
-  sigmah += (p4.E() - p4.Pz());
-  Pxh += p4.Px();
-  Pyh += p4.Py();
-  hadronSumVec += p4;
-  countHadrons++;
-  //HFS tree variables
   hfspx[nHFS] = p4.Px();
   hfspy[nHFS] = p4.Py();
   hfspz[nHFS] = p4.Pz();
   hfsE[nHFS] = p4.E();
   new(ar[nHFS]) TLorentzVector(p4);
   nHFS++;
+  
+  if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(p4,p4);
+  sigmah += (p4.E() - p4.Pz());
+  Pxh += p4.Px();
+  Pyh += p4.Py();
+  hadronSumVec += p4;
+  countHadrons++;
 };
 
 void Kinematics::AddPion(TLorentzVector p4_){
