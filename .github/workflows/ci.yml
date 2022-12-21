@@ -169,7 +169,7 @@ jobs:
               --output ${{matrix.id}} \
               --mode   d \
               --config s3files.config \
-              ${{matrix.options}
+              ${{matrix.options}}
             echo "[CI] cat config file"
             cat s3files.config
       - uses: actions/upload-artifact@v3
