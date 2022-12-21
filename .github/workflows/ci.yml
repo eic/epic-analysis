@@ -147,10 +147,10 @@ jobs:
           # - { id: epic_brycecanyon,        version: epic.22.11.3, config: brycecanyon, radcor: no-radcor, num_files: 20 }
           # - { id: epic_arches_radcor,      version: epic.22.11.3, config: arches,      radcor: radcor,    num_files: 20 }
           # - { id: epic_brycecanyon_radcor, version: epic.22.11.3, config: brycecanyon, radcor: radcor,    num_files: 20 }
-          - { id: epic_arches,      version: epic.22.11.2,            config: arches,      radcor: no-radcor, num_files: 3 }
-          - { id: epic_brycecanyon, version: epic.22.11.2,            config: brycecanyon, radcor: no-radcor, num_files: 3 }
-          - { id: ecce,             version: ecce.22.1,               config: arches,      radcor: no-radcor, num_files: 40 }
-          - { id: athena,           version: athena.deathvalley-v1.0, config: arches,      radcor: no-radcor, num_files: 20 }
+          - { id: epic_arches,      options: --version epic.22.11.2            --limit 3 --detector arches      }
+          - { id: epic_brycecanyon, options: --version epic.22.11.2            --limit 3 --detector brycecanyon }
+          - { id: ecce,             options: --version ecce.22.1               --limit 3 } # default: 40
+          - { id: athena,           options: --version athena.deathvalley-v1.0 --limit 3 } # default: 20
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -165,14 +165,11 @@ jobs:
             echo "[CI] download files from S3"
             s3tools/add-host.sh
             s3tools/make-epic-config.rb \
-              -v ${{matrix.version}} \
-              -e ${{env.ebeam_en}}x${{env.pbeam_en}} \
-              -o ${{matrix.id}} \
-              -m d \
-              -l ${{matrix.num_files}} \
-              -c s3files.config \
-              -d ${{matrix.config}} \
-              --${{matrix.radcor}}
+              --energy ${{env.ebeam_en}}x${{env.pbeam_en}} \
+              --output ${{matrix.id}} \
+              --mode   d \
+              --config s3files.config \
+              ${{matrix.options}
             echo "[CI] cat config file"
             cat s3files.config
       - uses: actions/upload-artifact@v3
