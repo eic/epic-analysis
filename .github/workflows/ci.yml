@@ -105,6 +105,8 @@ jobs:
           platform-release: "jug_xl:nightly"
           setup: environ.sh
           run: |
+            echo "[CI] install delphes"
+            deps/install_delphes.sh
             echo "[CI] download HEPMC files and run Delphes"
             s3tools/add-host.sh
             s3tools/s3tool.rb \
@@ -222,7 +224,7 @@ jobs:
             ls -R x_fastsim_delphes*
             echo "[CI] unpack Delphes artifacts"
             mkdir -p datarec/ci
-            mv -v x_fastsim_delphes*/ci/* datarec/ci/
+            mv -v x_fastsim_delphes*/datarec/ci/* datarec/ci/
             echo "[CI] generate combined config file"
             s3tools/src/generate-config-file.rb delphes.config ${{env.ebeam_en}}x${{env.pbeam_en}} x_fastsim_delphes*/delphes.config.list
             echo "[CI] cat delphes.config"
