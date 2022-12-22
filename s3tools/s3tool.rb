@@ -212,7 +212,7 @@ prod[:targetDir] = "datarec/#{options.locDir.empty? ? options.version : options.
 # settings for handling full simulation output `RECO` vs. fast simulation input `EVGEN` from event generation
 readingEvGen = options.version.match? /^hepmc/
 ext          = readingEvGen ? 'hepmc.gz' : 'root'
-delphesCmd   = 's3tools/loop_run_delphes.sh'
+delphesCmd   = 's3tools/src/loop_run_delphes.sh'
 
 ## helper functions
 # get a list of files on S3 at `dir`; use `preFilter` to filter out things that are not in the file name (e.g., file size)
@@ -435,4 +435,4 @@ puts "File Config Table: #{localFileTableName}"
 system "cat #{localFileTableName}"
 puts '\''*50
 configFile = localFileTableName.sub(/\.list/,'')
-system "s3tools/generate-config-file.rb #{configFile} #{options.energy} #{localFileTableName}"
+system "s3tools/src/generate-config-file.rb #{configFile} #{options.energy} #{localFileTableName}"

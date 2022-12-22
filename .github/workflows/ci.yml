@@ -107,7 +107,7 @@ jobs:
           run: |
             echo "[CI] download HEPMC files and run Delphes"
             s3tools/add-host.sh
-            s3tools/make-epic-config.rb \
+            s3tools/s3tool.rb \
               --version hepmc.pythia8 \
               --energy ${{env.ebeam_en}}x${{env.pbeam_en}} \
               --minQ2 ${{matrix.minq2}} \
@@ -118,7 +118,7 @@ jobs:
           name: x_fastsim_delphes_q2min${{matrix.minq2}}
           retention-days: 1
           path: |
-            datarec/ci/*.root
+            datarec
             delphes.config
             delphes.config.list
 
@@ -153,7 +153,7 @@ jobs:
           run: |
             echo "[CI] download files from S3"
             s3tools/add-host.sh
-            s3tools/make-epic-config.rb \
+            s3tools/s3tool.rb \
               --energy ${{env.ebeam_en}}x${{env.pbeam_en}} \
               --output ${{matrix.id}} \
               --mode   d \
@@ -218,12 +218,11 @@ jobs:
             echo "[CI] job matrix params:"
             echo "aname = ${{matrix.aname}}"
             echo "recon = ${{matrix.recon}}"
-            echo "[CI] flatten tree of Delphes files"
+            echo "[CI] unpack Delphes artifacts"
             mkdir -p datarec/ci
-            find -name "*.root" -print | tee tmp.list
-            cat tmp.list | while read f; do mv -v $f datarec/ci; done
+            mv -v x_fastsim_delphes*/datarec/ci/* datarec/ci/
             echo "[CI] generate combined config file"
-            s3tools/generate-config-file.rb delphes.config ${{env.ebeam_en}}x${{env.pbeam_en}} x_fastsim_delphes*/delphes.config.list
+            s3tools/src/generate-config-file.rb delphes.config ${{env.ebeam_en}}x${{env.pbeam_en}} x_fastsim_delphes*/delphes.config.list
             echo "[CI] cat delphes.config"
             cat delphes.config
             echo "[CI] ANALYSIS MACRO"
