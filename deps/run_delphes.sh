@@ -29,11 +29,11 @@ fi
 infile=$1
 if [ $# -ge 2 ]; then outfile=$2
 else
-  if grep -qE '^datagen' <<< "$infile"; then
-    outfile=$(echo $infile|sed 's/^datagen/datarec/'|sed 's/.hepmc.*$/.root/g')
+  if [[ $infile =~ ^datagen ]]; then
+    outfile=$(echo $infile|sed 's/^datagen/datarec/'|sed 's/\.hepmc.*$/.root/g')
     mkdir -p $(dirname $outfile)
   else
-    outfile=$(echo $infile|sed 's/^.*\//datarec\//g'|sed 's/.hepmc.*$/.root/g')
+    outfile=$(echo $infile|sed 's/^.*\//datarec\//g'|sed 's/\.hepmc.*$/.root/g')
   fi
 fi
 if [ $# -ge 3 ]; then cardfile=$3; fi

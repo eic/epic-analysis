@@ -105,31 +105,20 @@ jobs:
           platform-release: "jug_xl:nightly"
           setup: environ.sh
           run: |
-            echo "[CI] add S3 host"
+            echo "[CI] download HEPMC files and run Delphes"
             s3tools/add-host.sh
-            echo "[CI] generate list of HEPMC files"
-            s3tools/generate-hepmc-list.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 6 | tee hepmc.list
-            echo "[CI] download HEPMC files"
-            while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
-            echo "====="
-            ls -lh datagen
-            echo "[CI] install delphes"
-            deps/install_delphes.sh
-            echo "[CI] RUN DELPHES"
-            chmod u+x deps/delphes/DelphesHepMC3
-            for hepmc in datagen/*.hepmc.gz; do deps/run_delphes.sh $hepmc; done
-            echo "====="
-            ls -lh datarec
-            echo "[CI] make config file"
-            s3tools/make-fastsim-local-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 0 datarec delphes.config
-            echo "====="
-            cat delphes.config
+            s3tools/make-epic-config.rb \
+              --version hepmc.pythia8 \
+              --energy ${{env.ebeam_en}}x${{env.pbeam_en}} \
+              --minQ2 ${{matrix.minq2}} \
+              --output ci \
+              --config delphes.config
       - uses: actions/upload-artifact@v3
         with:
           name: x_fastsim_delphes_q2min${{matrix.minq2}}
           retention-days: 1
           path: |
-            datarec/*.root
+            datarec/ci/*.root
             delphes.config
             delphes.config.list
 
@@ -230,8 +219,9 @@ jobs:
             echo "aname = ${{matrix.aname}}"
             echo "recon = ${{matrix.recon}}"
             echo "[CI] flatten tree of Delphes files"
+            mkdir -p datarec/ci
             find -name "*.root" -print | tee tmp.list
-            cat tmp.list | while read f; do mv -v $f datarec/; done
+            cat tmp.list | while read f; do mv -v $f datarec/ci; done
             echo "[CI] generate combined config file"
             s3tools/generate-config-file.rb delphes.config ${{env.ebeam_en}}x${{env.pbeam_en}} x_fastsim_delphes*/delphes.config.list
             echo "[CI] cat delphes.config"
