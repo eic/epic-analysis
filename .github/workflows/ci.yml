@@ -145,7 +145,7 @@ jobs:
         include:
           # EPIC
           - { id: epic_arches,             options: --version epic.22.11.3 --limit 20 --detector arches      }
-          - { id: epic_brycecanyon,        options: --version epic.22.11.3 --limit 20 --detector brycecanyon }
+          - { id: epic_brycecanyon,        options: --version epic.22.11.3 --limit 3 --detector brycecanyon } # NOTE: large RECO files
           # - { id: epic_arches_radcor,      options: --version epic.22.11.3 --limit 20 --detector arches      --radcor }
           # - { id: epic_brycecanyon_radcor, options: --version epic.22.11.3 --limit 20 --detector brycecanyon --radcor }
           # ECCE / ATHENA
