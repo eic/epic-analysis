@@ -16,7 +16,7 @@ First, obtain access to S3:
     locally (most likely to `~/.mc/config.json`)
 
 Now you can run our S3 automation script: `s3tools/s3tool.rb`
-- Run without any arguments will print the usage guide
+- Run without any arguments to print the usage guide
 - This script can:
   - Download files from S3, given your choice of campaign production version,
     beam energy, detector configuration, radiative corrections, and more
