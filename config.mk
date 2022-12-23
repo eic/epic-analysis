@@ -20,8 +20,8 @@ LIBS = $(shell root-config --glibs)
 # Data Model (PODIO + EDM4hep + EDM4eic)
 LIBS += -L/usr/local/lib -lpodio -lpodioRootIO -ledm4hep -ledm4eic
 
-#PYBIND
-LIBS += -lcrypto -lintl -ldl -lm -lpython3.10
+# PYTHON (for pybind)
+LIBS += -lpython3.10
 
 # Miscellaneous
 LIBS += -lfmt
