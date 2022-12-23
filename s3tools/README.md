@@ -1,116 +1,70 @@
 # S3 Tools
 
-Scripts to provide access to S3 and interface with this SIDIS analysis
-repository
+Scripts to provide access to data on S3 and interface with this SIDIS analysis repository
 
-For more details, see [S3 file storage documentation](https://doc.athena-eic.org/en/latest/howto/s3_file_storage.html)
 
-## Quick Start
+## Usage Guide
 
-### Full Simulations
-One top-level script automates all the work:
-- `s3tools/make-athena-config.sh` or `s3tools/make-ecce-config.sh` (best to run from top-level directory)
-  - running with no arguments will print the usage guide
-  - output:
-    - config file, with file names, Q2 minima, and cross sections; used as
-      input to the analysis macros; see [doc/example.config](../doc/example.config)
-      for a sample config file
-    - the downloaded full simulation files, if you chose to download from S3
-  - this script contains some settings such as directory paths to data on S3,
-    for the convenience of SIDIS full simulation analysis
-  - you may have to run `add-host.sh` first, if you have not yet; set env vars
-    `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password beforehand:
-    - `export S3_ACCESS_KEY=*****`
-    - `export S3_SECRET_KEY=*****`
-  - this script calls several other scripts in this directory; read on for their
-    documentation
-- if you are not running in the Singularity/Docker container, download and install
-  the [MinIO client](https://docs.min.io/docs/minio-client-complete-guide) first
+First, obtain access to S3:
+- Set environment variables `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password beforehand:
+  - `export S3_ACCESS_KEY=*****`
+  - `export S3_SECRET_KEY=*****`
+  - It is useful to add these variables to your shell configuration
+  - For more details on S3, see [S3 file storage documentation](https://doc.athena-eic.org/en/latest/howto/s3_file_storage.html)
+- Add our S3 endpoint by running `s3tools/add-host.sh`
+  - This only needs to be done once, since it will write your configuration
+    locally (most likely to `~/.mc/config.json`)
 
-### Fast Simulations
-Two options:
-- download `hepmc` files from S3 and run Delphes locally
-  - this is automated by `s3tools/make-fastsim-S3-config.sh`; run with no
-    arguments to print the usage guide, and note the arguments are a bit
-    different than those for the full simulation scripts
-  - this script can download `hepmc` files from S3, run Delphes on them, and
-    generate the config file
-    - Delphes will run using one thread per Q2 minimum; edit the script
-      to change this behavior
-  - similar to full simulations, you need to have the S3 access and secret
-    environment variables set in order to download `hepmc` files
-- alternatively, if you already have a directory of Delphes output ROOT files,
-  use `make-fastsim-local-config.sh` to create a config file
+Now you can run our S3 automation script: `s3tools/s3tool.rb`
+- Run without any arguments will print the usage guide
+- This script can:
+  - Download files from S3, given your choice of campaign production version,
+    beam energy, detector configuration, radiative corrections, and more
+  - Automatically generate a `config` file, with file names, Q2 minima, and
+    cross sections; this is used as input to the analysis macros (see
+    [doc/example.config](../doc/example.config) for a sample config file)
+  - Alternative to downloading files from S3, you can generate a `config` file
+    for streaming from S3
+  - This script supports both fast and full simulations from EPIC, ECCE, and ATHENA
+  - For fast simulations, event-generated `hepmc` files are obtained and passed through
+    `Delphes` locally
+  - Dependencies (included in `eic-shell`):
+    - [MinIO client](https://docs.min.io/docs/minio-client-complete-guide)
+    - Ruby and Bash
 
-## Accessing S3 Files
-- The [MinIO client](https://docs.min.io/docs/minio-client-complete-guide) is required
-  - if you are using the Singularity or Docker container (`eic-shell`), it is already installed,
-    otherwise you will have to install it
-  - the main command is `mc`
-- next, setup your client to connect to our S3 host (ask someone for credentials):
-  - first set env vars `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password:
-    - `export=S3_ACCESS_KEY=*****`
-    - `export=S3_SECRET_KEY=*****`
-- then add our S3 host to MinIO client: `add-host.sh`
-  - this only needs to be done once on your machine or container
 
 ### MinIO Client Usage
-- find a directory on S3 with full simulation files; example S3 navigation commands:
-  - top-level ATHENA directory list: `mc ls S3/eictest/ATHENA`
-  - show directory tree: `mc tree S3/eictest/ATHENA/RECO/acadia-v2.1/DIS/NC/`
-  - list files: `mc ls S3/eictest/ATHENA/RECO/acadia-v2.1/DIS/NC/10x275/minQ2=1`
-- from here, you have two options, both of which are described in the next sections:
-  - generate a list of S3 file URLs, which will be "streamed" when running
-    the analysis code, and will not be stored locally
-  - if streaming files from S3 is unsuitable, you can download them instead
-    using MinIO client: `mc cp S3/.../.../source.root ./your/data/directory/`;
-    see below for a download script for automation and filtering
+If you would rather do things yourself, you can use MinIO client directly using the
+`mc` command to browse data on S3
+- Example S3 navigation commands:
+  - top-level EPIC directory list: `mc ls S3/eictest/EPIC`
+  - show directory tree: `mc tree S3/eictest/EPIC/RECO/`
+  - download a file: `mc cp /S3/path/to/some/file path/to/local/target/directory/`
+  - more documentation: `mc -h`
+- Once you have some files, you will need to write your own `config` file
+  - Follow [doc/example.config](../doc/example.config) as a template
+  - Cross sections are available in [`datarec/xsec/xsec.dat`](../datarec/xsec/xsec.dat)
 
-## Generating Config Files
-Next we need to make a "config file", which consists of the file name, and
-additional columns such as cross section and minimum Q2. Follow the next sections,
-whether you plan to stream from S3 or download.
 
-The config file includes settings such as beam energy, cross sections, and
-Q2 ranges. See [doc/example.config](../doc/example.config) for an example
-config file, and documentation.
+### Additional Notes
+The `s3tools/src/` directory contains additional scripts, some of which may be useful standalone:
 
-### Cross Sections
-- cross sections are stored in `datarec/xsec/xsec.dat`; use `read-xsec-table.sh`
-  to get the cross section for a particular beam energy setting and Q2 minimum
-- in case you want to update `xsec.dat`:
-  - the script `get-cross-section.sh` will read the cross section from
-    `GenCrossSection` in a `hepmc` file; use `get-cross-section-ALL.sh` to
-    automate running `get-cross-section.sh` over all `hepmc` files in a specific
-    directory tree; this will populate `datarec/xsec/*.xsec` files, one for each
-    `hepmc` file
-  - next use `tabulate-cross-section.py` to read the tree of `.xsec` files into
-    a table of cross sections, output to `datarec/xsec/xsec.dat`
-  - given the time it takes to run `get-cross-section.sh`, we try to store the
-    most up-to-date version of `xsec.dat` in this repository
+#### Delphes Automation
+For convenience, `s3tools/src/loop_run_delphes.sh` can run Delphes on a list of files
+in a list of directories
+- Takes a list of directories as the arguments; they must be in the `datagen/`
+  directory, since the Delphes output files will be to the same path, but with
+  `datagen/` replaced with `datarec/`
+- Runs multi-threaded: one thread per directory
 
-### Stream from S3
-To stream, we need to make a list of URLs.
-- run `generate-s3-list.sh` to generate a list of files
-  - running it with no arguments will print the usage and required arguments
-  - the file list should appear in `stdout`; pipe the output somewhere, for example, a text file
-
-### Download from S3
-Instead of URLs, we make a list of local files, together with the columns needed to
-make a config file
-- first, to download the files from S3 to a local directory
-  `/my/local/directory`, pipe the output of `generate-s3-list.sh` (see above)
-  to `download.sh`, for example:
-  - `generate-s3-list.sh S3/.../... | grep -v OLD | download.sh /my/local/directory`
-  - this will generate a downloader script `/my/local/directory/get-files.sh`,
-    and execute it; this `get-files.sh` script is useful because it tells you
-    where the files have been downloaded from, and can be easily executed again
-    or editted in case the downloading experience any problems
-- next run the script `generate-local-list.sh`, which is very similar to
-  `generate-s3-list.sh`, but uses files from the specified local directory; see
-  above for details and example usage
-  - **Important**: execute this script from the main repository directory
-    (`../`), so that the file names are relative to the same directory that the
-    macros are designed to be executed from:
-    `s3tools/generate-local-list.sh path/to/data`
-    - or just specify an absolute path, which is more robust
+#### Cross Sections
+In case you want to update the cross section table `xsec.dat`:
+- the script `s3tools/src/get-cross-section.sh` will read the cross section from
+  `GenCrossSection` in a `hepmc` file; use `s3tools/src/get-cross-section-ALL.sh` to
+  automate running `get-cross-section.sh` over all `hepmc` files in a specific
+  directory tree; this will populate `datarec/xsec/*.xsec` files, one for each
+  `hepmc` file
+- next use `s3tools/src/tabulate-cross-section.py` to read the tree of `.xsec` files into
+  a table of cross sections, output to `datarec/xsec/xsec.dat`
+- given the time it takes to run `get-cross-section.sh`, we try to store the
+  most up-to-date version of `xsec.dat` in this repository
