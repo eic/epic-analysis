@@ -38,7 +38,7 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
   s3tools/s3tool.rb -e 18x275 -o tutorial.epic -c tutorial/s3files.epic.config -l 4
   ```
   - This is for the latest EPIC data (with the specified beam energy, and
-    writes the config file to `tutorial/s3files.epic.config`
+    writes the config file to `tutorial/s3files.epic.config`)
     - By default, the `config` file will be filled with URLs for streaming data
       from S3; if you would rather download the files locally, add the option
       `-m d` to copy them to `datarec/tutorial.epic/`
