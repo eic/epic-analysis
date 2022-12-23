@@ -223,8 +223,8 @@ jobs:
             echo "[CI] Delphes artifacts"
             ls -R x_fastsim_delphes*
             echo "[CI] unpack Delphes artifacts"
-            mkdir -p datarec/ci
-            mv -v x_fastsim_delphes*/datarec/ci/* datarec/ci/
+            mkdir -p datarec/ci/${{env.ebeam_en}}x${{env.pbeam_en}}
+            mv -v x_fastsim_delphes*/datarec/ci/${{env.ebeam_en}}x${{env.pbeam_en}}/* datarec/ci/${{env.ebeam_en}}x${{env.pbeam_en}}
             echo "[CI] generate combined config file"
             s3tools/src/generate-config-file.rb delphes.config ${{env.ebeam_en}}x${{env.pbeam_en}} x_fastsim_delphes*/delphes.config.list
             echo "[CI] cat delphes.config"
