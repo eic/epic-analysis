@@ -3,52 +3,54 @@
 Here is a collection of tutorial macros. If you are learning this software,
 it is recommended to go through these tutorials in the numerical order given below.
 
-- **Note**: execute macros from the `sidis-eic` top directory, not from
+- **Note**: Execute macros from the `sidis-eic` top directory, not from
 this tutorial directory, e.g., `root -b -q tutorial/analysis_template.C`
 
 ## Generate or Obtain Simulation Output Trees 
 
 To run tutorials, you need to generate or obtain ROOT files, from fast or full simulation
-- the `datarec/` directory is provided for storage of these files,
+- The `datarec/` directory is provided for storage of these files,
   but is not required to use
-- the following sub-sections describe how to obtain these files from the common
+- The following sub-sections describe how to obtain these files from the common
   storage area
-  - this requires access to S3, the common storage area: follow
-    [s3tools documentation](../s3tools/README.md#accessing-s3-files) for guidance, 
-    in particular, the "Accessing S3 Files" section
-- a set of files, together with settings such as beam energy and Q2 ranges, are
+  - This requires access to S3, the common storage area: follow
+    [s3tools documentation](../s3tools/README.md) for guidance
+- A set of files, together with settings such as beam energy and Q2 ranges, are
   specified by config files; see [doc/example.config](../doc/example.config) for an example
   config file and more details
 
 ### Fast Simulation
-- to download sample HEPMC files from S3, and run them through Delphes, run:
+- To download sample HEPMC files from S3, and run them through Delphes, run:
   ```bash
-  s3tools/make-fastsim-S3-config.sh 10x100 tutorial a 4
+  s3tools/s3tool.rb -v hepmc.pythia8 -o tutorial.fastsim -c tutorial/delphes.config -e 10x100 -l 4
   ```
-  - run `s3tools/make-fastsim-S3-config.sh` for an explaination of the
-    arguments for this script
-  - by default, Delphes output files will be written to `datarec/tutorial`
-    (and the HEPMC files will be in `datagen/tutorial`)
-- copy the resulting top-level `delphes.config` file to the `tutorial/`
-  directory. If you ran `s3tools/make-fastsim-S3-config.sh` with the above
-  settings, run
-  ```bash
-  cp datarec/tutorial/10x100/delphes.config tutorial/
-  ```
-  By default, all of the tutorial macros for fast simulations assume the
-  `config` file is `tutorial/delphes.config`.
+  - Run `s3tools/s3tool.rb` (no arguments) for a usage guide of this script
+    - Different `hepmc` datasets may be available (control with the `-v` option)
+  - Delphes output files will be written to `datarec/tutorial.fastsim`
+    (and the HEPMC files will be in `datagen/tutorial.fastsim`)
+  - By default, all of the tutorial macros for fast simulations assume the
+    `config` file is `tutorial/delphes.config` (as specified by the `-c` option)
 
 
 ### Full Simulation
-- use `s3tools/` scripts to make `config` files, download files from S3, and more; for example:
-```bash
-s3tools/make-epic-config.sh 10x100 tutorial.epic s 4  # stream EPIC files
-s3tools/make-ecce-config.sh 10x100 tutorial.ecce d 12 # download ECCE files (legacy production from Fun4all+EventEvaluator)
-```
-- run `s3tools/` scripts with no arguments to print usage guide
-- downloading from S3 is preferred, if disk space is available
-- similar to the fast simulations, note where the `config` file is produced; the tutorial
-  macros require this file as an argument
+- The same `s3tools/s3tool.rb` script is used to download full simulation files from S3:
+  ```bash
+  s3tools/s3tool.rb -e 18x275 -o tutorial.epic -c tutorial/s3files.epic.config -l 4
+  ```
+  - This is for the latest EPIC data (with the specified beam energy, and
+    writes the config file to `tutorial/s3files.epic.config`)
+    - By default, the `config` file will be filled with URLs for streaming data
+      from S3; if you would rather download the files locally, add the option
+      `-m d` to copy them to `datarec/tutorial.epic/`
+  - Run `s3tools/s3tool.rb -e 18x275 -v PRODUCTION_VERSION` for a different
+    production, such as one from ECCE or ATHENA (run `s3tools/s3tool.rb` with
+    no arguments to see available `PRODUCTION_VERSION`s)
+  - Similar to the fast simulations, note where the `config` file is produced; the tutorial
+    macros require this file as an argument; you can control this with the `-c` option:
+    - `s3tools/s3tool.rb -c tutorial/s3files.epic.config` for EPIC macros
+    - `s3tools/s3tool.rb -c tutorial/s3files.ecce.config` for ECCE macros
+    - `s3tools/s3tool.rb -c tutorial/s3files.athena.config` for ATHENA macros
+
 
 ## Introductory Notes
 

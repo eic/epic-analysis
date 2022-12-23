@@ -189,7 +189,7 @@ void Analysis::Prepare() {
     std::vector<Long64_t> entries;
     for(auto fileName : fileNames) {
       auto file = TFile::Open(fileName.c_str());
-      if (file->IsZombie()) {
+      if (file==nullptr || file->IsZombie()) {
         fmt::print(stderr,"ERROR: Couldn't open input file '{}'\n",fileName);
         return;
       }
