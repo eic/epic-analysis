@@ -25,12 +25,12 @@ Now you can run our S3 automation script: `s3tools/s3tool.rb`
     [doc/example.config](../doc/example.config) for a sample config file)
   - Alternative to downloading files from S3, you can generate a `config` file
     for streaming from S3
-  - This script supports both fast and full simulations from EPIC, ECCE, and ATHENA
-  - For fast simulations, event-generated `hepmc` files are obtained and passed through
-    `Delphes` locally
-  - Dependencies (included in `eic-shell`):
-    - [MinIO client](https://docs.min.io/docs/minio-client-complete-guide)
-    - Ruby and Bash
+- This script supports both fast and full simulations from EPIC, ECCE, and ATHENA
+- For fast simulations, event-generated `hepmc` files are obtained and passed through
+  `Delphes` locally
+- Dependencies (included in `eic-shell`):
+  - [MinIO client](https://docs.min.io/docs/minio-client-complete-guide)
+  - Ruby and Bash
 
 
 ### MinIO Client Usage
