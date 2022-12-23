@@ -24,9 +24,7 @@ datarec/*
 results*
 
 # tmp files
-tutorial/delphes.config
-tutorial/delphes.config.bak
-tutorial/s3files.*.config
+tutorial/*.config*
 get-files.sh
 *.xsec
 

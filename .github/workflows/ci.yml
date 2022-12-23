@@ -14,8 +14,8 @@ defaults:
     shell: bash
 
 env:
-  ebeam_en: 10
-  pbeam_en: 100
+  ebeam_en: 18
+  pbeam_en: 275
   root: root -b -q
   root_no_delphes: root -b -q macro/ci/define_exclude_delphes.C 
 
@@ -105,46 +105,43 @@ jobs:
           platform-release: "jug_xl:nightly"
           setup: environ.sh
           run: |
-            echo "[CI] add S3 host"
-            s3tools/add-host.sh
-            echo "[CI] generate list of HEPMC files"
-            s3tools/generate-hepmc-list.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 6 | tee hepmc.list
-            echo "[CI] download HEPMC files"
-            while read hepmc; do mc cp $hepmc datagen/; done < hepmc.list
-            echo "====="
-            ls -lh datagen
             echo "[CI] install delphes"
             deps/install_delphes.sh
-            echo "[CI] RUN DELPHES"
-            chmod u+x deps/delphes/DelphesHepMC3
-            for hepmc in datagen/*.hepmc.gz; do deps/run_delphes.sh $hepmc; done
-            echo "====="
-            ls -lh datarec
-            echo "[CI] make config file"
-            s3tools/make-fastsim-local-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.minq2}} 0 datarec delphes.config
-            echo "====="
-            cat delphes.config
+            echo "[CI] download HEPMC files and run Delphes"
+            s3tools/add-host.sh
+            s3tools/s3tool.rb \
+              --version hepmc.pythia8 \
+              --energy ${{env.ebeam_en}}x${{env.pbeam_en}} \
+              --minQ2 ${{matrix.minq2}} \
+              --output ci \
+              --config delphes.config
       - uses: actions/upload-artifact@v3
         with:
           name: x_fastsim_delphes_q2min${{matrix.minq2}}
           retention-days: 1
           path: |
-            datarec/*.root
+            datarec
             delphes.config
             delphes.config.list
 
 # DOWNLOAD FULLSIM ---------------------------------------------------------------------------
 
 # download full simulation files and make config
+
   download_fullsim:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
       matrix:
         include:
-          - { detector: epic,   num_files: 20 }
-          - { detector: athena, num_files: 20 }
-          - { detector: ecce,   num_files: 40 }
+          # EPIC
+          - { id: epic_arches,             options: --version epic.22.11.3 --limit 20 --detector arches      }
+          - { id: epic_brycecanyon,        options: --version epic.22.11.3 --limit 3 --detector brycecanyon } # NOTE: large RECO files
+          # - { id: epic_arches_radcor,      options: --version epic.22.11.3 --limit 20 --detector arches      --radcor }
+          # - { id: epic_brycecanyon_radcor, options: --version epic.22.11.3 --limit 20 --detector brycecanyon --radcor }
+          # ECCE / ATHENA
+          - { id: ecce,   options: --version ecce.22.1               --limit 40 }
+          - { id: athena, options: --version athena.deathvalley-v1.0 --limit 20 }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -158,12 +155,17 @@ jobs:
           run: |
             echo "[CI] download files from S3"
             s3tools/add-host.sh
-            s3tools/make-${{matrix.detector}}-config.sh ${{env.ebeam_en}}x${{env.pbeam_en}} ${{matrix.detector}} d ${{matrix.num_files}} s3files.config
+            s3tools/s3tool.rb \
+              --energy ${{env.ebeam_en}}x${{env.pbeam_en}} \
+              --output ${{matrix.id}} \
+              --mode   d \
+              --config s3files.config \
+              ${{matrix.options}}
             echo "[CI] cat config file"
             cat s3files.config
       - uses: actions/upload-artifact@v3
         with:
-          name: x_fullsim_${{matrix.detector}}
+          name: x_fullsim_${{matrix.id}}
           retention-days: 1
           path: |
             s3files.config
@@ -218,11 +220,13 @@ jobs:
             echo "[CI] job matrix params:"
             echo "aname = ${{matrix.aname}}"
             echo "recon = ${{matrix.recon}}"
-            echo "[CI] flatten tree of Delphes files"
-            find -name "*.root" -print | tee tmp.list
-            cat tmp.list | while read f; do mv -v $f datarec/; done
+            echo "[CI] Delphes artifacts"
+            ls -R x_fastsim_delphes*
+            echo "[CI] unpack Delphes artifacts"
+            mkdir -p datarec/ci/${{env.ebeam_en}}x${{env.pbeam_en}}
+            mv -v x_fastsim_delphes*/datarec/ci/${{env.ebeam_en}}x${{env.pbeam_en}}/* datarec/ci/${{env.ebeam_en}}x${{env.pbeam_en}}
             echo "[CI] generate combined config file"
-            s3tools/generate-config-file.rb delphes.config ${{env.ebeam_en}}x${{env.pbeam_en}} x_fastsim_delphes*/delphes.config.list
+            s3tools/src/generate-config-file.rb delphes.config ${{env.ebeam_en}}x${{env.pbeam_en}} x_fastsim_delphes*/delphes.config.list
             echo "[CI] cat delphes.config"
             cat delphes.config
             echo "[CI] ANALYSIS MACRO"
@@ -242,15 +246,15 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        detector: [epic, athena, ecce]
+        detector: [epic_arches, epic_brycecanyon, athena, ecce]
         aname: [x_q2, p_eta, yRatio]
         recon: [Ele]
         include: # enable other recon methods for `aname==x_q2` only
-        - { aname: x_q2, recon: Mixed,  detector: epic } # FIXME: not sure how to avoid being repetitive... 
-        - { aname: x_q2, recon: JB,     detector: epic }
-        - { aname: x_q2, recon: DA,     detector: epic }
-        - { aname: x_q2, recon: Sigma,  detector: epic }
-        - { aname: x_q2, recon: eSigma, detector: epic }
+        - { aname: x_q2, recon: Mixed,  detector: epic_arches } # FIXME: not sure how to avoid being repetitive... 
+        - { aname: x_q2, recon: JB,     detector: epic_arches }
+        - { aname: x_q2, recon: DA,     detector: epic_arches }
+        - { aname: x_q2, recon: Sigma,  detector: epic_arches }
+        - { aname: x_q2, recon: eSigma, detector: epic_arches }
         - { aname: x_q2, recon: Mixed,  detector: athena }
         - { aname: x_q2, recon: JB,     detector: athena }
         - { aname: x_q2, recon: DA,     detector: athena }
@@ -301,7 +305,8 @@ jobs:
       matrix:
         mode:
           - fastsim
-          - epic
+          - epic_arches
+          - epic_brycecanyon
           - athena
           - ecce
         pname: # list only jobs which will only use one (primary) recon method
@@ -321,12 +326,13 @@ jobs:
           - { mode: fastsim, pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: fastsim, pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: fastsim, pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic,    pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic,    pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic,    pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic,    pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic,    pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic,    pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_arches,    pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_arches,    pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_arches,    pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_arches,    pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_arches,    pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_arches,    pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_brycecanyon,    pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: athena,  pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: athena,  pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: athena,  pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
@@ -418,7 +424,7 @@ jobs:
           path: out
       - uses: actions/download-artifact@v3
         with:
-          name: root_analysis_epic_${{matrix.aname}}_${{matrix.recon}}
+          name: root_analysis_epic_arches_${{matrix.aname}}_${{matrix.recon}}
           path: out
       - uses: actions/download-artifact@v3
         with:
@@ -443,12 +449,12 @@ jobs:
             echo "[CI] COMPARATOR MACRO"
             ls out
             mv -v out/fastsim.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
-            mv -v out/epic.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
+            mv -v out/epic_arches.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
             mv -v out/athena.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
             mv -v out/ecce.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
-            ${{env.root_no_delphes}} 'macro/ci/comparator.C("out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root","out/epic.${{matrix.pname}}.${{matrix.recon}}.root","out/athena.${{matrix.pname}}.${{matrix.recon}}.root","out/ecce.${{matrix.pname}}.${{matrix.recon}}.root","out/comparison.${{matrix.pname}}.${{matrix.recon}}","${{matrix.xvar}}","${{matrix.yvar}}")'
+            ${{env.root_no_delphes}} 'macro/ci/comparator.C("out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root","out/epic_arches.${{matrix.pname}}.${{matrix.recon}}.root","out/athena.${{matrix.pname}}.${{matrix.recon}}.root","out/ecce.${{matrix.pname}}.${{matrix.recon}}.root","out/comparison.${{matrix.pname}}.${{matrix.recon}}","${{matrix.xvar}}","${{matrix.yvar}}")'
             rm -v out/fastsim.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
-            rm -v out/epic.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
+            rm -v out/epic_arches.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
             rm -v out/athena.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
             rm -v out/ecce.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
       - uses: actions/upload-artifact@v3

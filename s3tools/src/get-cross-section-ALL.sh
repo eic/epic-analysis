@@ -37,7 +37,7 @@ while read hepmc; do
   outFile=$xsecDir/$(basename $hepmc).xsec
   mkdir -p $xsecDir
   echo "  outFile = $outFile"
-  s3tools/get-cross-section.sh $hepmc $limiter | tee $outFile
+  s3tools/src/get-cross-section.sh $hepmc $limiter | tee $outFile
 done < evgenList.tmp
 rm evgenList.tmp
 #tree datarec/xsec
