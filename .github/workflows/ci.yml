@@ -94,10 +94,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # - { id: 1,    options: --version hepmc.pythia6 --limit 1 --minQ2 1    --output ci --config delphes_1.config    }
-          # - { id: 10,   options: --version hepmc.pythia6 --limit 1 --minQ2 10   --output ci --config delphes_10.config   }
-          - { id: 100,  options: --version hepmc.pythia6 --limit 1 --minQ2 100  --output ci --config delphes_100.config  }
-          - { id: 1000, options: --version hepmc.pythia6 --limit 1 --minQ2 1000 --output ci --config delphes_1000.config }
+          # - { id: 1,    options: --version hepmc.pythia6 --limit 1 --minQ2 1    --output ci --config datarec/ci/delphes_1.config    }
+          # - { id: 10,   options: --version hepmc.pythia6 --limit 1 --minQ2 10   --output ci --config datarec/ci/delphes_10.config   }
+          - { id: 100,  options: --version hepmc.pythia6 --limit 1 --minQ2 100  --output ci --config datarec/ci/delphes_100.config  }
+          - { id: 1000, options: --version hepmc.pythia6 --limit 1 --minQ2 1000 --output ci --config datarec/ci/delphes_1000.config }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -120,9 +120,7 @@ jobs:
         with:
           name: x_fastsim_delphes
           retention-days: 1
-          path: |
-            datarec
-            delphes*.config*
+          path: datarec
 
 # DOWNLOAD FULLSIM ---------------------------------------------------------------------------
 
@@ -213,7 +211,7 @@ jobs:
             echo "[CI] unpack Delphes artifacts"
             mv -v x_fastsim_delphes/datarec/ci datarec/
             echo "[CI] generate combined config file"
-            s3tools/src/generate-config-file.rb delphes.config ${{env.ebeam_en}}x${{env.pbeam_en}} x_fastsim_delphes/delphes*.config.list
+            s3tools/src/generate-config-file.rb delphes.config ${{env.ebeam_en}}x${{env.pbeam_en}} datarec/ci/delphes*.config.list
             echo "[CI] cat delphes.config"
             cat delphes.config
             echo "[CI] ANALYSIS MACRO"
