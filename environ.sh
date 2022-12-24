@@ -4,17 +4,17 @@
 # Copyright (C) 2022 Christopher Dilks
 
 
-### SIDIS-EIC
+### EPIC-ANALYSIS
 if [ -z "${BASH_SOURCE[0]}" ]; then
-  export SIDIS_EIC_HOME=$(dirname $(realpath $0))
+  export EPIC_ANALYSIS_HOME=$(dirname $(realpath $0))
 else
-  export SIDIS_EIC_HOME=$(dirname $(realpath ${BASH_SOURCE[0]}))
+  export EPIC_ANALYSIS_HOME=$(dirname $(realpath ${BASH_SOURCE[0]}))
 fi
-echo "SIDIS_EIC_HOME = $SIDIS_EIC_HOME"
+echo "EPIC_ANALYSIS_HOME = $EPIC_ANALYSIS_HOME"
 
 ### DELPHES
 export LD_LIBRARY_PATH=$PYTHIA8/lib:$LD_LIBRARY_PATH
-export DELPHES_HOME=$SIDIS_EIC_HOME/deps/delphes
+export DELPHES_HOME=$EPIC_ANALYSIS_HOME/deps/delphes
 if [ -f "$DELPHES_HOME/DelphesEnv.sh" ]; then
   # set $LIBRARY_PATH to "", if unbound (for CI `eic/run-cvmfs-osg-eic-shell` payloads)
   LIBRARY_PATH_BIND=${LIBRARY_PATH:-}
@@ -28,14 +28,14 @@ else
 fi
 
 ### MSTWPDF
-export MSTWPDF_HOME=$SIDIS_EIC_HOME/deps/mstwpdf
+export MSTWPDF_HOME=$EPIC_ANALYSIS_HOME/deps/mstwpdf
 echo "MSTWPDF found at $MSTWPDF_HOME"
 export LD_LIBRARY_PATH=$MSTWPDF_HOME:$LD_LIBRARY_PATH
 
 ### ADAGE
-export ADAGE_HOME=$SIDIS_EIC_HOME/deps/adage
+export ADAGE_HOME=$EPIC_ANALYSIS_HOME/deps/adage
 echo "ADAGE found at $ADAGE_HOME"
 export LD_LIBRARY_PATH=$ADAGE_HOME/lib:$LD_LIBRARY_PATH
 
-# prioritize SIDIS_EIC libraries
-export LD_LIBRARY_PATH=$SIDIS_EIC_HOME/lib:$LD_LIBRARY_PATH
+# prioritize EPIC_ANALYSIS libraries
+export LD_LIBRARY_PATH=$EPIC_ANALYSIS_HOME/lib:$LD_LIBRARY_PATH

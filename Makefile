@@ -1,16 +1,16 @@
 include config.mk
 
-# sidis-eic targets
-all: deps sidis-eic
+# epic-analysis targets
+all: deps epic-analysis
 all-clean: deps-clean clean
-sidis-eic:
-	@echo "\n===== SIDIS-EIC ====="
+epic-analysis:
+	@echo "\n===== EPIC-ANALYSIS ====="
 	@if [ -z "${EXCLUDE_DELPHES}" ]; then \
 		ln -svf ${DELPHES_HOME}/external ./; \
 	fi
 	@cd src; $(MAKE)
 clean:
-	@echo "\n===== CLEAN SIDIS-EIC ====="
+	@echo "\n===== CLEAN EPIC-ANALYSIS ====="
 	@cd src; $(MAKE) clean
 
 # dependency targets

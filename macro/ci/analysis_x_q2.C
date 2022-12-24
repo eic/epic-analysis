@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2022 Christopher Dilks
 
-R__LOAD_LIBRARY(Sidis-eic)
+R__LOAD_LIBRARY(EpicAnalysis)
 
 // analysis in bins of (x,Q2)
 void analysis_x_q2(

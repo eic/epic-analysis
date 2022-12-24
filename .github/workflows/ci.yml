@@ -37,7 +37,7 @@ jobs:
           run: |
             echo "[CI] install delphes"
             deps/install_delphes.sh
-            echo "[CI] build sidis-eic"
+            echo "[CI] build epic-analysis"
             source environ.sh
             make
       - uses: actions/upload-artifact@v3
@@ -45,7 +45,7 @@ jobs:
           name: x_build_all
           retention-days: 1
           path: |
-            # sidis-eic
+            # epic-analysis
             lib
             src/*Dict.cxx
             # delphes
@@ -67,7 +67,7 @@ jobs:
         with:
           platform-release: "jug_xl:nightly"
           run: |
-            echo "[CI] build sidis-eic"
+            echo "[CI] build epic-analysis"
             source environ.sh
             EXCLUDE_DELPHES=1 make
       - uses: actions/upload-artifact@v3
@@ -75,7 +75,7 @@ jobs:
           name: x_build_no_delphes
           retention-days: 1
           path: |
-            # sidis-eic
+            # epic-analysis
             lib
             src/*Dict.cxx
             # mstwpdf

@@ -15,7 +15,7 @@
 #include "edm4eic/MCRecoParticleAssociationCollection.h"
 #include "edm4eic/InclusiveKinematicsCollection.h"
 
-// sidis-eic
+// epic-analysis
 #include "Analysis.h"
 
 

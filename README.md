@@ -1,6 +1,6 @@
-# SIDIS-EIC
+# EPIC-ANALYSIS
 
-General purpose analysis software for SIDIS at the EIC
+General purpose analysis software for (SI)DIS at the EIC
 
 This repository provides a set of common tools for the analysis of both full and
 fast simulations, including the following features:
@@ -38,7 +38,7 @@ upstream simulation output:
 
 ## Upstream Dependencies
 These are common dependencies used for the upstream simulation, some of which
-are needed for `sidis-eic` as well.
+are needed for `epic-analysis` as well.
 
 Follow the [EIC Software Environment Setup Guide](https://eic.github.io/tutorial-setting-up-environment/index.html)
 to obtain and install the EIC software image.
@@ -53,7 +53,7 @@ If you upgrade your image (`eic-shell --upgrade`), it is recommended to `clean` 
 everything: `make all-clean && make`
 
 ## Local Dependencies
-These are additional dependencies needed by `sidis-eic`; they will be built
+These are additional dependencies needed by `epic-analysis`; they will be built
 locally and stored in the `deps/` directory (see [deps/README.md](deps/README.md)
 for more details). This section documents how to obtain and build local dependencies:
 
@@ -62,23 +62,23 @@ for more details). This section documents how to obtain and build local dependen
   - run `deps/install_delphes.sh`; this will clone the `delphes` repository to `deps/delphes`,
     and compile it
   - alternatively, if you already have a `delphes` build elsewhere, symlink `deps/delphes` to it
-- All other dependencies in `deps/` are mirrors, and are already included with `sidis-eic`.
+- All other dependencies in `deps/` are mirrors, and are already included with `epic-analysis`.
   For the ones that need building, see the **Building** section below.
 
 ## Building
 
 - First make sure environment variables are set by calling `source environ.sh`
 - Run `make` to build everything: all dependencies in `deps/`, followed by the
-  `sidis-eic` library from the source code in `src/`
+  `epic-analysis` library from the source code in `src/`
 - Additional `make` targets are available (see `Makefile`), for more control during
   development:
 
 ```bash
-make                     # builds dependencies, then `sidis-eic` (equivalent to `make all`)
+make                     # builds dependencies, then `epic-analysis` (equivalent to `make all`)
 make deps                # builds only dependencies
-make clean               # clean `sidis-eic` (but not dependencies)
+make clean               # clean `epic-analysis` (but not dependencies)
 make deps-clean          # clean dependencies
-make all-clean           # clean `sidis-eic` and dependencies
+make all-clean           # clean `epic-analysis` and dependencies
 make <dependency>        # build a particular `<dependency>`
 make <dependency>-clean  # clean a particular `<dependency>`
 ```
@@ -86,7 +86,7 @@ make <dependency>-clean  # clean a particular `<dependency>`
 Additional build options are available:
 - `INCLUDE_CENTAURO=1 make` will build with `fastjet` plugin `Centauro`; note that `Centauro` is not included
   with `Delphes` by default
-- `EXCLUDE_DELPHES=1 make` will build `sidis-eic` without Delphes, which is primarily used to expedite CI workflows
+- `EXCLUDE_DELPHES=1 make` will build `epic-analysis` without Delphes, which is primarily used to expedite CI workflows
 
 ## Quick Start
 
@@ -106,7 +106,7 @@ Additional build options are available:
   names and the appropriate configuration card
   - configuration cards are stored in the `deps/delphes_EIC/` directory,
     a mirror of [`eic/delphes_EIC`](https://github.com/eic/delphes_EIC/tree/master)
-    - clone this `sidis-eic` repository with `--recurse-submodules`, or
+    - clone this `epic-analysis` repository with `--recurse-submodules`, or
       if you already have cloned without submodules, execute
       `git submodule update --init` to obtain them
   - environment must be set first (`source environ.sh`)
@@ -164,7 +164,7 @@ The two stages are driven by macros. See examples in the `tutorial` directory,
 and follow the [README](tutorial/README.md).
 
 - **Note**: most macros stored in this repository must be executed from the
-  `sidis-eic` top directory, not from within their subdirectory, e.g., run
+  `epic-analysis` top directory, not from within their subdirectory, e.g., run
   `root -b -q tutorial/analysis_template.C`; this is because certain library
   and data directory paths are given as relative paths
 

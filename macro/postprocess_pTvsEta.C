@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2022 Connor Pecar
 
-R__LOAD_LIBRARY(Sidis-eic)
+R__LOAD_LIBRARY(EpicAnalysis)
 
 /*
 Script to plot histograms binned in two variables in their respective positions

@@ -3,7 +3,7 @@
 Here is a collection of tutorial macros. If you are learning this software,
 it is recommended to go through these tutorials in the numerical order given below.
 
-- **Note**: Execute macros from the `sidis-eic` top directory, not from
+- **Note**: Execute macros from the `epic-analysis` top directory, not from
 this tutorial directory, e.g., `root -b -q tutorial/analysis_template.C`
 
 ## Generate or Obtain Simulation Output Trees 
