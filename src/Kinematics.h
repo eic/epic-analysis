@@ -176,7 +176,6 @@ class Kinematics : public TObject
     TClonesArray *pip4 = new TClonesArray("TLorentzVector");
     TClonesArray &arpi = *pip4;
     // TMVA for ML sidis reconstruction
-    py::object numpy;
     std::vector<std::vector<float>> hfsinfo;
     std::vector<float> globalinfo;
 
@@ -333,14 +332,14 @@ class Kinematics : public TObject
     Double_t rotAboutX, rotAboutY;
     // other
     TLorentzVector vecSpin, IvecSpin;
-
-    py::object keras, tensorflow;// = py::module_::import("keras");
+#ifdef SIDIS_MLPRED
+    py::object keras, tensorflow;
     py::object efnpackage;
     py::function pfnimport;
     py::object model;
-    py::object modelload;// = keras.attr("models.load_model");                       
+    py::object modelload;
     std::string modelname = "pfn_testEpic_000-2_vecQele_nHFS2_500_bs10k_bestValLoss";
-  
+#endif  
 
   ClassDef(Kinematics,1);
 };

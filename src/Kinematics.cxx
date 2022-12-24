@@ -15,17 +15,12 @@ Kinematics::Kinematics(
     )
 {
   srand(time(NULL));
-  // working version (slow):
+  // importing from local python script for ML predictions
+  // requires tensorflow, energyflow packages installed
+#ifdef SIDIS_MLPRED
   efnpackage = py::module_::import("testEFlowimport");
   pfnimport = efnpackage.attr("eflowPredict");
-  
-  //tensorflow = py::module_::import("tensorflow");
-  //keras = tensorflow.attr("keras");
-  //efnpackage = py::module_::import("energyflow");
-  //pfnimport = efnpackage.attr("archs");
-  //numpy = py::module_::import("numpy");
-  //model = keras.attr("models").attr("load_model")(modelname);
-  
+#endif
   // set ion mass
   IonMass = ProtonMass();
   
@@ -228,11 +223,6 @@ void Kinematics::GetQWNu_ML(){
       hfsinfo.push_back(partHold);
       partHold.clear();
     }
-    // order in current model (needs fixed):
-    //  ['Q2DA','Q2Ele','Q2JB','xDA','xEle','xJB',
-    //	 'vecQElePx','vecQElePy',
-    //   'vecQElePz','vecQEleE']
-    // obviously should have NN to predict Q2, x as well
     double Q2ele, Q2DA, Q2JB;
     double xele, xDA, xJB;
     TLorentzVector vecQEle;
@@ -287,12 +277,11 @@ void Kinematics::GetQWNu_ML(){
     globalinfo.push_back(vecQEle.Py());
     globalinfo.push_back(vecQEle.Pz());
     globalinfo.push_back(vecQEle.E());
-
+#ifdef SIDIS_MLPRED
     py::object nnoutput = pfnimport(hfsinfo, globalinfo);
-
     std::vector<float> nnvecq = nnoutput.cast<std::vector<float>>();
-
     vecQ.SetPxPyPzE(nnvecq[0],nnvecq[1],nnvecq[2],nnvecq[3]);
+#endif
   }
   else{
     this->CalculateDISbyElectron();
@@ -300,7 +289,6 @@ void Kinematics::GetQWNu_ML(){
   vecW = vecEleBeam + vecIonBeam - vecElectron; 
   W = vecW.M();
   Nu = vecIonBeam.Dot(vecQ) / IonMass;
-
   
 }
 
