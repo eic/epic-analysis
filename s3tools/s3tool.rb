@@ -39,6 +39,7 @@ end
 #   :releaseSubDir   => Proc() -> Directory for this PRODUCTION_VERSION
 #   :energySubDir    => Proc() -> Subdirectory associated to user-specified beam energy
 #   :dataSubDir      => Proc(*version dependent*) -> Subdirectory of `:energySubDir`
+#   :fileExtension   => File extension (optional, defaults to 'root')
 # }
 prodSettings = {
   'epic.22.11.3' => {
@@ -75,12 +76,28 @@ prodSettings = {
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
+  'hepmc.pythia6' => {
+    :comment         => 'HEPMC files from Pythia 6 for EPIC, with & without radiative corrections',
+    :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
+    :releaseSubDir   => Proc.new { 
+      puts """
+      WARNING: unfortunately, these HEPMC files are very large!!!
+        Potential workaround (TODO): use `mc cat` to get part of a file,
+        being careful not to truncate the last event's particles
+      """
+      "S3/eictest/EPIC/EVGEN/SIDIS/pythia6"
+    },
+    :energySubDir    => Proc.new { "ep_#{options.energy}" },
+    :dataSubDir      => Proc.new { |radDir| "hepmc_ip6/#{radDir}" },
+    :fileExtension   => 'hepmc',
+  },
   'hepmc.pythia8' => {
     :comment         => 'HEPMC files from Pythia 8, used for ATHENA proposal',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
     :releaseSubDir   => Proc.new { "S3/eictest/ATHENA/EVGEN/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+    :fileExtension   => 'hepmc.gz',
   },
 }
 
@@ -209,9 +226,11 @@ puts "Energy Dir:  #{prod[:energyDir]}"
 # set target `locDir` directory
 prod[:targetDir] = "datarec/#{options.locDir.empty? ? options.version : options.locDir}"
 
+# set the file extension, if specified
+ext = prod[:fileExtension].nil? ? 'root' : prod[:fileExtension]
+
 # settings for handling full simulation output `RECO` vs. fast simulation input `EVGEN` from event generation
 readingEvGen = options.version.match? /^hepmc/
-ext          = readingEvGen ? 'hepmc.gz' : 'root'
 delphesCmd   = 's3tools/src/loop_run_delphes.sh'
 
 ## helper functions
@@ -251,7 +270,7 @@ end
 
 
 
-# RELEASE VERSION DEPENDENT CODDE ##################
+# RELEASE VERSION DEPENDENT CODE ###################
 # Organize a list of Q2 ranges and associated S3 files for each
 # - The file tree layout and naming conventions on S3 varies as a function of productions
 # - The following is a chain of `if` statements, grouping together productions with similarly structured file trees
@@ -265,6 +284,7 @@ end
 # pattern: "ep_#{energy}/hepmc_ip6/" with Q2 range given in file name as "q2_#{minQ2}_#{maxQ2}"
 if [
     'epic.22.11.3',
+    'hepmc.pythia6',
 ].include? options.version
   # set source data directory
   prod[:radDir] = options.radCor ? 'radcor' : 'noradcor'
@@ -342,7 +362,6 @@ elsif [
   end
   prod[:radDir] = '' # not used
 
-
 elsif [
   'ecce.22.1'
 ].include? options.version
@@ -366,7 +385,7 @@ elsif [
       .first(options.limit)
   end
 
-end # END RELEASE VERSION DEPENDENT CODDE ##################
+end # END RELEASE VERSION DEPENDENT CODE ##################
 
 
 # append the energy to the target directory
