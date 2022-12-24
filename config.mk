@@ -1,10 +1,10 @@
 # compiler and flags
 CXX = g++
-FLAGS = -g -Wno-deprecated -fPIC -fno-inline -Wno-write-strings
+FLAGS = -Wno-deprecated -fPIC
 FLAGS += -fmax-errors=3
-#-fvisibility=hidden
-# extra flags
-#FLAGS += -O0
+# FLAGS += -fvisibility=hidden # FIXME: required by pybind, but causes unresolved symbols in cling...
+# FLAGS += -g # build with debugging symbols
+# FLAGS += -O0
 
 # extra flags for Mac OS
 UNAME := $(shell uname)
