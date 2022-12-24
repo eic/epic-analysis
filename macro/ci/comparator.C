@@ -118,8 +118,12 @@ void comparator(
 
   // set legend labels
   auto makeLegendName = [] (TString infileName) -> TString {
-    if     (infileName.Contains("fastsim")) return "Delphes";
-    else if(infileName.Contains("epic"))    return "EPIC";
+    if(infileName.Contains("epic")) {
+      TString name = infileName;
+      name.ReplaceAll("_",", ").ReplaceAll("epic","EPIC");
+      return name;
+    }
+    else if(infileName.Contains("fastsim")) return "Delphes";
     else if(infileName.Contains("athena"))  return "ATHENA";
     else if(infileName.Contains("ecce"))    return "ECCE";
     return "UNKNOWN";
