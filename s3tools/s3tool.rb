@@ -19,6 +19,7 @@ options.detector   = 'arches'
 options.radCor     = false
 options.minQ2      = -1
 options.maxQ2      = -1
+options.numHepmc   = 0
 
 # global settings
 CrossSectionTable = 'datarec/xsec/xsec.dat'
@@ -79,14 +80,7 @@ prodSettings = {
   'hepmc.pythia6' => {
     :comment         => 'HEPMC files from Pythia 6 for EPIC, with & without radiative corrections',
     :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
-    :releaseSubDir   => Proc.new { 
-      puts """
-      WARNING: unfortunately, these HEPMC files are very large!!!
-        Potential workaround (TODO): use `mc cat` to get part of a file,
-        being careful not to truncate the last event's particles
-      """
-      "S3/eictest/EPIC/EVGEN/SIDIS/pythia6"
-    },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/EVGEN/SIDIS/pythia6" },
     :energySubDir    => Proc.new { "ep_#{options.energy}" },
     :dataSubDir      => Proc.new { |radDir| "hepmc_ip6/#{radDir}" },
     :fileExtension   => 'hepmc',
@@ -203,8 +197,11 @@ OptionParser.new do |o|
         options.radCor = a
       end
   o.separator ''
+  o.separator 'Options useful for CI:'
   o.on("--minQ2 [MIN_Q2]", Float, "limit to Q2 bins with minQ2=[MIN_Q2]") { |a| options.minQ2 = a }
   o.on("--maxQ2 [MAX_Q2]", Float, "limit to Q2 bins with maxQ2=[MAX_Q2]") { |a| options.maxQ2 = a }
+  o.on("--num-hepmc-events [NUM]", Integer, "limit the number of HEPMC events per file", "(for production version 'hepmc.pythia6' only)") { |a| options.numHepmc = a }
+  o.separator ''
   o.separator ''
   o.on_tail("-h", "--help",
             "Show this message"
@@ -214,6 +211,18 @@ OptionParser.new do |o|
            end
 end.parse!( ARGV.length>0 ? ARGV : ['--help'] )
 puts "OPTIONS: #{options}"
+
+# warn about large HEPMC files
+if options.version=='hepmc.pythia6' and options.numHepmc<=0
+  puts """
+    WARNING: unfortunately, these HEPMC files are very large!!!
+      Recommendation: limit the number of events per file with the
+                      `--num-hepmc-events` option
+  """
+end
+if options.numHepmc>=0 and options.version!='hepmc.pythia6'
+  $stderr.puts "WARNING: --num-hepmc-events option does not apply to production version '#{options.version}'"
+end
 
 # get release and energy subdirectories, for the user-specified release version
 prod = prodSettings[options.version]
@@ -417,7 +426,17 @@ prod[:q2ranges].zip(prod[:dataDirs],prod[:fileLists]).each do |q2range,dataDir,f
     delphesCmd += " #{genDir}"
     FileUtils.mkdir_p genDir, verbose: true
     fileList.each do |file|
-      mc_cp "#{dataDir}/#{file}", genDir
+      if options.version=="hepmc.pythia6" and options.numHepmc>0
+        # truncate HEPMC file after `options.numHepmc` events (FIXME: could be more efficient)
+        puts "Downloading #{file}, truncating after #{options.numHepmc} events..."
+        lineNum = `mc cat #{dataDir}/#{file} | grep -En -m#{options.numHepmc+1} '^E' | tail -n1 | sed 's/:.*//g'`.to_i
+        puts "  Event #{options.numHepmc} ends on line number #{lineNum-1}; now downloading..."
+        system "mc head -n #{lineNum-1} #{dataDir}/#{file} > #{genDir}/#{file}"
+        puts "  ...done"
+      else
+        # otherwise get the full file
+        mc_cp "#{dataDir}/#{file}", genDir
+      end
     end
   end
 
