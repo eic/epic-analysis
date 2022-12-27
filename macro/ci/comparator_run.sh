@@ -5,6 +5,8 @@
 
 # wrapper for CI usage of comparator.C
 
+set -e
+
 echo "CALLED $0"
 if [ $# -ne 14 ]; then
   echo "ERROR: improper args (see script)"
@@ -31,12 +33,12 @@ done
 
 # run comparator.C
 args=""
-args+="\"$title1\",\"out/$name1.$pname.$recon.root\","
-args+="\"$title2\",\"out/$name2.$pname.$recon.root\","
-args+="\"$title3\",\"out/$name3.$pname.$recon.root\","
-args+="\"$title4\",\"out/$name4.$pname.$recon.root\","
-args+="\"out/comparison.$outname.$pname.$recon\",\"$xvar\",\"$yvar\""
-root -b -q macro/ci/define_exclude_delphes.C 'macro/ci/comparator.C('$args')'
+args+="\"$title1\"','\"out/$name1.$pname.$recon.root\"','"
+args+="\"$title2\"','\"out/$name2.$pname.$recon.root\"','"
+args+="\"$title3\"','\"out/$name3.$pname.$recon.root\"','"
+args+="\"$title4\"','\"out/$name4.$pname.$recon.root\"','"
+args+="\"out/comparison.$outname.$pname.$recon\"','\"$xvar\"','\"$yvar\""
+root -b -q macro/ci/define_exclude_delphes.C macro/ci/comparator.C'('$args')'
 
 # rm analysis_root artifact
 for det in $dets; do
