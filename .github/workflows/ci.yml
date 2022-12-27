@@ -504,7 +504,10 @@ jobs:
           tree results
       - name: rename-dirs
         run: |
-          for d in $(ls -d results/*.images); do mv -v $d $(echo $d|sed 's;\.images/$;;'); done
+          for d in $(ls -d results/*.images); do \
+            d=$(echo $d | sed 's;/$;;'); \
+            mv -v $d $(echo $d | sed 's;\.images$;;'); \
+          done
           tree results
       - name: merge_recon
         run: |
