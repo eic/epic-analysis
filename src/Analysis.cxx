@@ -448,17 +448,17 @@ void Analysis::Prepare() {
       HS->DefineHist1D("Q_xsec","Q","GeV",NBINS,1.0,3000,true,true); // log
       HS->Hist("Q_xsec")->SetMinimum(1e-10);
       // -- resolutions
-      HS->DefineHist1D("x_Res","x-x_{true}","", NBINS, -0.5, 0.5);
-      HS->DefineHist1D("y_Res","y-y_{true}","", NBINS, -0.2, 0.2);
-      HS->DefineHist1D("Q2_Res","Q2-Q2_{true}","GeV^{2}", NBINS, -20, 20);
-      HS->DefineHist1D("W_Res","W-W_{true}","GeV", NBINS, -20, 20);
-      HS->DefineHist1D("Nu_Res","#nu-#nu_{true}","GeV", NBINS, -100, 100);
-      HS->DefineHist1D("phiH_Res","#phi_{h}-#phi_{h}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
-      HS->DefineHist1D("phiS_Res","#phi_{S}-#phi_{S}^{true}","", NBINS, -TMath::Pi(), TMath::Pi());
-      HS->DefineHist1D("pT_Res","pT-pT^{true}","GeV", NBINS, -1.5, 1.5);
-      HS->DefineHist1D("z_Res","z-z^{true}","", NBINS, -1.5, 1.5);
-      HS->DefineHist1D("mX_Res","mX-mX^{true}","GeV", NBINS, -10, 10);
-      HS->DefineHist1D("xF_Res","xF-xF^{true}","", NBINS, -1.5, 1.5);
+      HS->DefineHist1D("x_Res",  "x-x_{true}/x_{true}",             "", NBINS, -0.3, 0.3);
+      HS->DefineHist1D("y_Res",  "y-y_{true}/y_{true}",             "", NBINS, -0.3, 0.3);
+      HS->DefineHist1D("Q2_Res", "Q^{2}-Q^{2}_{true}/Q^{2}_{true}", "", NBINS, -0.3, 0.3);
+      HS->DefineHist1D("W_Res",  "W-W_{true}/W_{true}",             "", NBINS, -0.3, 0.3);
+      HS->DefineHist1D("Nu_Res", "#nu-#nu_{true}/#nu_{true}",       "", NBINS, -0.3, 0.3);
+      HS->DefineHist1D("pT_Res", "p_{T}-p_{T}^{true}/p_{T}^{true}", "", NBINS, -0.3, 0.3);
+      HS->DefineHist1D("z_Res",  "z-z_{true}/z_{true}",             "", NBINS, -0.3, 0.3);
+      HS->DefineHist1D("mX_Res", "m_{X}-m_{X}^{true}/m_{X}^{true}", "", NBINS, -0.3, 0.3);
+      HS->DefineHist1D("xF_Res", "x_{F}-x_{F}^{true}/x_{F}^{true}", "", NBINS, -0.3, 0.3);
+      HS->DefineHist1D("phiH_Res", "#phi_{h}-#phi_{h}^{true}", "", NBINS, -TMath::Pi(), TMath::Pi()); // absolute resolution
+      HS->DefineHist1D("phiS_Res", "#phi_{S}-#phi_{S}^{true}", "", NBINS, -TMath::Pi(), TMath::Pi()); // absolute resolution
       HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
           20,1e-4,1,
           10,1,1e4,
@@ -810,17 +810,18 @@ void Analysis::FillHistos1h(Double_t wgt) {
     // cross sections (divide by lumi after all events processed)
     H->FillHist1D("Q_xsec", TMath::Sqrt(kin->Q2), wgt);
     // resolutions
-    H->FillHist1D("x_Res",  kin->x - kinTrue->x,   wgt );
-    H->FillHist1D("y_Res",  kin->y - kinTrue->y,   wgt );
-    H->FillHist1D("Q2_Res", kin->Q2 - kinTrue->Q2, wgt );
-    H->FillHist1D("W_Res",  kin->W - kinTrue->W,   wgt );
-    H->FillHist1D("Nu_Res", kin->Nu - kinTrue->Nu, wgt );
+    auto fillRelativeResolution = [&H,&wgt] (auto name, auto rec, auto gen) { if(gen!=0) H->FillHist1D(name, (rec-gen)/gen, wgt); };
+    fillRelativeResolution("x_Res",  kin->x,  kinTrue->x);
+    fillRelativeResolution("y_Res",  kin->y,  kinTrue->y);
+    fillRelativeResolution("Q2_Res", kin->Q2, kinTrue->Q2);
+    fillRelativeResolution("W_Res",  kin->W,  kinTrue->W);
+    fillRelativeResolution("Nu_Res", kin->Nu, kinTrue->Nu);
+    fillRelativeResolution("pT_Res", kin->pT, kinTrue->pT);
+    fillRelativeResolution("z_Res",  kin->z,  kinTrue->z);
+    fillRelativeResolution("mX_Res", kin->mX, kinTrue->mX);
+    fillRelativeResolution("xF_Res", kin->xF, kinTrue->xF);
     H->FillHist1D("phiH_Res",  Kinematics::AdjAngle(kin->phiH - kinTrue->phiH), wgt );
     H->FillHist1D("phiS_Res",  Kinematics::AdjAngle(kin->phiS - kinTrue->phiS), wgt );
-    H->FillHist1D("pT_Res",    kin->pT - kinTrue->pT, wgt );
-    H->FillHist1D("z_Res",     kin->z - kinTrue->z,   wgt );
-    H->FillHist1D("mX_Res",    kin->mX - kinTrue->mX, wgt );
-    H->FillHist1D("xF_Res",    kin->xF - kinTrue->xF, wgt );
     H->FillHist2D("Q2vsXtrue", kinTrue->x,            kinTrue->Q2, wgt);
     if(kinTrue->z!=0)
       H->FillHist2D("Q2vsX_zres", kinTrue->x, kinTrue->Q2, wgt*( fabs(kinTrue->z - kin->z)/(kinTrue->z) ) );
