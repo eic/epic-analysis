@@ -287,7 +287,7 @@ void AnalysisEpicPodio::Execute()
               calc.getNu()
               }));
       // local calculations
-      fmt::print("{:-<75}\n",fmt::format("KINEMATICS, calculated locally in SIDIS-EIC, with method \"{}\": ",reconMethod));
+      fmt::print("{:-<75}\n",fmt::format("KINEMATICS, calculated locally in EPIC-ANALYSIS, with method \"{}\": ",reconMethod));
       auto PrintKinematics = [&PrintRow] (std::string name, Kinematics *K) {
         PrintRow( name, std::vector<Double_t>({
             K->x,

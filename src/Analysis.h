@@ -27,7 +27,7 @@
 // adage
 #include "adage/BinSet.h"
 
-// sidis-eic
+// epic-analysis
 #include "DataModel.h"
 #include "Histos.h"
 #include "HistosDAG.h"

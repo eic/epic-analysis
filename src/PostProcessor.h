@@ -23,7 +23,7 @@
 #include "adage/CutDef.h"
 #include "adage/BinSet.h"
 
-// sidis-eic
+// epic-analysis
 #include "Histos.h"
 #include "Kinematics.h"
 #include "HistosDAG.h"

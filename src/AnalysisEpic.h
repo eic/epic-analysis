@@ -8,7 +8,7 @@
 #include "TTreeReaderValue.h"
 #include "TTreeReaderArray.h"
 
-// sidis-eic
+// epic-analysis
 #include "Analysis.h"
 
 class AnalysisEpic : public Analysis
