@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2022 Connor Pecar
 
-R__LOAD_LIBRARY(Sidis-eic)
+R__LOAD_LIBRARY(EpicAnalysis)
 #include <pybind11/embed.h>
 namespace py = pybind11;
 // using ML prediction for vecQ, and writing out tree of HFS four-vectors
