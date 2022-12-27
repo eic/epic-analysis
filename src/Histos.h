@@ -27,7 +27,7 @@
 #include "adage/BinSet.h"
 #include "adage/CutDef.h"
 
-// sidis-eic
+// epic-analysis
 #include "Hist4D.h"
 
 // container for histogram settings

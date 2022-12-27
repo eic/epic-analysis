@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2022 Christopher Dilks
 
-R__LOAD_LIBRARY(Sidis-eic)
+R__LOAD_LIBRARY(EpicAnalysis)
 
 // make kinematics coverage plots, such as eta vs. p in bins of (x,Q2)
 void postprocess_xqbins_draw(

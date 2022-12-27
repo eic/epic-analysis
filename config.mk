@@ -45,7 +45,7 @@ LIBS += -L${MSTWPDF_HOME} -lmstwpdf
 DEPS += -I${ADAGE_HOME}/include
 LIBS += -L${ADAGE_HOME}/lib -lAdage
 
-# SIDIS-EIC
-ifndef SIDIS_EIC_HOME
+# EPIC-ANALYSIS
+ifndef EPIC_ANALYSIS_HOME
 $(error "ERROR: run 'source environ.sh' before building")
 endif

@@ -20,7 +20,7 @@ Notice
 ======
 
 These dependencies (subdirectories) may have a different license than
-`sidis-eic` itself. The license and copyright used by `sidis-eic` does not
+`epic-analysis` itself. The license and copyright used by `epic-analysis` does not
 apply to these subdirectories. Since they are git subrepos, they have been
 copied as is from their original source. Changes to any code in these
 dependencies must be accepted in the corresponding public Git repositories
@@ -34,15 +34,15 @@ about the subrepo configuration. Use `git subrepo` commands when making changes
 to any subrepos; run them from the top-level directory (`../`).
 
 ### Subrepo Updates
-Pull subrepo updates, and push them to `sidis-eic` remote:
+Pull subrepo updates, and push them to `epic-analysis` remote:
 ```bash
-git checkout -b <new-branch-name>  # make a new sidis-eic branch
+git checkout -b <new-branch-name>  # make a new epic-analysis branch
 
 # pull subrepo updates with either of:
 git subrepo pull deps/<subrepo>  # pull updates from a particular <subrepo>
 git subrepo pull --all           # pull updates from all subrepos
 
-git push -u origin <new-branch-name>  # push the new sidis-eic branch (which already has the subrepo pull commit(s))
+git push -u origin <new-branch-name>  # push the new epic-analysis branch (which already has the subrepo pull commit(s))
 ```
 Then open a pull request for `<new-branch-name> -> main`
 
@@ -51,16 +51,16 @@ If you have `push` access to a `subrepo` remote, you can make your changes here.
 have `push` access, you will need to fork and make your changes separately (or reconfigure subrepo remotes here).
 
 At any time, use `git subrepo status` to print the configuration of each subrepo. Actions such as `git subrepo push`
-or `git subrepo pull` will create commits on `sidis-eic`, be sure to push them to remote.
+or `git subrepo pull` will create commits on `epic-analysis`, be sure to push them to remote.
 
 Assuming you have `push` access to the subrepo `<subrepo>`, and you have already made your changes to `<subrepo>`
 and you're ready to push them to the `<subrepo>` remote:
 ```bash
-# check `sidis-eic` git status
+# check `epic-analysis` git status
 git status
 ```
-Commit and push all changes to `sidis-eic` (preferably in a new branch, and new PR); the
-changes can be both local to `sidis-eic` or local to `<subrepo>`, they do not have to be separate commits.
+Commit and push all changes to `epic-analysis` (preferably in a new branch, and new PR); the
+changes can be both local to `epic-analysis` or local to `<subrepo>`, they do not have to be separate commits.
 
 Create a new branch (e.g., `<my-feature>`) for `<subrepo>` remote, and push the changes we made to it:
 ```bash
@@ -72,10 +72,10 @@ only the changes relevant to `<subrepo>` will be pushed to `<subrepo>` remote.
 - The `-b` option sets the branch name
 - The `-u` option updates the `.gitrepo` file, telling it to track `<my-feature>`
 
-Make more changes as needed; push them to both `sidis-eic` and `subrepo` remotes:
+Make more changes as needed; push them to both `epic-analysis` and `subrepo` remotes:
 ```bash
 git commit ...
-git push ... # to `sidis-eic`
+git push ... # to `epic-analysis`
 git subrepo push deps/<subrepo>  # no need for -b or -u, we are tracking `<my-feature>` already
 git push  # (for .gitrepo)
 ```

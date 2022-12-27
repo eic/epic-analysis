@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2022 Christopher Dilks
 
-R__LOAD_LIBRARY(Sidis-eic)
+R__LOAD_LIBRARY(EpicAnalysis)
 
 /* template analysis macro
  * - runs an analysis and nothing more (e.g., it does not define bins)

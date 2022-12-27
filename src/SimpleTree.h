@@ -15,7 +15,7 @@
 #include <iostream>
 #include <sstream>
 
-// sidis-eic
+// epic-analysis
 #include "Kinematics.h"
 
 // ROOT

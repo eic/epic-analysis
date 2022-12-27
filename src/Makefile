@@ -1,13 +1,13 @@
 include ../config.mk
 
-SIDIS_EIC = Sidis-eic
+EPIC_ANALYSIS = EpicAnalysis
 ROOTCLING = rootcling
 
 # targets
-PREFIX  := ${SIDIS_EIC_HOME}/lib
-LIB     := lib$(SIDIS_EIC).so
-PCM     := $(SIDIS_EIC)Dict_rdict.pcm
-DICT    := $(SIDIS_EIC)Dict.cxx
+PREFIX  := ${EPIC_ANALYSIS_HOME}/lib
+LIB     := lib$(EPIC_ANALYSIS).so
+PCM     := $(EPIC_ANALYSIS)Dict_rdict.pcm
+DICT    := $(EPIC_ANALYSIS)Dict.cxx
 LINKDEF := LinkDef.h
 
 # source code (with $(DICT) and $(LINKDEF) moved to end of lists for rootcling)
@@ -22,12 +22,12 @@ endif
 #-----------------------------------------------
 
 $(PREFIX)/$(LIB): $(DICT) $(HEADERS) $(SOURCES)
-	@echo ">>>>> build $(SIDIS_EIC) library"
+	@echo ">>>>> build $(EPIC_ANALYSIS) library"
 	@echo "      $@"
 	$(CXX) $(SOURCES) -shared -o $@ $(FLAGS) $(DEPS) $(LIBS)
 
 $(DICT): $(HEADERS)
-	@echo ">>>>> generate $(SIDIS_EIC) dictionary"
+	@echo ">>>>> generate $(EPIC_ANALYSIS) dictionary"
 	@echo "      $@"
 	$(ROOTCLING) -f $@ $(DEPS) $^
 	@mkdir -p $(PREFIX)

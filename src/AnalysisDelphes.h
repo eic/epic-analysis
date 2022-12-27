@@ -11,7 +11,7 @@
 //#include "fastjet/contrib/Centauro.hh"
 //#include "fastjet/plugins/Centauro/Centauro.hh"
 
-// sidis-eic
+// epic-analysis
 #include "Analysis.h"
 
 

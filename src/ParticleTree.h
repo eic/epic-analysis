@@ -13,7 +13,7 @@
 #include <iostream>
 #include <sstream>
 
-// sidis-eic
+// epic-analysis
 
 // ROOT
 #include "TTree.h"
