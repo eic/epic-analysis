@@ -500,11 +500,11 @@ jobs:
       - name: cull
         run: |
           find results -name "*.root" -print | xargs rm -v
-          rm -v results/*y_minima*/*/canv*.png
+          rm -v results/*y_minima*/canv*.png
           tree results
-      - name: flatten
+      - name: rename-dirs
         run: |
-          macro/ci/flatten-artifacts.sh results
+          for d in $(ls -d results/*.images); do mv -v $d $(echo $d|sed 's;\.images/$;;'); done
           tree results
       - name: merge_recon
         run: |
@@ -514,7 +514,13 @@ jobs:
           tree results
       - name: merge_fastfull
         run: |
-          macro/ci/merge-fastfull.sh results
+          macro/ci/merge-fastfull.sh results \
+            epic_arches \
+            epic_brycecanyon \
+            epic_arches_radcor \
+            epic_brycecanyon_radcor \
+            ecce \
+            athena
           tree results
       - uses: actions/upload-artifact@v3
         with:

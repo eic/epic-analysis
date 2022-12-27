@@ -17,8 +17,8 @@ echo "------------- merge recon methods -------------------"
 # loop through recon* directories
 ls | grep "$2" |\
 while read dirRecon; do
-  method=$(echo $dirRecon | sed 's/^.*_//g')
-  dirOut=$(echo $dirRecon | sed "s/_$method/_allReconMethods/g")
+  method=$(echo $dirRecon | sed 's/^.*\.//g')
+  dirOut=$(echo $dirRecon | sed "s/\.$method/.allReconMethods/g")
   echo "MOVE ARTIFACTS IN $dirRecon/ FOR METHOD \"$method\" TO $dirOut/"
   mkdir -p $dirOut
   pushd $dirRecon
