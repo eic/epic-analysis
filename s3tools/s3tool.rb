@@ -19,6 +19,7 @@ options.detector   = 'arches'
 options.radCor     = false
 options.minQ2      = -1
 options.maxQ2      = -1
+options.numHepmc   = 0
 
 # global settings
 CrossSectionTable = 'datarec/xsec/xsec.dat'
@@ -39,6 +40,7 @@ end
 #   :releaseSubDir   => Proc() -> Directory for this PRODUCTION_VERSION
 #   :energySubDir    => Proc() -> Subdirectory associated to user-specified beam energy
 #   :dataSubDir      => Proc(*version dependent*) -> Subdirectory of `:energySubDir`
+#   :fileExtension   => File extension (optional, defaults to 'root')
 # }
 prodSettings = {
   'epic.22.11.3' => {
@@ -75,12 +77,21 @@ prodSettings = {
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
+  'hepmc.pythia6' => {
+    :comment         => 'HEPMC files from Pythia 6 for EPIC, with & without radiative corrections',
+    :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/EVGEN/SIDIS/pythia6" },
+    :energySubDir    => Proc.new { "ep_#{options.energy}" },
+    :dataSubDir      => Proc.new { |radDir| "hepmc_ip6/#{radDir}" },
+    :fileExtension   => 'hepmc',
+  },
   'hepmc.pythia8' => {
     :comment         => 'HEPMC files from Pythia 8, used for ATHENA proposal',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
     :releaseSubDir   => Proc.new { "S3/eictest/ATHENA/EVGEN/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+    :fileExtension   => 'hepmc.gz',
   },
 }
 
@@ -186,8 +197,11 @@ OptionParser.new do |o|
         options.radCor = a
       end
   o.separator ''
+  o.separator 'Options useful for CI:'
   o.on("--minQ2 [MIN_Q2]", Float, "limit to Q2 bins with minQ2=[MIN_Q2]") { |a| options.minQ2 = a }
   o.on("--maxQ2 [MAX_Q2]", Float, "limit to Q2 bins with maxQ2=[MAX_Q2]") { |a| options.maxQ2 = a }
+  o.on("--num-hepmc-events [NUM]", Integer, "limit the number of HEPMC events per file", "(for production version 'hepmc.pythia6' only)") { |a| options.numHepmc = a }
+  o.separator ''
   o.separator ''
   o.on_tail("-h", "--help",
             "Show this message"
@@ -197,6 +211,18 @@ OptionParser.new do |o|
            end
 end.parse!( ARGV.length>0 ? ARGV : ['--help'] )
 puts "OPTIONS: #{options}"
+
+# warn about large HEPMC files
+if options.version=='hepmc.pythia6' and options.numHepmc<=0
+  puts """
+    WARNING: unfortunately, these HEPMC files are very large!!!
+      Recommendation: limit the number of events per file with the
+                      `--num-hepmc-events` option
+  """
+end
+if options.numHepmc>=0 and options.version!='hepmc.pythia6'
+  $stderr.puts "WARNING: --num-hepmc-events option does not apply to production version '#{options.version}'"
+end
 
 # get release and energy subdirectories, for the user-specified release version
 prod = prodSettings[options.version]
@@ -209,9 +235,11 @@ puts "Energy Dir:  #{prod[:energyDir]}"
 # set target `locDir` directory
 prod[:targetDir] = "datarec/#{options.locDir.empty? ? options.version : options.locDir}"
 
+# set the file extension, if specified
+ext = prod[:fileExtension].nil? ? 'root' : prod[:fileExtension]
+
 # settings for handling full simulation output `RECO` vs. fast simulation input `EVGEN` from event generation
 readingEvGen = options.version.match? /^hepmc/
-ext          = readingEvGen ? 'hepmc.gz' : 'root'
 delphesCmd   = 's3tools/src/loop_run_delphes.sh'
 
 ## helper functions
@@ -251,7 +279,7 @@ end
 
 
 
-# RELEASE VERSION DEPENDENT CODDE ##################
+# RELEASE VERSION DEPENDENT CODE ###################
 # Organize a list of Q2 ranges and associated S3 files for each
 # - The file tree layout and naming conventions on S3 varies as a function of productions
 # - The following is a chain of `if` statements, grouping together productions with similarly structured file trees
@@ -265,6 +293,7 @@ end
 # pattern: "ep_#{energy}/hepmc_ip6/" with Q2 range given in file name as "q2_#{minQ2}_#{maxQ2}"
 if [
     'epic.22.11.3',
+    'hepmc.pythia6',
 ].include? options.version
   # set source data directory
   prod[:radDir] = options.radCor ? 'radcor' : 'noradcor'
@@ -342,7 +371,6 @@ elsif [
   end
   prod[:radDir] = '' # not used
 
-
 elsif [
   'ecce.22.1'
 ].include? options.version
@@ -366,7 +394,7 @@ elsif [
       .first(options.limit)
   end
 
-end # END RELEASE VERSION DEPENDENT CODDE ##################
+end # END RELEASE VERSION DEPENDENT CODE ##################
 
 
 # append the energy to the target directory
@@ -398,7 +426,17 @@ prod[:q2ranges].zip(prod[:dataDirs],prod[:fileLists]).each do |q2range,dataDir,f
     delphesCmd += " #{genDir}"
     FileUtils.mkdir_p genDir, verbose: true
     fileList.each do |file|
-      mc_cp "#{dataDir}/#{file}", genDir
+      if options.version=="hepmc.pythia6" and options.numHepmc>0
+        # truncate HEPMC file after `options.numHepmc` events (FIXME: could be more efficient)
+        puts "Downloading #{file}, truncating after #{options.numHepmc} events..."
+        lineNum = `mc cat #{dataDir}/#{file} | grep -En -m#{options.numHepmc+1} '^E' | tail -n1 | sed 's/:.*//g'`.to_i
+        puts "  Event #{options.numHepmc} ends on line number #{lineNum-1}; now downloading..."
+        system "mc head -n #{lineNum-1} #{dataDir}/#{file} > #{genDir}/#{file}"
+        puts "  ...done"
+      else
+        # otherwise get the full file
+        mc_cp "#{dataDir}/#{file}", genDir
+      end
     end
   end
 

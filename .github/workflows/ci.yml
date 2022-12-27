@@ -93,7 +93,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        minq2: [1, 10, 100, 1000] # note: keep consistent with `download-artifact` with name `x_fastsim_delphes_*`
+        include:
+          - { id: 1,    options: --version hepmc.pythia6 --radcor --limit 5 --num-hepmc-events 10000 --minQ2 1    }
+          - { id: 10,   options: --version hepmc.pythia6 --radcor --limit 5 --num-hepmc-events 10000 --minQ2 10   }
+          - { id: 100,  options: --version hepmc.pythia6 --radcor --limit 5 --num-hepmc-events 10000 --minQ2 100  }
+          - { id: 1000, options: --version hepmc.pythia6 --radcor --limit 5 --num-hepmc-events 10000 --minQ2 1000 }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -110,19 +114,15 @@ jobs:
             echo "[CI] download HEPMC files and run Delphes"
             s3tools/add-host.sh
             s3tools/s3tool.rb \
-              --version hepmc.pythia8 \
               --energy ${{env.ebeam_en}}x${{env.pbeam_en}} \
-              --minQ2 ${{matrix.minq2}} \
               --output ci \
-              --config delphes.config
+              --config datarec/ci/delphes_${{matrix.id}}.config \
+              ${{matrix.options}}
       - uses: actions/upload-artifact@v3
         with:
-          name: x_fastsim_delphes_q2min${{matrix.minq2}}
+          name: x_fastsim_delphes
           retention-days: 1
-          path: |
-            datarec
-            delphes.config
-            delphes.config.list
+          path: datarec
 
 # DOWNLOAD FULLSIM ---------------------------------------------------------------------------
 
@@ -197,20 +197,8 @@ jobs:
           name: x_build_all
       - uses: actions/download-artifact@v3
         with:
-          name: x_fastsim_delphes_q2min1
-          path: x_fastsim_delphes_q2min1
-      - uses: actions/download-artifact@v3
-        with:
-          name: x_fastsim_delphes_q2min10
-          path: x_fastsim_delphes_q2min10
-      - uses: actions/download-artifact@v3
-        with:
-          name: x_fastsim_delphes_q2min100
-          path: x_fastsim_delphes_q2min100
-      - uses: actions/download-artifact@v3
-        with:
-          name: x_fastsim_delphes_q2min1000
-          path: x_fastsim_delphes_q2min1000
+          name: x_fastsim_delphes
+          path: x_fastsim_delphes
       - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
         with:
@@ -221,12 +209,11 @@ jobs:
             echo "aname = ${{matrix.aname}}"
             echo "recon = ${{matrix.recon}}"
             echo "[CI] Delphes artifacts"
-            ls -R x_fastsim_delphes*
+            ls -R x_fastsim_delphes
             echo "[CI] unpack Delphes artifacts"
-            mkdir -p datarec/ci/${{env.ebeam_en}}x${{env.pbeam_en}}
-            mv -v x_fastsim_delphes*/datarec/ci/${{env.ebeam_en}}x${{env.pbeam_en}}/* datarec/ci/${{env.ebeam_en}}x${{env.pbeam_en}}
+            mv -v x_fastsim_delphes/ci datarec/
             echo "[CI] generate combined config file"
-            s3tools/src/generate-config-file.rb delphes.config ${{env.ebeam_en}}x${{env.pbeam_en}} x_fastsim_delphes*/delphes.config.list
+            s3tools/src/generate-config-file.rb delphes.config ${{env.ebeam_en}}x${{env.pbeam_en}} datarec/ci/delphes*.config.list
             echo "[CI] cat delphes.config"
             cat delphes.config
             echo "[CI] ANALYSIS MACRO"

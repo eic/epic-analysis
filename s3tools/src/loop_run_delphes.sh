@@ -14,7 +14,8 @@ function status { echo ""; echo "[+] $1"; }
 status "running Delphes (one thread per directory)"
 function runDelphes { 
   echo "delphes log: " > $1/delphes.log
-  for infile in $1/*.hepmc.gz; do 
+  for infile in $1/*.hepmc{,.gz}; do 
+    if [ ! -f "$infile" ]; then continue; fi
     echo "RUN DELPHES ON $infile" >> $1/delphes.log
     deps/run_delphes.sh $infile 2>&1 >> $1/delphes.log
   done
