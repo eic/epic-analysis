@@ -6,19 +6,24 @@
  */
 
 #include "Kinematics.h"
-
 ClassImp(Kinematics)
 
 Kinematics::Kinematics(
     Double_t enEleBeam, /*GeV*/
     Double_t enIonBeam, /*GeV*/
-    Double_t crossAng /*mrad*/
+    Double_t crossAng /*mrad*/    
     )
 {
-
+  srand(time(NULL));
+  // importing from local python script for ML predictions
+  // requires tensorflow, energyflow packages installed
+#ifdef SIDIS_MLPRED
+  efnpackage = py::module_::import("testEFlowimport");
+  pfnimport = efnpackage.attr("eflowPredict");
+#endif
   // set ion mass
   IonMass = ProtonMass();
-
+  
   // revise crossing angle
   crossAng *= 1e-3; // mrad -> rad
   crossAng = -1*TMath::Abs(crossAng); // take -1*abs(crossAng) to enforce the correct sign
@@ -196,6 +201,97 @@ void Kinematics::GetQWNu_electronic(){
   Nu = vecIonBeam.Dot(vecQ) / IonMass;
 };
 
+void Kinematics::GetQWNu_ML(){
+  hfsinfo.clear();
+  float pidadj = 0;
+  if(nHFS >= 2){
+    std::vector<float> partHold;
+    for(int i = 0; i < nHFS; i++){
+      double pidsgn=(hfspid[i]/abs(hfspid[i]));
+      if(abs(hfspid[i])==211) pidadj = 0.4*pidsgn;
+      if(abs(hfspid[i])==22) pidadj = 0.2*pidsgn;
+      if(abs(hfspid[i])==321) pidadj = 0.6*pidsgn;
+      if(abs(hfspid[i])==2212) pidadj = 0.8*pidsgn;
+      if(abs(hfspid[i])==11) pidadj = 1.0*pidsgn;
+      partHold.push_back(hfseta[i]);
+      partHold.push_back(hfsphi[i]);
+      partHold.push_back(hfspx[i]);
+      partHold.push_back(hfspy[i]);
+      partHold.push_back(hfspz[i]);
+      partHold.push_back(hfsE[i]);
+      partHold.push_back(pidadj);
+      hfsinfo.push_back(partHold);
+      partHold.clear();
+    }
+    double Q2ele, Q2DA, Q2JB;
+    double xele, xDA, xJB;
+    TLorentzVector vecQEle;
+    globalinfo.clear();
+    this->CalculateDISbyElectron();
+    vecQEle.SetPxPyPzE(vecQ.Px(), vecQ.Py(), vecQ.Pz(), vecQ.E());
+    Q2ele = Q2;
+    xele = x;
+    this->CalculateDISbyDA();
+    Q2DA = Q2;
+    xDA = x;
+    this->CalculateDISbyJB();
+    Q2JB = Q2;
+    xJB = x;
+    if( Q2DA > 0 && Q2DA < 1e4){
+      globalinfo.push_back(log10(Q2DA));
+    }
+    else{
+      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/10000.0)));
+    }
+    if( Q2ele > 0 && Q2ele < 1e4){
+      globalinfo.push_back(log10(Q2ele));
+    }
+    else{
+      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/10000.0)));
+    }
+    if( Q2JB > 0 && Q2JB < 1e4){
+      globalinfo.push_back(log10(Q2JB));
+    }
+    else{
+      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/10000.0)));
+    }        
+    if(xDA>0 && xDA < 1){
+      globalinfo.push_back(-1*log10(xDA));
+    }
+    else{
+      globalinfo.push_back(-1*log10( (float) (rand()) / (float) (RAND_MAX/1.0)  ));
+    }
+    if(xele>0 && xele < 1){
+      globalinfo.push_back(-1*log10(xele));
+    }
+    else{
+      globalinfo.push_back(-1*log10( (float) (rand()) / (float) (RAND_MAX/1.0)  ));
+    }
+    if(xJB>0 && xJB < 1){
+      globalinfo.push_back(-1*log10(xJB));
+    }
+    else{
+      globalinfo.push_back( -1*log10((float) (rand()) / (float) (RAND_MAX/1.0) ) );
+    }
+    globalinfo.push_back(vecQEle.Px());
+    globalinfo.push_back(vecQEle.Py());
+    globalinfo.push_back(vecQEle.Pz());
+    globalinfo.push_back(vecQEle.E());
+#ifdef SIDIS_MLPRED
+    py::object nnoutput = pfnimport(hfsinfo, globalinfo);
+    std::vector<float> nnvecq = nnoutput.cast<std::vector<float>>();
+    vecQ.SetPxPyPzE(nnvecq[0],nnvecq[1],nnvecq[2],nnvecq[3]);
+#endif
+  }
+  else{
+    this->CalculateDISbyElectron();
+  }
+  vecW = vecEleBeam + vecIonBeam - vecElectron; 
+  W = vecW.M();
+  Nu = vecIonBeam.Dot(vecQ) / IonMass;
+  
+}
+
 // ------------------------------------------------------
 
 
@@ -209,7 +305,7 @@ Bool_t Kinematics::CalculateDIS(TString recmethod){
   this->TransformToHeadOnFrame(vecEleBeam,HvecEleBeam);
   this->TransformToHeadOnFrame(vecIonBeam,HvecIonBeam);
   this->TransformToHeadOnFrame(vecElectron,HvecElectron);
-
+  
   // calculate primary DIS variables, including Q2,x,y,W,nu
   if     (recmethod.CompareTo( "Ele", TString::kIgnoreCase)==0)    { this->CalculateDISbyElectron(); }
   else if(recmethod.CompareTo( "DA", TString::kIgnoreCase)==0)     { this->CalculateDISbyDA(); }
@@ -217,6 +313,7 @@ Bool_t Kinematics::CalculateDIS(TString recmethod){
   else if(recmethod.CompareTo( "Mixed", TString::kIgnoreCase)==0)  { this->CalculateDISbyMixed(); }
   else if(recmethod.CompareTo( "Sigma", TString::kIgnoreCase)==0)  { this->CalculateDISbySigma(); }
   else if(recmethod.CompareTo( "eSigma", TString::kIgnoreCase)==0) { this->CalculateDISbyeSigma(); }
+  else if(recmethod.CompareTo( "ML", TString::kIgnoreCase)==0) { this->CalculateDISbyML(); }
   else {
     cerr << "ERROR: unknown reconstruction method" << endl;
     return false;
@@ -352,6 +449,12 @@ void Kinematics::CalculateDISbyeSigma(){
   }
 };
 
+void Kinematics::CalculateDISbyML() {
+  this->GetQWNu_ML(); // set `vecQ`, `vecW`, `W`, `Nu`   
+  Q2 = -1 * vecQ.M2();
+  x = Q2 / ( 2 * vecQ.Dot(vecIonBeam) );
+  y = vecIonBeam.Dot(vecQ) / vecIonBeam.Dot(vecEleBeam);
+};
 
 
 // calculate hadron kinematics
@@ -429,6 +532,13 @@ void Kinematics::ValidateHeadOnFrame() {
 // add a 4-momentum to the hadronic final state
 void Kinematics::AddToHFS(TLorentzVector p4_) {
   TLorentzVector p4 = p4_;
+  hfspx[nHFS] = p4.Px();
+  hfspy[nHFS] = p4.Py();
+  hfspz[nHFS] = p4.Pz();
+  hfsE[nHFS] = p4.E();
+  new(ar[nHFS]) TLorentzVector(p4);
+  nHFS++;
+  
   if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(p4,p4);
   sigmah += (p4.E() - p4.Pz());
   Pxh += p4.Px();
@@ -437,6 +547,12 @@ void Kinematics::AddToHFS(TLorentzVector p4_) {
   countHadrons++;
 };
 
+void Kinematics::AddPion(TLorentzVector p4_){
+  TLorentzVector p4 = p4_;
+  if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(p4,p4);
+  new(arpi[nPi]) TLorentzVector(p4);
+  nPi++;
+};
 
 // subtract electron from hadronic final state variables
 void Kinematics::SubtractElectronFromHFS() {
@@ -457,6 +573,8 @@ void Kinematics::SubtractElectronFromHFS() {
         break;
     }
     countHadrons--;
+    ar.Remove( &vecElectron );
+    nHFS--;
   } else {
     cerr << "ERROR: electron energy is NaN" << endl;
     // TODO: kill event
@@ -465,10 +583,14 @@ void Kinematics::SubtractElectronFromHFS() {
 
 
 // reset some variables for the hadronic final state
-void Kinematics::ResetHFS() {
+void Kinematics::ResetHFS() {  
   sigmah = Pxh = Pyh = 0;
   hadronSumVec.SetPxPyPzE(0,0,0,0);
   countHadrons = 0;
+  nHFS = 0;
+  nPi = 0;
+  ar.Clear();
+  arpi.Clear();
 };
 
 

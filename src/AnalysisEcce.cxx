@@ -101,13 +101,10 @@ void AnalysisEcce::Execute()
   tr.SetEntriesRange(1,maxEvents);
   do {
     if(tr.GetCurrentEntry()%10000==0) cout << tr.GetCurrentEntry() << " events..." << endl;
-  
+
     // resets
     kin->ResetHFS();
     kinTrue->ResetHFS();
-
-
-
 
     // a few maps needed to get the associated info between tracks, true particles, etec
 
@@ -140,16 +137,16 @@ void AnalysisEcce::Execute()
      * - find beam particles
      */
     std::vector<Particles> mcpart;
-    double maxP = 0;
+    double maxPt = 0;
     int genEleID = -1;
     bool foundBeamElectron = false;
     bool foundBeamIon = false;
+    int genEleBCID = -1;
 
     for(int imc=0; imc<hepmcp_PDG.GetSize(); imc++) {
 
       int pid_ = hepmcp_PDG[imc];
 
-      
       int genStatus_ = hepmcp_status[imc]; // genStatus 4: beam particle,  1: final state
       
       double px_ = hepmcp_psx[imc];
@@ -158,10 +155,14 @@ void AnalysisEcce::Execute()
       double e_  = hepmcp_E[imc];
       
       double p_ = sqrt(pow(hepmcp_psx[imc],2) + pow(hepmcp_psy[imc],2) + pow(hepmcp_psz[imc],2));
+      double pt_ = sqrt(pow(hepmcp_psx[imc],2) + pow(hepmcp_psy[imc],2));
       double mass_ = (fabs(pid_)==211)?constants::pimass:(fabs(pid_)==321)?constants::kmass:(fabs(pid_)==11)?constants::emass:(fabs(pid_)==13)?constants::mumass:(fabs(pid_)==2212)?constants::pmass:0.;
-      
+
       // add to `mcpart`
       Particles part;
+
+      //cout << genStatus_ << " " << pid_ << " " << part.mcID << " " << hepmcp_BCID[imc] << " " << hepmcp_m1[imc] << " " << hepmcp_m2[imc] << " "
+      //      << px_ << " " << py_ << " " << pz_ << " " << e_ << endl;
       
       if(genStatus_ == 1) { // final state
 	
@@ -170,18 +171,22 @@ void AnalysisEcce::Execute()
 	if (search != mcbcidmap.end()) {
 	  imcpart = search->second;
 	}
-
+	
+	
 	if (imcpart >-1){
 	  px_ = mcpart_psx[imcpart];
 	  py_ = mcpart_psy[imcpart];
 	  pz_ = mcpart_psz[imcpart];
 	  e_  = mcpart_E[imcpart];	  
 	  p_ = sqrt(pow(mcpart_psx[imcpart],2) + pow(mcpart_psy[imcpart],2) + pow(mcpart_psz[imcpart],2));
+	  pt_ = sqrt(pow(mcpart_psx[imcpart],2) + pow(mcpart_psy[imcpart],2));
 	  part.mcID = mcpart_ID[imcpart];
 	}
 	  else
 	    part.mcID = -1;
-	  	
+	//cout << genStatus_ << " " << pid_ << " " << part.mcID << " " << hepmcp_BCID[imc] << " " << hepmcp_m1[imc] << " " << hepmcp_m2[imc] << " "
+	//    << px_ << " " << py_ << " " << pz_ << " " << e_ << endl;
+	
 	  part.pid = pid_;
 	  part.vecPart.SetPxPyPzE(px_, py_, pz_, e_);
         
@@ -193,15 +198,16 @@ void AnalysisEcce::Execute()
 
 	  // identify scattered electron by max momentum
 	  if(pid_ == 11) {
-	    if(p_ > maxP) {
-	      maxP = p_;
+	    if(pt_ > maxPt) {
+	      maxPt = pt_;
 	      kinTrue->vecElectron.SetPxPyPzE(px_, py_, pz_, e_);
 	      genEleID = part.mcID; //mcpart_ID[imc];
+	      genEleBCID = hepmcp_BCID[imc];
 	      //	      cout  << "\t\t\t found scattered electron  " << Form(" %6.2f %6.2f %6.2f %6.2f %6.2f  %5.3f %6.2f %6.2f id %3d\n",px_,py_,pz_, sqrt(p_*p_ + mass_*mass_),p_,mass_,hepmcp_E[imc],mcpart_E[imcpart],genEleID);
 	    }
 	  }
       }
-
+      
       else if(genStatus_ == 4) { // beam particles
         if(pid_ == 11) { // electron beam
           if(!foundBeamElectron) {
@@ -221,10 +227,36 @@ void AnalysisEcce::Execute()
         }
       }
     } // end truth loop
+    
+    // looking for radiated photons (mother particle == scattered electron)
+    // requires that we already know scattered electron index
+    for(int imc=0; imc<hepmcp_PDG.GetSize(); imc++) {
+      int pid_ = hepmcp_PDG[imc];     
+      int genStatus_ = hepmcp_status[imc]; // genStatus 4: beam particle,  1: final state             						
 
+      double px_ = hepmcp_psx[imc];
+      double py_ = hepmcp_psy[imc];
+      double pz_ = hepmcp_psz[imc];
+      double e_  = hepmcp_E[imc];
+      
+      double p_ = sqrt(pow(hepmcp_psx[imc],2) + pow(hepmcp_psy[imc],2) + pow(hepmcp_psz[imc],2));
+      
+      int mother = hepmcp_m1[imc];
+      if(pid_ == 22 || pid_ == 23){
+	if(genStatus_ == 1){
+	  if( mother == genEleBCID ){
+	    TLorentzVector FSRmom(px_, py_, pz_, e_);
+	    TLorentzVector eleCorr = kinTrue->vecElectron + FSRmom;
+	    // correcting true scattered electron with FSR
+	    kinTrue->vecElectron.SetPxPyPzE(eleCorr.Px(), eleCorr.Py(), eleCorr.Pz(), eleCorr.E());
+	  }
+	}
+      }
+      
+      
+    }
     // check beam finding
     if(!foundBeamElectron || !foundBeamIon) { numNoBeam++; continue; };
-
 
     // reconstructed particles loop
     /* - add reconstructed particle to `recopart`
@@ -268,14 +300,15 @@ void AnalysisEcce::Execute()
       part.vecPart.SetPxPyPzE(reco_px, reco_py, reco_pz, sqrt(reco_p*reco_p + reco_mass*reco_mass));
 
 
-      //      cout  << "\t\t\t track  " << Form(" %4.2f %4.2f %4.2f true id %4d imc %3d mcid %3d \n",reco_px,reco_py,reco_pz,tracks_trueID[ireco],imc,part.mcID);
+      //cout  << "\t\t\t track  " << Form(" %4.2f %4.2f %4.2f true id %4d imc %3d mcid %3d \n",reco_px,reco_py,reco_pz,tracks_trueID[ireco],imc,part.mcID);
       
       // add to `recopart` and hadronic final state sums only if there is a matching truth particle
-      if(part.mcID > 0) {       
+      if(part.mcID > 0 && part.mcID != genEleID) { 
 	if(imc>-1) {
 	  //  cout  << "\t\t\t add  to hadfs  \n" ;
 	  recopart.push_back(part);
 	  kin->AddToHFS(part.vecPart);
+	  kin->hfspid[kin->nHFS - 1] = pid_;
 	}
       }
 
@@ -287,6 +320,7 @@ void AnalysisEcce::Execute()
       }
 
     } // end reco loop
+
 
     //add all clusters for hadronic final state
     int jentryt = tr.GetCurrentEntry();
@@ -386,10 +420,13 @@ void AnalysisEcce::Execute()
     // calculate DIS kinematics
     if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
     if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
-
+    
     // Get the weight for this event's Q2
     auto Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
 
+    //fill HFS tree for event
+    if( writeHFSTree && kin->nHFS > 0) HFST->FillTree(Q2weightFactor);
+    
     // fill inclusive histograms, if only `inclusive` is included in output
     // (otherwise they will be filled in track and jet loops)
     if(includeOutputSet["inclusive_only"]) {

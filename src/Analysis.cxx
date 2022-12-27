@@ -92,16 +92,18 @@ Analysis::Analysis(
 
   // common settings defaults
   // - these settings can be set at the macro level
-  verbose         = false;
-  writeSimpleTree = false;
+  verbose           = false;
+  writeSimpleTree   = false;
+  writeHFSTree      = false;
   writeParticleTree = false;
-  maxEvents       = 0;
-  useBreitJets    = false;
-  errorCntMax     = 1000;
-  jetAlg          = 0; // Default to kT Algorithm
-  jetRad          = 0.8;
-  jetMin          = 1.0; // Minimum Jet pT
-  jetMatchDR      = 0.5; // Delta R between true and reco jet to be considered matched
+
+  maxEvents    = 0;
+  useBreitJets = false;
+  errorCntMax  = 1000;
+  jetAlg       = 0; // Default to kT Algorithm
+  jetRad       = 0.8;
+  jetMin       = 1.0; // Minimum Jet pT
+  jetMatchDR   = 0.5; // Delta R between true and reco jet to be considered matched
 
   weightInclusive = new WeightsUniform();
   weightTrack     = new WeightsUniform();
@@ -310,8 +312,9 @@ void Analysis::Prepare() {
   // instantiate shared objects
   kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
   kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
-  ST = new SimpleTree("tree",kin,kinTrue);
-  PT = new ParticleTree("ptree");
+  ST   = new SimpleTree("tree",kin,kinTrue);
+  HFST = new HFSTree("hfstree",kin,kinTrue);
+  PT   = new ParticleTree("ptree");
 
   // if including jets, define a `jet` final state
 #ifndef EXCLUDE_DELPHES
@@ -660,7 +663,8 @@ void Analysis::Finish() {
   cout << sep << endl;
   cout << "writing ROOT file..." << endl;
   outFile->cd();
-  if(writeSimpleTree) ST->WriteTree();
+  if(writeSimpleTree)   ST->WriteTree();
+  if(writeHFSTree)      HFST->WriteTree();
   if(writeParticleTree) PT->WriteTree();
   HD->Payload([this](Histos *H){ H->WriteHists(outFile); }); HD->ExecuteAndClearOps();
   HD->Payload([this](Histos *H){ H->Write(); }); HD->ExecuteAndClearOps();

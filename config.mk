@@ -1,9 +1,10 @@
 # compiler and flags
 CXX = g++
-FLAGS = -g -Wno-deprecated -fPIC -fno-inline -Wno-write-strings
+FLAGS = -Wno-deprecated -fPIC
 FLAGS += -fmax-errors=3
-# extra flags
-#FLAGS += -O0
+# FLAGS += -fvisibility=hidden # FIXME: required by pybind, but causes unresolved symbols in cling...
+# FLAGS += -g # build with debugging symbols
+# FLAGS += -O0
 
 # extra flags for Mac OS
 UNAME := $(shell uname)
@@ -18,6 +19,9 @@ LIBS = $(shell root-config --glibs)
 
 # Data Model (PODIO + EDM4hep + EDM4eic)
 LIBS += -L/usr/local/lib -lpodio -lpodioRootIO -ledm4hep -ledm4eic
+
+# PYTHON (for pybind)
+LIBS += -lpython3.10
 
 # Miscellaneous
 LIBS += -lfmt

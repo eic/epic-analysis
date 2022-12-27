@@ -24,6 +24,7 @@
 #include "TLorentzVector.h"
 #include "TRandom.h"
 #include "TRandomGen.h"
+#include "TClonesArray.h"
 
 // Delphes
 #ifndef EXCLUDE_DELPHES
@@ -33,6 +34,12 @@
 #include "fastjet/plugins/Centauro/Centauro.hh"
 #endif
 #endif
+// pybind (for ML models using python packages)
+#include <pybind11/pybind11.h>
+#include <pybind11/numpy.h>
+#include <pybind11/embed.h>
+#include <pybind11/stl.h>
+namespace py = pybind11;
 
 using std::map;
 using std::cout;
@@ -51,6 +58,7 @@ class Kinematics : public TObject
 
     // hadronic final state (HFS)
     void AddToHFS(TLorentzVector p4_);
+    void AddPion(TLorentzVector p4_);
     void SubtractElectronFromHFS();
     void ResetHFS();
 
@@ -104,7 +112,7 @@ class Kinematics : public TObject
     Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // hadron
     Double_t sigmah, Pxh, Pyh; // hadronic final state variables
     TLorentzVector hadronSumVec;
-
+  
     // nucleon transverse spin; if you set this externally,
     // it must be done before calculating `phiS` (before
     // `CalculateHadronKinematics`)
@@ -153,7 +161,23 @@ class Kinematics : public TObject
     // struck quark information
     Double_t quarkpT;
 #endif
-
+    // HFS tree objects
+    Int_t nHFS;
+    Int_t nPi;
+    Double_t hfspx[100];
+    Double_t hfspy[100];
+    Double_t hfspz[100];
+    Double_t hfsE[100];
+    Double_t hfseta[100];
+    Double_t hfsphi[100];
+    Int_t hfspid[100];
+    TClonesArray *hfsp4 = new TClonesArray("TLorentzVector");
+    TClonesArray &ar = *hfsp4;
+    TClonesArray *pip4 = new TClonesArray("TLorentzVector");
+    TClonesArray &arpi = *pip4;
+    // TMVA for ML sidis reconstruction
+    std::vector<std::vector<float>> hfsinfo;
+    std::vector<float> globalinfo;
 
     // particle masses
     static Double_t ElectronMass() { return 0.000511; };
@@ -269,13 +293,13 @@ class Kinematics : public TObject
     void CalculateDISbyMixed();
     void CalculateDISbySigma();
     void CalculateDISbyeSigma();
-
+    void CalculateDISbyML();
     // calculate 4-momenta components of q and W (`vecQ` and `vecW`) as well as
     // derived invariants `W` and `nu`
     void GetQWNu_electronic();
     void GetQWNu_hadronic();
     void GetQWNu_quadratic();
-
+    void GetQWNu_ML();
   private:
     static const Int_t asymInjectN = 2;
     Double_t moduVal[asymInjectN];
@@ -308,7 +332,14 @@ class Kinematics : public TObject
     Double_t rotAboutX, rotAboutY;
     // other
     TLorentzVector vecSpin, IvecSpin;
-
+#ifdef SIDIS_MLPRED
+    py::object keras, tensorflow;
+    py::object efnpackage;
+    py::function pfnimport;
+    py::object model;
+    py::object modelload;
+    std::string modelname = "pfn_testEpic_000-2_vecQele_nHFS2_500_bs10k_bestValLoss";
+#endif  
 
   ClassDef(Kinematics,1);
 };
