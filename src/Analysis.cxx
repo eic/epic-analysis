@@ -448,15 +448,15 @@ void Analysis::Prepare() {
       HS->DefineHist1D("Q_xsec","Q","GeV",NBINS,1.0,3000,true,true); // log
       HS->Hist("Q_xsec")->SetMinimum(1e-10);
       // -- resolutions
-      HS->DefineHist1D("x_Res",  "x-x_{true}/x_{true}",             "", NBINS, -0.3, 0.3);
-      HS->DefineHist1D("y_Res",  "y-y_{true}/y_{true}",             "", NBINS, -0.3, 0.3);
-      HS->DefineHist1D("Q2_Res", "Q^{2}-Q^{2}_{true}/Q^{2}_{true}", "", NBINS, -0.3, 0.3);
-      HS->DefineHist1D("W_Res",  "W-W_{true}/W_{true}",             "", NBINS, -0.3, 0.3);
-      HS->DefineHist1D("Nu_Res", "#nu-#nu_{true}/#nu_{true}",       "", NBINS, -0.3, 0.3);
-      HS->DefineHist1D("pT_Res", "p_{T}-p_{T}^{true}/p_{T}^{true}", "", NBINS, -0.3, 0.3);
-      HS->DefineHist1D("z_Res",  "z-z_{true}/z_{true}",             "", NBINS, -0.3, 0.3);
-      HS->DefineHist1D("mX_Res", "m_{X}-m_{X}^{true}/m_{X}^{true}", "", NBINS, -0.3, 0.3);
-      HS->DefineHist1D("xF_Res", "x_{F}-x_{F}^{true}/x_{F}^{true}", "", NBINS, -0.3, 0.3);
+      HS->DefineHist1D("x_Res",  "x-x_{true}/x_{true}",             "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("y_Res",  "y-y_{true}/y_{true}",             "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("Q2_Res", "Q^{2}-Q^{2}_{true}/Q^{2}_{true}", "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("W_Res",  "W-W_{true}/W_{true}",             "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("Nu_Res", "#nu-#nu_{true}/#nu_{true}",       "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("pT_Res", "p_{T}-p_{T}^{true}/p_{T}^{true}", "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("z_Res",  "z-z_{true}/z_{true}",             "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("mX_Res", "m_{X}-m_{X}^{true}/m_{X}^{true}", "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("xF_Res", "x_{F}-x_{F}^{true}/x_{F}^{true}", "", NBINS, -1.0, 1.0);
       HS->DefineHist1D("phiH_Res", "#phi_{h}-#phi_{h}^{true}", "", NBINS, -TMath::Pi(), TMath::Pi()); // absolute resolution
       HS->DefineHist1D("phiS_Res", "#phi_{S}-#phi_{S}^{true}", "", NBINS, -TMath::Pi(), TMath::Pi()); // absolute resolution
       HS->DefineHist2D("Q2vsXtrue","x","Q^{2}","","GeV^{2}",
