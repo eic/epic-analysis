@@ -23,7 +23,7 @@ while read dirFast; do
 
   # set fullsim and output directory names
   echo "--------------------"
-  dirOut=$(echo $dirFast | sed 's/fastsim//g' | sed 's/__/_/g')
+  dirOut=$(echo $dirFast | sed 's/fastsim\.//g' | sed 's/__/_/g')
   mkdir -p $dirOut
 
   # move fastsim artifacts to output directory, and add suffix to file name
