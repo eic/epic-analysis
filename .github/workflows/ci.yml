@@ -524,11 +524,11 @@ jobs:
       - name: merge_fastfull
         run: |
           macro/ci/merge-fastfull.sh results \
-            epic_arches \
-            epic_brycecanyon \
-            epic_arches_radcor \
+            epic_arches             \
+            epic_brycecanyon        \
+            epic_arches_radcor      \
             epic_brycecanyon_radcor \
-            ecce \
+            ecce                    \
             athena
           tree results
       - uses: actions/upload-artifact@v3

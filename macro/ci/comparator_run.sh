@@ -28,7 +28,7 @@ dets="$name1 $name2 $name3 $name4"
 
 # rename aname -> pname
 for det in $dets; do
-  mv -v out/$det.{$aname,$pname}.$recon.root
+  cp out/$det.{$aname,$pname}.$recon.root
 done
 
 # run comparator.C
@@ -40,7 +40,4 @@ args+="\"$title4\",\"out/$name4.$pname.$recon.root\","
 args+="\"out/comparison.$outname.$pname.$recon\",\"$xvar\",\"$yvar\""
 root -b -q "macro/ci/comparator.C($args)"
 
-# rm analysis_root artifact
-for det in $dets; do
-  rm -v out/$det.$pname.$recon.root
-done
+echo "DONE $0"
