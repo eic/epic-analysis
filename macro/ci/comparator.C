@@ -76,7 +76,7 @@ void comparator(
   if(gy=="p")   { gyT="p";     logy=true;  }
 
   // file names and bin vars
-  std::map<TString,TFile*> infiles = {
+  std::vector<std::pair<TString,TFile*>> infiles = {
     {title0, new TFile(infile0)},
     {title1, new TFile(infile1)},
     {title2, new TFile(infile2)},
@@ -119,10 +119,8 @@ void comparator(
   }
 
   // set legend labels
-  for(auto [title,infile] : infiles) {
-    TString infileN = TString(infile->GetName());
+  for(auto [title,infile] : infiles)
     P0->legendLabels.push_back(title);
-  }
 
   // 3D array structure: list of 2D arrays of Histos pointers
   // - each element of the list will be compared
