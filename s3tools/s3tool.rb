@@ -220,7 +220,7 @@ if options.version=='hepmc.pythia6' and options.numHepmc<=0
                       `--num-hepmc-events` option
   """
 end
-if options.numHepmc>=0 and options.version!='hepmc.pythia6'
+if options.numHepmc>0 and options.version!='hepmc.pythia6'
   $stderr.puts "WARNING: --num-hepmc-events option does not apply to production version '#{options.version}'"
 end
 
