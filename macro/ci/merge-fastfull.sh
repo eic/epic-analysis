@@ -8,8 +8,11 @@
 #   have been collected into one directory, specified by argument
 
 # arguments
-if [ $# -ne 1 ]; then echo "USAGE: $0 [artifacts-dir]"; exit 2; fi
-pushd $1
+if [ $# -lt 2 ]; then echo "USAGE: $0 [artifacts-dir] [fullsim-dirs]..."; exit 2; fi
+artifactDir=$1
+shift
+fullsimNames=$*
+pushd $artifactDir
 
 # merge directories of fastsim and fullsim files, for comparison
 # - adds `.fastsim` or `.fullsim` suffixes to filenames
@@ -20,7 +23,7 @@ while read dirFast; do
 
   # set fullsim and output directory names
   echo "--------------------"
-  dirOut=$(echo $dirFast | sed 's/fastsim//g' | sed 's/__/_/g')
+  dirOut=$(echo $dirFast | sed 's/fastsim\.//g' | sed 's/__/_/g')
   mkdir -p $dirOut
 
   # move fastsim artifacts to output directory, and add suffix to file name
@@ -32,7 +35,7 @@ while read dirFast; do
   popd
 
   # repeat for fullsim artifacts
-  for detector in athena ecce epic; do
+  for detector in $fullsimNames; do
     dirFull=$(echo $dirFast | sed "s/fastsim/${detector}/g")
     echo "MOVE AND RENAME artifacts in $dirFull -> $dirOut"
     if [ -d "$dirFull" ]; then

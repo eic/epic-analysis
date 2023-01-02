@@ -1,15 +1,17 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2022 Christopher Dilks
 
+#define EXCLUDE_DELPHES
+
 R__LOAD_LIBRARY(EpicAnalysis)
 
 // make grids of plots, comparing data from the infiles
 // - depending on infile, different histograms will be drawn
 void comparator(
-    TString infile0="out/resolution.fastsim.root",
-    TString infile1="out/resolution.epic.root",
-    TString infile2="out/resolution.athena.root",
-    TString infile3="out/resolution.ecce.root",
+    TString title0="Delphes", TString infile0="out/resolution.fastsim.root",
+    TString title1="EPIC",    TString infile1="out/resolution.epic.root",
+    TString title2="ATHENA",  TString infile2="out/resolution.athena.root",
+    TString title3="ECCE",    TString infile3="out/resolution.ecce.root",
     TString outfile="out/resolution.comparison.root",
     TString gx="x", TString gy="q2" // plotgrid vars
     ) {
@@ -74,11 +76,11 @@ void comparator(
   if(gy=="p")   { gyT="p";     logy=true;  }
 
   // file names and bin vars
-  std::vector<TFile*> infiles = {
-    new TFile(infile0),
-    new TFile(infile1),
-    new TFile(infile2),
-    new TFile(infile3)
+  std::vector<std::pair<TString,TFile*>> infiles = {
+    {title0, new TFile(infile0)},
+    {title1, new TFile(infile1)},
+    {title2, new TFile(infile2)},
+    {title3, new TFile(infile3)}
   };
   bool first=true;
   Int_t numXbins, numYbins;
@@ -92,7 +94,7 @@ void comparator(
   std::vector<HistosDAG*> Dext; // additional DAGs
 
   // get DAGs and binning
-  for(auto infile : infiles) {
+  for(auto [title,infile] : infiles) {
     D = new HistosDAG();
     D->BuildFromFile(infile);
     auto xBins = D->GetBinSet(gx);
@@ -117,17 +119,8 @@ void comparator(
   }
 
   // set legend labels
-  auto makeLegendName = [] (TString infileName) -> TString {
-    if     (infileName.Contains("fastsim")) return "Delphes";
-    else if(infileName.Contains("epic"))    return "EPIC";
-    else if(infileName.Contains("athena"))  return "ATHENA";
-    else if(infileName.Contains("ecce"))    return "ECCE";
-    return "UNKNOWN";
-  };
-  for(auto infile : infiles) {
-    TString infileN = TString(infile->GetName());
-    P0->legendLabels.push_back(makeLegendName(infileN));
-  }
+  for(auto [title,infile] : infiles)
+    P0->legendLabels.push_back(title);
 
   // 3D array structure: list of 2D arrays of Histos pointers
   // - each element of the list will be compared
