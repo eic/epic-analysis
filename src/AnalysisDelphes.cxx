@@ -39,6 +39,7 @@ void AnalysisDelphes::Execute() {
       chain->Add(infiles[idx][idxF].c_str(), inEntries[idx][idxF]);
     }
   }
+  chain->CanDeleteRefs();
   ExRootTreeReader *tr = new ExRootTreeReader(chain);
   ENT = tr->GetEntries();
   if(maxEvents>0) ENT = std::min(maxEvents,ENT);

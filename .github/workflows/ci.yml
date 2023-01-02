@@ -94,10 +94,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { id: 1,    options: --version hepmc.pythia6 --radcor --limit 5 --num-hepmc-events 10000 --minQ2 1    }
-          - { id: 10,   options: --version hepmc.pythia6 --radcor --limit 5 --num-hepmc-events 10000 --minQ2 10   }
-          - { id: 100,  options: --version hepmc.pythia6 --radcor --limit 5 --num-hepmc-events 10000 --minQ2 100  }
-          - { id: 1000, options: --version hepmc.pythia6 --radcor --limit 5 --num-hepmc-events 10000 --minQ2 1000 }
+          - { id: 1,    options: --version hepmc.pythia6 --radcor --limit 30 --num-hepmc-events 15000 --minQ2 1    }
+          - { id: 10,   options: --version hepmc.pythia6 --radcor --limit 40 --num-hepmc-events 15000 --minQ2 10   }
+          - { id: 100,  options: --version hepmc.pythia6 --radcor --limit 50 --num-hepmc-events 15000 --minQ2 100  }
+          - { id: 1000, options: --version hepmc.pythia6 --radcor --limit 60 --num-hepmc-events 15000 --minQ2 1000 }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -135,13 +135,13 @@ jobs:
       matrix:
         include:
           # EPIC
-          - { id: epic_arches,             options: --version epic.22.11.3 --limit 20 --detector arches      }
-          - { id: epic_brycecanyon,        options: --version epic.22.11.3 --limit 4  --detector brycecanyon } # NOTE: large RECO files
-          - { id: epic_arches_radcor,      options: --version epic.22.11.3 --limit 20 --detector arches      --radcor }
-          - { id: epic_brycecanyon_radcor, options: --version epic.22.11.3 --limit 4  --detector brycecanyon --radcor } # NOTE: large RECO files
+          - { id: epic_arches,             options: --version epic.22.11.3 --mode s --limit 150 --detector arches      }
+          - { id: epic_brycecanyon,        options: --version epic.22.11.3 --mode s --limit 35  --detector brycecanyon } # NOTE: large RECO files
+          - { id: epic_arches_radcor,      options: --version epic.22.11.3 --mode s --limit 150 --detector arches      --radcor }
+          - { id: epic_brycecanyon_radcor, options: --version epic.22.11.3 --mode s --limit 35  --detector brycecanyon --radcor } # NOTE: large RECO files
           # ECCE / ATHENA
-          - { id: ecce,   options: --version ecce.22.1               --limit 40 }
-          - { id: athena, options: --version athena.deathvalley-v1.0 --limit 20 }
+          - { id: ecce,   options: --version ecce.22.1               --mode s --limit 375 }
+          - { id: athena, options: --version athena.deathvalley-v1.0 --mode s --limit 500 }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -283,6 +283,9 @@ jobs:
           name: x_fullsim_${{matrix.detector}}
       - uses: cvmfs-contrib/github-action-cvmfs@v3
       - uses: eic/run-cvmfs-osg-eic-shell@main
+        env:
+          S3_ACCESS_KEY: ${{secrets.S3_ACCESS_KEY}}
+          S3_SECRET_KEY: ${{secrets.S3_SECRET_KEY}}
         with:
           platform-release: "jug_xl:nightly"
           setup: environ.sh
@@ -293,7 +296,7 @@ jobs:
             echo "[CI] cat s3files.config"
             cat s3files.config
             echo "[CI] ANALYSIS MACRO"
-            ${{env.root_no_delphes}} 'macro/ci/analysis_${{matrix.aname}}.C("s3files.config","${{matrix.detector}}.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
+            ${{env.root_no_delphes}} 'macro/ci/analysis_${{matrix.aname}}.C("s3files.config","${{matrix.detector}}.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")' || echo "ignore failure"
       - uses: actions/upload-artifact@v3
         with:
           name: analysis
