@@ -94,10 +94,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { id: 1,    options: --version hepmc.pythia6 --radcor --limit 35 --num-hepmc-events 10000 --minQ2 1    }
-          - { id: 10,   options: --version hepmc.pythia6 --radcor --limit 35 --num-hepmc-events 10000 --minQ2 10   }
-          - { id: 100,  options: --version hepmc.pythia6 --radcor --limit 35 --num-hepmc-events 10000 --minQ2 100  }
-          - { id: 1000, options: --version hepmc.pythia6 --radcor --limit 35 --num-hepmc-events 10000 --minQ2 1000 }
+          - { id: 1,    options: --version hepmc.pythia6 --radcor --limit 30 --num-hepmc-events 10000 --minQ2 1    }
+          - { id: 10,   options: --version hepmc.pythia6 --radcor --limit 40 --num-hepmc-events 10000 --minQ2 10   }
+          - { id: 100,  options: --version hepmc.pythia6 --radcor --limit 50 --num-hepmc-events 10000 --minQ2 100  }
+          - { id: 1000, options: --version hepmc.pythia6 --radcor --limit 60 --num-hepmc-events 10000 --minQ2 1000 }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -141,7 +141,7 @@ jobs:
           - { id: epic_brycecanyon_radcor, options: --version epic.22.11.3 --limit 15 --detector brycecanyon --radcor } # NOTE: large RECO files
           # ECCE / ATHENA
           - { id: ecce,   options: --version ecce.22.1               --limit 200 }
-          - { id: athena, options: --version athena.deathvalley-v1.0 --limit 100 }
+          - { id: athena, options: --version athena.deathvalley-v1.0 --limit 300 }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
