@@ -1,4 +1,4 @@
-# EPIC-ANALYSIS
+## EPIC-ANALYSIS
 
 General purpose analysis software for (SI)DIS at the EIC
 
