@@ -322,9 +322,9 @@ void Analysis::Prepare() {
   // instantiate shared objects
   kin     = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
   kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
-  ST   = new SimpleTree("tree",kin,kinTrue);
-  HFST = new HFSTree("hfstree",kin,kinTrue);
-  PT   = new ParticleTree("ptree");
+  ST      = new SimpleTree("tree",kin,kinTrue);
+  HFST    = new HFSTree("hfstree",kin,kinTrue);
+  PT      = new ParticleTree("ptree");
 
   // if including jets, define a `jet` final state
 #ifndef EXCLUDE_DELPHES
@@ -915,21 +915,20 @@ void Analysis::FillHistos1h(Double_t wgt) {
 };
 
 // fill 2h (dihadron) histograms
-void Analysis::FillHistosDihadrons() {
-  HD->CheckBins();
-  HD->Payload([this](Histos *H){
-    H->FillHist1D("DihMh",     dih->Mh,     wTrack);
-    H->FillHist1D("DihMX",     dih->MX,     wTrack);
-    H->FillHist1D("DihZ",      dih->Z,      wTrack);
-    H->FillHist1D("DihPhPerp", dih->PhPerp, wTrack);
-    H->FillHist1D("DihTheta",  dih->Theta,  wTrack);
-    H->FillHist1D("DihPhiH",   dih->PhiH,   wTrack);
-    H->FillHist1D("DihPhiR",   dih->PhiR,   wTrack);
-    H->FillHist1D("DihPhiS",   dih->PhiS,   wTrack);
-    H->FillHist2D("DihPhiHvsPhiR", dih->PhiR, dih->PhiH,  wTrack);
-    H->FillHist2D("DihThetaVsPh",  dih->Ph,   dih->Theta, wTrack);
-    });
-  HD->ExecuteOps(true);
+void Analysis::FillHistos2h(Double_t wgt) {
+  auto fill_payload = [this,wgt] (Histos *H) {
+    H->FillHist1D("DihMh",     dih->Mh,     wgt);
+    H->FillHist1D("DihMX",     dih->MX,     wgt);
+    H->FillHist1D("DihZ",      dih->Z,      wgt);
+    H->FillHist1D("DihPhPerp", dih->PhPerp, wgt);
+    H->FillHist1D("DihTheta",  dih->Theta,  wgt);
+    H->FillHist1D("DihPhiH",   dih->PhiH,   wgt);
+    H->FillHist1D("DihPhiR",   dih->PhiR,   wgt);
+    H->FillHist1D("DihPhiS",   dih->PhiS,   wgt);
+    H->FillHist2D("DihPhiHvsPhiR", dih->PhiR, dih->PhiH,  wgt);
+    H->FillHist2D("DihThetaVsPh",  dih->Ph,   dih->Theta, wgt);
+  };
+  FillHistos(fill_payload);
 }
 
 // fill jet histograms

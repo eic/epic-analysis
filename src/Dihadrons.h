@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Christopher Dilks
+
 #pragma once
 
 #include <vector>
@@ -24,7 +27,7 @@ class DihadronSet {
     void IncludeHadron(TString hadName);
     void AddHadron(Analysis *A);
     void SetFinalStateID(TString state) { dihadronFinalStateID = state; }
-    void CalculateKinematics(Analysis *A);
+    void CalculateKinematics(Analysis *A, Double_t wgt=1.0);
   private:
     std::vector<TString> includedHadrons;
     std::map<TString,std::vector<TLorentzVector>> hadSetRec, hadSetGen;

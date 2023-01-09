@@ -241,7 +241,7 @@ void AnalysisEpicPodio::Execute()
       // - check PID, to see if it's a final state we're interested in
       auto kv = PIDtoFinalState.find(recPDG);
       if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else return;
-      if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) return;
+      if(!IsFinalState(finalStateID)) return;
 
       // set SIDIS particle 4-momenta, and calculate their kinematics
       kinTrue->vecHadron = GetP4(simPart);

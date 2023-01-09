@@ -127,7 +127,7 @@ class Analysis : public TNamed
     // `FillHistos(weight)` methods: fill histograms
     void FillHistosInclusive(Double_t wgt); // inclusive kinematics
     void FillHistos1h(Double_t wgt);        // single-hadron kinematics
-    void FillHistosDihadrons();
+    void FillHistos2h(Double_t wgt);        // dihadron kinematics
     void FillHistosJets(Double_t wgt);      // jet kinematics
 
     // shared objects

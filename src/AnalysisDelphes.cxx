@@ -236,7 +236,8 @@ void AnalysisDelphes::Execute() {
     }; // end track loop
 
     // dihadrons - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    if(includeOutputSet["2h"]) dihSet->CalculateKinematics(this);
+    if(includeOutputSet["2h"])
+      dihSet->CalculateKinematics(this, Q2weightFactor * weightTrack->GetWeight(*kinTrue)); // FIXME: need separate `Weights` object?
 
     // jet loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     if(includeOutputSet["jets"]) {

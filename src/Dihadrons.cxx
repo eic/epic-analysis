@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: LGPL-3.0-or-later
+// Copyright (C) 2022 Christopher Dilks
+
 #include "Dihadrons.h"
 
 ClassImp(DihadronSet)
@@ -81,7 +84,7 @@ void DihadronSet::AddHadron(Analysis *A) {
   hadSetGen[A->finalStateID].push_back( A->kinTrue->vecHadron );
 }
 
-void DihadronSet::CalculateKinematics(Analysis *A) {
+void DihadronSet::CalculateKinematics(Analysis *A, Double_t wgt) {
 
   // TODO: this does not yet handle generalized dihadrons
   if(includedHadrons.size()!=2) fmt::print("ERROR: more or less than 2 final states defined for DihadronSet\n");
@@ -107,7 +110,7 @@ void DihadronSet::CalculateKinematics(Analysis *A) {
     A->dihTrue = &(dihListGen[i]);
     auto finalStateID_tmp = A->finalStateID; // temporarily change Analysis::finalStateID
     A->finalStateID = dihadronFinalStateID;  // to that of this DihadronSet
-    A->FillHistosDihadrons();
+    A->FillHistos2h(wgt);
     A->finalStateID = finalStateID_tmp; // revert Analysis::finalStateID
   }
 
