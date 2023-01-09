@@ -5,14 +5,13 @@ R__LOAD_LIBRARY(EpicAnalysis)
 
 void analysis(
     TString source="delphes",
-    Double_t eleBeamEn=5,  Double_t ionBeamEn=41
-    // Double_t eleBeamEn=18, Double_t ionBeamEn=275
+    Double_t eleBeamEn=18, Double_t ionBeamEn=275
     )
 {
   Analysis *A;
   TString configFile, outfilePrefix;
   if(source=="delphes") {
-    configFile = Form("datarec/delphes/%dx%d/delphes.config",(int)eleBeamEn,(int)ionBeamEn);
+    configFile = Form("datarec/hepmc.pythia6/radcor/%dx%d/files.config",(int)eleBeamEn,(int)ionBeamEn);
     outfilePrefix = Form("dihadrons.delphes.%dx%d",(int)eleBeamEn,(int)ionBeamEn);
     A = new AnalysisDelphes(configFile, outfilePrefix);
   } else {
@@ -20,7 +19,7 @@ void analysis(
     return;
   }
 
-  A->maxEvents = 30000; // limiter
+  // A->maxEvents = 30000; // limiter
   A->writeSimpleTree = true;
   A->SetReconMethod("Ele");
   A->includeOutputSet["1h"] = true; // optionally output single-hadron plots

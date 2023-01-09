@@ -111,6 +111,7 @@ void DihadronSet::CalculateKinematics(Analysis *A, Double_t wgt) {
     auto finalStateID_tmp = A->finalStateID; // temporarily change Analysis::finalStateID
     A->finalStateID = dihadronFinalStateID;  // to that of this DihadronSet
     A->FillHistos2h(wgt);
+    A->FillHistosInclusive(wgt);
     A->finalStateID = finalStateID_tmp; // revert Analysis::finalStateID
   }
 

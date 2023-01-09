@@ -140,8 +140,9 @@ class Analysis : public TNamed
     HistosDAG *HD;
     Weights const* weightInclusive;
     Weights const* weightTrack;
+    Weights const* weightDihadron;
     Weights const* weightJet;
-    Double_t wInclusiveTotal, wTrackTotal, wJetTotal;
+    Double_t wInclusiveTotal, wTrackTotal, wDihadronTotal, wJetTotal;
     Long64_t entriesTot;
     Long64_t errorCnt;
     const TString sep = "--------------------------------------------";

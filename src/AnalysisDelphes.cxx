@@ -236,8 +236,11 @@ void AnalysisDelphes::Execute() {
     }; // end track loop
 
     // dihadrons - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    if(includeOutputSet["2h"])
-      dihSet->CalculateKinematics(this, Q2weightFactor * weightTrack->GetWeight(*kinTrue)); // FIXME: need separate `Weights` object?
+    if(includeOutputSet["2h"]) {
+      auto wDihadron = Q2weightFactor * weightDihadron->GetWeight(*kinTrue);
+      wDihadronTotal += wDihadron;
+      dihSet->CalculateKinematics(this, wDihadron); // calls FillHistos2h(wDihadron) and FillHistosInclusive(wDihadron);
+    }
 
     // jet loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     if(includeOutputSet["jets"]) {
