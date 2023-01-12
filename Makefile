@@ -93,8 +93,10 @@ all: epic-analysis
 all-clean: deps-clean clean
 
 debug: FLAGS += -g
+debug: DEP_RECIPE = debug
 debug: clean all
 release: FLAGS += -O3
+release: DEP_RECIPE = release
 release: clean all
 
 epic-analysis: deps epic-analysis-header $(PREFIX)/$(LIB)
@@ -140,13 +142,13 @@ delphes-clean:
 	fi
 mstwpdf:
 	@echo "\n===== $@ ====="
-	$(MAKE) -C ${MSTWPDF_HOME}
+	$(MAKE) -C ${MSTWPDF_HOME} $(DEP_RECIPE)
 mstwpdf-clean:
 	@echo "\n===== $@ ====="
 	$(MAKE) -C ${MSTWPDF_HOME} clean
 adage:
 	@echo "\n===== $@ ====="
-	$(MAKE) -C ${ADAGE_HOME}
+	$(MAKE) -C ${ADAGE_HOME} $(DEP_RECIPE)
 adage-clean:
 	@echo "\n===== $@ ====="
 	$(MAKE) -C ${ADAGE_HOME} clean
