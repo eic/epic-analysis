@@ -401,7 +401,7 @@ void Analysis::Prepare() {
           );
       // -- DIS kinematics
       HS->DefineHist2D("Q2vsX","x","Q^{2}","","GeV^{2}",
-          NBINS,1e-3,1,
+          NBINS,1e-4,1,
           NBINS,1,3000,
           true,true
           );
@@ -528,7 +528,12 @@ void Analysis::Prepare() {
       HS->DefineHist2D("JetResEVsRecoE","Reco E","(Reco-True)/True E","GeV","",100,0.,100.,10000,-10.,10.,false,false);
     }
 #endif
-
+#ifdef SIDIS_MLPRED
+    HS->DefineHist1D("vecQxres","(vecQ_x - vecQTrue_x)","", NBINS, -2, 2);
+    HS->DefineHist1D("vecQyres","(vecQ_y - vecQTrue_y)","", NBINS, -2, 2);
+    HS->DefineHist1D("vecQzres","(vecQ_z - vecQTrue_z)","", NBINS, -2, 2);
+    HS->DefineHist1D("vecQtres","(vecQ_t - vecQTrue_t)","", NBINS, -2, 2);
+#endif
     // -- depolarization
     if(includeOutputSet["depolarization"]) {
       std::map<TString,TString> depols = {
@@ -837,6 +842,12 @@ void Analysis::FillHistos1h(Double_t wgt) {
     H->FillHist2D("x_RvG",    kinTrue->x,    kin->x,    wgt);
     H->FillHist2D("phiH_RvG", kinTrue->phiH, kin->phiH, wgt);
     H->FillHist2D("phiS_RvG", kinTrue->phiS, kin->phiS, wgt);
+    //#ifdef SIDIS_MLPRED
+    H->FillHist1D("vecQxres",kin->vecQ.Px() - kinTrue->vecQ.Px(),wgt);
+    H->FillHist1D("vecQyres",kin->vecQ.Py() - kinTrue->vecQ.Py(),wgt);
+    H->FillHist1D("vecQzres",kin->vecQ.Pz() - kinTrue->vecQ.Pz(),wgt);
+    H->FillHist1D("vecQtres",kin->vecQ.E() - kinTrue->vecQ.E(),wgt);
+    //#endif
   };
   FillHistos(fill_payload);
 };
