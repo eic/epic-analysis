@@ -358,7 +358,6 @@ jobs:
       - build_all
       - download_fullsim
     runs-on: ubuntu-latest
-    steps:
     strategy:
       matrix:
         detector: [epic_arches]
