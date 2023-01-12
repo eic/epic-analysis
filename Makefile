@@ -93,9 +93,9 @@ all: epic-analysis
 all-clean: deps-clean clean
 
 debug: FLAGS += -g
-debug: all
+debug: clean all
 release: FLAGS += -O3
-release: all
+release: clean all
 
 epic-analysis: deps epic-analysis-header $(PREFIX)/$(LIB)
 	@echo "Done.\n"
