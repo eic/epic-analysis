@@ -1,8 +1,7 @@
 # compiler and flags
 CXX = g++
-FLAGS = -g -Wno-deprecated -fPIC -fno-inline -Wno-write-strings
+FLAGS = -Wno-deprecated -fPIC -fno-inline -Wno-write-strings
 FLAGS += -fmax-errors=3
-# FLAGS += -O0 # TODO: use optimization?
 
 # ROOT
 ROOT_INCLUDES := -I$(shell root-config --incdir)
@@ -27,6 +26,12 @@ HEADERS := $(wildcard $(INC_DIR)/*.h)
 SOURCES := $(filter-out $(DICT), $(wildcard $(SRC_DIR)/*.cxx)) $(DICT)
 
 #-----------------------------------------------
+
+all: $(LIB)
+debug: FLAGS += -g
+debug: clean all
+release: FLAGS += -O3
+release: clean all
 
 $(LIB): $(SOURCES) $(HEADERS) $(LINKDEF)
 	@echo ">>>>> build $(ADAGE) library"
