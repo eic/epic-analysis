@@ -18,6 +18,10 @@ FFLAGS=-Wall -W -fPIC
 CXXFLAGS=-Wall -W -fPIC
 
 all: libmstwpdf.so
+debug: CXXFLAGS += -g
+debug: clean all
+release: CXXFLAGS += -O3
+release: clean all
 
 libmstwpdf.so : mstwpdf_cpp.o alphaS.o
 	$(CXX) -shared $(CXXFLAGS) $< -o $@
