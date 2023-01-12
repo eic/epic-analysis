@@ -37,12 +37,12 @@ void AnalysisEpic::Execute()
   // All true particles (including secondaries, etc)
   TTreeReaderArray<Int_t> mcpart_PDG(tr,      "MCParticles.PDG");
   TTreeReaderArray<Int_t> mcpart_genStat(tr,         "MCParticles.generatorStatus");
-  TTreeReaderArray<Int_t> mcpart_simStat(tr,         "MCParticles.simulatorStatus");
+  TTreeReaderArray<Int_t> mcpart_simStat(tr,         "MCParticles.simulatorStatus"); 
+  TTreeReaderArray<Int_t> mcpart_parent(tr,         "MCParticles.parents_begin"); // is this correct usage? parents_begin and parents_end same length in files seemingly
   TTreeReaderArray<Double_t> mcpart_m(tr,         "MCParticles.mass");
   TTreeReaderArray<Float_t> mcpart_psx(tr,       "MCParticles.momentum.x");
   TTreeReaderArray<Float_t> mcpart_psy(tr,       "MCParticles.momentum.y");
   TTreeReaderArray<Float_t> mcpart_psz(tr,       "MCParticles.momentum.z");
-
 
   // Reco tracks
   TTreeReaderArray<Int_t> recparts_type(tr,  "ReconstructedChargedParticles.type"); // needs to be made an int eventually in actual EE code
@@ -130,6 +130,7 @@ void AnalysisEpic::Execute()
     for(int imc=0; imc < mcpart_PDG.GetSize(); imc++){
 
       int pid_ = mcpart_PDG[imc];
+      int parent_ = mcpart_parent[imc];
       double px_ = mcpart_psx[imc];
       double py_ = mcpart_psy[imc];
       double pz_ = mcpart_psz[imc];
@@ -142,6 +143,7 @@ void AnalysisEpic::Execute()
       part.pid=pid_;
       // part.charge = // TODO; not used yet
       part.mcID=imc;
+      part.parent = parent_;
       part.vecPart.SetPxPyPzE(px_,py_,pz_,e_);
       mcpart.push_back(part);
       
@@ -212,9 +214,9 @@ void AnalysisEpic::Execute()
     /*
       Loop over MCParticles
     */
-
+    int imcele = -1;
     for(auto mcpart_: mcpart){
-
+      
       int imc = mcpart_.mcID;
       /* Beam particles have a MCParticles.generatorStatus of 4 */
       int genStat_ = mcpart_genStat[imc];
@@ -233,6 +235,7 @@ void AnalysisEpic::Execute()
       /* Assume the scattered electron is the pid==11 final state particle with the most energy */
       if(mcpart_.pid==11 && genStat_ == 1 && mcpart_.vecPart.P() > maxP)
 	{
+	  imcele = imc;
 	  maxP=mcpart_.vecPart.P();
 	  kinTrue->vecElectron = mcpart_.vecPart;
 	  genEleID = mcpart_.mcID; 
@@ -243,7 +246,7 @@ void AnalysisEpic::Execute()
        */
       
       else if(genStat_ == 1 && mcidmap[mcpart_.mcID]>-1){ 
-	kinTrue->AddToHFS(mcpart_.vecPart);
+	kinTrue->AddToHFS(mcpart_.vecPart, mcpart_.pid);
       }
     
     }
@@ -251,6 +254,18 @@ void AnalysisEpic::Execute()
     //check beam finding
     if(!foundBeamElectron || !foundBeamIon) { numNoBeam++; continue;};
 
+    /* CHECK: Looking for FSR photon, relooping over MCparticles for:
+       final state particle, parent is scattered electron */
+    // is this always after scattered electron in MCparticles, so not requiring
+    // two loops over mcpart?
+    for(auto mcpart_: mcpart){
+      int imc = mcpart_.mcID;
+      int genStat_ = mcpart_genStat[imc];
+      if(mcpart_.pid==22 && genStat_==1 && mcpart_.parent==imcele){
+	kinTrue->vecElectron += mcpart_.vecPart;
+      }
+    }
+    
     /*
       Loop over RecoParticles
     */
@@ -266,7 +281,7 @@ void AnalysisEpic::Execute()
 	  kin->vecElectron= recpart_.vecPart;
 	}
 	// Add the final state particle to the HFS
-	kin->AddToHFS(recpart_.vecPart);
+	kin->AddToHFS(recpart_.vecPart, recpart_.pid);
       }
       irec++; // Increment to next particle
     }
@@ -294,8 +309,12 @@ void AnalysisEpic::Execute()
     if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
     if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
 
+    //cout << " vecQ in epic loop: " << kin->vecQ.Px() << " " << kin->vecQ.Py() << " " << kin->vecQ.Pz() << endl;
     // Get the weight for this event's Q2
     auto Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
+
+    //fill HFS tree for event                                                                                                                                                                   
+    if( writeHFSTree && kin->nHFS > 0) HFST->FillTree(Q2weightFactor);
 
     // fill inclusive histograms, if only `inclusive` is included in output
     // (otherwise they will be filled in track and jet loops)

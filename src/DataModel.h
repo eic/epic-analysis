@@ -10,6 +10,7 @@ class Particles {
     int pid    = 0;
     int charge = 0;
     int mcID   = -1;
+    int parent = -1;
     TLorentzVector vecPart;
 };
 
