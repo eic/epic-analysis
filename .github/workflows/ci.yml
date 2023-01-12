@@ -39,7 +39,7 @@ jobs:
             deps/install_delphes.sh
             echo "[CI] build epic-analysis"
             source environ.sh
-            make
+            make release
       - uses: actions/upload-artifact@v3
         with:
           name: x_build_all
@@ -69,7 +69,7 @@ jobs:
           run: |
             echo "[CI] build epic-analysis"
             source environ.sh
-            EXCLUDE_DELPHES=1 make
+            EXCLUDE_DELPHES=1 make release
       - uses: actions/upload-artifact@v3
         with:
           name: x_build_no_delphes
