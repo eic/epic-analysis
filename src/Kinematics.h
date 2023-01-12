@@ -57,7 +57,7 @@ class Kinematics : public TObject
     void CalculateHadronKinematics();
 
     // hadronic final state (HFS)
-    void AddToHFS(TLorentzVector p4_);
+    void AddToHFS(TLorentzVector p4_, int pid);
     void AddPion(TLorentzVector p4_);
     void SubtractElectronFromHFS();
     void ResetHFS();
@@ -176,8 +176,8 @@ class Kinematics : public TObject
     TClonesArray *pip4 = new TClonesArray("TLorentzVector");
     TClonesArray &arpi = *pip4;
     // TMVA for ML sidis reconstruction
-    std::vector<std::vector<float>> hfsinfo;
-    std::vector<float> globalinfo;
+    std::vector<std::vector<double>> hfsinfo;
+    std::vector<double> globalinfo;
 
     // particle masses
     static Double_t ElectronMass() { return 0.000511; };
@@ -337,8 +337,7 @@ class Kinematics : public TObject
     py::object efnpackage;
     py::function pfnimport;
     py::object model;
-    py::object modelload;
-    std::string modelname = "pfn_testEpic_000-2_vecQele_nHFS2_500_bs10k_bestValLoss";
+    py::object modelload;    
 #endif  
 
   ClassDef(Kinematics,1);

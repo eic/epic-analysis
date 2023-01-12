@@ -19,7 +19,7 @@ Kinematics::Kinematics(
   // requires tensorflow, energyflow packages installed
 #ifdef SIDIS_MLPRED
   efnpackage = py::module_::import("testEFlowimport");
-  pfnimport = efnpackage.attr("eflowPredict");
+  pfnimport = efnpackage.attr("singlePred");
 #endif
   // set ion mass
   IonMass = ProtonMass();
@@ -204,24 +204,35 @@ void Kinematics::GetQWNu_electronic(){
 void Kinematics::GetQWNu_ML(){
   hfsinfo.clear();
   float pidadj = 0;
-  if(nHFS >= 2){
-    std::vector<float> partHold;
+  if(nHFS >= 1){
+    std::vector<double> partHold;
+
     for(int i = 0; i < nHFS; i++){
+      double momdiff = sqrt( pow(hfspx[i]-vecElectron.Px(),2) + pow(hfspy[i]-vecElectron.Py(),2));
       double pidsgn=(hfspid[i]/abs(hfspid[i]));
-      if(abs(hfspid[i])==211) pidadj = 0.4*pidsgn;
-      if(abs(hfspid[i])==22) pidadj = 0.2*pidsgn;
-      if(abs(hfspid[i])==321) pidadj = 0.6*pidsgn;
-      if(abs(hfspid[i])==2212) pidadj = 0.8*pidsgn;
-      if(abs(hfspid[i])==11) pidadj = 1.0*pidsgn;
-      partHold.push_back(hfseta[i]);
-      partHold.push_back(hfsphi[i]);
-      partHold.push_back(hfspx[i]);
-      partHold.push_back(hfspy[i]);
-      partHold.push_back(hfspz[i]);
-      partHold.push_back(hfsE[i]);
-      partHold.push_back(pidadj);
-      hfsinfo.push_back(partHold);
-      partHold.clear();
+      if(momdiff > 0.0001){
+	if(abs(hfspid[i])==211) pidadj = 0.4*pidsgn;
+	if(abs(hfspid[i])==22) pidadj = 0.2*pidsgn;
+	if(abs(hfspid[i])==321) pidadj = 0.6*pidsgn;
+	if(abs(hfspid[i])==2212) pidadj = 0.8*pidsgn;
+	if(abs(hfspid[i])==11) pidadj = 1.0*pidsgn;
+	partHold.push_back(hfseta[i]);
+	partHold.push_back(hfsphi[i]);
+	partHold.push_back(hfspx[i]);
+	partHold.push_back(hfspy[i]);
+	partHold.push_back(hfspz[i]);
+	partHold.push_back(hfsE[i]);
+	//partHold.push_back(pidadj);
+	/*partHold.push_back(vecElectron.Eta());
+	partHold.push_back(vecElectron.Phi());
+	partHold.push_back(vecElectron.Px());
+	partHold.push_back(vecElectron.Py());
+	partHold.push_back(vecElectron.Pz());
+	partHold.push_back(vecElectron.E());
+	*/
+	hfsinfo.push_back(partHold);
+	partHold.clear();
+      }
     }
     double Q2ele, Q2DA, Q2JB;
     double xele, xDA, xJB;
@@ -277,6 +288,7 @@ void Kinematics::GetQWNu_ML(){
     globalinfo.push_back(vecQEle.Py());
     globalinfo.push_back(vecQEle.Pz());
     globalinfo.push_back(vecQEle.E());
+    
 #ifdef SIDIS_MLPRED
     py::object nnoutput = pfnimport(hfsinfo, globalinfo);
     std::vector<float> nnvecq = nnoutput.cast<std::vector<float>>();
@@ -530,14 +542,19 @@ void Kinematics::ValidateHeadOnFrame() {
 
 
 // add a 4-momentum to the hadronic final state
-void Kinematics::AddToHFS(TLorentzVector p4_) {
+void Kinematics::AddToHFS(TLorentzVector p4_, int pid) {
   TLorentzVector p4 = p4_;
-  hfspx[nHFS] = p4.Px();
-  hfspy[nHFS] = p4.Py();
-  hfspz[nHFS] = p4.Pz();
-  hfsE[nHFS] = p4.E();
-  new(ar[nHFS]) TLorentzVector(p4);
-  nHFS++;
+  if(std::abs(p4.Eta()) < 4.){
+    hfspx[nHFS] = p4.Px();
+    hfspy[nHFS] = p4.Py();
+    hfspz[nHFS] = p4.Pz();
+    hfsE[nHFS] = p4.E();
+    hfseta[nHFS] = p4.Eta();
+    hfsphi[nHFS] = p4.Phi();
+    hfspid[nHFS] = pid;
+    nHFS++;
+  };
+  //new(ar[nHFS]) TLorentzVector(p4);
   
   if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(p4,p4);
   sigmah += (p4.E() - p4.Pz());
@@ -573,8 +590,8 @@ void Kinematics::SubtractElectronFromHFS() {
         break;
     }
     countHadrons--;
-    ar.Remove( &vecElectron );
-    nHFS--;
+    //ar.Remove( &vecElectron );
+    //nHFS--;
   } else {
     cerr << "ERROR: electron energy is NaN" << endl;
     // TODO: kill event
@@ -640,7 +657,7 @@ void Kinematics::GetHFS(
           //continue; // drop events if PID not smeared // TODO [critical]: this is more realistic, but resolutions are much worse
         }
 
-        this->AddToHFS(trackp4);
+        this->AddToHFS(trackp4,pid);
       }
     }    
   }
@@ -650,7 +667,7 @@ void Kinematics::GetHFS(
     TLorentzVector eflowTrackp4 = eflowTrack->P4();
     if(!isnan(eflowTrackp4.E())){
       if(std::abs(eflowTrack->Eta) >= 4.0){
-        this->AddToHFS(eflowTrackp4);
+        this->AddToHFS(eflowTrackp4,0);
       }
     }
   }
@@ -660,7 +677,7 @@ void Kinematics::GetHFS(
     TLorentzVector  towerPhotonp4 = towerPhoton->P4();
     if(!isnan(towerPhotonp4.E())){
       if( std::abs(towerPhoton->Eta) < 4.0  ){
-        this->AddToHFS(towerPhotonp4);
+        this->AddToHFS(towerPhotonp4,22);
       }
     }
   }
@@ -670,7 +687,7 @@ void Kinematics::GetHFS(
     TLorentzVector  towerNeutralHadronp4 = towerNeutralHadron->P4();
     if(!isnan(towerNeutralHadronp4.E())){
       if( std::abs(towerNeutralHadron->Eta) < 4.0 ){
-        this->AddToHFS(towerNeutralHadronp4);
+        this->AddToHFS(towerNeutralHadronp4,0);
       }
     }
   }
@@ -689,7 +706,7 @@ void Kinematics::GetTrueHFS(TObjArrayIter itParticle){
 
   // truth loop
   while(GenParticle *partTrue = (GenParticle*)itParticle() ) {
-    if(partTrue->Status == 1) this->AddToHFS(partTrue->P4());
+    if(partTrue->Status == 1) this->AddToHFS(partTrue->P4(),0);
   }
 
   // remove electron from hadronic final state

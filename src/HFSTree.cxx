@@ -17,11 +17,12 @@ HFSTree::HFSTree(TString treeName_, Kinematics *K_, Kinematics *Ktrue_)
   T->Branch("vecEleBeamTrue", &(Ktrue->vecEleBeam));
   T->Branch("vecIonBeamTrue", &(Ktrue->vecIonBeam));
   T->Branch("nHFS", &(K->nHFS), "nHFS/I");
-  T->Branch("hfsp4", &(K->hfsp4));
-  //T->Branch("hfspy", &(K->hfspy), "hfspy[nHFS]/F");
-  //T->Branch("hfspz", &(K->hfspz), "hfspz[nHFS]/F");
-  //T->Branch("hfsE", &(K->hfsE), "hfsE[nHFS]/F");
-  T->Branch("hfspid", &(K->hfspid), "hfspid[nHFS]/F");
+  //T->Branch("hfsp4", &(K->hfsp4));
+  T->Branch("hfspx", &(K->hfspx), "hfspx[nHFS]/D");
+  T->Branch("hfspy", &(K->hfspy), "hfspy[nHFS]/D");
+  T->Branch("hfspz", &(K->hfspz), "hfspz[nHFS]/D");
+  T->Branch("hfsE", &(K->hfsE), "hfsE[nHFS]/D");
+  T->Branch("hfspid", &(K->hfspid), "hfspid[nHFS]/I");
   T->Branch("weight",    &(weight),       "weight/D");
 };
 
