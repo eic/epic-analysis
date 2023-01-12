@@ -102,6 +102,7 @@ class PostProcessor : public TNamed
     // accessors
     TString GetPngDir() { return pngDir; };
     TString GetOutfileName() { return outfileN; };
+    TFile *GetOutfile() { return outfile; };
     BinSet *GetBinSet(TString varName);
     CutDef *GetBinCut(TString varName, Int_t binNum);
     std::vector<int> GetBinNums(TString varName);

@@ -5,10 +5,13 @@ R__LOAD_LIBRARY(EpicAnalysis)
 
 // make kinematics coverage plots, such as eta vs. p in bins of (x,Q2)
 void postprocess_depolarization(
-    TString infile="out/depol.delphes.5x41.root"
-    // TString infile="out/depol.delphes.18x275.root"
-) {
+    Int_t eleBeamEn=5, Int_t ionBeamEn=41,
+    // Int_t eleBeamEn=18, Int_t ionBeamEn=275,
+    TString upstream="ecce"
+    )
+{
 
+  TString infile = Form("out/depol.%s.%dx%d.root",upstream.Data(),eleBeamEn,ionBeamEn);
   PostProcessor *P = new PostProcessor(infile);
 
   P->Op()->Payload(
@@ -21,6 +24,9 @@ void postprocess_depolarization(
               P->DrawSingle(H,histName,"COLZ",1,true);
           }
         }
+        P->GetOutfile()->cd("/");
+        H->Hist("Q2vsX")->Write();
+        H->Hist("y")->Write();
       });
 
   P->Execute();
