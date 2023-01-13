@@ -96,7 +96,7 @@ void AnalysisEpicPodio::Execute()
       auto simPDG = simPart.getPDG();
 
       // add to Hadronic Final State (HFS) sums
-      kinTrue->AddToHFS(GetP4(simPart));
+      kinTrue->AddToHFS(GetP4(simPart),0);
 
       // filter for beam particles
       if(simPart.getGeneratorStatus() == constants::statusBeam) {
@@ -158,7 +158,7 @@ void AnalysisEpicPodio::Execute()
      * - see `LoopMCRecoAssocs` for `payload` signature
      */
     auto AllRecPartsToHFS = [&] (auto& simPart, auto& recPart, auto recPDG) {
-      kin->AddToHFS(GetP4(recPart));
+      kin->AddToHFS(GetP4(recPart),0);
     };
     if(verbose) fmt::print("\n{:-<60}\n","MC<->Reco ASSOCIATIONS ");
     LoopMCRecoAssocs(mcRecAssocs, AllRecPartsToHFS, verbose);

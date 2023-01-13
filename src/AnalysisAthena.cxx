@@ -108,7 +108,7 @@ void AnalysisAthena::Execute()
         mcpart.push_back(part);
 
         // add to hadronic final state sums
-        kinTrue->AddToHFS(part.vecPart);
+        kinTrue->AddToHFS(part.vecPart,part.pid);
 
         // identify scattered electron by max momentum
         if(pid_ == 11) {
@@ -172,7 +172,7 @@ void AnalysisAthena::Execute()
         for(auto imc : mcpart) {
           if(part.mcID == imc.mcID) {
             recopart.push_back(part);
-            kin->AddToHFS(part.vecPart);
+            kin->AddToHFS(part.vecPart,part.pid);
             break;
           }
         }

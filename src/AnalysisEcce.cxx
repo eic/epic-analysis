@@ -193,7 +193,7 @@ void AnalysisEcce::Execute()
 	  mcpart.push_back(part);
 	
 	  // add to hadronic final state sums
-	  kinTrue->AddToHFS(part.vecPart);
+	  kinTrue->AddToHFS(part.vecPart,part.pid);
 
 
 	  // identify scattered electron by max momentum
@@ -307,7 +307,7 @@ void AnalysisEcce::Execute()
 	if(imc>-1) {
 	  //  cout  << "\t\t\t add  to hadfs  \n" ;
 	  recopart.push_back(part);
-	  kin->AddToHFS(part.vecPart);
+	  kin->AddToHFS(part.vecPart,part.pid);
 	  kin->hfspid[kin->nHFS - 1] = pid_;
 	}
       }
@@ -382,7 +382,7 @@ void AnalysisEcce::Execute()
 	    if ( fabs(part.pid) != 11 &&  fabs(part.pid) != 13 && fabs(part.pid) != 211 && fabs(part.pid) != 321 && fabs(part.pid) != 2212 && fabs(part.pid) != 0  ){
 	      // only add to hadronic final state, not to the particle list (could be changed for pi0 in the future
 	      //  recopart.push_back(part);
-	      kin->AddToHFS(part.vecPart);
+	      kin->AddToHFS(part.vecPart,part.pid);
 	    }
 	  }
 	}
