@@ -30,8 +30,8 @@ void AnalysisAthena::Execute()
   auto chain = std::make_unique<TChain>("events");
   for(Int_t idx=0; idx<infiles.size(); ++idx) {
     for(std::size_t idxF=0; idxF<infiles[idx].size(); ++idxF) {
-      // std::cout << "Adding " << infiles[idx][idxF] << " with " << inEntries[idx][idxF] << std::endl;
-      chain->Add(infiles[idx][idxF].c_str(), inEntries[idx][idxF]);
+      // std::cout << "Adding " << infiles[idx][idxF] << std::endl;
+      chain->Add(infiles[idx][idxF].c_str());
     }
   }
   chain->CanDeleteRefs();

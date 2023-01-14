@@ -96,7 +96,7 @@ release: FLAGS += -O3
 release: DEP_RECIPE = release
 release: clean all
 
-epic-analysis: deps epic-analysis-header $(PREFIX)/$(LIB)
+epic-analysis: deps epic-analysis-header $(PREFIX)/$(LIB) hpc
 	@echo "Done.\n"
 epic-analysis-header:
 	@echo "\n===== $(PROJECT) ====="
@@ -115,12 +115,6 @@ $(DICT): $(HEADERS) $(DEP_TARGETS)
 	$(ROOTCLING) -f $@ $(DEP_INCLUDES) $(HEADERS)
 	@mkdir -p $(PREFIX)
 	@mv src/$(PCM) $(PREFIX)/
-
-clean:
-	@echo "\n===== CLEAN $(PROJECT) ====="
-	$(RM) $(PREFIX)/$(LIB) $(PREFIX)/$(PCM) $(DICT)
-
-
 
 # dependency builds
 #################################################################
@@ -149,3 +143,27 @@ adage:
 adage-clean:
 	@echo "\n===== $@ ====="
 	$(MAKE) -C ${ADAGE_HOME} clean
+
+
+# HPC executables
+#################################################################
+
+HPC_SOURCES     := $(basename $(wildcard hpc/src/*.cpp))
+HPC_EXECUTABLES := $(addsuffix .exe, $(HPC_SOURCES))
+
+hpc: hpc-header $(HPC_EXECUTABLES)
+hpc-header:
+	@echo "\n===== HPC executables ====="
+hpc/src/%.exe: hpc/src/%.cpp $(PREFIX)/$(LIB)
+	@echo "----- build $@.o -----"
+	$(CXX) -c $< -o $@.o $(FLAGS) $(DEP_INCLUDES)
+	@echo "--- make executable $@"
+	$(CXX) -o $@ $@.o $(DEP_LIBRARIES) -L$(PREFIX) -l$(PROJECT)
+	$(RM) $@.o
+
+
+# clean
+#################################################################
+clean:
+	@echo "\n===== CLEAN $(PROJECT) ====="
+	$(RM) $(PREFIX)/$(LIB) $(PREFIX)/$(PCM) $(DICT) $(HPC_EXECUTABLES)

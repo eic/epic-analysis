@@ -121,7 +121,7 @@ Analysis::Analysis(
 // add a group of files
 void Analysis::AddFileGroup(
     std::vector<std::string> fileNames,
-    std::vector<Long64_t> entries,
+    Long64_t totalEntries,
     Double_t xs,
     Double_t Q2min,
     Double_t Q2max
@@ -140,12 +140,7 @@ void Analysis::AddFileGroup(
   Q2xsecs.push_back(xs);
   Q2mins.push_back(Q2min);
   Q2maxs.push_back(Q2max);
-  inEntries.push_back(entries);
-
-  // get total entries
-  Long64_t totalEntry = 0;
-  for (Long64_t entry : entries) totalEntry += entry;
-  Q2entries.push_back(totalEntry);
+  Q2entries.push_back(totalEntries);
 
   // check if the cross section for each group decreases; this is preferred
   // to make sure that `GetEventQ2Idx` behaves correctly
@@ -177,35 +172,51 @@ void Analysis::Prepare() {
   fmt::print("[+++] PARSING CONFIG FILE {}\n",configFileName);
 
   // vars
-  Double_t xsec  = totalCrossSection;
-  Double_t Q2min = 1.0;
-  Double_t Q2max = 0.0;
+  Double_t xsec;
+  Double_t Q2min;
+  Double_t Q2max;
+  Long64_t numEvents;
   std::vector<std::string> fileNames;
-  bool readingListOfFiles = false;
+  bool readingListOfFiles;
+  bool endGroupCalled;
+
+  // reset vars
+  auto ResetVars = [&] () {
+    xsec      = totalCrossSection;
+    Q2min     = 1.0;
+    Q2max     = 0.0;
+    numEvents = -1;
+    fileNames.clear();
+    readingListOfFiles = false;
+    endGroupCalled     = false;
+  };
+  ResetVars();
 
   /* lambda to add a list of files to this analysis; wraps `Analysis::AddFileGroup`,
    * and checks the files beforehand
    */
-  auto AddFiles = [this, &fileNames, &xsec, &Q2min, &Q2max] () {
-    // get the number of entries, and check the file
-    std::vector<Long64_t> entries;
-    for(auto fileName : fileNames) {
-      auto file = TFile::Open(fileName.c_str());
-      if (file==nullptr || file->IsZombie()) {
-        fmt::print(stderr,"ERROR: Couldn't open input file '{}'\n",fileName);
-        return;
+  auto AddFiles = [this, &fileNames, &xsec, &Q2min, &Q2max, &numEvents] () {
+    Long64_t entries = 0;
+    if(numEvents<0) {
+      // get the number of entries, and check the file
+      for(auto fileName : fileNames) {
+        auto file = TFile::Open(fileName.c_str());
+        if (file==nullptr || file->IsZombie()) {
+          fmt::print(stderr,"ERROR: Couldn't open input file '{}'\n",fileName);
+          return;
+        }
+        TTree *tree = file->Get<TTree>("Delphes");                  // fastsim
+        if (tree == nullptr) tree = file->Get<TTree>("events");     // ATHENA, EPIC
+        if (tree == nullptr) tree = file->Get<TTree>("event_tree"); // ECCE
+        if (tree == nullptr) {
+          fmt::print(stderr,"ERROR: Couldn't find tree in file '{}'\n",fileName);
+        }
+        else entries += tree->GetEntries();
+        file->Close();
+        delete file;
       }
-      TTree *tree = file->Get<TTree>("Delphes");                  // fastsim
-      if (tree == nullptr) tree = file->Get<TTree>("events");     // ATHENA, EPIC
-      if (tree == nullptr) tree = file->Get<TTree>("event_tree"); // ECCE
-      if (tree == nullptr) {
-        fmt::print(stderr,"ERROR: Couldn't find tree in file '{}'\n",fileName);
-        entries.push_back(0);
-      }
-      else entries.push_back(tree->GetEntries());
-      file->Close();
-      delete file;
     }
+    else entries = numEvents;
     // add the file group
     AddFileGroup(fileNames, entries, xsec, Q2min, Q2max);
   };
@@ -243,18 +254,14 @@ void Analysis::Prepare() {
     // parse buffers
     if (parseAs==kSetting) {
       // if we were reading a list of files, we're done with this list; add the files and reset
-      if(readingListOfFiles) {
+      if(readingListOfFiles || bufferKey==":endGroup") {
         if(debugParser) fmt::print("-> new setting, add current list of `fileNames`, then reset\n");
         AddFiles();
-        readingListOfFiles = false;
-        xsec  = totalCrossSection;
-        Q2min = 1.0;
-        Q2max = 0.0;
-        fileNames.clear();
+        ResetVars();
       }
       // parse setting value(s)
       if(debugParser) fmt::print("  parse as setting: bufferKey='{}' bufferVal='{}'\n",bufferKey,bufferVal);
-      if(bufferVal=="")
+      if(bufferVal=="" && bufferKey!=":endGroup")
         fmt::print(stderr,"ERROR: setting '{}' has no associated value\n",bufferKey);
       else if (bufferKey==":eleBeamEn")         eleBeamEn         = std::stod(bufferVal);
       else if (bufferKey==":ionBeamEn")         ionBeamEn         = std::stod(bufferVal);
@@ -263,8 +270,10 @@ void Analysis::Prepare() {
       else if (bufferKey==":q2min")             Q2min             = std::stod(bufferVal);
       else if (bufferKey==":q2max")             Q2max             = std::stod(bufferVal);
       else if (bufferKey==":crossSection")      xsec              = std::stod(bufferVal);
+      else if (bufferKey==":numEvents")         numEvents         = std::stoll(bufferVal);
+      else if (bufferKey==":endGroup")          endGroupCalled    = true;
       else
-        fmt::print(stderr,"ERROR: unkown setting \"{}\"\n",bufferKey);
+        fmt::print(stderr,"ERROR: unknown setting \"{}\"\n",bufferKey);
       if(debugParser) fmt::print("  setting:  \"{}\" = \"{}\"\n",bufferKey,bufferVal);
     }
     else if (parseAs==kRootFile) {
@@ -277,7 +286,7 @@ void Analysis::Prepare() {
 
   // add last list of files
   if(debugParser) fmt::print("-> EOF; add last list of `fileNames`\n");
-  AddFiles();
+  if(!endGroupCalled) AddFiles();
   fmt::print("[+++] PARSING COMPLETE\n\n");
 
   if (infiles.empty()) {
@@ -297,7 +306,6 @@ void Analysis::Prepare() {
   PrintStdVector(Q2maxs,"Q2maxs");
   PrintStdVector(Q2xsecs,"Q2xsecs");
   PrintStdVector(Q2entries,"Q2entries");
-  // PrintStdVector2D(inEntries,"inEntries");
   // PrintStdVector(inLookup,"inLookup");
   // fmt::print("{:-<50}\n",""); PrintStdMap(availableBinSchemes,"availableBinSchemes");
   fmt::print("{:-<50}\n",""); PrintStdMap(includeOutputSet,"includeOutputSet");
