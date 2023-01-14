@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:c-dilks/adage.git
 	branch = fix-leaks
-	commit = 8f89c50c22b0623dec8ada26407b6997d252943a
-	parent = ef07fbc9f03d3dc6c78c37934569d7a69f7d3ca2
+	commit = a9afe74ddc72fec4f02bd007b53a98d475f1aa1d
+	parent = 0562fab426b1202e96393cd64cd7febc2b13d493
 	method = merge
 	cmdver = 0.4.3
