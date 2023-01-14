@@ -15,7 +15,7 @@ void AnalysisEpic::Execute()
   Prepare();
 
   // read EventEvaluator tree
-  TChain *chain = new TChain("events");
+  auto chain = std::make_unique<TChain>("events");
   for(Int_t idx=0; idx<infiles.size(); ++idx) {
     for(std::size_t idxF=0; idxF<infiles[idx].size(); ++idxF) {
       // std::cout << "Adding " << infiles[idx][idxF] << " with " << inEntries[idx][idxF] << std::endl;
@@ -24,7 +24,7 @@ void AnalysisEpic::Execute()
   }
   chain->CanDeleteRefs();
 
-  TTreeReader tr(chain);
+  TTreeReader tr(chain.get());
 
   TTreeReaderArray<Int_t> hepmcp_status(tr, "GeneratedParticles.type");
   TTreeReaderArray<Int_t> hepmcp_PDG(tr,    "GeneratedParticles.PDG");

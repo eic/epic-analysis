@@ -52,6 +52,7 @@ public:
 			Int_t nbins_x, Double_t x_lower, Double_t x_upper,
 			Int_t nbins_y, Double_t y_lower, Double_t y_upper,
 			Int_t nbins_z, Double_t z_lower, Double_t z_upper);
+        ~Hist4D();
 
 	static bool CheckConsistency(Hist4D const* h1, Hist4D const* h2);
 	static bool CheckAxisLimits(TAxis const* ax1, TAxis const* ax2);

@@ -105,4 +105,12 @@ void Node::EndConditionalControl() {
 
 
 Node::~Node() {
+  if(cut) delete cut;
+  auto del_vec = [] (auto v) {
+    for(auto e : v) if(e) delete e;
+    v.clear();
+  };
+  del_vec(inputList);
+  del_vec(outputList);
+  del_vec(tempList);
 };
