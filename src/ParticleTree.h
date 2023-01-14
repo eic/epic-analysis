@@ -19,7 +19,7 @@
 #include "TTree.h"
 #include "TLorentzVector.h"
 
-class ParticleTree : public TObject
+class ParticleTree
 {
   public:
     ParticleTree(TString treeName_);

@@ -255,5 +255,15 @@ CutDef *Histos::GetCutDef(TString varName) {
 
 
 Histos::~Histos() {
-};
-
+  for(auto it : CutDefList)
+    if(it) delete it;
+  auto del = [] (auto m) {
+    for(auto [k,v] : m)
+      if(v) delete v;
+    m.clear();
+  };
+  del(histMap);
+  del(hist4Map);
+  del(histConfigMap);
+  del(hist4ConfigMap);
+}

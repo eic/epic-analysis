@@ -46,7 +46,7 @@ using std::cout;
 using std::cerr;
 using std::endl;
 
-class Kinematics : public TObject
+class Kinematics
 {
   public:
     Kinematics(Double_t enEleBeam, Double_t enIonBeam, Double_t crossAng);
@@ -171,9 +171,9 @@ class Kinematics : public TObject
     Double_t hfseta[100];
     Double_t hfsphi[100];
     Int_t hfspid[100];
-    TClonesArray *hfsp4 = new TClonesArray("TLorentzVector");
+    std::unique_ptr<TClonesArray> hfsp4 = std::make_unique<TClonesArray>("TLorentzVector");
     TClonesArray &ar = *hfsp4;
-    TClonesArray *pip4 = new TClonesArray("TLorentzVector");
+    std::unique_ptr<TClonesArray> pip4 = std::make_unique<TClonesArray>("TLorentzVector");
     TClonesArray &arpi = *pip4;
     // TMVA for ML sidis reconstruction
     std::vector<std::vector<float>> hfsinfo;
@@ -305,7 +305,7 @@ class Kinematics : public TObject
     Double_t moduVal[asymInjectN];
     Double_t ampVal[asymInjectN];
     Double_t asymInject;
-    TRandom *RNG;
+    std::unique_ptr<TRandom> RNG;
     Float_t RN;
     Bool_t reconOK;
 

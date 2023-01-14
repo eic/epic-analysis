@@ -40,7 +40,8 @@ void BinSet::BuildExternalBin(TString cutID_,TString cutTitle_) {
 
 // build list of bins
 void BinSet::BuildBins(Int_t nbins_, Double_t min_, Double_t max_, Bool_t log_) {
-  BuildBins(new TAxis(nbins_,min_,max_),log_);
+  auto ax = std::make_shared<TAxis>(nbins_,min_,max_);
+  BuildBins(ax.get(),log_);
 };
 void BinSet::BuildBins(TAxis *ax, Bool_t log_) {
   if(log_) BinLog(ax);

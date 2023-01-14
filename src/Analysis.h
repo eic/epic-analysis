@@ -38,7 +38,7 @@
 #include "Weights.h"
 #include "CommonConstants.h"
 
-class Analysis : public TNamed
+class Analysis
 {
   public:
     Analysis(
@@ -91,12 +91,8 @@ class Analysis : public TNamed
         );
 
     // access HistosDAG
-    HistosDAG *GetHistosDAG() { return HD; };
+    std::shared_ptr<HistosDAG> GetHistosDAG() { return HD; };
 
-
-    // set weights // TODO: are these used yet?
-    // void SetWeightsTrack(Weights const* w) { weightTrack = w; }
-    // void SetWeightsJet(Weights const* w) { weightJet = w; }
 
     Double_t GetEventQ2Weight(Double_t Q2, Int_t guess=0);
     // after adding all files, estimate the weights for events in each Q2 range
@@ -125,14 +121,12 @@ class Analysis : public TNamed
     void FillHistosJets(Double_t wgt);      // jet kinematics
 
     // shared objects
-    SimpleTree *ST;
-    HFSTree *HFST;
-    ParticleTree *PT;
-    Kinematics *kin, *kinTrue;
-    HistosDAG *HD;
-    Weights const* weightInclusive;
-    Weights const* weightTrack;
-    Weights const* weightJet;
+    std::unique_ptr<SimpleTree>   ST;
+    std::unique_ptr<HFSTree>      HFST;
+    std::unique_ptr<ParticleTree> PT;
+    std::shared_ptr<Kinematics>   kin, kinTrue;
+    std::shared_ptr<HistosDAG>    HD;
+    std::unique_ptr<Weights> weightInclusive, weightTrack, weightJet;
     Double_t wInclusiveTotal, wTrackTotal, wJetTotal;
     Long64_t entriesTot;
     Long64_t errorCnt;

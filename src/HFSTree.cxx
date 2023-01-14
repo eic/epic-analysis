@@ -6,7 +6,7 @@
 ClassImp(HFSTree)
 
 // constructor
-HFSTree::HFSTree(TString treeName_, Kinematics *K_, Kinematics *Ktrue_) 
+HFSTree::HFSTree(TString treeName_, std::shared_ptr<Kinematics> K_, std::shared_ptr<Kinematics> Ktrue_) 
   : treeName(treeName_)
   , K(K_)
   , Ktrue(Ktrue_)

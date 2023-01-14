@@ -105,9 +105,9 @@ Analysis::Analysis(
   jetMin       = 1.0; // Minimum Jet pT
   jetMatchDR   = 0.5; // Delta R between true and reco jet to be considered matched
 
-  weightInclusive = new WeightsUniform();
-  weightTrack     = new WeightsUniform();
-  weightJet       = new WeightsUniform();
+  weightInclusive = std::make_unique<WeightsUniform>();
+  weightTrack     = std::make_unique<WeightsUniform>();
+  weightJet       = std::make_unique<WeightsUniform>();
 
   // miscellaneous
   infiles.clear();
@@ -311,11 +311,11 @@ void Analysis::Prepare() {
   outFile = new TFile(outfileName,"RECREATE");
 
   // instantiate shared objects
-  kin = new Kinematics(eleBeamEn,ionBeamEn,crossingAngle);
-  kinTrue = new Kinematics(eleBeamEn, ionBeamEn, crossingAngle);
-  ST   = new SimpleTree("tree",kin,kinTrue);
-  HFST = new HFSTree("hfstree",kin,kinTrue);
-  PT   = new ParticleTree("ptree");
+  kin     = std::make_shared<Kinematics>(eleBeamEn,ionBeamEn,crossingAngle);
+  kinTrue = std::make_shared<Kinematics>(eleBeamEn, ionBeamEn, crossingAngle);
+  ST      = std::make_unique<SimpleTree>("tree",kin,kinTrue);
+  HFST    = std::make_unique<HFSTree>("hfstree",kin,kinTrue);
+  PT      = std::make_unique<ParticleTree>("ptree");
 
   // if including jets, define a `jet` final state
 #ifndef EXCLUDE_DELPHES
@@ -345,7 +345,7 @@ void Analysis::Prepare() {
   };
 
   // build HistosDAG with specified binning
-  HD = new HistosDAG();
+  HD = std::make_shared<HistosDAG>();
   HD->Build(binSchemes);
 
   // tell HD what values to associate for each BinScheme name
@@ -889,5 +889,7 @@ void Analysis::ErrorPrint(std::string message) {
 
 // destructor
 Analysis::~Analysis() {
-};
-
+  for(auto it : binSchemes)
+    if(it.second) delete it.second;
+  binSchemes.clear();
+}
