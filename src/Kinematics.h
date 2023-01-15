@@ -171,10 +171,10 @@ class Kinematics
     Double_t hfseta[100];
     Double_t hfsphi[100];
     Int_t hfspid[100];
-    std::unique_ptr<TClonesArray> hfsp4 = std::make_unique<TClonesArray>("TLorentzVector");
-    TClonesArray &ar = *hfsp4;
-    std::unique_ptr<TClonesArray> pip4 = std::make_unique<TClonesArray>("TLorentzVector");
-    TClonesArray &arpi = *pip4;
+    TClonesArray *hfsp4 = new TClonesArray("TLorentzVector");
+    TClonesArray &ar    = *hfsp4;
+    TClonesArray *pip4  = new TClonesArray("TLorentzVector");
+    TClonesArray &arpi  = *pip4;
     // TMVA for ML sidis reconstruction
     std::vector<std::vector<float>> hfsinfo;
     std::vector<float> globalinfo;

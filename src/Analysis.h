@@ -20,7 +20,6 @@
 // root
 #include "TChain.h"
 #include "TObjArray.h"
-#include "TClonesArray.h"
 #include "TFile.h"
 #include "TRegexp.h"
 
