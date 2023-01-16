@@ -204,6 +204,7 @@ void Analysis::Prepare() {
       }
       else entries.push_back(tree->GetEntries());
       file->Close();
+      delete file;
     }
     // add the file group
     AddFileGroup(fileNames, entries, xsec, Q2min, Q2max);
