@@ -61,19 +61,20 @@ DEP_TARGETS   += ${ADAGE_HOME}/lib/libAdage.so
 # epic-analysis objects
 #################################################################
 
-PREFIX  := ${EPIC_ANALYSIS_HOME}/lib
-LIB     := lib$(PROJECT).so
-PCM     := $(PROJECT)Dict_rdict.pcm
-DICT    := src/$(PROJECT)Dict.cxx
-LINKDEF := src/LinkDef.h
+PREFIX                  := ${EPIC_ANALYSIS_HOME}/lib
+EPIC_ANALYSIS_LIB       := $(PREFIX)/lib$(PROJECT).so
+EPIC_ANALYSIS_PCM       := $(PROJECT)Dict_rdict.pcm
+EPIC_ANALYSIS_DICT      := src/$(PROJECT)Dict.cxx
+EPIC_ANALYSIS_LINKDEF   := src/LinkDef.h
+EPIC_ANALYSIS_INCLUDES  := -I${EPIC_ANALYSIS_HOME}/src
+EPIC_ANALYSIS_LIBRARIES := -L$(PREFIX) -l$(PROJECT)
 
-
-# epic-analysis source code (with $(DICT) and $(LINKDEF) moved to end of lists for rootcling)
+# epic-analysis source code (with $(EPIC_ANALYSIS_DICT) and $(EPIC_ANALYSIS_LINKDEF) moved to end of lists for rootcling)
 #################################################################
 
-# move $(DICT) and $(LINKDEF) to end of lists for rootcling
-SOURCES := $(filter-out $(DICT),    $(wildcard src/*.cxx) $(wildcard src/sfset/*.cxx) $(wildcard src/interp/*.cxx)) $(DICT)
-HEADERS := $(filter-out $(LINKDEF), $(wildcard src/*.h)   $(wildcard src/sfset/*.h)   $(wildcard src/interp/*.h)    $(wildcard src/interp/*.ipp)) $(LINKDEF)
+# move $(EPIC_ANALYSIS_DICT) and $(EPIC_ANALYSIS_LINKDEF) to end of lists for rootcling
+SOURCES := $(filter-out $(EPIC_ANALYSIS_DICT),    $(wildcard src/*.cxx) $(wildcard src/sfset/*.cxx) $(wildcard src/interp/*.cxx)) $(EPIC_ANALYSIS_DICT)
+HEADERS := $(filter-out $(EPIC_ANALYSIS_LINKDEF), $(wildcard src/*.h)   $(wildcard src/sfset/*.h)   $(wildcard src/interp/*.h)    $(wildcard src/interp/*.ipp)) $(EPIC_ANALYSIS_LINKDEF)
 
 # filter out Delphes-dependent code (if needed)
 ifdef EXCLUDE_DELPHES
@@ -96,12 +97,12 @@ release: FLAGS += -O3
 release: DEP_RECIPE = release
 release: clean all
 
-epic-analysis: deps epic-analysis-header $(PREFIX)/$(LIB) hpc
+epic-analysis: deps epic-analysis-header $(EPIC_ANALYSIS_LIB) hpc
 	@echo "Done.\n"
 epic-analysis-header:
 	@echo "\n===== $(PROJECT) ====="
 
-$(PREFIX)/$(LIB): $(DICT) $(HEADERS) $(SOURCES)
+$(EPIC_ANALYSIS_LIB): $(EPIC_ANALYSIS_DICT) $(HEADERS) $(SOURCES)
 	@echo "\n----- $(PROJECT) library -----"
 	@if [ -z "${EXCLUDE_DELPHES}" ]; then \
 		ln -svf ${DELPHES_HOME}/external ./; \
@@ -109,12 +110,12 @@ $(PREFIX)/$(LIB): $(DICT) $(HEADERS) $(SOURCES)
 	@echo "target: $@"
 	$(CXX) $(SOURCES) -shared -o $@ $(FLAGS) $(DEP_LIBRARIES) $(DEP_INCLUDES) -I${EPIC_ANALYSIS_HOME}
 
-$(DICT): $(HEADERS) $(DEP_TARGETS)
+$(EPIC_ANALYSIS_DICT): $(HEADERS) $(DEP_TARGETS)
 	@echo "\n----- $(PROJECT) dictionary -----"
 	@echo "target: $@"
 	$(ROOTCLING) -f $@ $(DEP_INCLUDES) $(HEADERS)
 	@mkdir -p $(PREFIX)
-	@mv src/$(PCM) $(PREFIX)/
+	@mv src/$(EPIC_ANALYSIS_PCM) $(PREFIX)/
 
 # dependency builds
 #################################################################
@@ -154,11 +155,11 @@ HPC_EXECUTABLES := $(addsuffix .exe, $(HPC_SOURCES))
 hpc: hpc-header $(HPC_EXECUTABLES)
 hpc-header:
 	@echo "\n===== HPC executables ====="
-hpc/src/%.exe: hpc/src/%.cpp $(PREFIX)/$(LIB)
+hpc/src/%.exe: hpc/src/%.cpp $(EPIC_ANALYSIS_LIB) 
 	@echo "----- build $@.o -----"
-	$(CXX) -c $< -o $@.o $(FLAGS) $(DEP_INCLUDES)
+	$(CXX) -c $< -o $@.o $(FLAGS) $(DEP_INCLUDES) $(EPIC_ANALYSIS_INCLUDES)
 	@echo "--- make executable $@"
-	$(CXX) -o $@ $@.o $(DEP_LIBRARIES) -L$(PREFIX) -l$(PROJECT)
+	$(CXX) -o $@ $@.o $(DEP_LIBRARIES) $(EPIC_ANALYSIS_LIBRARIES)
 	$(RM) $@.o
 
 
@@ -166,4 +167,4 @@ hpc/src/%.exe: hpc/src/%.cpp $(PREFIX)/$(LIB)
 #################################################################
 clean:
 	@echo "\n===== CLEAN $(PROJECT) ====="
-	$(RM) $(PREFIX)/$(LIB) $(PREFIX)/$(PCM) $(DICT) $(HPC_EXECUTABLES)
+	$(RM) $(EPIC_ANALYSIS_LIB) $(PREFIX)/$(EPIC_ANALYSIS_PCM) $(EPIC_ANALYSIS_DICT) $(HPC_EXECUTABLES)

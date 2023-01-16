@@ -253,6 +253,19 @@ CutDef *Histos::GetCutDef(TString varName) {
   return nullptr;
 };
 
+// add histograms of `in_histos` to histograms in `this`
+void Histos::AddHistos(Histos *in_histos) {
+  for(auto [key,this_hist] : histMap) {
+    auto in_hist = in_histos->Hist(key);
+    if(in_hist==nullptr) continue;
+    this_hist->Add(in_hist);
+  }
+  // for(auto [key,this_hist] : hist4Map) {
+  //   auto in_hist = in_histos->Hist4(key);
+  //   if(in_hist==nullptr) continue;
+  //   this_hist->Add(in_hist); // TODO: no add method
+  // }
+}
 
 Histos::~Histos() {
   for(auto it : CutDefList)

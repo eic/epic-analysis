@@ -19,7 +19,6 @@ if ARGV.length < 3
     - [directory of config.part files]: directory containing config.part files to run
 
     - [output directory]: output directory for resulting ROOT files
-                          NOTE: this is assumed to be a subdirectory of 'out/'
                           NOTE: the ROOT files in this directory will be REMOVED
 
     - [additional macro args]: all remaining arguments will be sent to the macro
@@ -33,23 +32,39 @@ RootMacro, InDir, OutSubDir = ARGV[0..2]
 AdditionalArgs              = ARGV[3..-1]
 
 # set directories
-OutDir         = "out/#{OutSubDir}"
+OutDir         = "#{OutSubDir}"
 ShellScriptDir = "#{OutDir}/scripts"
 LogDir         = "hpc/log"
 LogSubDir      = "#{LogDir}/#{Time.now.to_i.to_s}" # use unix time for log subdirectory
+
+# ask a yes/no question to the user
+def ask(question)
+  print "#{question}\n> "
+  answer = $stdin.gets.chomp.split('').first
+  return false if answer.nil?
+  answer.downcase == "y"
+end
+
+# make/clean directories
+cleanDirs = [
+  "#{OutDir}/parts",
+  ShellScriptDir,
+]
+puts "\nCleanup ...\nRemoving the following directories:"
+cleanDirs.each{ |dir| puts "- #{dir}" }
+correct = ask("\nIs this OK? [y/N]")
+puts "you answered " + (correct ? "yes" : "no; stopping!")
+exit unless correct
+cleanDirs.each do |dir|
+  FileUtils.rm_f    dir, verbose: true
+  FileUtils.mkdir_p dir, verbose: true
+end
+FileUtils.mkdir_p LogSubDir, verbose: true
 
 # glob config.part files
 partFileList = Dir.glob "#{InDir}/*.config.part"
 sep = '-'*50
 puts 'config.part files:', sep, partFileList, sep
-
-# make/clean directories
-puts "Cleaning #{OutDir} ..."
-FileUtils.mkdir_p OutDir
-FileUtils.rm_f    Dir.glob("#{OutDir}/*.root"), verbose: true
-FileUtils.rm_f    ShellScriptDir,               verbose: true
-FileUtils.mkdir_p ShellScriptDir,               verbose: true
-FileUtils.mkdir_p LogSubDir,                    verbose: true
 
 # add explicit quotes around string arguments
 def enquote(str)
@@ -72,7 +87,7 @@ end
 eicShell = eicShellPrefix.split('/')[0..-2].join('/') + '/eic-shell'
 
 # generate condor config
-condorConfigN = "#{OutDir}/run.condor"
+condorConfigN = "#{OutDir}/scripts/run.condor"
 File.open(condorConfigN, 'w') do |condorConfig|
 
   # header
@@ -99,8 +114,7 @@ getenv       = True"""
 
     # generate output file prefix
     outFilePrefix = [
-      OutSubDir,
-      '/',
+      "#{OutSubDir}/parts/",
       File.basename(partFile,'.config.part'),
       '__',
       File.basename(rootFile,'.root'),
