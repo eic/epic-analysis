@@ -31,5 +31,6 @@ int main(int argc, char** argv) {
 
   fmt::print("{}\n", tree->GetEntries());
   root_file->Close();
+  delete root_file;
   return 0;
 }
