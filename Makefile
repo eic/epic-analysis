@@ -10,7 +10,7 @@ endif
 # compiler and flags
 #################################################################
 
-CXX = g++
+CXX := g++
 FLAGS = -Wno-deprecated -fPIC
 FLAGS += -fmax-errors=3
 # FLAGS += -fvisibility=hidden # FIXME: required by pybind, but causes unresolved symbols in cling...
