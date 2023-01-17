@@ -9,7 +9,7 @@ require 'fileutils'
 if ARGV.length < 3
   puts """
   USAGE:
-    #{$0} [analysis_macro] [directory of config.part files] [output directory] [additional macro args]...
+    #{$0} [analysis_macro] [directory of config.part files] [output subdirectory] [additional macro args]...
 
     - [analysis_macro]: the analysis ROOT macro to run on each file
                         NOTE: the first two arguments of the macro must be:
@@ -18,8 +18,9 @@ if ARGV.length < 3
 
     - [directory of config.part files]: directory containing config.part files to run
 
-    - [output directory]: output directory for resulting ROOT files
-                          NOTE: the ROOT files in this directory will be REMOVED
+    - [output subdirectory]: output subdirectory for resulting ROOT files
+                             NOTE: this will be a subdirectory of out/
+                             NOTE: the ROOT files in this directory will be REMOVED
 
     - [additional macro args]: all remaining arguments will be sent to the macro
                                NOTE: prepend strings with an underscore (_)
@@ -32,7 +33,7 @@ RootMacro, InDir, OutSubDir = ARGV[0..2]
 AdditionalArgs              = ARGV[3..-1]
 
 # set directories
-OutDir         = "#{OutSubDir}"
+OutDir         = "out/#{OutSubDir}"
 ShellScriptDir = "#{OutDir}/scripts"
 LogDir         = "hpc/log"
 LogSubDir      = "#{LogDir}/#{Time.now.to_i.to_s}" # use unix time for log subdirectory
