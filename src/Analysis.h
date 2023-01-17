@@ -32,11 +32,15 @@
 #include "Histos.h"
 #include "HistosDAG.h"
 #include "Kinematics.h"
+#include "Dihadrons.h"
 #include "SimpleTree.h"
 #include "HFSTree.h"
 #include "ParticleTree.h"
 #include "Weights.h"
 #include "CommonConstants.h"
+
+class Dihadron;
+class DihadronSet;
 
 class Analysis : public TNamed
 {
@@ -58,6 +62,7 @@ class Analysis : public TNamed
 
     // add a new final state bin
     void AddFinalState(TString finalStateN);
+    Bool_t IsFinalState(TString finalState); // check if it's been added
 
     // common settings
     Bool_t verbose; // if true, print a lot more information
@@ -122,6 +127,7 @@ class Analysis : public TNamed
     // `FillHistos(weight)` methods: fill histograms
     void FillHistosInclusive(Double_t wgt); // inclusive kinematics
     void FillHistos1h(Double_t wgt);        // single-hadron kinematics
+    void FillHistos2h(Double_t wgt);        // dihadron kinematics
     void FillHistosJets(Double_t wgt);      // jet kinematics
 
     // shared objects
@@ -129,11 +135,14 @@ class Analysis : public TNamed
     HFSTree *HFST;
     ParticleTree *PT;
     Kinematics *kin, *kinTrue;
+    Dihadron *dih, *dihTrue;
+    DihadronSet *dihSet;
     HistosDAG *HD;
     Weights const* weightInclusive;
     Weights const* weightTrack;
+    Weights const* weightDihadron;
     Weights const* weightJet;
-    Double_t wInclusiveTotal, wTrackTotal, wJetTotal;
+    Double_t wInclusiveTotal, wTrackTotal, wDihadronTotal, wJetTotal;
     Long64_t entriesTot;
     Long64_t errorCnt;
     const TString sep = "--------------------------------------------";
@@ -172,7 +181,7 @@ class Analysis : public TNamed
     std::map<TString,TString> reconMethodToTitle;
     std::map<TString,TString> finalStateToTitle;
     std::map<int,TString> PIDtoFinalState;
-    std::set<TString> activeFinalStates;
+    std::vector<TString> activeFinalStates;
 
     // check if Q2 `val` is between `min` and `max`; if `max==0`, only `val>=min` is checked
     template<class T> bool InQ2Range(T val, T min, T max, bool ignoreZero=false) {
@@ -201,6 +210,9 @@ class Analysis : public TNamed
       for(const auto [key,val] : hash) fmt::print("  {} => {},\n",key,val);
       fmt::print("}}\n");
     }
+
+    // expose protected members to `DihadronSet`, such as `kin` and `kinTrue`
+    friend class DihadronSet;
 
   private:
 

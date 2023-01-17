@@ -204,6 +204,12 @@ class Kinematics : public TObject
     // - convert energy,mass to momentum
     static Double_t EMtoP(Double_t energy, Double_t mass) {
       return TMath::Sqrt( TMath::Power(energy,2) - TMath::Power(mass,2) );
+    }; 
+    // - get angle between two vectors
+    static Double_t AngleSubtend(TVector3 vA, TVector3 vB) {
+      Double_t m = vA.Mag() * vB.Mag();
+      if(m>0) return TMath::ACos( vA.Dot(vB) / m );
+      return -10000;
     };
     // - vector projection: returns vA projected onto vB
     static TVector3 Project(TVector3 vA, TVector3 vB) {

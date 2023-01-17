@@ -183,7 +183,7 @@ void AnalysisDelphes::Execute() {
           );
       auto kv = PIDtoFinalState.find(pid);
       if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
-      if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
+      if(!IsFinalState(finalStateID)) continue;
 
       // get parent particle, to check if pion is from vector meson
       GenParticle *trkParticle = (GenParticle*)trk->Particle.GetObject();
@@ -228,12 +228,19 @@ void AnalysisDelphes::Execute() {
         // - `IsActiveEvent()` is only true if at least one bin gets filled for this track
         if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
       }
+      if(includeOutputSet["2h"]) dihSet->AddHadron(this);
 
       // tests
       //kin->ValidateHeadOnFrame();
 
     }; // end track loop
 
+    // dihadrons - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    if(includeOutputSet["2h"]) {
+      auto wDihadron = Q2weightFactor * weightDihadron->GetWeight(*kinTrue);
+      wDihadronTotal += wDihadron;
+      dihSet->CalculateKinematics(this, wDihadron); // calls FillHistos2h(wDihadron) and FillHistosInclusive(wDihadron);
+    }
 
     // jet loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     if(includeOutputSet["jets"]) {

@@ -322,7 +322,7 @@ void AnalysisEpic::Execute()
       //   histograms; if not, proceed to next track
       auto kv = PIDtoFinalState.find(pid_);
       if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
-      if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
+      if(!IsFinalState(finalStateID)) continue;
 
       // calculate reconstructed hadron kinematics
       kin->vecHadron = part.vecPart;
