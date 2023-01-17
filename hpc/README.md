@@ -6,9 +6,6 @@ job per simulation `ROOT` file. The scripts in this directory support this proce
 
 Run any script without any arguments for more documentation.
 
-Procedure
-=========
-
 ## 1. Preparation
 ```bash
 hpc/prepare.rb
