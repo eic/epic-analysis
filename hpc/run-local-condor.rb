@@ -180,5 +180,10 @@ Monitor errors with:
 
   more #{LogSubDir}/*.err
 
+When condor jobs are done, merge the ROOT files by running
+(from inside eic-shell):
+
+  hpc/merge.rb #{OutDir}
+
 #{sep}
 """
