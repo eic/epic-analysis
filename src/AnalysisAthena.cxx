@@ -34,7 +34,7 @@ void AnalysisAthena::Execute()
       chain->Add(infiles[idx][idxF].c_str(), inEntries[idx][idxF]);
     }
   }
-  chain->CanDeleteRefs();
+  // chain->CanDeleteRefs();
 
   TTreeReader tr(chain);
 
