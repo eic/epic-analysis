@@ -14,8 +14,28 @@ defaults:
     shell: bash
 
 env:
+  ### beam energies
   ebeam_en: 18
   pbeam_en: 275
+  ### statistics (normal test)
+  # stat_fast_1:    5
+  # stat_fast_10:   5
+  # stat_fast_100:  5
+  # stat_fast_1000: 5
+  # stat_epic_arches:      20
+  # stat_epic_brycecanyon: 4
+  # stat_ecce:   40
+  # stat_athena: 20
+  ### statistics (large)
+  stat_fast_1:    30
+  stat_fast_10:   40
+  stat_fast_100:  50
+  stat_fast_1000: 60
+  stat_epic_arches:      150
+  stat_epic_brycecanyon: 35
+  stat_ecce:   375
+  stat_athena: 500
+  ### ROOT wrappers
   root: root -b -q
   root_no_delphes: root -b -q macro/ci/define_exclude_delphes.C 
 
@@ -94,10 +114,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { id: 1,    options: --version hepmc.pythia6 --radcor --limit 3 --num-hepmc-events 15000 --minQ2 1    } # 30
-          - { id: 10,   options: --version hepmc.pythia6 --radcor --limit 3 --num-hepmc-events 15000 --minQ2 10   } # 40
-          - { id: 100,  options: --version hepmc.pythia6 --radcor --limit 3 --num-hepmc-events 15000 --minQ2 100  } # 50
-          - { id: 1000, options: --version hepmc.pythia6 --radcor --limit 3 --num-hepmc-events 15000 --minQ2 1000 } # 60
+          - { id: 1,    options: --version hepmc.pythia6 --radcor --limit ${{env.stat_fast_1}}    --num-hepmc-events 15000 --minQ2 1    }
+          - { id: 10,   options: --version hepmc.pythia6 --radcor --limit ${{env.stat_fast_10}}   --num-hepmc-events 15000 --minQ2 10   }
+          - { id: 100,  options: --version hepmc.pythia6 --radcor --limit ${{env.stat_fast_100}}  --num-hepmc-events 15000 --minQ2 100  }
+          - { id: 1000, options: --version hepmc.pythia6 --radcor --limit ${{env.stat_fast_1000}} --num-hepmc-events 15000 --minQ2 1000 }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -135,13 +155,13 @@ jobs:
       matrix:
         include:
           # EPIC
-          - { id: epic_arches,             options: --version epic.22.11.3 --mode s --limit 3 --detector arches      } # 150
-          - { id: epic_brycecanyon,        options: --version epic.22.11.3 --mode s --limit 3 --detector brycecanyon } # NOTE: large RECO files # 35
-          - { id: epic_arches_radcor,      options: --version epic.22.11.3 --mode s --limit 3 --detector arches      --radcor } # 150
-          - { id: epic_brycecanyon_radcor, options: --version epic.22.11.3 --mode s --limit 3 --detector brycecanyon --radcor } # NOTE: large RECO files # 35
+          - { id: epic_arches,             options: --version epic.22.11.3 --mode s --limit ${{env.stat_arches}}      --detector arches      }
+          - { id: epic_brycecanyon,        options: --version epic.22.11.3 --mode s --limit ${{env.stat_brycecanyon}} --detector brycecanyon }
+          - { id: epic_arches_radcor,      options: --version epic.22.11.3 --mode s --limit ${{env.stat_arches}}      --detector arches      --radcor }
+          - { id: epic_brycecanyon_radcor, options: --version epic.22.11.3 --mode s --limit ${{env.stat_brycecanyon}} --detector brycecanyon --radcor }
           # ECCE / ATHENA
-          - { id: ecce,   options: --version ecce.22.1               --mode s --limit 3 } # 375
-          - { id: athena, options: --version athena.deathvalley-v1.0 --mode s --limit 3 } # 500
+          - { id: ecce,   options: --version ecce.22.1               --mode s --limit ${{env.stat_ecce}}   }
+          - { id: athena, options: --version athena.deathvalley-v1.0 --mode s --limit ${{env.stat_athena}} }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
