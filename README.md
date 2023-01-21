@@ -75,10 +75,14 @@ for more details). This section documents how to obtain and build local dependen
 
 ```bash
 make                     # builds dependencies, then `epic-analysis` (equivalent to `make all`)
-make deps                # builds only dependencies
+make release             # build with optimization enabled
+make debug               # build with debugging symbols
 make clean               # clean `epic-analysis` (but not dependencies)
+
+make deps                # builds only dependencies
 make deps-clean          # clean dependencies
 make all-clean           # clean `epic-analysis` and dependencies
+
 make <dependency>        # build a particular `<dependency>`
 make <dependency>-clean  # clean a particular `<dependency>`
 ```
