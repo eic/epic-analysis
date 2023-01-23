@@ -330,7 +330,7 @@ jobs:
           - { pname: bin_test,         aname: x_q2,       pmacro: postprocess_bin_test.C   }
           - { pname: coverage2D_p_eta, aname: p_eta,      pmacro: postprocess_p_eta.C      }
           - { pname: y_minima,         aname: yRatio,     pmacro: postprocess_yRatio.C     }
-          - { pname: q2_weights,       aname: q2_weights, pmacro: postprocess_q2_weights.C }
+          - { pname: q2_weights_test,  aname: q2_weights, pmacro: postprocess_q2_weights.C }
           # use all reconstruction methods: # FIXME: not sure how to avoid being repetitive... 
           - { mode: fastsim,                 pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: fastsim,                 pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
