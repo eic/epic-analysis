@@ -94,10 +94,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { id: 1,    options: --version hepmc.pythia6 --radcor --limit 5 --num-hepmc-events 15000 --minQ2 1    } # max limit=30
-          - { id: 10,   options: --version hepmc.pythia6 --radcor --limit 5 --num-hepmc-events 15000 --minQ2 10   } # max limit=40
-          - { id: 100,  options: --version hepmc.pythia6 --radcor --limit 5 --num-hepmc-events 15000 --minQ2 100  } # max limit=50
-          - { id: 1000, options: --version hepmc.pythia6 --radcor --limit 5 --num-hepmc-events 15000 --minQ2 1000 } # max limit=60
+          - { id: 1,    options: --version hepmc.pythia6 --radcor --limit 10 --num-hepmc-events 15000 --minQ2 1    } # max limit=30
+          - { id: 10,   options: --version hepmc.pythia6 --radcor --limit 10 --num-hepmc-events 15000 --minQ2 10   } # max limit=40
+          - { id: 100,  options: --version hepmc.pythia6 --radcor --limit 10 --num-hepmc-events 15000 --minQ2 100  } # max limit=50
+          - { id: 1000, options: --version hepmc.pythia6 --radcor --limit 10 --num-hepmc-events 15000 --minQ2 1000 } # max limit=60
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -135,13 +135,13 @@ jobs:
       matrix:
         include:
           # EPIC
-          - { id: epic_arches,             options: --version epic.22.11.3 --mode s --limit 20 --detector arches      } # max limit=150
-          - { id: epic_brycecanyon,        options: --version epic.22.11.3 --mode s --limit 4  --detector brycecanyon } # max limit=35
-          - { id: epic_arches_radcor,      options: --version epic.22.11.3 --mode s --limit 20 --detector arches      --radcor } # max limit=150
-          - { id: epic_brycecanyon_radcor, options: --version epic.22.11.3 --mode s --limit 4  --detector brycecanyon --radcor } # max limit=35
+          - { id: epic_arches,             options: --version epic.22.11.3 --mode s --limit 40 --detector arches      } # max limit=150
+          - { id: epic_brycecanyon,        options: --version epic.22.11.3 --mode s --limit 8  --detector brycecanyon } # max limit=35
+          - { id: epic_arches_radcor,      options: --version epic.22.11.3 --mode s --limit 40 --detector arches      --radcor } # max limit=150
+          - { id: epic_brycecanyon_radcor, options: --version epic.22.11.3 --mode s --limit 8  --detector brycecanyon --radcor } # max limit=35
           # ECCE / ATHENA
-          - { id: ecce,   options: --version ecce.22.1               --mode s --limit 40 } # max limit=375
-          - { id: athena, options: --version athena.deathvalley-v1.0 --mode s --limit 20 } # max limit=500
+          - { id: ecce,   options: --version ecce.22.1               --mode s --limit 80 } # max limit=375
+          - { id: athena, options: --version athena.deathvalley-v1.0 --mode s --limit 40 } # max limit=500
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
