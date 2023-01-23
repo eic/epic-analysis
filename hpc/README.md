@@ -27,6 +27,14 @@ If you have a local `condor` service, use this script to prepare a `condor` conf
 The user must then run `condor_submit` from outside of `eic-shell` (individual jobs will be run in `eic-shell`).
 Log files will be written to `hpc/log/`.
 
+### RCF Cluster
+- TODO
+- Can we avoid using S3?
+
+### JLab Cluster
+- TODO - need Slurm config generator
+- Can we avoid using S3?
+
 ## 3. Merge Output Files
 ```bash
 hpc/merge.rb
