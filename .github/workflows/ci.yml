@@ -182,7 +182,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        aname: [x_q2, p_eta, yRatio]
+        aname: [x_q2, p_eta, yRatio, q2_weights]
         recon: [Ele]
         include:
           - { aname: x_q2, recon: Mixed }
@@ -240,7 +240,7 @@ jobs:
           - epic_brycecanyon_radcor
           - athena
           - ecce
-        aname: [x_q2, p_eta, yRatio]
+        aname: [x_q2, p_eta, yRatio, q2_weights]
         recon: [Ele]
         include: # enable other recon methods for `aname==x_q2` only
         - { aname: x_q2, recon: Mixed,  detector: epic_arches } # FIXME: not sure how to avoid being repetitive... 
@@ -323,12 +323,14 @@ jobs:
           - bin_test
           - coverage2D_p_eta
           - y_minima
+          - q2_weights
         recon: [Ele] # primary recon method(s)
         include:
           # use only primary recon method
-          - { pname: bin_test,         aname: x_q2,   pmacro: postprocess_bin_test.C }
-          - { pname: coverage2D_p_eta, aname: p_eta,  pmacro: postprocess_p_eta.C    }
-          - { pname: y_minima,         aname: yRatio, pmacro: postprocess_yRatio.C   }
+          - { pname: bin_test,         aname: x_q2,       pmacro: postprocess_bin_test.C   }
+          - { pname: coverage2D_p_eta, aname: p_eta,      pmacro: postprocess_p_eta.C      }
+          - { pname: y_minima,         aname: yRatio,     pmacro: postprocess_yRatio.C     }
+          - { pname: q2_weights,       aname: q2_weights, pmacro: postprocess_q2_weights.C }
           # use all reconstruction methods: # FIXME: not sure how to avoid being repetitive... 
           - { mode: fastsim,                 pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: fastsim,                 pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
