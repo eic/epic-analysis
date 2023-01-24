@@ -625,6 +625,255 @@ void PostProcessor::DrawInBins(
   // }
 };
 
+
+//=========================================================================
+/* ALGORITHM: draw ratios of histograms from different bins in their respective bins
+on axis of bin variables, e.g. Q2 vs x.
+*/
+// -- process one histArr
+void PostProcessor::DrawRatioInBins(
+    TString outName,    
+    std::vector<std::vector<Histos*>>& histArr,
+    TString histName,
+    TString var1name, int nvar1, double var1low, double var1high, bool var1log,
+    TString var2name, int nvar2, double var2low, double var2high, bool var2log,
+    bool intgrid1, bool intgrid2, // grid option for small plots
+    bool renormalize // if true, normalize histograms
+){
+  std::vector<std::vector<std::vector<Histos*>>> histArrList;
+  histArrList.push_back(histArr); // build list of histArrs with the one histArr
+  this->DrawRatioInBins( // call the main algo below, which uses histArrList
+      outName,    
+      histArrList,
+      histName,
+      var1name, nvar1, var1low, var1high, var1log,
+      var2name, nvar2, var2low, var2high, var2log,
+      intgrid1, intgrid2,
+      renormalize
+      );
+};
+// -- process list of histArrs
+void PostProcessor::DrawRatioInBins(
+    TString outName,    
+    std::vector<std::vector<std::vector<Histos*>>>& histArrList,
+    TString histName,
+    TString var1name, int nvar1, double var1low, double var1high, bool var1log,
+    TString var2name, int nvar2, double var2low, double var2high, bool var2log,
+    bool intgrid1, bool intgrid2, // grid option for small plots
+    bool renormalize // if true, normalize histograms (useful for drawing 1D hists with "SAME")
+){
+  // default values set for nvar1==nvar2
+  int canvx = 1400;
+  int canvy = 1200;
+  double botmargin = 0.2;
+  double leftmargin = 0.2;
+  double xaxisy = 0.04;
+  double xaxisx1 = 0.08;
+  double xaxisx2 = 0.97;
+  double yaxisx = 0.04;
+  double yaxisy1 = 0.085;
+  double yaxisy2 = 0.97;
+  if(nvar1 > nvar2){
+    // different canvas sizing/axis position for unequal binning
+    canvx = 2200;
+    canvy = 1400;
+    xaxisx1 = 0.075;
+    xaxisx2 = 0.975;
+    yaxisy1 = 0.08;
+  };
+
+  TString canvN = "canv_"+outName+"_"+histName;
+  TCanvas *canv = new TCanvas(canvN,canvN, canvx, canvy);
+  TPad *mainpad = new TPad("mainpad", "mainpad", 0.07, 0.07, 0.98, 0.98);
+
+  TLegend *leg;
+  if(legendLabels.size()>0) {
+    double legX0 = 0.1;
+    double legY0 = 0.95;
+    double legWidth = 0.15;
+    double legRowHeight = 0.05;
+    leg = new TLegend(
+        legX0,
+        legY0,
+        legX0 + legWidth,
+        legY0 - legRowHeight*legendLabels.size()
+        );
+  };
+
+  mainpad->SetFillStyle(4000);
+  mainpad->Divide(nvar1,nvar2,0,0);
+  mainpad->Draw();
+  TLine * lDIRC = new TLine(6,-1,6,1);
+  TLine * lDIRClow = new TLine(0.5,-1,0.5,1);
+  TLine * lmRICH = new TLine(2,-1,2,-4);
+  TLine * lDRICH = new TLine(2.5,1,2.5,4);
+  lDIRC->SetLineColor(kRed);
+  lDIRClow->SetLineColor(kRed);
+  lmRICH->SetLineColor(kRed);
+  lDRICH->SetLineColor(kRed);
+  // TH1* histArray[nvar1][nvar2]; // TODO: re-enable
+  int drawpid = 0;
+  outfile->cd("/");
+  canv->Write();
+
+  // get histograms from Histos 2D vector
+  Histos *H;
+  for(int i = 0; i < nvar1; i++){
+    for(int j = 0; j < nvar2; j++){
+      int count = 0;
+      int dims;
+      TH1 *histref;
+      for(auto histArr : histArrList) {
+        H = histArr[i][j];
+        TH1 *hist = H->Hist(histName);
+        dims = hist->GetDimension();
+        // histArray[i][j] = hist;
+        hist->SetTitle("");
+        //hist->GetXaxis()->SetTitle("");
+        //hist->GetYaxis()->SetTitle("");
+        //hist->GetXaxis()->SetLabelSize(0);
+        //hist->GetYaxis()->SetLabelSize(0);
+
+        hist->SetLineWidth(3);
+        switch(count) {
+          case 0:
+	    histref = (TH1*) hist->Clone();
+            hist->SetLineColor(kBlack);
+	    //            hist->SetFillColor(kGray);
+            break;
+          case 1:
+            hist->SetLineColor(kAzure);
+            hist->SetLineStyle(1);
+            break;
+          case 2:
+            hist->SetLineColor(kRed);
+            hist->SetLineStyle(7);
+            break;
+          case 3:
+            hist->SetLineColor(kGreen+2);
+            hist->SetLineStyle(9);
+            break;
+        }
+
+
+	hist->Divide(histref);
+	
+        if(legendLabels.size()>0 && i==0 && j==0) {
+          try { leg->AddEntry(hist,legendLabels[count],"LF"); }
+          catch(const std::out_of_range &e) {
+            cerr << "ERROR: legendLabels not filled correctly" << endl;
+          };
+        };
+
+        if(count==0) {
+          mainpad->cd((nvar2-j-1)*nvar1 + i + 1);
+          gPad->SetLogx(H->GetHistConfig(histName)->logx);
+          gPad->SetLogy(H->GetHistConfig(histName)->logy);
+          gPad->SetLogz(H->GetHistConfig(histName)->logz);
+          gPad->SetGridy(intgrid2);
+          gPad->SetGridx(intgrid1);
+        }
+
+        // renormalize
+        if(renormalize) {
+          // hist->Scale(1/hist->GetMaximum());
+          // hist->Scale(1/hist->GetEntries());
+	  //         hist->Scale(1/hist->Integral());
+	  hist->GetYaxis()->SetRangeUser(0.,3.);
+        }
+
+        TString drawStr = "";
+        switch(dims) {
+          case 1:
+            drawStr = "HIST MIN0";
+            break;
+          case 2:
+            drawStr = "COLZ";
+            break;
+          case 3:
+            drawStr = "BOX";
+            break;
+        };
+        if(count>0) drawStr += " SAME";
+
+        if( hist->GetEntries() > 0 ) {	
+          hist->Draw(drawStr);
+          if(drawpid){
+            lDIRClow->Draw();
+            lDIRC->Draw();
+            lmRICH->Draw();
+            lDRICH->Draw();
+          }
+          hist->GetXaxis()->SetLabelSize(0.04);
+          hist->GetYaxis()->SetLabelSize(0.04);
+          hist->GetXaxis()->SetTitleSize(0.05);
+          hist->GetYaxis()->SetTitleSize(0.05);
+          hist->GetXaxis()->SetTitleOffset(0.9);
+          hist->GetXaxis()->SetLabelOffset(0.0005);
+          if(dims==1) {
+            hist->GetYaxis()->SetLabelSize(0.00); // suppress y-axis labels (since each subplot has its own scale)
+          }
+        }
+        count++;
+      }; // end for(histArrList)
+
+      // some formatting for 1D plots drawn with "SAME"
+      if(dims==1) {
+        UnzoomVertical(gPad,"",true,H->GetHistConfig(histName)->logy); // allow all "SAME" plots to be visible; 3rd arg forces min to be 0
+      }
+    };
+  };
+  canv->cd();
+
+  TPad *newpad1 = new TPad("newpad1","full pad",0,0,1,1);
+  TPad *newpad2 = new TPad("newpad2","full pad",0,0,1,1);
+  newpad1->SetFillStyle(4000);
+  newpad1->Draw();
+  newpad2->SetFillStyle(4000);
+  newpad2->Draw();
+
+  TString xopt, yopt;
+  if(var1log) xopt = "GS";
+  else xopt = "S";
+  if(var2log) yopt = "GS";
+  else yopt = "S";
+
+  TGaxis *xaxis = new TGaxis(xaxisx1,xaxisy,xaxisx2,xaxisy,var1low,var1high,510,xopt);
+  TGaxis *yaxis = new TGaxis(yaxisx,yaxisy1,yaxisx,yaxisy2,var2low,var2high,510,yopt);
+  xaxis->SetTitle(var1name);
+  xaxis->SetName("xaxis");
+  xaxis->SetTitleSize(0.02);
+  xaxis->SetTextFont(40);
+  xaxis->SetLabelSize(0.02);
+  xaxis->SetTickSize(0.02);
+
+  yaxis->SetTitle(var2name);
+  yaxis->SetTitleSize(0.02);
+  yaxis->SetName("yaxis");
+  yaxis->SetTextFont(40);
+  yaxis->SetLabelSize(0.02);
+  yaxis->SetTickSize(0.02);
+
+  newpad1->cd();
+  yaxis->Draw();
+  newpad2->cd();
+  xaxis->Draw();
+
+  if(legendLabels.size()>0) leg->Draw();
+
+  //  canv->Write();
+  canv->Print(pngDir+"/"+canvN+".png");
+  canv->Print(pngDir+"/"+canvN+".pdf");
+  outfile->cd("/");
+  canv->Write();
+  // for(int i = 0; i <nvar1; i++){
+  //   for(int j = 0; j < nvar2; j++){
+  //     histArray[i][j]->Write();
+  //   }
+  // }
+};
+
+
 //=========================================================================
 
 /* ALGORITHM: draw a ratio of all 1D histograms in the specified histogram set
