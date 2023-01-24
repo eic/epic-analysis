@@ -21,7 +21,7 @@ rootFileName = ARGV[0]
 
 # read plots
 rootFile = r.TFile.new rootFileName
-depolPlotList = PyCall.iterable(rootFile.GetListOfKeys)
+depolProfileList = PyCall.iterable(rootFile.GetListOfKeys)
   .select{ |key| key.GetName.match? /^histos/ }
   .select{ |key| key.GetName.match? /depol.*Q2vsX/ }
   .map &:ReadObj
@@ -35,7 +35,12 @@ q2vsX = PyCall.iterable(rootFile.GetListOfKeys)
 nTotal = q2vsX.Integral
 
 # calculate impact on uncertainty
-uncPlotList = depolPlotList.map do |depolProfile|
+#   plotting the quantity 1 / [ sqrt(N_i/N_total) * depol ], so that one only
+#   needs to divide it by sqrt(N_total) == sqrt(crossSec*lumi) in order to get the
+#   expected statistical uncertainty. In other words, what is plotted is
+#   proportional to the expected stat. unc.
+uncPlotMax = 0
+uncPlotList = depolProfileList.map do |depolProfile|
   depolPlot = depolProfile.ProjectionXY # convert TProfile2D -> TH2
   uncPlot   = depolPlot.Clone "unc_#{depolProfile.GetName}"
   uncPlot.SetTitle [ depolProfile.GetTitle, depolProfile.GetXaxis.GetTitle, depolProfile.GetYaxis.GetTitle ].join(';')
@@ -44,18 +49,21 @@ uncPlotList = depolPlotList.map do |depolProfile|
       uncPlot.SetBinContent bx, by, 0 # clear the histogram (since it is a Clone)
       depol     = depolPlot.GetBinContent bx, by
       n         = q2vsX.GetBinContent bx, by
-      sqrtNfrac = Math.sqrt n/nTotal
-      impact    = (depol==0 or sqrtNfrac==0) ? 0 : 1/(depol*sqrtNfrac)
-      uncPlot.SetBinContent bx, by, impact
+      sqrtNfrac = Math.sqrt n.to_f/nTotal
+      unless depol==0 or sqrtNfrac==0
+        impact = 1/(depol*sqrtNfrac)
+        uncPlot.SetBinContent bx, by, impact
+      end
     end
   end
+  uncPlotMax = [uncPlotMax,uncPlot.GetMaximum].max
   uncPlot
 end
 
 #########################################################################
 
 # depolarization plots canvas
-[depolPlotList, uncPlotList].zip(['depol','unc']).each do |plotList,plotName|
+[depolProfileList, uncPlotList].zip(['depol','unc']).each do |plotList,plotName|
 
   # make canvas
   nrows = 3
@@ -67,13 +75,17 @@ end
 
   plotList.each_with_index do |plot,i|
 
-    # get maximum
-    max = (1..plot.GetNbinsX).map do |bx|
+    # get minimum and maximum (may be overridden below!)
+    contents = (1..plot.GetNbinsX).map do |bx|
       (1..plot.GetNbinsY).map do |by|
         plot.GetBinContent bx, by
       end
-    end.flatten.max
-    plot.GetZaxis.SetRangeUser 0, 1.0*max
+    end.flatten.select{|e|e>0}
+    min = contents.min
+    max = contents.max
+    plot.SetMinimum min
+    plot.SetMaximum max
+    # plot.GetZaxis.SetRangeUser min,max
 
     # get depol variable name; associate to pad number
     varName = plot.GetName.split('_').find{|tok|tok.match?(/^depol|^epsilon/)}.sub(/vs.*/,'')
@@ -97,6 +109,7 @@ end
     end
 
     # draw
+    next unless padHash.has_key? varName.to_sym
     pad = canv.GetPad padHash[varName.to_sym].to_i
     pad.cd
     pad.SetGrid 1, 1
@@ -119,8 +132,12 @@ end
     case plotName
     when 'depol'
       plot.SetTitle "        #{plot.GetTitle}"
+      plot.SetMinimum 0
+      plot.SetMaximum( varName.match?(/depolV/) ? 2 : 1 )
     when 'unc'
       plot.SetTitle "    1 / [ N^{1/2} #{plot.GetTitle} ]"
+      plot.SetMinimum 1.0
+      plot.SetMaximum uncPlotMax
     end
     plot.GetZaxis.SetTitle ''
     r.gStyle.SetPalette(plotName=='depol' ? r.kBlueRedYellow : Palette)
@@ -149,7 +166,7 @@ end
   placePol.call 4, 'UL, UT'
   placePol.call 7, 'LU, LL, LT'
 
-  canv.SaveAs rootFileName.gsub(/root$/,"#{plotName}.Q2vsX.pdf")
+  canv.SaveAs rootFileName.gsub(/root$/,"#{plotName}.Q2vsX.png")
 
 end # [depolPlotLit, uncPlotList, ...].each
 
@@ -172,7 +189,9 @@ q2plotMin = q2vsX.GetYaxis.GetXmin
 q2plotMax = q2vsX.GetYaxis.GetXmax
 xPlotMin  = q2vsX.GetXaxis.GetXmin
 xPlotMax  = q2vsX.GetXaxis.GetXmax
-s = 4 * energy.split('x').map(&:to_i).inject(:*) # = 4 * electornBeamEn * protonBeamEn
+s = 4 * energy.split('x').map(&:to_i).inject(:*) # = 4 * electornBeamEn * protonBeamEn (EIC)
+# s = (beamEnergy+TargetMass)**2 - beamEnergy**2 # CLAS
+puts "Mandelstam s = #{s}\n\n"
 ytex = Array.new
 ylines = [ 0.01, 0.1, 1.0 ].map do |y|
   xmin = [ q2plotMin/(y*s), xPlotMin ].max
@@ -209,4 +228,4 @@ l0 = ylines.first
 ylineAngle = latex.SetTextAngle(35)
 ytex.each{ |t| latex.DrawLatex *t }
 
-canvD.SaveAs rootFileName.gsub(/root$/,"dist.Q2vsX.pdf")
+canvD.SaveAs rootFileName.gsub(/root$/,"dist.Q2vsX.png")
