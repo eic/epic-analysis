@@ -323,7 +323,7 @@ jobs:
           - bin_test
           - coverage2D_p_eta
           - y_minima
-          - q2_weights
+          - q2_weights_test
         recon: [Ele] # primary recon method(s)
         include:
           # use only primary recon method
