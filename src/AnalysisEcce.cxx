@@ -35,6 +35,7 @@ void AnalysisEcce::Execute()
       chain->Add(infiles[idx][idxF].c_str(), inEntries[idx][idxF]);
     }
   }
+  chain->CanDeleteRefs();
 
   TTreeReader tr(chain);
 
