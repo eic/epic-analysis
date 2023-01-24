@@ -4,24 +4,24 @@
 R__LOAD_LIBRARY(EpicAnalysis)
 
 void analysis_depolarization(
-    Int_t eleBeamEn=5, Int_t ionBeamEn=41,
-    // Int_t eleBeamEn=18, Int_t ionBeamEn=275,
-    TString upstream="ecce"
+    TString configFile,
+    TString outfilePrefix,
+    TString upstream="epic"
     )
 {
 
-  TString outfilePrefix = Form("depol.%s.%dx%d",upstream.Data(),eleBeamEn,ionBeamEn);
-  TString configFile;
   Analysis *A;
   if(upstream=="delphes") {
-    configFile = Form("datarec/delphes/%dx%d/delphes.config",eleBeamEn,ionBeamEn);
     A = new AnalysisDelphes(configFile, outfilePrefix);
+  } else if(upstream=="epic") {
+    A = new AnalysisEpic(configFile, outfilePrefix);
   } else if(upstream=="ecce") {
-    configFile = Form("datarec/ecce/22.1/%dx%d/files.config",eleBeamEn,ionBeamEn);
     A = new AnalysisEcce(configFile, outfilePrefix);
+  } else if(upstream=="athena") {
+    A = new AnalysisAthena(configFile, outfilePrefix);
   } else {
     fmt::print(stderr,"ERROR: unknown upstream='{}'\n",upstream);
-    return;
+    return 1;
   }
 
   // A->maxEvents = 100000; // use this to limit the number of events

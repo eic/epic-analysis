@@ -4,14 +4,8 @@
 R__LOAD_LIBRARY(EpicAnalysis)
 
 // make kinematics coverage plots, such as eta vs. p in bins of (x,Q2)
-void postprocess_depolarization(
-    Int_t eleBeamEn=5, Int_t ionBeamEn=41,
-    // Int_t eleBeamEn=18, Int_t ionBeamEn=275,
-    TString upstream="ecce"
-    )
-{
+void postprocess_depolarization(TString infile) {
 
-  TString infile = Form("out/depol.%s.%dx%d.root",upstream.Data(),eleBeamEn,ionBeamEn);
   PostProcessor *P = new PostProcessor(infile);
 
   P->Op()->Payload(
