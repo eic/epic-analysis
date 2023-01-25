@@ -233,7 +233,7 @@ void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat, 
   TString canvN = "canv_"+histName+"___"+H->GetSetName();
   TCanvas *canv = new TCanvas(canvN,canvN,dimx,dimy);
   hist->Draw(drawFormat);
-  if(hist->GetMinimum()>=0 && hist->GetDimension()==1)
+  if(hist->GetMinimum()>=0 && hist->GetDimension()==1 && H->GetHistConfig(histName)->logy==false)
     hist->GetYaxis()->SetRangeUser(0,hist->GetMaximum()*1.1); // do not suppress zero
 
   canv->SetGrid(1,1);
