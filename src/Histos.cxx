@@ -193,6 +193,13 @@ void Histos::RegisterHist4(TString varname_, Hist4D *hist_, HistConfig *config_)
   hist4Map.insert({varname_,hist_});
 };
 
+// replace a histogram (keeps its HistConfig)
+void Histos::ReplaceHist(TString varname_, TH1 *hist_) {
+  auto hist_orig = this->Hist(varname_);
+  if(hist_orig==nullptr) return;
+  delete hist_orig;
+  histMap[varname_] = hist_;
+};
 
 // access histogram by name
 TH1 *Histos::Hist(TString histName, Bool_t silence) {

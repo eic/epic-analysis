@@ -22,6 +22,7 @@ Analysis::Analysis(
   , ionBeamEn(100.0)
   , crossingAngle(-25.0)
   , totalCrossSection(1e6)
+  , prepared(false)
 {
   // available variables for binning
   // - availableBinSchemes is a map from variable name to variable title
@@ -169,6 +170,9 @@ void Analysis::AddFileGroup(
 // prepare for the analysis
 //------------------------------------
 void Analysis::Prepare() {
+
+  // run only once
+  if(prepared) return;
 
   // parse config file --------------------
   std::ifstream fin(configFileName);
@@ -564,6 +568,9 @@ void Analysis::Prepare() {
   wInclusiveTotal = 0.;
   wTrackTotal     = 0.;
   wJetTotal       = 0.;
+
+  // run only once
+  prepared = true;
 };
 
 void Analysis::CalculateEventQ2Weights() {

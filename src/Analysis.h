@@ -106,12 +106,13 @@ class Analysis : public TNamed
     // run the analysis
     virtual void Execute() = 0;
 
-  protected:
-
     // prepare to perform the analysis; in derived classes, define a method `Execute()`, which
     // will run the event loop; the first line of `Execute()` should call `Analysis::Prepare()`,
     // which set up common things like output files, `HistosDAG`, etc.
     void Prepare();
+    bool prepared; // true if Prepared() has been called
+
+  protected:
 
     // finish the analysis; call `Analysis::Finish()` at the end of derived `Execute()` methods
     void Finish();
