@@ -28,7 +28,7 @@ void AnalysisEcce::Execute()
   Prepare();
 
   // read EventEvaluator tree
-  TChain *chain = new TChain("event_tree");
+  auto chain = std::make_unique<TChain>("event_tree");
   for(Int_t idx=0; idx<infiles.size(); ++idx) {
     for(std::size_t idxF=0; idxF<infiles[idx].size(); ++idxF) {
       // std::cout << "Adding " << infiles[idx][idxF] << " with " << inEntries[idx][idxF] << std::endl;
@@ -37,7 +37,7 @@ void AnalysisEcce::Execute()
   }
   chain->CanDeleteRefs();
 
-  TTreeReader tr(chain);
+  TTreeReader tr(chain.get());
 
   TBranch        *b_clusters;   //!                                         
   TBranch        *b_cluster_E;   //!                                        

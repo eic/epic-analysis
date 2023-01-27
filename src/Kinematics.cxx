@@ -83,7 +83,7 @@ Kinematics::Kinematics(
   polBeam = 0.;
 
   // random number generator (for asymmetry injection
-  RNG = new TRandomMixMax(91874); // (TODO: fixed seed?)
+  RNG = std::make_unique<TRandomMixMax>(91874); // (TODO: fixed seed?)
 
   // reset counters
   countPIDsmeared=countPIDtrue=0;

@@ -28,7 +28,7 @@
 #include "Kinematics.h"
 #include "HistosDAG.h"
 
-class PostProcessor : public TNamed
+class PostProcessor
 {
   public:
     PostProcessor(

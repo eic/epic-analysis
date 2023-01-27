@@ -370,5 +370,11 @@ void DAG::RepatchToLeaf(TString varName) {
 
 
 DAG::~DAG() {
-};
-
+  auto del = [] (auto m) {
+    for(auto [k,v] : m)
+      if(v) delete v;
+    m.clear();
+  };
+  del(nodeMap);
+  del(layerMap);
+}

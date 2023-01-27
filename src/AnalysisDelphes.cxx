@@ -32,7 +32,7 @@ void AnalysisDelphes::Execute() {
   Prepare();
 
   // read delphes tree
-  TChain *chain = new TChain("Delphes");
+  auto chain = std::make_unique<TChain>("Delphes");
   for(Int_t idx=0; idx<infiles.size(); ++idx) {
     for(std::size_t idxF=0; idxF<infiles[idx].size(); ++idxF) {
       // std::cout << "Adding " << infiles[idx][idxF] << " with " << inEntries[idx][idxF] << std::endl;
@@ -40,7 +40,7 @@ void AnalysisDelphes::Execute() {
     }
   }
   chain->CanDeleteRefs();
-  ExRootTreeReader *tr = new ExRootTreeReader(chain);
+  auto tr = std::make_unique<ExRootTreeReader>(chain.get());
   ENT = tr->GetEntries();
   if(maxEvents>0) ENT = std::min(maxEvents,ENT);
 

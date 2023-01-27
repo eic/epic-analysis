@@ -288,7 +288,7 @@ void AnalysisEpicPodio::Execute()
               }));
       // local calculations
       fmt::print("{:-<75}\n",fmt::format("KINEMATICS, calculated locally in EPIC-ANALYSIS, with method \"{}\": ",reconMethod));
-      auto PrintKinematics = [&PrintRow] (std::string name, Kinematics *K) {
+      auto PrintKinematics = [&PrintRow] (std::string name, std::shared_ptr<Kinematics> K) {
         PrintRow( name, std::vector<Double_t>({
             K->x,
             K->Q2,

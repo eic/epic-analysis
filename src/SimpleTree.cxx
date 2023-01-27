@@ -6,7 +6,7 @@
 ClassImp(SimpleTree)
 
 // constructor
-SimpleTree::SimpleTree(TString treeName_, Kinematics *K_, Kinematics *Ktrue_) 
+SimpleTree::SimpleTree(TString treeName_, std::shared_ptr<Kinematics> K_, std::shared_ptr<Kinematics> Ktrue_) 
   : treeName(treeName_)
   , K(K_)
   , Ktrue(Ktrue_)

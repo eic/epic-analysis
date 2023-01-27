@@ -21,15 +21,15 @@
 // ROOT
 #include "TTree.h"
 
-class HFSTree : public TObject
+class HFSTree
 {
   public:
-    HFSTree(TString treeName_, Kinematics *K_, Kinematics *Ktrue_);
+    HFSTree(TString treeName_, std::shared_ptr<Kinematics> K_, std::shared_ptr<Kinematics> Ktrue_);
     ~HFSTree();
 
     TTree *GetTree() { return T; };
-    Kinematics *GetKinematics() { return K; };
-    Kinematics *GetKinematicsTrue() { return Ktrue; };
+    std::shared_ptr<Kinematics> GetKinematics() { return K; };
+    std::shared_ptr<Kinematics> GetKinematicsTrue() { return Ktrue; };
     void FillTree(Double_t w) { weight = w;
       T->Fill(); };
     void WriteTree() { T->Write(); };
@@ -37,8 +37,8 @@ class HFSTree : public TObject
   private:
     Double_t weight;
     TTree *T;
-    Kinematics *K;
-    Kinematics *Ktrue;
+    std::shared_ptr<Kinematics> K;
+    std::shared_ptr<Kinematics> Ktrue;
     TString treeName;
 
   ClassDef(HFSTree,1);

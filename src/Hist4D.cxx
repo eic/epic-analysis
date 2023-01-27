@@ -449,3 +449,13 @@ void Hist4D::DrawPad(TVirtualPad* pad, char const* options) {
 	pad->cd();
 }
 
+Hist4D::~Hist4D() {
+  if(_w_axis) delete _w_axis;
+  if(_x_axis) delete _x_axis;
+  if(_y_axis) delete _y_axis;
+  if(_z_axis) delete _z_axis;
+  if(_axes) delete _axes;
+  for(auto e : _hists)
+    if(e) delete e;
+  _hists.clear();
+}
