@@ -311,11 +311,13 @@ void Analysis::Prepare() {
   outFile = new TFile(outfileName,"RECREATE");
 
   // instantiate shared objects
-  kin     = std::make_shared<Kinematics>(eleBeamEn,ionBeamEn,crossingAngle);
-  kinTrue = std::make_shared<Kinematics>(eleBeamEn, ionBeamEn, crossingAngle);
-  ST      = std::make_unique<SimpleTree>("tree",kin,kinTrue);
-  HFST    = std::make_unique<HFSTree>("hfstree",kin,kinTrue);
-  PT      = std::make_unique<ParticleTree>("ptree");
+  kin        = std::make_shared<Kinematics>(eleBeamEn,ionBeamEn,crossingAngle);
+  kinTrue    = std::make_shared<Kinematics>(eleBeamEn, ionBeamEn, crossingAngle);
+  kinJet     = std::make_shared<KinematicsJets>(eleBeamEn, ionBeamEn, crossingAngle);
+  kinJetTrue = std::make_shared<KinematicsJets>(eleBeamEn, ionBeamEn, crossingAngle);
+  ST         = std::make_unique<SimpleTree>("tree",kin,kinTrue);
+  HFST       = std::make_unique<HFSTree>("hfstree",kin,kinTrue);
+  PT         = std::make_unique<ParticleTree>("ptree");
 
   // if including jets, define a `jet` final state
 #ifndef EXCLUDE_DELPHES
@@ -372,10 +374,10 @@ void Analysis::Prepare() {
   HD->SetBinSchemeValue("lSpin", [this](){ return (Double_t)kin->lSpin;         });
   /* jets */
 #ifndef EXCLUDE_DELPHES
-  HD->SetBinSchemeValue("JetPT", [this](){ return kin->pTjet;                   });
-  HD->SetBinSchemeValue("JetZ",  [this](){ return kin->zjet;                    });
-  HD->SetBinSchemeValue("JetEta", [this](){ return kin->etajet;                 });
-  HD->SetBinSchemeValue("JetE", [this](){ return kin->ejet;           });
+  HD->SetBinSchemeValue("JetPT", [this](){ return kinJet->pTjet;                });
+  HD->SetBinSchemeValue("JetZ",  [this](){ return kinJet->zjet;                 });
+  HD->SetBinSchemeValue("JetEta", [this](){ return kinJet->etajet;              });
+  HD->SetBinSchemeValue("JetE", [this](){ return kinJet->ejet;                  });
 #endif
 
   // some bin schemes values are checked here, instead of by CutDef checks ("External" cut type)
@@ -848,31 +850,31 @@ void Analysis::FillHistosJets(Double_t wgt) {
 #ifndef EXCLUDE_DELPHES
   auto fill_payload = [this,wgt] (Histos *H) {
     // jet kinematics
-    H->FillHist1D("JetPT",  kin->pTjet,  wgt);
-    H->FillHist1D("JetMT",  kin->mTjet,  wgt);
-    H->FillHist1D("JetZ",   kin->zjet,   wgt);
-    H->FillHist1D("JetEta", kin->etajet, wgt);
-    H->FillHist1D("JetQT",  kin->qTjet,  wgt);
-    H->FillHist1D("JetE",   kin->ejet,   wgt);
-    H->FillHist1D("JetM",   kin->mjet,   wgt);
+    H->FillHist1D("JetPT",  kinJet->pTjet,  wgt);
+    H->FillHist1D("JetMT",  kinJet->mTjet,  wgt);
+    H->FillHist1D("JetZ",   kinJet->zjet,   wgt);
+    H->FillHist1D("JetEta", kinJet->etajet, wgt);
+    H->FillHist1D("JetQT",  kinJet->qTjet,  wgt);
+    H->FillHist1D("JetE",   kinJet->ejet,   wgt);
+    H->FillHist1D("JetM",   kinJet->mjet,   wgt);
 
-    H->FillHist2D("JetPTVsEta", kin->etajet, kin->pTjet, wgt);
+    H->FillHist2D("JetPTVsEta", kinJet->etajet, kinJet->pTjet, wgt);
 
     // Fill Resolution Histos
-    H->FillHist1D("JetDeltaR", kin->deltaRjet, wgt);
+    H->FillHist1D("JetDeltaR", kinJet->deltaRjet, wgt);
 
-    H->FillHist2D("JetPTTrueVsReco", kin->pTjet, kin->pTmtjet, wgt);
-    H->FillHist2D("JetETrueVsReco", kin->ejet, kin->emtjet, wgt);
+    H->FillHist2D("JetPTTrueVsReco", kinJet->pTjet, kinJet->pTmtjet, wgt);
+    H->FillHist2D("JetETrueVsReco", kinJet->ejet, kinJet->emtjet, wgt);
 
-    H->FillHist2D("JetResPTVsTruePT", kin->pTmtjet, (kin->pTjet - kin->pTmtjet)/(kin->pTmtjet), wgt);
-    H->FillHist2D("JetResEVsTrueE", kin->emtjet, (kin->ejet - kin->emtjet)/(kin->emtjet), wgt);
+    H->FillHist2D("JetResPTVsTruePT", kinJet->pTmtjet, (kinJet->pTjet - kinJet->pTmtjet)/(kinJet->pTmtjet), wgt);
+    H->FillHist2D("JetResEVsTrueE", kinJet->emtjet, (kinJet->ejet - kinJet->emtjet)/(kinJet->emtjet), wgt);
 
-    H->FillHist2D("JetResPTVsRecoPT", kin->pTjet, (kin->pTjet - kin->pTmtjet)/(kin->pTmtjet), wgt);
-    H->FillHist2D("JetResEVsRecoE", kin->ejet, (kin->ejet - kin->emtjet)/(kin->emtjet), wgt);
+    H->FillHist2D("JetResPTVsRecoPT", kinJet->pTjet, (kinJet->pTjet - kinJet->pTmtjet)/(kinJet->pTmtjet), wgt);
+    H->FillHist2D("JetResEVsRecoE", kinJet->ejet, (kinJet->ejet - kinJet->emtjet)/(kinJet->emtjet), wgt);
 
-    if(kin->Q2!=0) H->FillHist1D("JetQTQ", kin->qTjet/sqrt(kin->Q2), wgt);
-    for(int j = 0; j < kin->jperp.size(); j++) {
-      H->FillHist1D("JetJperp", kin->jperp[j], wgt);
+    if(kinJet->Q2!=0) H->FillHist1D("JetQTQ", kinJet->qTjet/sqrt(kinJet->Q2), wgt);
+    for(int j = 0; j < kinJet->jperp.size(); j++) {
+      H->FillHist1D("JetJperp", kinJet->jperp[j], wgt);
     };
   };
   FillHistos(fill_payload);
