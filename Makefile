@@ -28,9 +28,6 @@ DEP_LIBRARIES = $(shell root-config --glibs)
 # Data Model (PODIO + EDM4hep + EDM4eic)
 DEP_LIBRARIES += -L/usr/local/lib -lpodio -lpodioRootIO -ledm4hep -ledm4eic
 
-# PYTHON (for pybind)
-DEP_LIBRARIES += -lpython3.10
-
 # Miscellaneous
 DEP_LIBRARIES += -lfmt
 
