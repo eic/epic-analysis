@@ -2,23 +2,33 @@
 
 Scripts to provide access to data on S3 and interface with this SIDIS analysis repository
 
+NOTE: before anything, be sure to set the environment:
+```bash
+source environ.sh
+```
 
-## Usage Guide
-
-NOTE: before anything, be sure to `source environ.sh`
-
-First, obtain access to S3:
-- Set environment variables `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password beforehand:
-  - `export S3_ACCESS_KEY=*****`
-  - `export S3_SECRET_KEY=*****`
-  - It is useful to add these variables to your shell configuration
+## Setup
+First you must obtain access to S3. Set the environment variables `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password beforehand:
+```bash
+export S3_ACCESS_KEY=*****
+export S3_SECRET_KEY=*****
+```
+  - It is useful to add these variables to your shell configuration (such as `~/.bashrc`),
+    but do not expose the username and password to the outside world
   - For more details on S3, see [S3 file storage documentation](https://doc.athena-eic.org/en/latest/howto/s3_file_storage.html)
-- Add our S3 endpoint by running `s3tools/add-host.sh`
+
+Then add our S3 endpoint:
+```bash
+s3tools/add-host.sh
+```
   - This only needs to be done once, since it will write your configuration
     locally (most likely to `~/.mc/config.json`)
 
-Now you can run our S3 automation script: `s3tools/s3tool.rb`
-- Run without any arguments to print the usage guide
+## s3tools Usage
+Now you can run our S3 automation script, `s3tools/s3tool.rb`; run without any arguments to print the usage guide:
+```bash
+s3tools/s3tool.rb
+```
 - This script can:
   - Download files from S3, given your choice of campaign production version,
     beam energy, detector configuration, radiative corrections, and more
@@ -30,10 +40,11 @@ Now you can run our S3 automation script: `s3tools/s3tool.rb`
 - This script supports both fast and full simulations from ePIC, ECCE, and ATHENA
 - For fast simulations, event-generated `hepmc` files are obtained and passed through
   `Delphes` locally
-- Dependencies (included in `eic-shell`):
-  - [MinIO client](https://docs.min.io/docs/minio-client-complete-guide)
-  - Ruby and Bash
+- This script uses [MinIO client](https://docs.min.io/docs/minio-client-complete-guide) (included
+  in `eic-shell`).
 
+
+## Additional Notes
 
 ### MinIO Client Usage
 If you would rather do things yourself, you can use MinIO client directly using the
@@ -47,11 +58,7 @@ If you would rather do things yourself, you can use MinIO client directly using 
   - Follow [doc/example.config](../doc/example.config) as a template
   - Cross sections are available in [`datarec/xsec/xsec.dat`](../datarec/xsec/xsec.dat)
 
-
-### Additional Notes
-The `s3tools/src/` directory contains additional scripts, some of which may be useful standalone:
-
-#### Delphes Automation
+### Delphes Automation
 For convenience, `s3tools/src/loop_run_delphes.sh` can run Delphes on a list of files
 in a list of directories
 - Takes a list of directories as the arguments; they must be in the `datagen/`
@@ -59,7 +66,7 @@ in a list of directories
   `datagen/` replaced with `datarec/`
 - Runs multi-threaded: one thread per directory
 
-#### Cross Sections
+### Cross Sections
 In case you want to update the cross section table `xsec.dat`:
 - the script `s3tools/src/get-cross-section.sh` will read the cross section from
   `GenCrossSection` in a `hepmc` file; use `s3tools/src/get-cross-section-ALL.sh` to
