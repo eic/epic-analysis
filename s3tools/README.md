@@ -46,13 +46,13 @@ s3tools/s3tool.rb
 ### Example `s3tool.rb` Commands
 For full simulation files from S3, run:
 ```bash
-s3tools/s3tool.rb -o tutorial.epic -c tutorial/s3files.epic.config -e 18x275 -l 4
+s3tools/s3tool.rb -o tutorial.epic -c tutorial/epic.config -e 18x275 -l 4
 ```
   - By default, the `config` file will be filled with S3 URLs for streaming data
     from S3; if you would rather download the files locally, add the option
     `-m d` to download them to `datarec/tutorial.epic/`
   - This is for the latest ePIC data, with the specified beam energy, and
-    writes the config file to `tutorial/s3files.epic.config`
+    writes the config file to `tutorial/epic.config`
     - Run `s3tools/s3tool.rb -v PRODUCTION_VERSION` for a different
       production, such as one from ECCE or ATHENA (run `s3tools/s3tool.rb` with no
       arguments to see available `PRODUCTION_VERSION`s).

@@ -14,11 +14,10 @@ R__LOAD_LIBRARY(EpicAnalysis)
  *   - for S3, you must know the username and password, and have them in your environment:
  *     - `export S3_ACCESS_KEY=<login>`
  *     - `export S3_SECRET_KEY=<password>`
- *   - a sample config file is `s3files.athena.config`, with a list of S3 URLs
  */
 void analysis_athena(
-    TString configFile="tutorial/s3files.athena.config", // input config file
-    TString outfilePrefix="tutorial.athena"              // output filename prefix
+    TString configFile="tutorial/athena.config", // input config file
+    TString outfilePrefix="tutorial.athena"      // output filename prefix
 ) {
 
   // setup analysis ========================================

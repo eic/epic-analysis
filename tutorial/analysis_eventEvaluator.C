@@ -14,11 +14,10 @@ R__LOAD_LIBRARY(EpicAnalysis)
  *   - for S3, you must know the username and password, and have them in your environment:
  *     - `export S3_ACCESS_KEY=<login>`
  *     - `export S3_SECRET_KEY=<password>`
- *   - a sample config file is `s3files.ecce.config`, with a list of S3 URLs
  */
 void analysis_eventEvaluator(
-    TString configFile="tutorial/s3files.ecce.config", // input config file
-    TString outfilePrefix="tutorial.eventEvaluator"    // output filename prefix
+    TString configFile="tutorial/ecce.config",      // input config file
+    TString outfilePrefix="tutorial.eventEvaluator" // output filename prefix
 ) {
 
   // setup analysis ========================================
