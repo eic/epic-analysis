@@ -6,7 +6,7 @@ it is recommended to go through these tutorials in the numerical order given bel
 **Note**: Execute macros from the `epic-analysis` top directory, not from
 this tutorial directory, for example:
 ```bash
-root -b -q tutorial/analysis_template.C
+root -b -q -l tutorial/analysis_template.C
 ```
 
 ## Generate or Obtain Simulation Output Trees 
@@ -61,6 +61,27 @@ Each of these examples has two macros:
 - there is no postprocessor macro (see other examples); instead, inspect
   the output root file from the analysis macro, to learn what objects
   are stored
+
+Commands:
+```bash
+root -b -q -l tutorial/analysis_template.C   # run the analysis macro
+root out/tutorial.template.root              # open the ROOT file
+```
+
+Once in the ROOT file, try:
+```cpp
+new TBrowser               // open a browser
+tree->Draw("Q2")           // draw a Q2 distribution (not weighted!)
+tree->Draw("Q2","Weight")  // draw a Q2 distribution, with the correct weights
+```
+Explore the ROOT file, view the histograms in the `histArr*` TDirectories.
+
+Try to run on ePIC full simulations; change the macro to run with `AnalysisEpic`,
+then call
+```bash
+root -b -q -l tutorial/analysis_template.C'("tutorial/epic.config")'
+root out/tutorial.template.root
+```
 
 ### 2. (x,Q2) Binning
 - `analysis_xqbins.C`: bin the analysis in a few 2D bins of x and Q2
