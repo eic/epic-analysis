@@ -138,7 +138,7 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          # EPIC
+          # ePIC
           - { id: epic_arches,             options: --version epic.22.11.3 --mode s --limit 20 --detector arches      } # max limit=150
           - { id: epic_brycecanyon,        options: --version epic.22.11.3 --mode s --limit 4  --detector brycecanyon } # max limit=35
           - { id: epic_arches_radcor,      options: --version epic.22.11.3 --mode s --limit 20 --detector arches      --radcor } # max limit=150
@@ -552,17 +552,17 @@ jobs:
             echo "recon = ${{matrix.recon}}"
             echo "xvar = ${{matrix.xvar}}"
             echo "yvar = ${{matrix.yvar}}"
-            echo "[CI] COMPARATOR MACRO: EPIC"
+            echo "[CI] COMPARATOR MACRO: ePIC"
             macro/ci/comparator_run.sh ${{matrix.aname}} ${{matrix.pname}} ${{matrix.recon}} ${{matrix.xvar}} ${{matrix.yvar}} \
-              'EPIC Arches'               'epic_arches'             \
-              'EPIC BryceCanyon'          'epic_brycecanyon'        \
-              'EPIC Arches (radcor)'      'epic_arches_radcor'      \
-              'EPIC BryceCanyon (radcor)' 'epic_brycecanyon_radcor' \
-              'EPIC'
+              'ePIC Arches'               'epic_arches'             \
+              'ePIC BryceCanyon'          'epic_brycecanyon'        \
+              'ePIC Arches (radcor)'      'epic_arches_radcor'      \
+              'ePIC BryceCanyon (radcor)' 'epic_brycecanyon_radcor' \
+              'ePIC'
             echo "[CI] COMPARATOR MACRO: LEGACY"
             macro/ci/comparator_run.sh ${{matrix.aname}} ${{matrix.pname}} ${{matrix.recon}} ${{matrix.xvar}} ${{matrix.yvar}} \
               'Delphes Pythia6 (radcor)' 'fastsim'            \
-              'EPIC Arches (radcor)'     'epic_arches_radcor' \
+              'ePIC Arches (radcor)'     'epic_arches_radcor' \
               'ATHENA'                   'athena'             \
               'ECCE'                     'ecce'               \
               'LEGACY'
