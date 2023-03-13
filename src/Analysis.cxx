@@ -206,7 +206,7 @@ void Analysis::Prepare() {
           return;
         }
         TTree *tree = file->Get<TTree>("Delphes");                  // fastsim
-        if (tree == nullptr) tree = file->Get<TTree>("events");     // ATHENA, EPIC
+        if (tree == nullptr) tree = file->Get<TTree>("events");     // ATHENA, ePIC
         if (tree == nullptr) tree = file->Get<TTree>("event_tree"); // ECCE
         if (tree == nullptr) {
           fmt::print(stderr,"ERROR: Couldn't find tree in file '{}'\n",fileName);

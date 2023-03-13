@@ -1,4 +1,4 @@
-# Pythia 6, for EPIC: S3/eictest/EPIC/EVGEN/DIS/NC
+# Pythia 6, for ePIC: S3/eictest/EPIC/EVGEN/DIS/NC
 # qbins from 1-10-100-1000-100000 
 # noradcor is without radgen, radcor is including radgen 
 #label                                    cross_section_[pb] relative_uncertainty

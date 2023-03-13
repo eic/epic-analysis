@@ -37,7 +37,7 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
   ```bash
   s3tools/s3tool.rb -e 18x275 -o tutorial.epic -c tutorial/s3files.epic.config -l 4
   ```
-  - This is for the latest EPIC data (with the specified beam energy, and
+  - This is for the latest ePIC data (with the specified beam energy, and
     writes the config file to `tutorial/s3files.epic.config`)
     - By default, the `config` file will be filled with URLs for streaming data
       from S3; if you would rather download the files locally, add the option
@@ -47,7 +47,7 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
     no arguments to see available `PRODUCTION_VERSION`s)
   - Similar to the fast simulations, note where the `config` file is produced; the tutorial
     macros require this file as an argument; you can control this with the `-c` option:
-    - `s3tools/s3tool.rb -c tutorial/s3files.epic.config` for EPIC macros
+    - `s3tools/s3tool.rb -c tutorial/s3files.epic.config` for ePIC macros
     - `s3tools/s3tool.rb -c tutorial/s3files.ecce.config` for ECCE macros
     - `s3tools/s3tool.rb -c tutorial/s3files.athena.config` for ATHENA macros
 
@@ -58,7 +58,7 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
 - many of these examples focus on fast simulations; to switch between fast and
   full simulations, change the `Analysis`-derived class in the macro:
   - `AnalysisDelphes` for Delphes trees (fast simulations)
-  - `AnalysisEpic` for trees from the DD4hep+EICrecon stack (EPIC full simulations)
+  - `AnalysisEpic` for trees from the DD4hep+EICrecon stack (ePIC full simulations)
   - `AnalysisAthena` for trees from the DD4hep+Juggler stack (ATHENA full simulations)
   - `AnalysisEcce` for trees from the Fun4all+EventEvaluator stack (ECCE full simulations)
 - note: some extra settings and features differ between these

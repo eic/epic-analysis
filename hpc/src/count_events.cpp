@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
   }
 
   auto tree = root_file->Get<TTree>("Delphes");                   // fastsim
-  if(tree == nullptr) tree = root_file->Get<TTree>("events");     // EPIC, ATHENA
+  if(tree == nullptr) tree = root_file->Get<TTree>("events");     // ePIC, ATHENA
   if(tree == nullptr) tree = root_file->Get<TTree>("event_tree"); // ECCE
   if(tree == nullptr) {
     fmt::print(stderr,"ERROR: Couldn't find tree in file '{}'\n",root_file_name);
