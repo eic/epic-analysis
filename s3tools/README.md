@@ -43,7 +43,20 @@ s3tools/s3tool.rb
 - This script uses [MinIO client](https://docs.min.io/docs/minio-client-complete-guide) (included
   in `eic-shell`).
 
-### Example s3tool.rb Commands
+### Example `s3tool.rb` Commands
+For full simulation files from S3, run:
+```bash
+s3tools/s3tool.rb -o tutorial.epic -c tutorial/s3files.epic.config -e 18x275 -l 4
+```
+  - By default, the `config` file will be filled with S3 URLs for streaming data
+    from S3; if you would rather download the files locally, add the option
+    `-m d` to download them to `datarec/tutorial.epic/`
+  - This is for the latest ePIC data, with the specified beam energy, and
+    writes the config file to `tutorial/s3files.epic.config`
+    - Run `s3tools/s3tool.rb -v PRODUCTION_VERSION` for a different
+      production, such as one from ECCE or ATHENA (run `s3tools/s3tool.rb` with no
+      arguments to see available `PRODUCTION_VERSION`s).
+
 To download sample HEPMC files from S3, and run them through Delphes, run:
 ```bash
 s3tools/s3tool.rb -v hepmc.pythia8 -o tutorial.fastsim -c tutorial/delphes.config -e 10x100 -l 4
@@ -51,20 +64,6 @@ s3tools/s3tool.rb -v hepmc.pythia8 -o tutorial.fastsim -c tutorial/delphes.confi
   - Delphes output files will be written to `datarec/tutorial.fastsim`
     (and the HEPMC files will be in `datagen/tutorial.fastsim`)
   - The `config` file will be written to `tutorial/delphes.config`
-
-For full simulation files from S3, run:
-```bash
-s3tools/s3tool.rb -o tutorial.epic -c tutorial/s3files.epic.config -e 18x275 -l 4
-```
-  - This is for the latest ePIC data, with the specified beam energy, and
-    writes the config file to `tutorial/s3files.epic.config`
-  - By default, the `config` file will be filled with S3 URLs for streaming data
-    from S3; if you would rather download the files locally, add the option
-    `-m d` to download them to `datarec/tutorial.epic/`
-
-Run `s3tools/s3tool.rb -e 18x275 -v PRODUCTION_VERSION` for a different
-production, such as one from ECCE or ATHENA (run `s3tools/s3tool.rb` with no
-arguments to see available `PRODUCTION_VERSION`s).
 
 
 ## Additional Notes
