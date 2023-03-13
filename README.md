@@ -79,15 +79,17 @@ While you are waiting for Delphes to build, you may want to:
 - Tutorial macros in the `tutorial/` directory, to learn how to run `epic-analysis`
 
 ## Building
-- First, set environment variables:
+First, set environment variables:
 ```bash
 source environ.sh
 ```
-- We have not yet upgraded to `cmake` in this repository, and still use `Makefiles`, so just run
-  `make` to build everything: all dependencies in `deps/`, followed by the `epic-analysis` library
-  from the source code in `src/`
-  - build target locations are not yet configurable, and all will stay within `epic-analysis` (e.g.,
-    libaries will be installd in `lib/`
+Then compile `analysis-epic` (and some other local dependencies):
+```bash
+make
+```
+- We have not yet upgraded to `cmake` in this repository, and still use `Makefiles`
+- Build target locations are not yet configurable, and all will stay within `epic-analysis` (e.g.,
+  libaries will be installd in `lib/`)
 - Additional `make` targets are available (see `Makefile`), for more control during
   development:
 
@@ -111,9 +113,9 @@ INCLUDE_CENTAURO=1 make  # build with fastjet plugin Centauro (not included in D
 EXCLUDE_DELPHES=1 make   # build without Delphes support; primarily used to expedite CI workflows
 ```
 
-## Quick Start
-- If you're ready to try the software hands-on, follow the [tutorials](tutorial/README.md) in 
-  the `tutorial/` directory
+## Quick Start: Tutorial Macros
+If you're ready to try the software hands-on, follow the [tutorials](tutorial/README.md) in 
+the `tutorial/` directory. Otherwise continue reading below.
 
 ---
 
