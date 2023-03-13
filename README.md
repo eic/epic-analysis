@@ -63,8 +63,8 @@ These are additional dependencies needed by `epic-analysis`; they will be built
 locally and stored in the `deps/` directory (see [deps/README.md](deps/README.md)
 for more details). This section documents how to obtain and build local dependencies:
 
-- [Delphes](https://github.com/delphes/delphes) is the only local dependency that
-  is not mirrored in `deps/`, so you must download and build it first:
+[Delphes](https://github.com/delphes/delphes) is the only local dependency that
+is not mirrored in `deps/`, so you must download and build it first:
 ```bash
 deps/install_delphes.sh
 ```
