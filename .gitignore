@@ -27,7 +27,9 @@ results*
 tutorial/*.config*
 get-files.sh
 *.xsec
+*.config.part
 valgrind.log
+hpc/log
 
 # environment setup files
 external

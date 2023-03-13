@@ -83,7 +83,7 @@ class Analysis
     // common cross section `xs`, and Q2 range `Q2min` to `Q2max`
     void AddFileGroup(
         std::vector<std::string> fileNames,
-        std::vector<Long64_t> entries,
+        Long64_t totalEntries,
         Double_t xs,
         Double_t Q2min,
         Double_t Q2max
@@ -133,7 +133,6 @@ class Analysis
 
     // setup / common settings
     std::vector<std::vector<std::string> > infiles;
-    std::vector<std::vector<Long64_t> > inEntries;
     // A lookup index for guessing which Q2 range an event belongs to.
     std::vector<std::size_t> inLookup;
     std::vector<Double_t> Q2xsecs;

@@ -133,6 +133,9 @@ class Histos : public TNamed
       ofile->cd("/");
     };
 
+    // add histograms of `in_histos` to histograms in `this`
+    void AddHistos(Histos *in_histos);
+
     // fill a histogram, iff it is defined
     template <typename... VALS> void FillHist1D(TString histName, VALS... values) {
       auto hist = Hist(histName,true);

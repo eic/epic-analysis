@@ -135,23 +135,22 @@ Additional build options are available:
   simulation data are read
 
 
-## ATHENA Full Simulation
+## ePIC Full Simulation
 
 - Full simulation files are stored on S3; follow [s3tools documentation](s3tools/README.md)
   for scripts and guidance
 - In general, everything that can be done in fast simulation can also be done in
   full simulation; just replace your usage of `AnalysisDelphes` with
-  `AnalysisAthena`
+  `AnalysisEpic`
   - In practice, implementations may sometimes be a bit out of sync, where some
     features exist in fast simulation do not exist in full simulation, or vice
     versa
-- See the event loop in `src/AnalysisAthena.cxx` for details of how the full
+- See the event loop in `src/AnalysisEpic.cxx` for details of how the full
   simulation data are read
 
-## ECCE Full Simulation
+## ATHENA and ECCE Full Simulations
 
-- Similar implementation as ATHENA full simulation, but use `AnalysisEcce` to
-  read `EventEvaluator` output files
+- Similar implementation as ePIC full simulation, but use `AnalysisEcce` or `AnalysisAthena`
 
 ---
 
@@ -171,6 +170,9 @@ and follow the [README](tutorial/README.md).
   `epic-analysis` top directory, not from within their subdirectory, e.g., run
   `root -b -q tutorial/analysis_template.C`; this is because certain library
   and data directory paths are given as relative paths
+
+In general, these macros will run single-threaded. See [HPC documentation](hpc/README.md)
+for guidance how to run multi-threaded or on a High Performance Computing (HPC) cluster.
 
 ## Analysis Stage
 
