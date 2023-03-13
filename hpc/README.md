@@ -6,6 +6,12 @@ job per simulation `ROOT` file. The scripts in this directory support this proce
 
 Run any script without any arguments for more documentation.
 
+**NOTE**: Running `epic-analysis` using these `hpc` tools is not as well tested as running
+single-threaded; please check everything carefully, especially Q2 weights. Report any
+issues; you are welcome to contribute your own scripts to support your preferred computing cluster.
+It is highly recommended to test jobs with small samples, before launching a full-scale analysis
+on all available data.
+
 ## 1. Preparation
 ```bash
 hpc/prepare.rb
