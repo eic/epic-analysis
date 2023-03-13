@@ -5,6 +5,8 @@ Scripts to provide access to data on S3 and interface with this SIDIS analysis r
 
 ## Usage Guide
 
+NOTE: before anything, be sure to `source environ.sh`
+
 First, obtain access to S3:
 - Set environment variables `$S3_ACCESS_KEY` and `$S3_SECRET_KEY` with the login and password beforehand:
   - `export S3_ACCESS_KEY=*****`
