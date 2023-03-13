@@ -25,7 +25,7 @@ Now you can run our S3 automation script: `s3tools/s3tool.rb`
     [doc/example.config](../doc/example.config) for a sample config file)
   - Alternative to downloading files from S3, you can generate a `config` file
     for streaming from S3
-- This script supports both fast and full simulations from EPIC, ECCE, and ATHENA
+- This script supports both fast and full simulations from ePIC, ECCE, and ATHENA
 - For fast simulations, event-generated `hepmc` files are obtained and passed through
   `Delphes` locally
 - Dependencies (included in `eic-shell`):
@@ -37,7 +37,7 @@ Now you can run our S3 automation script: `s3tools/s3tool.rb`
 If you would rather do things yourself, you can use MinIO client directly using the
 `mc` command to browse data on S3
 - Example S3 navigation commands:
-  - top-level EPIC directory list: `mc ls S3/eictest/EPIC`
+  - top-level ePIC directory list: `mc ls S3/eictest/EPIC`
   - show directory tree: `mc tree S3/eictest/EPIC/RECO/`
   - download a file: `mc cp /S3/path/to/some/file path/to/local/target/directory/`
   - more documentation: `mc -h`
