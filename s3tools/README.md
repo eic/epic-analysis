@@ -40,8 +40,8 @@ s3tools/s3tool.rb
 - This script supports both fast and full simulations from ePIC, ECCE, and ATHENA
 - For fast simulations, event-generated `hepmc` files are obtained and passed through
   `Delphes` locally
-- This script uses [MinIO client](https://docs.min.io/docs/minio-client-complete-guide) (included
-  in `eic-shell`).
+- This script uses [MinIO client](https://min.io/docs/minio/linux/reference/minio-mc.html)
+  (included in `eic-shell`).
 
 ### Example `s3tool.rb` Commands
 For full simulation files from S3, run:
