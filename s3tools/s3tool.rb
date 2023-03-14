@@ -78,7 +78,7 @@ prodSettings = {
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
   'hepmc.pythia6' => {
-    :comment         => 'HEPMC files from Pythia 6 for EPIC, with & without radiative corrections',
+    :comment         => 'HEPMC files from Pythia 6 for ePIC, with & without radiative corrections',
     :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
     :releaseSubDir   => Proc.new { "S3/eictest/EPIC/EVGEN/SIDIS/pythia6" },
     :energySubDir    => Proc.new { "ep_#{options.energy}" },

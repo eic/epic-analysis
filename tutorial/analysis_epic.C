@@ -3,14 +3,14 @@
 
 R__LOAD_LIBRARY(EpicAnalysis)
 
-/* EPIC simulation example
+/* ePIC simulation example
  * - note the similarity of the macro to the fast simulation
  * - you only need to swap `AnalysisDelphes` with `AnalysisEpic` to switch
  *   between fast and full simulations
  */
 void analysis_epic(
-    TString configFile="tutorial/s3files.epic.config", // input config file
-    TString outfilePrefix="tutorial.epic"              // output filename prefix
+    TString configFile="tutorial/epic.config", // input config file
+    TString outfilePrefix="tutorial.epic"      // output filename prefix
     )
 {
 
