@@ -57,12 +57,13 @@ s3tools/s3tool.rb -o tutorial.epic -c tutorial/epic.config -e 18x275 -l 3
       production, such as one from ECCE or ATHENA (run `s3tools/s3tool.rb` with no
       arguments to see available `PRODUCTION_VERSION`s).
 
-To download sample HEPMC files from S3, and run them through Delphes, run:
+For fast simulation, download sample HEPMC files from S3 and run them through Delphes using:
 ```bash
 s3tools/s3tool.rb -v hepmc.pythia8 -o tutorial.fastsim -c tutorial/delphes.config -e 10x100 -l 3
 ```
-  - Delphes output files will be written to `datarec/tutorial.fastsim`
-    (and the HEPMC files will be in `datagen/tutorial.fastsim`)
+  - **Note:** Delphes must be fully compiled before doing this
+  - Delphes output files will be written to `datarec/tutorial.fastsim`,
+    and the HEPMC files will be stored in `datagen/tutorial.fastsim`
   - The `config` file will be written to `tutorial/delphes.config`
 
 
