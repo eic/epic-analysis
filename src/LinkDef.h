@@ -16,6 +16,7 @@
 
 // analysis objects
 #pragma link C++ class Kinematics+;
+#pragma link C++ class KinematicsJets+;
 #pragma link C++ class SimpleTree+;
 #pragma link C++ class HFSTree+;
 #pragma link C++ class ParticleTree+;
