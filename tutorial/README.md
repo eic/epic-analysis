@@ -41,8 +41,9 @@ automatically.
   - for example, this file allows one to combine different Q2 regions together
     using relative weights 
 
+---
+# Tutorial Example Macros
 
-# Tutorials:
 
 Each of these examples has two macros:
 - analysis macro, to run an `Analysis`-derived class, which will analyze 
@@ -55,7 +56,7 @@ Each of these examples has two macros:
   it analyzes the resulting data structures
 
 
-### 1. Template
+# 1. Template
 - `analysis_template.C`: minimal analysis macro to demonstrate how
   to run `Analysis`; no bins are specified
 - there is no postprocessor macro (see other examples); instead, inspect
@@ -83,7 +84,7 @@ root -b -q -l tutorial/analysis_template.C'("tutorial/epic.config")'
 root out/tutorial.template.root
 ```
 
-### 2. (x,Q2) Binning
+# 2. (x,Q2) Binning
 - `analysis_xqbins.C`: bin the analysis in a few 2D bins of x and Q2
   - there is a `switch` statement to allow the choice of various
     example binning schemes
@@ -102,7 +103,8 @@ View the images in `out/tutorial.xqbins.images/`, for example:
 display out/tutorial.xqbins.images/*.png   # press 'space' or 'backspace' to change images
 ```
 
-### 3. Full Simulations (all other tutorials are for fast simulations)
+# 3. Full Simulations
+All other tutorials are for fast simulations (by default); this one is an example for full simulations
 - `analysis_epic.C`: basically a copy of `analysis_xqbins.C`,
   but shows how to analyze full simulation data; the main difference
   is using `AnalysisEpic` instead of `AnalysisDelphes`
@@ -113,24 +115,24 @@ display out/tutorial.xqbins.images/*.png   # press 'space' or 'backspace' to cha
   ECCE simulations
 - see also `analysis_athena.C` for the ATHENA version
 
-### 4. Average kinematics table
+# 4. Average kinematics table
 - `analysis_qbins.C`: bin the analysis in several Q2 bins, for a couple
   pT bins
 - `postprocess_qbins_tables.C`: produce a text file containing tables
   of averages of kinematics variables, where each row is for a Q2 bin;
   one table is produced for each pT bin
 
-### 5. Draw ratio of histograms for different y-minima
+# 5. Draw ratio of histograms for different y-minima
 - `analysis_yRatio.C`: bins in 3 y-minima, along with a full-y bin
 - `postprocess_yRatio.C`: produces ratios of all histograms, with
   a y-minimum divided by no y-minimum
 
-### 6. Test DAG lambda staging
+# 6. Test DAG lambda staging
 - `analysis_testDAG.C`: define multi-dimensional binning
 - `postprocess_testDAG.C`: contains various lambdas examples and
   describes how to stage them
 
-### 7. Conditional Subloops
+# 7. Conditional Subloops
 - `analysis_coverage.C`: define 4-D binning scheme, including
   extra "full-range" bins
 - `postprocess_coverage.C`: draw certain plots, while restricting
