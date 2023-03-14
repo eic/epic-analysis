@@ -36,6 +36,14 @@ upstream simulation output:
 
 # Setup and Dependencies
 
+## Initial setup
+First, clone this `epic-analysis` Github repository:
+```bash
+git clone git@github.com:eic/epic-analysis.git      # if you have SSH permission
+git clone https://github.com/eic/epic-analysis.git  # if you do not have SSH permission
+```
+This will create the directory `epic-analysis`, which you can then `cd` into.
+
 ## Upstream Dependencies
 These are common dependencies used for the upstream simulation, some of which
 are needed for `epic-analysis` as well.
@@ -46,10 +54,8 @@ to obtain and install the EIC software image.
 - The `eic-shell` script is used to start a container shell
 - This image contains all the upstream dependencies needed for EIC simulations
 - All documentation below assumes you are running in `eic-shell`
-  - **NOTE**: our old image, that was obtained by scripts in `container/`, is deprecated.
-  - **NOTE**: it is no longer recommended to set up your own environment
 
-If you upgrade your image (`eic-shell --upgrade`), it is recommended to `clean` build
+If you upgrade your image (`eic-shell --upgrade`), you may need to `clean` build
 everything: `make all-clean && make`
 
 ## Local Dependencies
@@ -57,19 +63,33 @@ These are additional dependencies needed by `epic-analysis`; they will be built
 locally and stored in the `deps/` directory (see [deps/README.md](deps/README.md)
 for more details). This section documents how to obtain and build local dependencies:
 
-- [Delphes](https://github.com/delphes/delphes) is the only local dependency that
-  is not mirrored in `deps/`; in other words you must download and build it:
-  - run `deps/install_delphes.sh`; this will clone the `delphes` repository to `deps/delphes`,
-    and compile it
-  - alternatively, if you already have a `delphes` build elsewhere, symlink `deps/delphes` to it
-- All other dependencies in `deps/` are mirrors, and are already included with `epic-analysis`.
-  For the ones that need building, see the **Building** section below.
+[Delphes](https://github.com/delphes/delphes) is the only local dependency that
+is not mirrored in `deps/`, so you must download and build it first:
+```bash
+deps/install_delphes.sh
+```
+- Alternatively, if you already have a `delphes` build elsewhere, symlink `deps/delphes` to it
+- All other dependencies in `deps/` are mirrors, and are already included with `epic-analysis`;
+  they will be built automatically later
+
+While you are waiting for Delphes to build, you may want to:
+- Prepare to analyze some data from S3, following [s3tools documentation](s3tools/README.md)
+- Read through the `Kinematics` class [header](src/Kinematics.h) and [source](src/Kinematics.cxx), along
+  with [documentation](doc/kinematics.md), to see what physics reconstruction methods are available
+- Tutorial macros in the `tutorial/` directory, to learn how to run `epic-analysis`
 
 ## Building
-
-- First make sure environment variables are set by calling `source environ.sh`
-- Run `make` to build everything: all dependencies in `deps/`, followed by the
-  `epic-analysis` library from the source code in `src/`
+First, set environment variables:
+```bash
+source environ.sh
+```
+Then compile `analysis-epic` (and some other local dependencies):
+```bash
+make
+```
+- We have not yet upgraded to `cmake` in this repository, and still use `Makefiles`
+- Build target locations are not yet configurable, and all will stay within `epic-analysis` (e.g.,
+  libaries will be installd in `lib/`)
 - Additional `make` targets are available (see `Makefile`), for more control during
   development:
 
@@ -88,14 +108,14 @@ make <dependency>-clean  # clean a particular `<dependency>`
 ```
 
 Additional build options are available:
-- `INCLUDE_CENTAURO=1 make` will build with `fastjet` plugin `Centauro`; note that `Centauro` is not included
-  with `Delphes` by default
-- `EXCLUDE_DELPHES=1 make` will build `epic-analysis` without Delphes, which is primarily used to expedite CI workflows
+```bash
+INCLUDE_CENTAURO=1 make  # build with fastjet plugin Centauro (not included in Delphes by default!)
+EXCLUDE_DELPHES=1 make   # build without Delphes support; primarily used to expedite CI workflows
+```
 
-## Quick Start
-
-- If you're ready to try the software hands-on, follow the [tutorials](tutorial/README.md) in 
-  the `tutorial/` directory
+## Quick Start: Tutorial Macros
+If you're ready to try the software hands-on, follow the [tutorials](tutorial/README.md) in 
+the `tutorial/` directory. Otherwise continue reading below.
 
 ---
 
@@ -110,9 +130,6 @@ Additional build options are available:
   names and the appropriate configuration card
   - configuration cards are stored in the `deps/delphes_EIC/` directory,
     a mirror of [`eic/delphes_EIC`](https://github.com/eic/delphes_EIC/tree/master)
-    - clone this `epic-analysis` repository with `--recurse-submodules`, or
-      if you already have cloned without submodules, execute
-      `git submodule update --init` to obtain them
   - environment must be set first (`source environ.sh`)
   - run `deps/run_delphes.sh` with no arguments for usage guide
   - in the script, you may need to change `exeDelphes` to the proper
