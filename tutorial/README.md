@@ -91,6 +91,17 @@ root out/tutorial.template.root
 - `postprocess_xqbins_draw.C`: draws a couple sample histograms for
   the given binning scheme
 
+Commands:
+```bash
+root -b -q -l tutorial/analysis_xqbins.C           # run the analysis macro
+root -b -q -l tutorial/postprocess_xqbins_draw.C   # run the post-processing macro
+root out/tutorial.xqbins.canvas.root               # open the resulting ROOT file
+```
+View the images in `out/tutorial.xqbins.images/`, for example:
+```bash
+display out/tutorial.xqbins.images/*.png   # press 'space' or 'backspace' to change images
+```
+
 ### 3. Full Simulations (all other tutorials are for fast simulations)
 - `analysis_epic.C`: basically a copy of `analysis_xqbins.C`,
   but shows how to analyze full simulation data; the main difference
