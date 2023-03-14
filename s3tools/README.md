@@ -46,7 +46,7 @@ s3tools/s3tool.rb
 ### Example `s3tool.rb` Commands
 For full simulation files from S3, run:
 ```bash
-s3tools/s3tool.rb -o tutorial.epic -c tutorial/epic.config -e 18x275 -l 4
+s3tools/s3tool.rb -o tutorial.epic -c tutorial/epic.config -e 18x275 -l 3
 ```
   - By default, the `config` file will be filled with S3 URLs for streaming data
     from S3; if you would rather download the files locally, add the option
@@ -59,7 +59,7 @@ s3tools/s3tool.rb -o tutorial.epic -c tutorial/epic.config -e 18x275 -l 4
 
 To download sample HEPMC files from S3, and run them through Delphes, run:
 ```bash
-s3tools/s3tool.rb -v hepmc.pythia8 -o tutorial.fastsim -c tutorial/delphes.config -e 10x100 -l 4
+s3tools/s3tool.rb -v hepmc.pythia8 -o tutorial.fastsim -c tutorial/delphes.config -e 10x100 -l 3
 ```
   - Delphes output files will be written to `datarec/tutorial.fastsim`
     (and the HEPMC files will be in `datagen/tutorial.fastsim`)
