@@ -17,12 +17,26 @@ To run tutorials, you need to generate or obtain ROOT files, from fast or full s
   or write your own `s3tools/s3tool.rb` command to get any other files
 - The `datarec/` directory is provided for storage of these files, but is not required to use
 
-A set of files, together with settings such as beam energy and Q2 ranges, are
-specified by config files; see [doc/example.config](../doc/example.config) for an example
-config file and more details. The `s3tools/s3tool.rb` script will generate such files for you
-automatically.
-
 ## Introductory Notes
+
+### Macros: Analysis and Postprocessing
+In general, two macros are used to run `epic-analysis`:
+1. Analysis macro, to run an `Analysis`-derived class, which will analyze 
+   simulated data in an event loop, and generate a variety of output
+   data structures
+2. Postprocessor macro, to process the output from the analysis macro,
+   such as drawing plots
+
+The analysis macro will take some time to run, since it runs the event loop;
+the postprocessor macro is typically fast, since it analyzes the resulting data
+structures
+
+### Input File Lists (Config Files)
+A set of files, together with settings such as beam energy and Q2 ranges, are
+specified by config files; these files are the _input_ to the analysis macros.
+See [doc/example.config](../doc/example.config) for an example config file and
+more details. The `s3tools/s3tool.rb` script will generate such files for you
+automatically.
 
 ### Switching between Fast and Full Simulations
 - many of these examples focus on fast simulations; to switch between fast and
@@ -33,28 +47,11 @@ automatically.
   - `AnalysisEcce` for trees from the Fun4all+EventEvaluator stack (ECCE full simulations)
 - note: some extra settings and features differ between these
 
-### Input File Lists (Config Files)
-- in the analysis macros, the input files are specified by a list, a "config
-  file", with the additional columns
-  - see [documentation here](../s3tools/README.md) for the formatting of these
-    files, as well as scripts to help generate them
-  - for example, this file allows one to combine different Q2 regions together
-    using relative weights 
-
----
-# Tutorial Example Macros
-
-
-Each of these examples has two macros:
-- analysis macro, to run an `Analysis`-derived class, which will analyze 
-  simulated data in an event loop, and generate a variety of output
-  data structures
-- postprocessor macro, to process the output from the analysis macro,
-  such as drawing plots
-- the analysis macro will take some time to run, since it runs
-  the event loop; the postprocessor macro is typically fast, since
-  it analyzes the resulting data structures
-
+-----------------------
+-----------------------
+Tutorial Example Macros
+=======================
+-----------------------
 
 # 1. Template
 - `analysis_template.C`: minimal analysis macro to demonstrate how
