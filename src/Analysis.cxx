@@ -313,8 +313,10 @@ void Analysis::Prepare() {
   // instantiate shared objects
   kin        = std::make_shared<Kinematics>(eleBeamEn,ionBeamEn,crossingAngle);
   kinTrue    = std::make_shared<Kinematics>(eleBeamEn, ionBeamEn, crossingAngle);
+#ifndef EXCLUDE_DELPHES
   kinJet     = std::make_shared<KinematicsJets>(eleBeamEn, ionBeamEn, crossingAngle);
   kinJetTrue = std::make_shared<KinematicsJets>(eleBeamEn, ionBeamEn, crossingAngle);
+#endif
   ST         = std::make_unique<SimpleTree>("tree",kin,kinTrue);
   HFST       = std::make_unique<HFSTree>("hfstree",kin,kinTrue);
   PT         = std::make_unique<ParticleTree>("ptree");
