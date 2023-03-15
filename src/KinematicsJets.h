@@ -32,7 +32,7 @@ class KinematicsJets : public Kinematics
     ~KinematicsJets();
 
     // DELPHES-specific methods ////////////////////////// -- to be removed when jets are added to AnalysisEpic
-#ifndef EXCLUDE_DELPHES
+  //#ifndef EXCLUDE_DELPHES
 
     // jet calculators
     void GetJets(
@@ -70,7 +70,7 @@ class KinematicsJets : public Kinematics
     std::vector<double> zhad_jet;
     // struck quark information
     Double_t quarkpT;
-#endif // ifndef EXCLUDE_DELPHES
+  //#endif // ifndef EXCLUDE_DELPHES
 
   ClassDef(KinematicsJets,1);
 };
