@@ -68,7 +68,7 @@ void binning(char const* file_name, char const* output="") {
 	Double_t depol_4;
 	Double_t weight;
 	events->SetBranchAddress("X", &x);
-	events->SetBranchAddress("QSq", &Q2);
+	events->SetBranchAddress("Q2", &Q2);
 	events->SetBranchAddress("Z", &z);
 	events->SetBranchAddress("PhPerp", &pt);
 	events->SetBranchAddress("PhiH", &phi_h);

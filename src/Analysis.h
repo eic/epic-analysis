@@ -128,9 +128,7 @@ public:
     std::unique_ptr<HFSTree>      HFST;
     std::unique_ptr<ParticleTree> PT;
     std::shared_ptr<Kinematics>   kin, kinTrue;
-#ifndef EXCLUDE_DELPHES
     std::shared_ptr<KinematicsJets> kinJet, kinJetTrue;
-#endif
     std::shared_ptr<HistosDAG>    HD;
     std::unique_ptr<Weights> weightInclusive, weightTrack, weightJet;
     Double_t wInclusiveTotal, wTrackTotal, wJetTotal;

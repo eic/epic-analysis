@@ -14,7 +14,7 @@ SimpleTree::SimpleTree(TString treeName_, std::shared_ptr<Kinematics> K_, std::s
   // branch names are set to match `brufit` implementation
   // (see `https://github.com/c-dilks/dispin/tree/master/src`)
   T = new TTree(treeName,treeName);
-  T->Branch("QSq",       &(K->Q2),        "QSq/D");
+  T->Branch("Q2",        &(K->Q2),        "Q2/D");
   T->Branch("X",         &(K->x),         "X/D");
   T->Branch("Y",         &(K->y),         "Y/D");
   T->Branch("Z",         &(K->z),         "Z/D");

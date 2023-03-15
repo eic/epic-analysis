@@ -31,11 +31,13 @@
 #include "classes/DelphesClasses.h"
 #endif
 // pybind (for ML models using python packages)
+#ifdef SIDIS_MLPRED
 #include <pybind11/pybind11.h>
 #include <pybind11/numpy.h>
 #include <pybind11/embed.h>
 #include <pybind11/stl.h>
 namespace py = pybind11;
+#endif
 
 using std::map;
 using std::cout;
