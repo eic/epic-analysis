@@ -31,7 +31,9 @@
 #include "Histos.h"
 #include "HistosDAG.h"
 #include "Kinematics.h"
+#ifndef EXCLUDE_DELPHES
 #include "KinematicsJets.h"
+#endif
 #include "SimpleTree.h"
 #include "HFSTree.h"
 #include "ParticleTree.h"
@@ -125,7 +127,9 @@ protected:
   std::unique_ptr<HFSTree>      HFST;
   std::unique_ptr<ParticleTree> PT;
   std::shared_ptr<Kinematics>   kin, kinTrue;
+#ifndef EXCLUDE_DELPHES
   std::shared_ptr<KinematicsJets> kinJet, kinJetTrue;
+#endif  
   std::shared_ptr<HistosDAG>    HD;
   std::unique_ptr<Weights> weightInclusive, weightTrack, weightJet;
   Double_t wInclusiveTotal, wTrackTotal, wJetTotal;
