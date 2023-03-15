@@ -123,6 +123,9 @@ class Histos : public TNamed
         Bool_t logz = false
         );
 
+    // replace a histogram (keeps its HistConfig); useful for re-binning
+    void ReplaceHist(TString varname_, TH1 *hist_);
+
     // writers
     void WriteHists(TFile *ofile) {
       ofile->cd("/");
