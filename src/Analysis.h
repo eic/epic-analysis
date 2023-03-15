@@ -161,66 +161,7 @@ public:
     Double_t elePtrue, maxElePtrue;
     int pid;
     TString finalStateID;
-
-    Int_t GetEventQ2Idx(Double_t Q2, Int_t guess=0);
-
-    // run the analysis
-    virtual void Execute() = 0;
-
-  protected:
-
-    // prepare to perform the analysis; in derived classes, define a method `Execute()`, which
-    // will run the event loop; the first line of `Execute()` should call `Analysis::Prepare()`,
-    // which set up common things like output files, `HistosDAG`, etc.
-    void Prepare();
-
-    // finish the analysis; call `Analysis::Finish()` at the end of derived `Execute()` methods
-    void Finish();
-
-    // print an error; if more than `errorCntMax` errors are printed, printing is suppressed
-    void ErrorPrint(std::string message);
-
-    // `FillHistos(weight)` methods: fill histograms
-    void FillHistosInclusive(Double_t wgt); // inclusive kinematics
-    void FillHistos1h(Double_t wgt);        // single-hadron kinematics
-    void FillHistosJets(Double_t wgt);      // jet kinematics
-
-    // shared objects
-    std::unique_ptr<SimpleTree>   ST;
-    std::unique_ptr<HFSTree>      HFST;
-    std::unique_ptr<ParticleTree> PT;
-    std::shared_ptr<Kinematics>   kin, kinTrue;
-    std::shared_ptr<HistosDAG>    HD;
-    std::unique_ptr<Weights> weightInclusive, weightTrack, weightJet;
-    Double_t wInclusiveTotal, wTrackTotal, wJetTotal;
-    Long64_t entriesTot;
-    Long64_t errorCnt;
-    const TString sep = "--------------------------------------------";
-
-    // setup / common settings
-    std::vector<std::vector<std::string> > infiles;
-    // A lookup index for guessing which Q2 range an event belongs to.
-    std::vector<std::size_t> inLookup;
-    std::vector<Double_t> Q2xsecs;
-    std::vector<Double_t> Q2mins;
-    std::vector<Double_t> Q2maxs;
-    std::vector<Long64_t> Q2entries;
-    std::vector<Double_t> Q2weights;
-    TString configFileName,outfileName,outfilePrefix;
-    TFile *outFile;
-    Double_t eleBeamEn; // GeV
-    Double_t ionBeamEn; // GeV
-    Double_t crossingAngle; // mrad
-    Double_t totalCrossSection;
-    TString reconMethod;
-
-    // event loop objects
-    Long64_t ENT;
-    Double_t eleP,maxEleP;
-    Double_t elePtrue, maxElePtrue;
-    int pid;
-    TString finalStateID;
-
+ 
 #ifndef EXCLUDE_DELPHES
   fastjet::PseudoJet jet;
 #endif
