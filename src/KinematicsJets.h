@@ -1,24 +1,22 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2023 Kevin Adkins
+#ifndef EXCLUDE_DELPHES
 
 /* NOTE:
  * if you make changes, MAINTAIN DOCUMENTATION IN ../doc/kinematicsJets.md
  */
 
-#ifndef KinematicsJets_
-#define KinematicsJets_
+#pragma once
 
 // Kinematics base calss
 #include "Kinematics.h"
 
 // Delphes includes
-//#ifndef EXCLUDE_DELPHES
 #include "classes/DelphesClasses.h"
 #include "fastjet/ClusterSequence.hh"
 #ifdef INCLUDE_CENTAURO
 #include "fastjet/plugins/Centauro/Centauro.hh"
 #endif // CENTAURO
-//#endif // DELPHES
 
 using std::map;
 using std::cout;
@@ -32,7 +30,6 @@ class KinematicsJets : public Kinematics
     ~KinematicsJets();
 
     // DELPHES-specific methods ////////////////////////// -- to be removed when jets are added to AnalysisEpic
-  //#ifndef EXCLUDE_DELPHES
 
     // jet calculators
     void GetJets(
@@ -70,7 +67,6 @@ class KinematicsJets : public Kinematics
     std::vector<double> zhad_jet;
     // struck quark information
     Double_t quarkpT;
-  //#endif // ifndef EXCLUDE_DELPHES
 
   ClassDef(KinematicsJets,1);
 };

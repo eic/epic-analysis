@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2023 Kevin Adkins
+#ifndef EXCLUDE_DELPHES
 
 /* NOTE:
  * if you make changes, MAINTAIN DOCUMENTATION IN ../doc/kinematicsJets.md
@@ -11,8 +12,6 @@ ClassImp(KinematicsJets)
 KinematicsJets::KinematicsJets(Double_t enEleBeam_, Double_t enIonBeam_, Double_t crossAng_) : Kinematics(enEleBeam_,enIonBeam_,crossAng_)
 {/*Note: Energy units are GeV, angle units are mrad*/};
 
-// DELPHES-only methods //////////////////////////////////////////////////////
-#ifndef EXCLUDE_DELPHES
 
 // JET METHODS ///////////////////////
 
@@ -346,9 +345,8 @@ void KinematicsJets::CalculateBreitJetKinematics(fastjet::PseudoJet jet){
 
 };
 #endif // ifdef INCLUDE_CENTAURO
-#endif // ifndef EXCLUDE_DELPHES
 // end DELPHES-only methods //////////////////////////////////////////////////////
 
 
 KinematicsJets::~KinematicsJets() {};
-
+#endif // ifndef EXCLUDE_DELPHES
