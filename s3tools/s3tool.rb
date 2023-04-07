@@ -9,7 +9,7 @@ require 'fileutils'
 
 # default CLI options
 options = OpenStruct.new
-options.version    = 'epic.22.11.3'
+options.version    = 'epic.23.03.0'
 options.energy     = '18x275'
 options.locDir     = ''
 options.mode       = 's'
@@ -43,6 +43,31 @@ end
 #   :fileExtension   => File extension (optional, defaults to 'root')
 # }
 prodSettings = {
+  'epic.23.03.0' => {
+    :comment         => 'Pythia 6, with & without radiative corrections',
+    :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/SIDIS/pythia6" },
+    :energySubDir    => Proc.new { "ep_#{options.energy}" },
+    :dataSubDir      => Proc.new { |radDir|
+      # if [options.energy,radDir]==['18x275','noradcor']  # correct for S3 disorganization  #FIXME: still true?
+      #   "hepmc_ip6"
+      # else
+        "hepmc_ip6/#{radDir}"
+      # end
+    },
+    #
+    #
+    # FIXME: are there also Pythia8 data in this production ?!?!?!?
+    #
+    #
+  },
+  'epic.23.01.0' => {
+    :comment         => 'Pythia 8',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
   'epic.22.11.3' => {
     :comment         => 'Pythia 6, with & without radiative corrections',
     :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
@@ -292,6 +317,7 @@ end
 
 # pattern: "ep_#{energy}/hepmc_ip6/" with Q2 range given in file name as "q2_#{minQ2}_#{maxQ2}"
 if [
+    'epic.23.03.0',
     'epic.22.11.3',
     'hepmc.pythia6',
 ].include? options.version
@@ -333,6 +359,7 @@ if [
 
 # pattern: "#{energy}/minQ2=#{minQ2}/"
 elsif [
+  'epic.23.01.0',
   'epic.22.11.2',
   'athena.deathvalley-v1.0',
   'hepmc.pythia8',
