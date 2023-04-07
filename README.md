@@ -8,7 +8,9 @@ fast simulations, including the following features:
 - General event loops for reading upstream data structures; for example,
   `src/AnalysisDelphes.cxx` for reading Delphes trees
 - Kinematics reconstruction methods (e.g., leptonic, hadronic, Jacquet-Blondel,
-  etc.); see [Kinematics Documentation](doc/kinematics.md) for more information
+  etc.)
+  - see [Kinematics Documentation](doc/kinematics.md) for more information
+  - see [Jet Kinematics Documentation](doc/kinematicsJets.md) for jet kinematics
 - Calculations of SIDIS variables, such as `PhiH` and `qT`, for single
   particles, as well as jet variables
 - Automation for downloading or streaming simulation data from S3, along with
