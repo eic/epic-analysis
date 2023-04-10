@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2023 Christopher Dilks, Connor Pecar, Matthew McEneaney
 
-#ifndef AnalysisDelphes_
-#define AnalysisDelphes_
+#pragma once
 
 // delphes
 #include "classes/DelphesClasses.h"
@@ -28,5 +27,3 @@ class AnalysisDelphes : public Analysis
 
   ClassDefOverride(AnalysisDelphes,1);
 };
-
-#endif

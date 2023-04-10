@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2023 Christopher Dilks, Connor Pecar, Duane Byer
 
-#ifndef PostProcessor_
-#define PostProcessor_
+#pragma once
 
 #include <map>
 #include <iomanip>
@@ -191,5 +190,3 @@ class PostProcessor
 
   ClassDef(PostProcessor,1);
 };
-
-#endif

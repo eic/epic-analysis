@@ -1,6 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2023 Christopher Dilks
 
+//////////////////////////////////////////////////////
+//
+// FIXME: this needs to be updated for PODIO Frames
+//
+//////////////////////////////////////////////////////
+
 // print PODIO data types for a ROOT file
 //
 // USAGE:

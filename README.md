@@ -8,7 +8,9 @@ fast simulations, including the following features:
 - General event loops for reading upstream data structures; for example,
   `src/AnalysisDelphes.cxx` for reading Delphes trees
 - Kinematics reconstruction methods (e.g., leptonic, hadronic, Jacquet-Blondel,
-  etc.); see [Kinematics Documentation](doc/kinematics.md) for more information
+  etc.)
+  - see [Kinematics Documentation](doc/kinematics.md) for more information
+  - see [Jet Kinematics Documentation](doc/kinematicsJets.md) for jet kinematics
 - Calculations of SIDIS variables, such as `PhiH` and `qT`, for single
   particles, as well as jet variables
 - Automation for downloading or streaming simulation data from S3, along with
@@ -111,6 +113,7 @@ Additional build options are available:
 ```bash
 INCLUDE_CENTAURO=1 make  # build with fastjet plugin Centauro (not included in Delphes by default!)
 EXCLUDE_DELPHES=1 make   # build without Delphes support; primarily used to expedite CI workflows
+INCLUDE_PODIO=1 make     # build with support for reading data with PODIO
 ```
 
 ## Quick Start: Tutorial Macros

@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2023 Duane Byer
 
-#ifndef Weights_
-#define Weights_
+#pragma once
 
 #include <memory>
 #include <initializer_list>
@@ -82,5 +81,3 @@ class WeightsSum : public Weights
     std::vector<Weights const*> weights;
   ClassDefOverride(WeightsSum,1);
 };
-
-#endif

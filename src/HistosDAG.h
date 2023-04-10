@@ -2,8 +2,7 @@
 // Copyright (C) 2023 Christopher Dilks
 
 // Implement Histos payload for Adage
-#ifndef HistosDAG_
-#define HistosDAG_
+#pragma once
 
 #include "adage/Adage.h"
 #include "Histos.h"
@@ -19,5 +18,3 @@ class HistosDAG : public Adage<Histos>
 
   ClassDefOverride(HistosDAG,1);
 };
-
-#endif

@@ -7,8 +7,7 @@
      and PID, scattered electron information, and true scattered
      electron and beam information.
  */
-#ifndef HFSTree_
-#define HFSTree_
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,5 +42,3 @@ class HFSTree
 
   ClassDef(HFSTree,1);
 };
-
-#endif

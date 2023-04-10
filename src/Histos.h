@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2023 Christopher Dilks, Duane Byer
 
-#ifndef Histos_
-#define Histos_
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -165,5 +164,3 @@ class Histos : public TNamed
 
   ClassDef(Histos,1);
 };
-
-#endif

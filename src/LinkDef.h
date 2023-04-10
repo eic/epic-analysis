@@ -16,6 +16,9 @@
 
 // analysis objects
 #pragma link C++ class Kinematics+;
+#ifndef EXCLUDE_DELPHES
+#pragma link C++ class KinematicsJets+;
+#endif
 #pragma link C++ class SimpleTree+;
 #pragma link C++ class HFSTree+;
 #pragma link C++ class ParticleTree+;
@@ -29,9 +32,13 @@
 // analysis event loop classes
 #pragma link C++ class Analysis+;
 #pragma link C++ class AnalysisEpic+;
-#pragma link C++ class AnalysisEpicPodio+;
 #pragma link C++ class AnalysisAthena+;
 #pragma link C++ class AnalysisEcce+;
+
+#ifdef INCLUDE_PODIO
+#pragma link C++ class AnalysisEpicPodio+;
+#endif
+
 #ifndef EXCLUDE_DELPHES
 #pragma link C++ class AnalysisDelphes+;
 #endif
