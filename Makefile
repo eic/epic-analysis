@@ -26,7 +26,11 @@ DEP_LIBRARIES = $(shell root-config --glibs)
 #DEP_LIBRARIES += -lMinuit -lRooFitCore -lRooFit -lRooStats -lProof -lMathMore
 
 # Data Model (PODIO + EDM4hep + EDM4eic)
-DEP_LIBRARIES += -L/usr/local/lib -lpodio -lpodioRootIO -ledm4hep -ledm4eic
+DEP_LIBRARIES += -L/usr/local/lib -ledm4hep -ledm4eic
+ifdef INCLUDE_PODIO
+	DEP_LIBRARIES += -L/usr/local/lib -lpodio -lpodioRootIO
+	FLAGS += -DINCLUDE_PODIO
+endif
 
 # Miscellaneous
 DEP_LIBRARIES += -lfmt
