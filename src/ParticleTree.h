@@ -5,8 +5,7 @@
  * - provides a particle tree for storing reconstructed particle kinematics + pid
  * - helpful for debugging matching algorithm
  */
-#ifndef ParticleTree_
-#define ParticleTree_
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -45,5 +44,3 @@ class ParticleTree
   
   ClassDef(ParticleTree,1);
 };
-
-#endif

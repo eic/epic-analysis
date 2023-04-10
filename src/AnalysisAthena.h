@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2022 Sanghwa Park, Christopher Dilks
 
-#ifndef AnalysisAthena_
-#define AnalysisAthena_
+#pragma once
 
 #include "TTreeReader.h"
 #include "TTreeReaderValue.h"
@@ -20,5 +19,3 @@ class AnalysisAthena : public Analysis
 
     ClassDefOverride(AnalysisAthena,1);
 };
-
-#endif

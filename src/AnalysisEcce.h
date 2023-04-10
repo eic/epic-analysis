@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2022 Ralf Seidl, Christopher Dilks, Sanghwa Park
 
-#ifndef AnalysisEcce_
-#define AnalysisEcce_
+#pragma once
 
 #include "TTreeReader.h"
 #include "TTreeReaderValue.h"
@@ -27,5 +26,3 @@ class AnalysisEcce : public Analysis
 
     ClassDefOverride(AnalysisEcce,1);
 };
-
-#endif

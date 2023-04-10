@@ -5,8 +5,7 @@
  * if you make changes, MAINTAIN DOCUMENTATION IN ../doc/kinematics.md
  */
 
-#ifndef Kinematics_
-#define Kinematics_
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -306,6 +305,3 @@ class Kinematics
 
   ClassDef(Kinematics,1);
 };
-
-#endif
-
