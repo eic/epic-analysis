@@ -242,34 +242,34 @@ void AnalysisDelphes::Execute() {
       // get vector of jets
       // TODO: should this have an option for clustering method?
       //kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
-      kin->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle, jetAlg, jetRad, jetMin);
+      kinJet->GetJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle, jetAlg, jetRad, jetMin);
 
       finalStateID = "jet";
 
 #ifdef INCLUDE_CENTAURO
-      if(useBreitJets) kin->GetBreitFrameJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
+      if(useBreitJets) kinJet->GetBreitFrameJets(itEFlowTrack, itEFlowPhoton, itEFlowNeutralHadron, itParticle);
 #endif
 
-      auto wJet = Q2weightFactor * weightJet->GetWeight(*kinTrue); // TODO: should we separate weights for breit and non-breit jets?
+      auto wJet = Q2weightFactor * weightJet->GetWeight(*kinJetTrue); // TODO: should we separate weights for breit and non-breit jets?
       wJetTotal += wJet;
 
       Int_t nJets;
-      if(useBreitJets) nJets = kin->breitJetsRec.size();
-      else      nJets = kin->jetsRec.size();
+      if(useBreitJets) nJets = kinJet->breitJetsRec.size();
+      else      nJets = kinJet->jetsRec.size();
 
-      for(int i = 0; i < kin->jetsRec.size(); i++){
+      for(int i = 0; i < kinJet->jetsRec.size(); i++){
 
         if(useBreitJets) {
 #ifdef INCLUDE_CENTAURO
-          jet = kin->breitJetsRec[i];
-          kin->CalculateBreitJetKinematics(jet);
+          jet = kinJet->breitJetsRec[i];
+          kinJet->CalculateBreitJetKinematics(jet);
 #endif
         } else {
-          jet = kin->jetsRec[i];
-          kin->CalculateJetKinematics(jet);
+          jet = kinJet->jetsRec[i];
+          kinJet->CalculateJetKinematics(jet);
 
 	  // Match Reco Jet to Nearest Truth Jet (Specify DR matching limit between jets)
-	  kin->CalculateJetResolution(jetMatchDR);
+	  kinJet->CalculateJetResolution(jetMatchDR);
         };
 
         // fill jet histograms in activated bins
