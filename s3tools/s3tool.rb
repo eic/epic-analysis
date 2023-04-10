@@ -64,7 +64,7 @@ prodSettings = {
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
   'ecce.22.1' => {
-    :comment         => 'Last ECCE Production, August 2023',
+    :comment         => 'Last ECCE Production, August 2022',
     :crossSectionID  => Proc.new { |minQ2,maxQ2| "pythia6:ep-#{options.energy}#{ecceQ2range(minQ2,maxQ2)}" },
     :releaseSubDir   => Proc.new { "S3/eictest/EPIC/Campaigns/#{versionNum(options.version)}/SIDIS/pythia6" },
     :energySubDir    => Proc.new { "ep-#{options.energy}" },
