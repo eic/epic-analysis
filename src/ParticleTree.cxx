@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-// Copyright (C) 2022 Gregory Matousek
+// Copyright (C) 2023 Gregory Matousek
 
 #include "ParticleTree.h"
 

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-// Copyright (C) 2022 Ralf Seidl, Christopher Dilks, Sanghwa Park
+// Copyright (C) 2023 Ralf Seidl, Christopher Dilks, Sanghwa Park
 
 #pragma once
 

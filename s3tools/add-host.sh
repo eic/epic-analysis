@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # SPDX-License-Identifier: LGPL-3.0-or-later
-# Copyright (C) 2022 Christopher Dilks
+# Copyright (C) 2023 Christopher Dilks
 
 # add host to MinIO client config
 # - requires env vars S3_SECRET_KEY and S3_ACCESS_KEY

@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 # SPDX-License-Identifier: LGPL-3.0-or-later
-# Copyright (C) 2022 Christopher Dilks
+# Copyright (C) 2023 Christopher Dilks
 
 # generate a config file, from a set of `list` files
 

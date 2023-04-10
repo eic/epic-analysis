@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-// Copyright (C) 2022 Gregory Matousek, Christopher Dilks
+// Copyright (C) 2023 Gregory Matousek, Christopher Dilks
 
 #include "AnalysisEpic.h"
 

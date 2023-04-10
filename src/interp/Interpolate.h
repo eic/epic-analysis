@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-// Copyright (C) 2022 Duane Byer
+// Copyright (C) 2023 Duane Byer
 
 #ifndef Interpolate_
 #define Interpolate_

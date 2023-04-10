@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-// Copyright (C) 2022 Sanghwa Park, Christopher Dilks
+// Copyright (C) 2023 Sanghwa Park, Christopher Dilks
 
 #pragma once
 
