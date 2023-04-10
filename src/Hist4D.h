@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2022 Duane Byer
 
-#ifndef Hist4D_
-#define Hist4D_
+#pragma once
 
 #include <TROOT.h>
 #include <TNamed.h>
@@ -106,5 +105,3 @@ public:
 
 	ClassDefOverride(Hist4D, 1);
 };
-
-#endif

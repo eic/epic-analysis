@@ -7,8 +7,7 @@
  *   with BruFit for asymmetry analysis
  *   (see `https://github.com/c-dilks/dispin/tree/master/src`)
  */
-#ifndef SimpleTree_
-#define SimpleTree_
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,5 +41,3 @@ class SimpleTree
 
   ClassDef(SimpleTree,1);
 };
-
-#endif
