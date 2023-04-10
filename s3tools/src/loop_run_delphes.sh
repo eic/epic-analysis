@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # SPDX-License-Identifier: LGPL-3.0-or-later
-# Copyright (C) 2022 Christopher Dilks
+# Copyright (C) 2023 Christopher Dilks
 
 # runs Delphes in a loop over all files in the directories specified in $*
 # - optionally runs multi-threaded: one thread per directory

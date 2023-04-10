@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
-// Copyright (C) 2022 Connor Pecar
+// Copyright (C) 2023 Connor Pecar
 
 /* HFSTree
    - Produces a tree containing information needed for kinematic
