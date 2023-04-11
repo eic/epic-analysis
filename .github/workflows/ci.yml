@@ -554,17 +554,17 @@ jobs:
             echo "yvar = ${{matrix.yvar}}"
             echo "[CI] COMPARATOR MACRO: ePIC"
             macro/ci/comparator_run.sh ${{matrix.aname}} ${{matrix.pname}} ${{matrix.recon}} ${{matrix.xvar}} ${{matrix.yvar}} \
-              'ePIC Arches'               'epic_arches'             \
-              'ePIC BryceCanyon'          'epic_brycecanyon'        \
-              'ePIC Arches (radcor)'      'epic_arches_radcor'      \
-              'ePIC BryceCanyon (radcor)' 'epic_brycecanyon_radcor' \
+              'ePIC Arches (no radcor)'      'epic_arches'             \
+              'ePIC BryceCanyon (no radcor)' 'epic_brycecanyon'        \
+              'ePIC Arches (radcor)'         'epic_arches_radcor'      \
+              'ePIC BryceCanyon (radcor)'    'epic_brycecanyon_radcor' \
               'ePIC'
             echo "[CI] COMPARATOR MACRO: LEGACY"
             macro/ci/comparator_run.sh ${{matrix.aname}} ${{matrix.pname}} ${{matrix.recon}} ${{matrix.xvar}} ${{matrix.yvar}} \
-              'Delphes Pythia6 (radcor)' 'fastsim'            \
-              'ePIC Arches (radcor)'     'epic_arches_radcor' \
-              'ATHENA'                   'athena'             \
-              'ECCE'                     'ecce'               \
+              'Delphes Pythia6 (no radcor)' 'fastsim'     \
+              'ePIC Arches (no radcor)'     'epic_arches' \
+              'ATHENA'                      'athena'      \
+              'ECCE'                        'ecce'        \
               'LEGACY'
       - uses: actions/upload-artifact@v3
         with:
