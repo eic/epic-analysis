@@ -9,7 +9,7 @@ require 'fileutils'
 
 # default CLI options
 options = OpenStruct.new
-options.version    = 'epic.23.03.0'
+options.version    = 'epic.22.11.3'
 options.energy     = '18x275'
 options.locDir     = ''
 options.mode       = 's'
