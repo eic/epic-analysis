@@ -59,7 +59,7 @@ void analysis_asymmetry(
   });
   //A->SetWeights(weights);
 
-  A->writeSimpleTree = true; // write SimpleTree (for one bin)
+  A->writeSidisTree = true; // write SidisTree (for one bin)
   //A->maxEvents = 10000; // use this to limit the number of events
   //A->SetReconMethod("Ele"); // recon method (default is "Ele")
   //A->AddFinalState("pipTrack"); // final states (default is "pipTrack" only)

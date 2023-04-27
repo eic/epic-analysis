@@ -25,7 +25,7 @@ void analysis_eventEvaluator(
   AnalysisEcce *A = new AnalysisEcce(configFile, outfilePrefix);
 
   A->maxEvents = 300000; // use this to limit the number of events
-  A->writeSimpleTree = true;
+  A->writeSidisTree = true;
 
   // set reconstruction method and final states =============================
   // - see `Analysis` constructor for methods (or other tutorials)

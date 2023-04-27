@@ -13,7 +13,7 @@ void analysis_yRatio(
   AnalysisDelphes *A = new AnalysisDelphes(configFile, outfilePrefix);
 
   //A->maxEvents = 30000; // use this to limit the number of events
-  A->writeSimpleTree = true; // write SimpleTree (for one bin)
+  A->writeSidisTree = true; // write SidisTree (for one bin)
   A->SetReconMethod("Ele"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
   //A->AddFinalState("KpTrack"); // kaon final state

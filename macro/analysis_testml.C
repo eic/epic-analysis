@@ -20,7 +20,7 @@ void analysis_testml(
       );
   
   A->maxEvents = 10000; // use this to limit the number of events
-  A->writeSimpleTree = true; // write SimpleTree (for one bin)
+  A->writeSidisTree = true; // write SidisTree (for one bin)
   A->writeHFSTree = true; // write HFSTree (for one bin)
   A->SetReconMethod("ML"); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state

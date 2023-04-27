@@ -20,7 +20,7 @@ void analysis_jets(
   // AnalysisAthena *A = new AnalysisAthena(configFile, outfilePrefix); // ATHENA DD4hep + Juggler
 
   //A->maxEvents = 10000; // use this to limit the number of events
-  A->writeSimpleTree = false; // (don't) write SimpleTree (for one bin)
+  A->writeSidisTree = false; // (don't) write SidisTree (for one bin)
 
   // set reconstruction method =============================
   // - see `Analysis` constructor for methods

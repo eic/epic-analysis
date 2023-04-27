@@ -227,7 +227,7 @@ void AnalysisDelphes::Execute() {
         // fill simple tree
         // - not binned
         // - `IsActiveEvent()` is only true if at least one bin gets filled for this track
-        if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
+        if( writeSidisTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
       }
 
       // tests
