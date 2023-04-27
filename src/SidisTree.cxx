@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2023 Christopher Dilks, Duane Byer
 
-#include "SimpleTree.h"
+#include "SidisTree.h"
 
-ClassImp(SimpleTree)
+ClassImp(SidisTree)
 
 // constructor
-SimpleTree::SimpleTree(TString treeName_, std::shared_ptr<Kinematics> K_, std::shared_ptr<Kinematics> Ktrue_) 
+SidisTree::SidisTree(TString treeName_, std::shared_ptr<Kinematics> K_, std::shared_ptr<Kinematics> Ktrue_) 
   : treeName(treeName_)
   , K(K_)
   , Ktrue(Ktrue_)
@@ -39,6 +39,6 @@ SimpleTree::SimpleTree(TString treeName_, std::shared_ptr<Kinematics> K_, std::s
 };
 
 // destructor
-SimpleTree::~SimpleTree() {
+SidisTree::~SidisTree() {
 };
 

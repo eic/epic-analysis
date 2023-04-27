@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2023 Christopher Dilks, Duane Byer
 
-/* SimpleTree
+/* SidisTree
  * - provides a simple tree, for common usage in any Analysis or
  *   Analysis derived class; this tree is designed to be compatible
  *   with BruFit for asymmetry analysis
@@ -20,11 +20,11 @@
 // ROOT
 #include "TTree.h"
 
-class SimpleTree
+class SidisTree
 {
   public:
-    SimpleTree(TString treeName_, std::shared_ptr<Kinematics> K_, std::shared_ptr<Kinematics> Ktrue_);
-    ~SimpleTree();
+    SidisTree(TString treeName_, std::shared_ptr<Kinematics> K_, std::shared_ptr<Kinematics> Ktrue_);
+    ~SidisTree();
 
     TTree *GetTree() { return T; };
     std::shared_ptr<Kinematics> GetKinematics() { return K; };
@@ -39,5 +39,5 @@ class SimpleTree
     std::shared_ptr<Kinematics> Ktrue;
     TString treeName;
 
-  ClassDef(SimpleTree,1);
+  ClassDef(SidisTree,1);
 };

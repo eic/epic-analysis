@@ -22,7 +22,7 @@ void analysis_q2_weights(
 
   A->SetReconMethod(reconMethod); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
-  // A->writeSimpleTree = true;
+  // A->writeSidisTree = true;
 
   // define cuts ===========================================
   A->AddBinScheme("w");  A->BinScheme("w")->BuildBin("Min",3.0); // W > 3 GeV
