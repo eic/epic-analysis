@@ -3,8 +3,8 @@
 
 R__LOAD_LIBRARY(EpicAnalysis)
 
-// plot the Q2 distribution, to check if Q2 weights are correctly applied
-void analysis_q2_weights(
+// run analysis on a single bin
+void analysis_single_bin(
     TString configFile,
     TString outfilePrefix,
     TString reconMethod="Ele"
