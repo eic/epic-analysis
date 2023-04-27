@@ -7,7 +7,7 @@ R__LOAD_LIBRARY(EpicAnalysis)
 void postprocess_eta_vs_p_forPID(TString infile="out/coverage.fastsim.root") {
   PostProcessor *P = new PostProcessor(infile);
   P->Op()->Payload( [&P](Histos *H) {
-      P->DrawSingle(H,"etaVsP");
+      P->DrawSingle(H,"etaVsP","COLZ");
       });
   P->Execute();
   P->Finish(); 
