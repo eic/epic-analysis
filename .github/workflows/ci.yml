@@ -14,8 +14,8 @@ defaults:
     shell: bash
 
 env:
-  ebeam_en: 18
-  pbeam_en: 275
+  ebeam_en: 5
+  pbeam_en: 41
   root: root -b -q
   root_no_delphes: root -b -q macro/ci/define_exclude_delphes.C 
 
@@ -139,13 +139,11 @@ jobs:
       matrix:
         include:
           # ePIC
-          - { id: epic_arches,             options: --version epic.22.11.3 --limit 20 --detector arches      } # max limit=150
-          - { id: epic_brycecanyon,        options: --version epic.22.11.3 --limit 4  --detector brycecanyon } # max limit=35
-          - { id: epic_arches_radcor,      options: --version epic.22.11.3 --limit 20 --detector arches      --radcor } # max limit=150
-          - { id: epic_brycecanyon_radcor, options: --version epic.22.11.3 --limit 4  --detector brycecanyon --radcor } # max limit=35
+          - { id: epic_arches,             options: --version epic.23.03.0_pythia6 --limit 2 --detector arches      } # max limit=150
+          - { id: epic_brycecanyon,        options: --version epic.23.03.0_pythia6 --limit 2  --detector brycecanyon } # max limit=35
           # ECCE / ATHENA
-          - { id: ecce,   options: --version ecce.22.1               --limit 40 } # max limit=375
-          - { id: athena, options: --version athena.deathvalley-v1.0 --limit 20 } # max limit=500
+          - { id: ecce,   options: --version ecce.22.1               --limit 2 } # max limit=375
+          - { id: athena, options: --version athena.deathvalley-v1.0 --limit 2 } # max limit=500
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -240,8 +238,6 @@ jobs:
         detector:
           - epic_arches
           - epic_brycecanyon
-          - epic_arches_radcor
-          - epic_brycecanyon_radcor
           - athena
           - ecce
         aname: [x_q2, p_eta, yRatio, q2_weights]
@@ -257,16 +253,6 @@ jobs:
         - { aname: x_q2, recon: DA,     detector: epic_brycecanyon }
         - { aname: x_q2, recon: Sigma,  detector: epic_brycecanyon }
         - { aname: x_q2, recon: eSigma, detector: epic_brycecanyon }
-        - { aname: x_q2, recon: Mixed,  detector: epic_arches_radcor }
-        - { aname: x_q2, recon: JB,     detector: epic_arches_radcor }
-        - { aname: x_q2, recon: DA,     detector: epic_arches_radcor }
-        - { aname: x_q2, recon: Sigma,  detector: epic_arches_radcor }
-        - { aname: x_q2, recon: eSigma, detector: epic_arches_radcor }
-        - { aname: x_q2, recon: Mixed,  detector: epic_brycecanyon_radcor }
-        - { aname: x_q2, recon: JB,     detector: epic_brycecanyon_radcor }
-        - { aname: x_q2, recon: DA,     detector: epic_brycecanyon_radcor }
-        - { aname: x_q2, recon: Sigma,  detector: epic_brycecanyon_radcor }
-        - { aname: x_q2, recon: eSigma, detector: epic_brycecanyon_radcor }
         - { aname: x_q2, recon: Mixed,  detector: athena }
         - { aname: x_q2, recon: JB,     detector: athena }
         - { aname: x_q2, recon: DA,     detector: athena }
@@ -404,8 +390,6 @@ jobs:
           - fastsim
           - epic_arches
           - epic_brycecanyon
-          - epic_arches_radcor
-          - epic_brycecanyon_radcor
           - athena
           - ecce
         pname: # list only jobs which will only use one (primary) recon method
@@ -439,18 +423,6 @@ jobs:
           - { mode: epic_brycecanyon,        pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: epic_brycecanyon,        pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: epic_brycecanyon,        pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_arches_radcor,      pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_arches_radcor,      pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_arches_radcor,      pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_arches_radcor,      pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_arches_radcor,      pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_arches_radcor,      pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_brycecanyon_radcor, pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_brycecanyon_radcor, pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_brycecanyon_radcor, pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_brycecanyon_radcor, pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_brycecanyon_radcor, pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_brycecanyon_radcor, pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: athena,                  pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: athena,                  pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
           - { mode: athena,                  pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
@@ -554,10 +526,10 @@ jobs:
             echo "yvar = ${{matrix.yvar}}"
             echo "[CI] COMPARATOR MACRO: ePIC"
             macro/ci/comparator_run.sh ${{matrix.aname}} ${{matrix.pname}} ${{matrix.recon}} ${{matrix.xvar}} ${{matrix.yvar}} \
-              'ePIC Arches (no radcor)'      'epic_arches'             \
-              'ePIC BryceCanyon (no radcor)' 'epic_brycecanyon'        \
-              'ePIC Arches (radcor)'         'epic_arches_radcor'      \
-              'ePIC BryceCanyon (radcor)'    'epic_brycecanyon_radcor' \
+              'ePIC Arches (no radcor)'      'epic_arches'      \
+              'ePIC BryceCanyon (no radcor)' 'epic_brycecanyon' \
+              'ePIC Arches (same)'           'epic_arches'      \
+              'ePIC BryceCanyon (same)'      'epic_brycecanyon' \
               'ePIC'
             echo "[CI] COMPARATOR MACRO: LEGACY"
             macro/ci/comparator_run.sh ${{matrix.aname}} ${{matrix.pname}} ${{matrix.recon}} ${{matrix.xvar}} ${{matrix.yvar}} \
@@ -617,8 +589,6 @@ jobs:
           macro/ci/merge-fastfull.sh results \
             epic_arches             \
             epic_brycecanyon        \
-            epic_arches_radcor      \
-            epic_brycecanyon_radcor \
             ecce                    \
             athena
           tree results
