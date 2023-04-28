@@ -46,6 +46,13 @@ end
 #   :fileExtension   => File extension (optional, defaults to 'root')
 # }
 prodSettings = {
+  'epic.unstable' => {
+    :comment         => "Latest ePIC TEST sample production; update in #{$0} as needed",
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/main/epic_brycecanyon/DIS/NC" }, # FORCE brycecanyon only
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
   'epic.23.03.0_pythia8' => {
     :comment         => 'Pythia 8, small sample, 10x100, minQ2=1000 only',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
@@ -358,6 +365,7 @@ if [
 
 # pattern: "#{energy}/minQ2=#{minQ2}/"
 elsif [
+  'epic.unstable',
   'epic.23.03.0_pythia8',
   'epic.23.01.0',
   'epic.22.11.2',
@@ -421,6 +429,9 @@ elsif [
       .first(options.limit)
   end
 
+else
+  $stderr.puts "\nERROR: production version '#{options.version}' is missing in RELEASE VERSION DEPENDENT part of #{$0}; add it!"
+  exit 1
 end # END RELEASE VERSION DEPENDENT CODE ##################
 
 
