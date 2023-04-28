@@ -53,13 +53,13 @@ prodSettings = {
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
-  'epic.23.03.0_pythia6' => {
-    :comment         => 'Pythia 6, small sample, 5x41, noradcor only',
-    :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/SIDIS/pythia6" },
-    :energySubDir    => Proc.new { "ep_#{options.energy}" },
-    :dataSubDir      => Proc.new { |radDir| "hepmc_ip6/#{radDir}" },
-  },
+  # 'epic.23.03.0_pythia6' => { # FIXME: need cross section for Q2<1 bin
+  #   :comment         => 'Pythia 6, small sample, 5x41, noradcor only, Q2<1 only',
+  #   :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
+  #   :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/SIDIS/pythia6" },
+  #   :energySubDir    => Proc.new { "ep_#{options.energy}" },
+  #   :dataSubDir      => Proc.new { |radDir| "hepmc_ip6/#{radDir}" },
+  # },
   'epic.23.01.0' => {
     :comment         => 'Pythia 8',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
