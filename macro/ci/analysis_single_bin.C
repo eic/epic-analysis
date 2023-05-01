@@ -30,7 +30,7 @@ void analysis_single_bin(
   //A->AddBinScheme("z");  A->BinScheme("z")->BuildBin("Range",0.2,0.9); // 0.2 < z < 0.9
   //A->AddBinScheme("xF"); A->BinScheme("xF")->BuildBin("Min",0.0); // xF > 0
   //A->AddBinScheme("ptLab");  A->BinScheme("ptLab")->BuildBin("Min",0.1); // pT_lab > 0.1 GeV (tracking limit)
-    A->AddBinScheme("Q2");  A->BinScheme("Q2")->BuildBin("Min",1.0); //Q2>1 GeV2 
+    A->AddBinScheme("q2");  A->BinScheme("q2")->BuildBin("Min",1.0); //Q2>1 GeV2 
   // perform the analysis ==================================
   A->Execute();
 };
