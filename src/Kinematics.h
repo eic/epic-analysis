@@ -29,14 +29,8 @@
 #ifndef EXCLUDE_DELPHES
 #include "classes/DelphesClasses.h"
 #endif
-// pybind (for ML models using python packages)
-#ifdef SIDIS_MLPRED
-#include <pybind11/pybind11.h>
-#include <pybind11/numpy.h>
-#include <pybind11/embed.h>
-#include <pybind11/stl.h>
-namespace py = pybind11;
-#endif
+// onxx (for ML models prediction in c++)
+#include <onnxruntime_cxx_api.h>
 
 using std::map;
 using std::cout;
@@ -123,7 +117,7 @@ class Kinematics
     TLorentzVector vecElectron, vecW, vecQ;
     TLorentzVector vecHadron;
 
-  // HFS tree objects
+    // HFS tree objects
     Int_t nHFS;
     Int_t nPi;
     Double_t hfspx[100];
@@ -294,14 +288,19 @@ class Kinematics
     Double_t rotAboutX, rotAboutY;
     // other
     TLorentzVector vecSpin, IvecSpin;
-#ifdef SIDIS_MLPRED
-    py::object keras, tensorflow;
-    py::object efnpackage;
-    py::function pfnimport;
-    py::object model;
-    py::object modelload;
-    std::string modelname = "pfn_testEpic_000-2_vecQele_nHFS2_500_bs10k_bestValLoss";
-#endif  
 
+    // ONNX
+    const char* modelname = "pfn_testEpic_000-2_vecQele_nHFS2_500_bs10k_bestValLoss";
+  //std::vector<const char*> input_node_names;
+  //std::vector<const char*> output_node_names;
+
+    std::vector<std::vector<int64_t>> input_node_dims;
+    std::vector<size_t> input_tensor_size;
+    std::vector<int64_t> dims;
+    std::vector<int64_t> dimsglobal;
+    std::vector<float> input_tensor_values_hfs{60*7};
+    std::vector<float> input_tensor_values_global{10};
+
+  
   ClassDef(Kinematics,1);
 };
