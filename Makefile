@@ -51,6 +51,11 @@ ifdef INCLUDE_CENTAURO
 	FLAGS += -DINCLUDE_CENTAURO
 endif
 
+# ONNX plugin: ML model predictions
+DEP_INCLUDES += -I${ONNX_HOME}/include
+DEP_INCLUDES += -L${ONNX_HOME}/lib -lonnxruntime
+
+
 # MSTWPDF
 DEP_INCLUDES  += -I${MSTWPDF_HOME}
 DEP_LIBRARIES += -L${MSTWPDF_HOME} -lmstwpdf
