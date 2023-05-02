@@ -50,9 +50,11 @@ void podio_print_collection_datatypes(std::string root_file_name) {
             fmt::format("{:<5} {:>45} - {:<45}", coll_id, coll_name, type_name)
             });
       }
-      else
+      /*
+      else // benign issue, see https://github.com/eic/EICrecon/issues/643
         fmt::print(stderr,"WARNING: collection '{}' (id={}) found in collection table, but not in tree '{}'\n",
             coll_name, coll_id, cat_name);
+            */
     }
 
     // print collection types
