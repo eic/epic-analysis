@@ -290,10 +290,10 @@ class Kinematics
     TLorentzVector vecSpin, IvecSpin;
 
     // ONNX
+    // TODO: make this variable that can be input at macro level
     const char* modelname = "pfn_testEpic_000-2_vecQele_nHFS2_500_bs10k_bestValLoss";
-  //std::vector<const char*> input_node_names;
-  //std::vector<const char*> output_node_names;
-
+    int nPad = 60;
+    
     std::vector<std::vector<int64_t>> input_node_dims;
     std::vector<size_t> input_tensor_size;
     std::vector<int64_t> dims;

@@ -311,7 +311,6 @@ void Kinematics::GetQWNu_ML(){
     input_tensor_values_global.push_back(vecQEle.Pz());
     input_tensor_values_global.push_back(vecQEle.E());
     
-    //std::vector<Ort::Value>
     std::vector<Ort::Value> ort_outputs = ORTsession.Run(Ort::RunOptions{nullptr},
 							  input_node_names.data(),
 							 ort_inputs.data(),
