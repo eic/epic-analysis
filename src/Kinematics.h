@@ -291,15 +291,15 @@ class Kinematics
 
     // ONNX
     // TODO: make this variable that can be input at macro level
-    const char* modelname = "pfn_testEpic_000-2_vecQele_nHFS2_500_bs10k_bestValLoss";
-    int nPad = 60;
+    const char* modelname = "pfn_epic22.11.2_d100_Q2_all_18x275_eleglobal_npartg3_bestValLoss.onnx";
+    int nPad = 35;
     
     std::vector<std::vector<int64_t>> input_node_dims;
     std::vector<size_t> input_tensor_size;
     std::vector<int64_t> dims;
     std::vector<int64_t> dimsglobal;
-    std::vector<float> input_tensor_values_hfs{60*7};
-    std::vector<float> input_tensor_values_global{10};
+    std::vector<float> input_tensor_values_hfs;
+    std::vector<float> input_tensor_values_global;
 
   
   ClassDef(Kinematics,1);

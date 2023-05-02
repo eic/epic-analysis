@@ -16,14 +16,10 @@ Kinematics::Kinematics(
 {
   srand(time(NULL));
 
-  // vectors initialized for ML predictions
-  //input_node_names.push_back("hfsin");
-  //input_node_names.push_back("globalin");  
-  //output_node_names.push_back("pfnout");
-
-  dims = {60,7};
-  dimsglobal = {10};
-    
+  // dimension of tensors for ML pred
+  dims = {1,35,6};
+  dimsglobal = {1,10};
+  
   // set ion mass
   IonMass = ProtonMass();
   
@@ -204,43 +200,34 @@ void Kinematics::GetQWNu_electronic(){
 };
 
 void Kinematics::GetQWNu_ML(){
+
   Ort::Env env(OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING,"test");
   Ort::SessionOptions session_options;
   session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
   Ort::AllocatorWithDefaultOptions allocator;
   Ort::Session ORTsession(env, modelname, session_options);
 
-  /*  std::vector<Ort::AllocatedStringPtr> input_ptrs;
-  input_ptrs.push_back(ORTsession.GetInputNameAllocated(0,allocator));
-  input_ptrs.push_back(ORTsession.GetInputNameAllocated(1,allocator));
-  const char* input_node_names[] = {input_ptrs[0]->get(),input_ptrs[1]->get()};
-
-  std::vector<Ort::AllocatedStringPtr> output_ptrs;
-  output_ptrs.push_back(ORTsession.GetOutputNameAllocated(0,allocator));  
-  const char* output_node_names[] = {output_ptrs[0]->get()};
-  */
   std::vector<const char*> input_node_names, output_node_names;
-  for (int i = 0; i < ORTsession.GetInputCount(); i++) {
-    input_node_names.push_back(ORTsession.GetInputNameAllocated(i, allocator).get());    
+  std::vector<std::vector<int64_t>> input_shape;
+  /*for (int i = 0; i < ORTsession.GetInputCount(); i++) {
+    input_node_names.push_back(ORTsession.GetInputNameAllocated(i, allocator).get());
+    input_shape.push_back(ORTsession.GetInputTypeInfo(i).GetTensorTypeAndShapeInfo().GetShape());
+    //std::cout << "input " << i << " " << input_node_names[i] << " shape: "
+    //<< input_shape[i][0] << " " << input_shape[i][1] << " " << input_shape[i][2] << endl;
   }
-
-  output_node_names.push_back(ORTsession.GetOutputNameAllocated(0, allocator).get());
-
+  */
+  input_node_names.push_back("input");
+  input_node_names.push_back("num_global_features");
+  
+  //output_node_names.push_back(ORTsession.GetOutputNameAllocated(0, allocator).get());
+  output_node_names.push_back("activation_7");
 
   auto memoryInfo = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
   std::vector<Ort::Value> ort_inputs;
-  ort_inputs.push_back(Ort::Value::CreateTensor<float>(memoryInfo,
-                                                       input_tensor_values_hfs.data(),2,
-                                                       dims.data(),dims.size()
-                                                       ));
-  ort_inputs.push_back(Ort::Value::CreateTensor<float>(memoryInfo,
-                                                       input_tensor_values_global.data(),1,
-                                                       dimsglobal.data(),dimsglobal.size()
-                                                       ));
   
   input_tensor_values_hfs.clear();
   float pidadj = 0;
-  if(nHFS >= 2){
+  if(nHFS >= 3){
     for(int i = 0; i < nHFS; i++){
       double pidsgn=(hfspid[i]/abs(hfspid[i]));
       if(abs(hfspid[i])==211) pidadj = 0.4*pidsgn;
@@ -254,8 +241,24 @@ void Kinematics::GetQWNu_ML(){
       input_tensor_values_hfs.push_back(hfspy[i]);
       input_tensor_values_hfs.push_back(hfspz[i]);
       input_tensor_values_hfs.push_back(hfsE[i]);
-      input_tensor_values_hfs.push_back(pidadj);    
+      //input_tensor_values_hfs.push_back(pidadj);    
     }
+    // zero padding (fixed expected shape of input)
+    for(int i = nHFS; i < nPad; i++){
+      input_tensor_values_hfs.push_back(0);
+      input_tensor_values_hfs.push_back(0);
+      input_tensor_values_hfs.push_back(0);
+      input_tensor_values_hfs.push_back(0);
+      input_tensor_values_hfs.push_back(0);
+      input_tensor_values_hfs.push_back(0);
+    }
+    ort_inputs.push_back(Ort::Value::CreateTensor<float>(memoryInfo,
+                                                       input_tensor_values_hfs.data(),
+                                                       input_tensor_values_hfs.size(),
+                                                       dims.data(),
+                                                       dims.size()
+                                                       ));
+
     double Q2ele, Q2DA, Q2JB;
     double xele, xDA, xJB;
     TLorentzVector vecQEle;
@@ -267,7 +270,7 @@ void Kinematics::GetQWNu_ML(){
     this->CalculateDISbyDA();
     Q2DA = Q2;
     xDA = x;
-    this->CalculateDISbyJB();
+    this->CalculateDISbySigma();
     Q2JB = Q2;
     xJB = x;
     if( Q2DA > 0 && Q2DA < 1e4){
@@ -306,17 +309,23 @@ void Kinematics::GetQWNu_ML(){
     else{
      input_tensor_values_global.push_back( -1*log10((float) (rand()) / (float) (RAND_MAX/1.0) ) );
     }
-    input_tensor_values_global.push_back(vecQEle.Px());
-    input_tensor_values_global.push_back(vecQEle.Py());
-    input_tensor_values_global.push_back(vecQEle.Pz());
+    input_tensor_values_global.push_back(vecQEle.Eta());
+    input_tensor_values_global.push_back(vecQEle.Phi());
+    input_tensor_values_global.push_back(vecQEle.Pt());
     input_tensor_values_global.push_back(vecQEle.E());
-    
+    ort_inputs.push_back(Ort::Value::CreateTensor<float>(memoryInfo,
+                                                       input_tensor_values_global.data(),
+                                                       input_tensor_values_global.size(),
+                                                       dimsglobal.data(),dimsglobal.size()
+                                                       ));
+
     std::vector<Ort::Value> ort_outputs = ORTsession.Run(Ort::RunOptions{nullptr},
 							  input_node_names.data(),
 							 ort_inputs.data(),
 							 ort_inputs.size(),
-							  output_node_names.data(),
+							 output_node_names.data(),
 							 1);
+
     float* nnvecq = ort_outputs[0].GetTensorMutableData<float>();
     vecQ.SetPxPyPzE(nnvecq[0],nnvecq[1],nnvecq[2],nnvecq[3]);
     
