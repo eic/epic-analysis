@@ -18,10 +18,11 @@ HFSTree::HFSTree(TString treeName_, std::shared_ptr<Kinematics> K_, std::shared_
   T->Branch("vecIonBeamTrue", &(Ktrue->vecIonBeam));
   T->Branch("nHFS", &(K->nHFS), "nHFS/I");
   T->Branch("hfsp4", &(K->hfsp4));
-  //T->Branch("hfspy", &(K->hfspy), "hfspy[nHFS]/F");
-  //T->Branch("hfspz", &(K->hfspz), "hfspz[nHFS]/F");
-  //T->Branch("hfsE", &(K->hfsE), "hfsE[nHFS]/F");
-  T->Branch("hfspid", &(K->hfspid), "hfspid[nHFS]/F");
+  T->Branch("hfspx", &(K->hfspx), "hfspx[nHFS]/D");
+  T->Branch("hfspy", &(K->hfspy), "hfspy[nHFS]/D");
+  T->Branch("hfspz", &(K->hfspz), "hfspz[nHFS]/D");
+  T->Branch("hfsE", &(K->hfsE), "hfsE[nHFS]/D");
+  T->Branch("hfspid", &(K->hfspid), "hfspid[nHFS]/D");
   T->Branch("weight",    &(weight),       "weight/D");
 };
 
