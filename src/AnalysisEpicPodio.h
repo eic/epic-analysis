@@ -49,8 +49,9 @@ class AnalysisEpicPodio : public Analysis
 
   protected:
 
-    // get PDG from reconstructed particle
-    int GetReconstructedPDG(
+    // get PDG from reconstructed particle; resort to true PDG, if
+    // PID is unavailable (sets `usedTruth` to true)
+    int GetPDG(
         const edm4hep::MCParticle& simPart,
         const edm4eic::ReconstructedParticle& recPart,
         bool& usedTruth
@@ -58,14 +59,14 @@ class AnalysisEpicPodio : public Analysis
     // common loop over Reconstructed Particle <-> MC Particle associations
     // payload signature: (simPart, recPart, reconstructed PDG)
     void LoopMCRecoAssocs(
+        const edm4eic::ReconstructedParticleCollection&     recParts,
         const edm4eic::MCRecoParticleAssociationCollection& mcRecAssocs,
         std::function<void(const edm4hep::MCParticle&, const edm4eic::ReconstructedParticle&, int)> payload,
         bool printParticles=false
         );
 
   private:
-    podio::ROOTReader podioReader;
-    podio::EventStore evStore;
+    podio::ROOTFrameReader podioReader;
 
     ClassDefOverride(AnalysisEpicPodio,1);
 };
