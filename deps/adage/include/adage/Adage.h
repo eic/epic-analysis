@@ -10,8 +10,8 @@
  *   on the stored objects
  * - Inherits from back-end class `DAG`
  */
-#ifndef Adage_
-#define Adage_
+
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,12 +19,12 @@
 #include <sstream>
 
 // ROOT
-#include "TString.h"
-#include "TRegexp.h"
-#include "TFile.h"
-#include "TKey.h"
+#include <TString.h>
+#include <TRegexp.h>
+#include <TFile.h>
+#include <TKey.h>
 
-// sidis-eic
+// adage
 #include "DAG.h"
 #include "BinSet.h"
 #include "Node.h"
@@ -246,5 +246,3 @@ PL *Adage<PL>::GetPayloadData(NodePath *P,  bool NodePath_is_external) {
   };
   return ret;
 };
-
-#endif

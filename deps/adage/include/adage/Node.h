@@ -1,5 +1,4 @@
-#ifndef Node_
-#define Node_
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,12 +9,12 @@
 #include <functional>
 
 // ROOT
-#include "TSystem.h"
-#include "TObject.h"
-#include "TNamed.h"
-#include "TString.h"
+#include <TSystem.h>
+#include <TObject.h>
+#include <TNamed.h>
+#include <TString.h>
 
-// sidis-eic
+// adage
 #include "CutDef.h"
 #include "NodePath.h"
 
@@ -152,5 +151,3 @@ class Node : public TObject
 
   ClassDef(Node,1);
 };
-
-#endif

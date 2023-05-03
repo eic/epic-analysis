@@ -5,8 +5,7 @@
  * G - Graph
  * E - Environment
  */
-#ifndef DAG_
-#define DAG_
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,10 +18,10 @@
 #include <algorithm>
 
 // ROOT
-#include "TObject.h"
-#include "TString.h"
+#include <TObject.h>
+#include <TString.h>
 
-// sidis-eic
+// adage
 #include "CutDef.h"
 #include "BinSet.h"
 #include "Node.h"
@@ -280,5 +279,3 @@ class DAG : public TObject
 
   ClassDef(DAG,1);
 };
-
-#endif
