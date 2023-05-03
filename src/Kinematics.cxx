@@ -18,7 +18,7 @@ Kinematics::Kinematics(
 
   // dimension of tensors for ML pred
   dims = {1,35,6};
-  dimsglobal = {1,10};
+  dimsglobal = {1,12};
   
   // set ion mass
   IonMass = ProtonMass();
@@ -200,7 +200,6 @@ void Kinematics::GetQWNu_electronic(){
 };
 
 void Kinematics::GetQWNu_ML(){
-
   Ort::Env env(OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING,"test");
   Ort::SessionOptions session_options;
   session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
@@ -209,13 +208,7 @@ void Kinematics::GetQWNu_ML(){
 
   std::vector<const char*> input_node_names, output_node_names;
   std::vector<std::vector<int64_t>> input_shape;
-  /*for (int i = 0; i < ORTsession.GetInputCount(); i++) {
-    input_node_names.push_back(ORTsession.GetInputNameAllocated(i, allocator).get());
-    input_shape.push_back(ORTsession.GetInputTypeInfo(i).GetTensorTypeAndShapeInfo().GetShape());
-    //std::cout << "input " << i << " " << input_node_names[i] << " shape: "
-    //<< input_shape[i][0] << " " << input_shape[i][1] << " " << input_shape[i][2] << endl;
-  }
-  */
+  
   input_node_names.push_back("input");
   input_node_names.push_back("num_global_features");
   
@@ -227,6 +220,7 @@ void Kinematics::GetQWNu_ML(){
   
   input_tensor_values_hfs.clear();
   float pidadj = 0;
+  
   if(nHFS >= 3){
     for(int i = 0; i < nHFS; i++){
       double pidsgn=(hfspid[i]/abs(hfspid[i]));
@@ -258,7 +252,7 @@ void Kinematics::GetQWNu_ML(){
                                                        dims.data(),
                                                        dims.size()
                                                        ));
-
+    
     double Q2ele, Q2DA, Q2JB;
     double xele, xDA, xJB;
     TLorentzVector vecQEle;
@@ -273,19 +267,19 @@ void Kinematics::GetQWNu_ML(){
     this->CalculateDISbySigma();
     Q2JB = Q2;
     xJB = x;
-    if( Q2DA > 0 && Q2DA < 1e4){
+    if( Q2DA > 0 && Q2DA < 1e6){
       input_tensor_values_global.push_back(log10(Q2DA));
     }
     else{
       input_tensor_values_global.push_back(log10((float) (rand()) / (float) (RAND_MAX/10000.0)));
     }
-    if( Q2ele > 0 && Q2ele < 1e4){
+    if( Q2ele > 0 && Q2ele < 1e6){
       input_tensor_values_global.push_back(log10(Q2ele));
     }
     else{
       input_tensor_values_global.push_back(log10((float) (rand()) / (float) (RAND_MAX/10000.0)));
     }
-    if( Q2JB > 0 && Q2JB < 1e4){
+    if( Q2JB > 0 && Q2JB < 1e6){
       input_tensor_values_global.push_back(log10(Q2JB));
     }
     else{
@@ -309,26 +303,25 @@ void Kinematics::GetQWNu_ML(){
     else{
      input_tensor_values_global.push_back( -1*log10((float) (rand()) / (float) (RAND_MAX/1.0) ) );
     }
-    input_tensor_values_global.push_back(vecQEle.Eta());
-    input_tensor_values_global.push_back(vecQEle.Phi());
-    input_tensor_values_global.push_back(vecQEle.Pt());
-    input_tensor_values_global.push_back(vecQEle.E());
+    input_tensor_values_global.push_back(vecElectron.Eta());
+    input_tensor_values_global.push_back(vecElectron.Phi());
+    input_tensor_values_global.push_back(vecElectron.Px());
+    input_tensor_values_global.push_back(vecElectron.Py());
+    input_tensor_values_global.push_back(vecElectron.Pz());
+    input_tensor_values_global.push_back(vecElectron.E());
     ort_inputs.push_back(Ort::Value::CreateTensor<float>(memoryInfo,
-                                                       input_tensor_values_global.data(),
-                                                       input_tensor_values_global.size(),
-                                                       dimsglobal.data(),dimsglobal.size()
-                                                       ));
-
+							 input_tensor_values_global.data(),
+							 input_tensor_values_global.size(),
+							 dimsglobal.data(),dimsglobal.size()
+							 ));
     std::vector<Ort::Value> ort_outputs = ORTsession.Run(Ort::RunOptions{nullptr},
-							  input_node_names.data(),
+							 input_node_names.data(),
 							 ort_inputs.data(),
 							 ort_inputs.size(),
 							 output_node_names.data(),
 							 1);
-
-    float* nnvecq = ort_outputs[0].GetTensorMutableData<float>();
+    float* nnvecq = ort_outputs[0].GetTensorMutableData<float>();    
     vecQ.SetPxPyPzE(nnvecq[0],nnvecq[1],nnvecq[2],nnvecq[3]);
-    
   }
   else{
     this->CalculateDISbyElectron();

@@ -6,7 +6,8 @@ R__LOAD_LIBRARY(EpicAnalysis)
 // requires pybind includes above
 void analysis_testml(
     TString configFile="datarec/in.config", /* delphes tree(s) */
-    TString outfilePrefix="resolutions" /* output filename prefix*/
+    TString outfilePrefix="resolutions", /* output filename prefix*/
+    TString onnxFileName="pfn_epic22.11.2_d500_Q2_1_10_18x275_eleglobal_npartg3_bestValLoss.onnx"
 ) {
   //outfilePrefix+="_DA";
   // setup analysis ========================================
@@ -15,10 +16,11 @@ void analysis_testml(
       outfilePrefix
       );
   
-  A->maxEvents = 1000; // use this to limit the number of events
+  //A->maxEvents = 1000; // use this to limit the number of events
   //A->writeSimpleTree = true; // write SimpleTree (for one bin)
   //A->writeHFSTree = true; // write HFSTree (for one bin)
   A->SetReconMethod("ML"); // set reconstruction method
+  A->SetModelName(onnxFileName);
   A->AddFinalState("pipTrack"); // pion final state
   //A->AddFinalState("KpTrack"); // kaon final state
   

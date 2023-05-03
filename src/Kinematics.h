@@ -239,7 +239,9 @@ class Kinematics
     enum mainFrame_enum {fLab, fHeadOn};
     Int_t qComponentsMethod;
     enum qComponentsMethod_enum {qQuadratic, qHadronic, qElectronic};
-     
+
+    // onnx model name
+    const char* modelname;
   protected:
 
     // reconstruction methods
@@ -289,9 +291,8 @@ class Kinematics
     // other
     TLorentzVector vecSpin, IvecSpin;
 
-    // ONNX
-    // TODO: make this variable that can be input at macro level
-    const char* modelname = "pfn_epic22.11.2_d100_Q2_all_18x275_eleglobal_npartg3_bestValLoss.onnx";
+    // ONNX  
+    //const char* modelname;// = "pfn_epic22.11.2_d100_Q2_all_18x275_eleglobal_npartg3_bestValLoss.onnx";
     int nPad = 35;
     
     std::vector<std::vector<int64_t>> input_node_dims;

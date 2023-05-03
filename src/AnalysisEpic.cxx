@@ -13,7 +13,7 @@ void AnalysisEpic::Execute()
 {
   // setup
   Prepare();
-
+  
   // read EventEvaluator tree
   auto chain = std::make_unique<TChain>("events");
   for(Int_t idx=0; idx<infiles.size(); ++idx) {
@@ -293,8 +293,12 @@ void AnalysisEpic::Execute()
    
     // calculate DIS kinematics
     if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
-    if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
-
+    if( reconMethod == "ML"){
+      if(!(kinTrue->CalculateDIS("ele"))) continue; // generated (truth)
+    }
+    else{
+      if(!(kinTrue->CalculateDIS(reconMethod))) continue;
+    }
     // Get the weight for this event's Q2
     auto Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
 
