@@ -12,10 +12,10 @@
 #include "Kinematics.h"
 
 // Delphes includes
-#include "classes/DelphesClasses.h"
-#include "fastjet/ClusterSequence.hh"
+#include <classes/DelphesClasses.h>
+#include <fastjet/ClusterSequence.hh>
 #ifdef INCLUDE_CENTAURO
-#include "fastjet/plugins/Centauro/Centauro.hh"
+#include <fastjet/plugins/Centauro/Centauro.hh>
 #endif // CENTAURO
 
 using std::map;

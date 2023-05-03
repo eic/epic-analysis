@@ -14,20 +14,20 @@
 #include <stdexcept>
 
 // ROOT
-#include "TSystem.h"
-#include "TObject.h"
-#include "TFile.h"
-#include "TString.h"
-#include "TH1.h"
-#include "TMath.h"
-#include "TLorentzVector.h"
-#include "TRandom.h"
-#include "TRandomGen.h"
-#include "TClonesArray.h"
+#include <TSystem.h>
+#include <TObject.h>
+#include <TFile.h>
+#include <TString.h>
+#include <TH1.h>
+#include <TMath.h>
+#include <TLorentzVector.h>
+#include <TRandom.h>
+#include <TRandomGen.h>
+#include <TClonesArray.h>
 
 // Delphes
 #ifndef EXCLUDE_DELPHES
-#include "classes/DelphesClasses.h"
+#include <classes/DelphesClasses.h>
 #endif
 // pybind (for ML models using python packages)
 #ifdef SIDIS_MLPRED
