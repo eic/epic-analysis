@@ -7,6 +7,6 @@
 	remote = git@github.com:c-dilks/adage.git
 	branch = main
 	commit = 996bdd7f7283b99d01feb38db81d8764ef05d87e
-	parent = 5cb40e0550b3a7e88dbf2a18f759178689f64598
+        parent = 46fbdcef3470a0cb3cbbcb0f84c3cdc2c86e6930
 	method = merge
 	cmdver = 0.4.3
