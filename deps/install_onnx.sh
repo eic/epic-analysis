@@ -11,5 +11,5 @@ source environ.sh
 echo "[+] downloading onnx runtime source"
 wget https://github.com/microsoft/onnxruntime/releases/download/v1.14.1/onnxruntime-linux-x64-1.14.1.tgz
 mv onnxruntime-linux-x64-1.14.1.tgz deps
-tar -zxvf deps/onnxruntime-linux-x64-1.14.1.tgz
-
+tar -zxvf deps/onnxruntime-linux-x64-1.14.1.tgz -C deps/
+rm deps/onnxruntime-linux-x64-1.14.1.tgz
