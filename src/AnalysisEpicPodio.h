@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2023 Christopher Dilks
-#ifdef INCLUDE_PODIO
 
 #pragma once
 
@@ -69,5 +68,3 @@ class AnalysisEpicPodio : public Analysis
 
     ClassDefOverride(AnalysisEpicPodio,1);
 };
-
-#endif

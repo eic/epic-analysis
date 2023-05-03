@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2023 Christopher Dilks
-#ifdef INCLUDE_PODIO
 
 #include "AnalysisEpicPodio.h"
 
@@ -465,5 +464,3 @@ int AnalysisEpicPodio::GetReconstructedPDG(
 
   return pdg;
 }
-
-#endif
