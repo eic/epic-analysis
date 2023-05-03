@@ -3,17 +3,18 @@
 
 #pragma once
 
-// data model
-#include "podio/EventStore.h"
-#include "podio/ROOTReader.h"
-#include "podio/CollectionBase.h"
-#include "edm4hep/utils/kinematics.h"
+// PODIO
+#include <podio/ROOTFrameReader.h>
+#include <podio/Frame.h>
 
-// data model collections
-#include "edm4hep/MCParticleCollection.h"
-#include "edm4eic/ReconstructedParticleCollection.h"
-#include "edm4eic/MCRecoParticleAssociationCollection.h"
-#include "edm4eic/InclusiveKinematicsCollection.h"
+// data model
+#include <edm4hep/MCParticleCollection.h>
+#include <edm4eic/ReconstructedParticleCollection.h>
+#include <edm4eic/MCRecoParticleAssociationCollection.h>
+#include <edm4eic/InclusiveKinematicsCollection.h>
+
+// utilities
+#include <edm4hep/utils/kinematics.h>
 
 // epic-analysis
 #include "Analysis.h"
