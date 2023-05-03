@@ -5,7 +5,7 @@
 ;
 [subrepo]
 	remote = git@github.com:c-dilks/adage.git
-	branch = include-directives
+	branch = main
 	commit = 996bdd7f7283b99d01feb38db81d8764ef05d87e
 	parent = 5cb40e0550b3a7e88dbf2a18f759178689f64598
 	method = merge
