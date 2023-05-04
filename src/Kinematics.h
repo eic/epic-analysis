@@ -29,8 +29,11 @@
 #ifndef EXCLUDE_DELPHES
 #include "classes/DelphesClasses.h"
 #endif
-// onxx (for ML models prediction in c++)
+
+// onnx (for ML models prediction in c++)
+#ifdef INCLUDE_ONNX
 #include <onnxruntime_cxx_api.h>
+#endif
 
 using std::map;
 using std::cout;
@@ -292,7 +295,6 @@ class Kinematics
     TLorentzVector vecSpin, IvecSpin;
 
     // ONNX  
-    //const char* modelname;// = "pfn_epic22.11.2_d100_Q2_all_18x275_eleglobal_npartg3_bestValLoss.onnx";
     int nPad = 35;
     
     std::vector<std::vector<int64_t>> input_node_dims;

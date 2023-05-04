@@ -16,7 +16,7 @@ Kinematics::Kinematics(
 {
   srand(time(NULL));
 
-  // dimension of tensors for ML pred
+  // dimension of tensors for ML predictions
   dims = {1,35,6};
   dimsglobal = {1,12};
   
@@ -199,7 +199,10 @@ void Kinematics::GetQWNu_electronic(){
   Nu = vecIonBeam.Dot(vecQ) / IonMass;
 };
 
+
 void Kinematics::GetQWNu_ML(){
+  #ifdef INCLUDE_ONNX
+  
   Ort::Env env(OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING,"test");
   Ort::SessionOptions session_options;
   session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
@@ -212,7 +215,6 @@ void Kinematics::GetQWNu_ML(){
   input_node_names.push_back("input");
   input_node_names.push_back("num_global_features");
   
-  //output_node_names.push_back(ORTsession.GetOutputNameAllocated(0, allocator).get());
   output_node_names.push_back("activation_7");
 
   auto memoryInfo = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
@@ -221,7 +223,7 @@ void Kinematics::GetQWNu_ML(){
   input_tensor_values_hfs.clear();
   float pidadj = 0;
   
-  if(nHFS >= 3){
+  if(nHFS >= 2){
     for(int i = 0; i < nHFS; i++){
       double pidsgn=(hfspid[i]/abs(hfspid[i]));
       if(abs(hfspid[i])==211) pidadj = 0.4*pidsgn;
@@ -302,7 +304,7 @@ void Kinematics::GetQWNu_ML(){
     }
     else{
      input_tensor_values_global.push_back( -1*log10((float) (rand()) / (float) (RAND_MAX/1.0) ) );
-    }
+    }    
     input_tensor_values_global.push_back(vecElectron.Eta());
     input_tensor_values_global.push_back(vecElectron.Phi());
     input_tensor_values_global.push_back(vecElectron.Px());
@@ -321,7 +323,7 @@ void Kinematics::GetQWNu_ML(){
 							 output_node_names.data(),
 							 1);
     float* nnvecq = ort_outputs[0].GetTensorMutableData<float>();    
-    vecQ.SetPxPyPzE(nnvecq[0],nnvecq[1],nnvecq[2],nnvecq[3]);
+    vecQ.SetPxPyPzE(nnvecq[0],nnvecq[1],nnvecq[2],nnvecq[3]);    
   }
   else{
     this->CalculateDISbyElectron();
@@ -329,7 +331,7 @@ void Kinematics::GetQWNu_ML(){
   vecW = vecEleBeam + vecIonBeam - vecElectron; 
   W = vecW.M();
   Nu = vecIonBeam.Dot(vecQ) / IonMass;
-  
+  #endif
 }
 
 // ------------------------------------------------------
@@ -576,6 +578,8 @@ void Kinematics::AddToHFS(TLorentzVector p4_) {
   hfspy[nHFS] = p4.Py();
   hfspz[nHFS] = p4.Pz();
   hfsE[nHFS] = p4.E();
+  hfseta[nHFS] = p4.Eta();
+  hfsphi[nHFS] = p4.Phi();
   new(ar[nHFS]) TLorentzVector(p4);
   nHFS++;
   
