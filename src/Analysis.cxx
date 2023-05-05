@@ -93,7 +93,7 @@ Analysis::Analysis(
   // common settings defaults
   // - these settings can be set at the macro level
   verbose           = false;
-  writeSimpleTree   = false;
+  writeSidisTree   = false;
   writeHFSTree      = false;
   writeParticleTree = false;
 
@@ -325,7 +325,7 @@ void Analysis::Prepare() {
   kinJet     = std::make_shared<KinematicsJets>(eleBeamEn, ionBeamEn, crossingAngle);
   kinJetTrue = std::make_shared<KinematicsJets>(eleBeamEn, ionBeamEn, crossingAngle);
 #endif
-  ST         = std::make_unique<SimpleTree>("tree",kin,kinTrue);
+  ST         = std::make_unique<SidisTree>("tree",kin,kinTrue);
   HFST       = std::make_unique<HFSTree>("hfstree",kin,kinTrue);
   PT         = std::make_unique<ParticleTree>("ptree");
 
@@ -678,7 +678,7 @@ void Analysis::Finish() {
   cout << sep << endl;
   cout << "writing ROOT file..." << endl;
   outFile->cd();
-  if(writeSimpleTree)   ST->WriteTree();
+  if(writeSidisTree)   ST->WriteTree();
   if(writeHFSTree)      HFST->WriteTree();
   if(writeParticleTree) PT->WriteTree();
   HD->Payload([this](Histos *H){ H->WriteHists(outFile); }); HD->ExecuteAndClearOps();

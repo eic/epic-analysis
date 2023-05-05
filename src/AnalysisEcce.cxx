@@ -438,7 +438,7 @@ void AnalysisEcce::Execute()
 
     // loop over reconstructed particles again
     /* - calculate hadron kinematics
-     * - fill output data structures (Histos, SimpleTree, etc.)
+     * - fill output data structures (Histos, SidisTree, etc.)
      */
     for(auto part : recopart) {
       int pid_ = part.pid;
@@ -499,7 +499,7 @@ void AnalysisEcce::Execute()
         // fill simple tree
         // - not binned
         // - `IsActiveEvent()` is only true if at least one bin gets filled for this track
-        if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
+        if( writeSidisTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
       }
 
     }//hadron loop

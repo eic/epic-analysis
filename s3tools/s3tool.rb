@@ -27,7 +27,10 @@ HostURL           = 'https://eics3.sdcc.bnl.gov:9000'
 
 # helpers
 def versionNum(v) # options.version -> version number
-  v.split('.')[1..-1].join('.')
+  v
+    .split('_').first
+    .split('.')[1..-1]
+    .join('.')
 end
 def ecceQ2range(minQ2,maxQ2) # return file path suffix, for ECCE Q2 ranges
   { [1,0]=>'', [1,100]=>'-q2-low', [100,0]=>'-q2-high' }[[minQ2,maxQ2]]
@@ -43,6 +46,34 @@ end
 #   :fileExtension   => File extension (optional, defaults to 'root')
 # }
 prodSettings = {
+  'epic.unstable' => {
+    :comment         => "Latest ePIC TEST sample production; update in #{$0} as needed",
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/main/epic_brycecanyon/DIS/NC" }, # FORCE brycecanyon only
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
+  'epic.23.03.0_pythia8' => {
+    :comment         => 'Pythia 8, small sample, 10x100, minQ2=1000 only',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
+  # 'epic.23.03.0_pythia6' => { # FIXME: need cross section for Q2<1 bin
+  #   :comment         => 'Pythia 6, small sample, 5x41, noradcor only, Q2<1 only',
+  #   :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
+  #   :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/SIDIS/pythia6" },
+  #   :energySubDir    => Proc.new { "ep_#{options.energy}" },
+  #   :dataSubDir      => Proc.new { |radDir| "hepmc_ip6/#{radDir}" },
+  # },
+  'epic.23.01.0' => {
+    :comment         => 'Pythia 8',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
   'epic.22.11.3' => {
     :comment         => 'Pythia 6, with & without radiative corrections',
     :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
@@ -292,6 +323,7 @@ end
 
 # pattern: "ep_#{energy}/hepmc_ip6/" with Q2 range given in file name as "q2_#{minQ2}_#{maxQ2}"
 if [
+    'epic.23.03.0_pythia6',
     'epic.22.11.3',
     'hepmc.pythia6',
 ].include? options.version
@@ -333,6 +365,9 @@ if [
 
 # pattern: "#{energy}/minQ2=#{minQ2}/"
 elsif [
+  'epic.unstable',
+  'epic.23.03.0_pythia8',
+  'epic.23.01.0',
   'epic.22.11.2',
   'athena.deathvalley-v1.0',
   'hepmc.pythia8',
@@ -394,6 +429,9 @@ elsif [
       .first(options.limit)
   end
 
+else
+  $stderr.puts "\nERROR: production version '#{options.version}' is missing in RELEASE VERSION DEPENDENT part of #{$0}; add it!"
+  exit 1
 end # END RELEASE VERSION DEPENDENT CODE ##################
 
 

@@ -302,6 +302,8 @@ void AnalysisEpic::Execute()
     // Get the weight for this event's Q2
     auto Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
 
+    if( writeHFSTree && kin->nHFS > 0) HFST->FillTree(Q2weightFactor);
+    
     // fill inclusive histograms, if only `inclusive` is included in output
     // (otherwise they will be filled in track and jet loops)
     if(includeOutputSet["inclusive_only"]) {
@@ -355,7 +357,7 @@ void AnalysisEpic::Execute()
 	// fill simple tree
 	// - not binned
 	// - `IsActiveEvent()` is only true if at least one bin gets filled for this track
-	if( writeSimpleTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
+	if( writeSidisTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
       }
     } //hadron loop
     

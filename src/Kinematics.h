@@ -86,7 +86,7 @@ class Kinematics
     // end DELPHES-specific methods //////////////////////////
 
 
-    // kinematics (should be Double_t, if going in SimpleTree)
+    // kinematics (should be Double_t, if going in SidisTree)
     Double_t W,Q2,Nu,x,y,s; // DIS
     Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // hadron
     Double_t sigmah, Pxh, Pyh; // hadronic final state variables

@@ -18,7 +18,7 @@ void analysis_purity(
       );
 
   //  A->maxEvents = 100; // use this to limit the number of events
-  A->writeSimpleTree = true; // write SimpleTree (for one bin)
+  A->writeSidisTree = true; // write SidisTree (for one bin)
   A->SetReconMethod(methodname); // set reconstruction method
   A->AddFinalState("pipTrack"); // pion final state
   //A->AddFinalState("KpTrack"); // kaon final state

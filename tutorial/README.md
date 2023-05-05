@@ -136,3 +136,14 @@ All other tutorials are for fast simulations (by default); this one is an exampl
   certain bins to be "full-range", i.e., "integrated over"; in order
   to restrict the execution of certain subloops, conditional control
   functions are used
+
+# 8. PODIO Examples
+Additional example macros demonstrating PODIO usage:
+- `podio_frame_reader.C`
+  - simple example showing how to read a ROOT file with PODIO
+  - `Analysis`-derived classes which use PODIO are essentially based
+    of this procedure
+- `podio_print_collection_datatypes.C`
+  - dump the PODIO Collection type for all Collections contained in
+    a ROOT file
+  - it is very useful to know what datatypes and data models are available

@@ -266,7 +266,7 @@ for guidance how to run multi-threaded or on a High Performance Computing (HPC) 
 ### Simple Tree
 
 - The `Analysis` class is also capable of producing a simple `TTree`, handled by the
-  `SimpleTree` class, which can also be useful for analysis
+  `SidisTree` class, which can also be useful for analysis
   - As the name suggests, it is a flat tree with a minimal set of variables,
     specifically needed for SIDIS spin asymmetry analysis
   - The tree branches are configured to be compatible with 

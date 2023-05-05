@@ -33,7 +33,7 @@
 #ifndef EXCLUDE_DELPHES
 #include "KinematicsJets.h"
 #endif
-#include "SimpleTree.h"
+#include "SidisTree.h"
 #include "HFSTree.h"
 #include "ParticleTree.h"
 #include "Weights.h"
@@ -62,7 +62,7 @@ public:
   
   // common settings
   Bool_t verbose; // if true, print a lot more information
-  Bool_t writeSimpleTree;   // if true, write SimpleTree (not binned)
+  Bool_t writeSidisTree;   // if true, write SidisTree (not binned)
   Bool_t writeHFSTree;      // if true, write HFSTree (not binned)
   Bool_t writeParticleTree; // if true, write ParticleTree (not binned)
   Long64_t maxEvents; /* default=0, which runs all events;
@@ -125,7 +125,7 @@ public:
     void FillHistosJets(Double_t wgt);      // jet kinematics
 
     // shared objects
-    std::unique_ptr<SimpleTree>   ST;
+    std::unique_ptr<SidisTree>   ST;
     std::unique_ptr<HFSTree>      HFST;
     std::unique_ptr<ParticleTree> PT;
     std::shared_ptr<Kinematics>   kin, kinTrue;
