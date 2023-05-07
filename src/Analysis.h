@@ -70,7 +70,9 @@ public:
                          */
   Bool_t useBreitJets; // if true, use Breit jets, if using finalState `jets` (requires centauro)
   // set kinematics reconstruction method; see constructor for available methods
-  void SetReconMethod(TString reconMethod_) { reconMethod=reconMethod_; }; 
+  void SetReconMethod(TString reconMethod_) { reconMethod=reconMethod_; };
+  // set ONNX file name
+  void SetModelName(TString onnxFile) { nnFile = onnxFile; };
   // choose which output sets to include
   std::map<TString,Bool_t> includeOutputSet;
   // maximum number of errors to print
@@ -153,7 +155,7 @@ public:
     Double_t crossingAngle; // mrad
     Double_t totalCrossSection;
     TString reconMethod;
-
+    TString nnFile;
     // event loop objects
     Long64_t ENT;
     Double_t eleP,maxEleP;

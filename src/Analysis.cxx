@@ -320,7 +320,7 @@ void Analysis::Prepare() {
 
   // instantiate shared objects
   kin        = std::make_shared<Kinematics>(eleBeamEn,ionBeamEn,crossingAngle);
-  kinTrue    = std::make_shared<Kinematics>(eleBeamEn, ionBeamEn, crossingAngle);
+  kinTrue    = std::make_shared<Kinematics>(eleBeamEn, ionBeamEn, crossingAngle);   
 #ifndef EXCLUDE_DELPHES
   kinJet     = std::make_shared<KinematicsJets>(eleBeamEn, ionBeamEn, crossingAngle);
   kinJetTrue = std::make_shared<KinematicsJets>(eleBeamEn, ionBeamEn, crossingAngle);
@@ -329,6 +329,8 @@ void Analysis::Prepare() {
   HFST       = std::make_unique<HFSTree>("hfstree",kin,kinTrue);
   PT         = std::make_unique<ParticleTree>("ptree");
 
+  kin->modelname = nnFile;
+  
   // if including jets, define a `jet` final state
 #ifndef EXCLUDE_DELPHES
   if(includeOutputSet["jets"]) {

@@ -2,27 +2,25 @@
 // Copyright (C) 2023 Connor Pecar
 
 R__LOAD_LIBRARY(EpicAnalysis)
-#include <pybind11/embed.h>
-namespace py = pybind11;
 // using ML prediction for vecQ, and writing out tree of HFS four-vectors
 // requires pybind includes above
 void analysis_testml(
     TString configFile="datarec/in.config", /* delphes tree(s) */
-    TString outfilePrefix="resolutions" /* output filename prefix*/
+    TString outfilePrefix="resolutions", /* output filename prefix*/
+    TString onnxFileName="pfn_epic22.11.2_d500_Q2_1_10_18x275_eleglobal_npartg3_bestValLoss.onnx"
 ) {
-  // object needed at start of script using pybind11
-  py::scoped_interpreter guard{};
   //outfilePrefix+="_DA";
   // setup analysis ========================================
-  AnalysisEcce *A = new AnalysisEcce(
+  AnalysisEpic *A = new AnalysisEpic(
       configFile,
       outfilePrefix
       );
   
-  A->maxEvents = 10000; // use this to limit the number of events
-  A->writeSidisTree = true; // write SidisTree (for one bin)
-  A->writeHFSTree = true; // write HFSTree (for one bin)
+  //A->maxEvents = 1000; // use this to limit the number of events
+  //A->writeSimpleTree = true; // write SimpleTree (for one bin)
+  //A->writeHFSTree = true; // write HFSTree (for one bin)
   A->SetReconMethod("ML"); // set reconstruction method
+  A->SetModelName(onnxFileName);
   A->AddFinalState("pipTrack"); // pion final state
   //A->AddFinalState("KpTrack"); // kaon final state
   

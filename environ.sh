@@ -37,5 +37,9 @@ export ADAGE_HOME=$EPIC_ANALYSIS_HOME/deps/adage
 echo "ADAGE found at $ADAGE_HOME"
 export LD_LIBRARY_PATH=$ADAGE_HOME/lib:$LD_LIBRARY_PATH
 
+### onnx
+export ONNX_HOME=$EPIC_ANALYSIS_HOME/deps/onnxruntime-linux-x64-1.14.1
+export LD_LIBRARY_PATH=$ONNX_HOME/lib:$LD_LIBRARY_PATH
+
 # prioritize EPIC_ANALYSIS libraries
 export LD_LIBRARY_PATH=$EPIC_ANALYSIS_HOME/lib:$LD_LIBRARY_PATH

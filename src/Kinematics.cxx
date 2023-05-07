@@ -15,12 +15,11 @@ Kinematics::Kinematics(
     )
 {
   srand(time(NULL));
-  // importing from local python script for ML predictions
-  // requires tensorflow, energyflow packages installed
-#ifdef SIDIS_MLPRED
-  efnpackage = py::module_::import("testEFlowimport");
-  pfnimport = efnpackage.attr("eflowPredict");
-#endif
+
+  // dimension of tensors for ML predictions
+  dims = {1,35,6};
+  dimsglobal = {1,12};
+  
   // set ion mass
   IonMass = ProtonMass();
   
@@ -88,7 +87,6 @@ Kinematics::Kinematics(
   // reset counters
   countPIDsmeared=countPIDtrue=0;
 };
-
 
 // ---------------------------------
 // calculates 4-momenta components of q and W (`vecQ` and `vecW`) as well as
@@ -201,11 +199,31 @@ void Kinematics::GetQWNu_electronic(){
   Nu = vecIonBeam.Dot(vecQ) / IonMass;
 };
 
+
 void Kinematics::GetQWNu_ML(){
-  hfsinfo.clear();
+  #ifdef INCLUDE_ONNX
+  
+  Ort::Env env(OrtLoggingLevel::ORT_LOGGING_LEVEL_WARNING,"test");
+  Ort::SessionOptions session_options;
+  session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_EXTENDED);
+  Ort::AllocatorWithDefaultOptions allocator;
+  Ort::Session ORTsession(env, modelname, session_options);
+
+  std::vector<const char*> input_node_names, output_node_names;
+  std::vector<std::vector<int64_t>> input_shape;
+  
+  input_node_names.push_back("input");
+  input_node_names.push_back("num_global_features");
+  
+  output_node_names.push_back("activation_7");
+
+  auto memoryInfo = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
+  std::vector<Ort::Value> ort_inputs;
+  
+  input_tensor_values_hfs.clear();
   float pidadj = 0;
+  
   if(nHFS >= 2){
-    std::vector<float> partHold;
     for(int i = 0; i < nHFS; i++){
       double pidsgn=(hfspid[i]/abs(hfspid[i]));
       if(abs(hfspid[i])==211) pidadj = 0.4*pidsgn;
@@ -213,20 +231,34 @@ void Kinematics::GetQWNu_ML(){
       if(abs(hfspid[i])==321) pidadj = 0.6*pidsgn;
       if(abs(hfspid[i])==2212) pidadj = 0.8*pidsgn;
       if(abs(hfspid[i])==11) pidadj = 1.0*pidsgn;
-      partHold.push_back(hfseta[i]);
-      partHold.push_back(hfsphi[i]);
-      partHold.push_back(hfspx[i]);
-      partHold.push_back(hfspy[i]);
-      partHold.push_back(hfspz[i]);
-      partHold.push_back(hfsE[i]);
-      partHold.push_back(pidadj);
-      hfsinfo.push_back(partHold);
-      partHold.clear();
+      input_tensor_values_hfs.push_back(hfseta[i]);
+      input_tensor_values_hfs.push_back(hfsphi[i]);
+      input_tensor_values_hfs.push_back(hfspx[i]);
+      input_tensor_values_hfs.push_back(hfspy[i]);
+      input_tensor_values_hfs.push_back(hfspz[i]);
+      input_tensor_values_hfs.push_back(hfsE[i]);
+      //input_tensor_values_hfs.push_back(pidadj);    
     }
+    // zero padding (fixed expected shape of input)
+    for(int i = nHFS; i < nPad; i++){
+      input_tensor_values_hfs.push_back(0);
+      input_tensor_values_hfs.push_back(0);
+      input_tensor_values_hfs.push_back(0);
+      input_tensor_values_hfs.push_back(0);
+      input_tensor_values_hfs.push_back(0);
+      input_tensor_values_hfs.push_back(0);
+    }
+    ort_inputs.push_back(Ort::Value::CreateTensor<float>(memoryInfo,
+                                                       input_tensor_values_hfs.data(),
+                                                       input_tensor_values_hfs.size(),
+                                                       dims.data(),
+                                                       dims.size()
+                                                       ));
+    
     double Q2ele, Q2DA, Q2JB;
     double xele, xDA, xJB;
     TLorentzVector vecQEle;
-    globalinfo.clear();
+    input_tensor_values_global.clear();
     this->CalculateDISbyElectron();
     vecQEle.SetPxPyPzE(vecQ.Px(), vecQ.Py(), vecQ.Pz(), vecQ.E());
     Q2ele = Q2;
@@ -234,54 +266,64 @@ void Kinematics::GetQWNu_ML(){
     this->CalculateDISbyDA();
     Q2DA = Q2;
     xDA = x;
-    this->CalculateDISbyJB();
+    this->CalculateDISbySigma();
     Q2JB = Q2;
     xJB = x;
-    if( Q2DA > 0 && Q2DA < 1e4){
-      globalinfo.push_back(log10(Q2DA));
+    if( Q2DA > 0 && Q2DA < 1e6){
+      input_tensor_values_global.push_back(log10(Q2DA));
     }
     else{
-      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/10000.0)));
+      input_tensor_values_global.push_back(log10((float) (rand()) / (float) (RAND_MAX/10000.0)));
     }
-    if( Q2ele > 0 && Q2ele < 1e4){
-      globalinfo.push_back(log10(Q2ele));
-    }
-    else{
-      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/10000.0)));
-    }
-    if( Q2JB > 0 && Q2JB < 1e4){
-      globalinfo.push_back(log10(Q2JB));
+    if( Q2ele > 0 && Q2ele < 1e6){
+      input_tensor_values_global.push_back(log10(Q2ele));
     }
     else{
-      globalinfo.push_back(log10((float) (rand()) / (float) (RAND_MAX/10000.0)));
+      input_tensor_values_global.push_back(log10((float) (rand()) / (float) (RAND_MAX/10000.0)));
+    }
+    if( Q2JB > 0 && Q2JB < 1e6){
+      input_tensor_values_global.push_back(log10(Q2JB));
+    }
+    else{
+      input_tensor_values_global.push_back(log10((float) (rand()) / (float) (RAND_MAX/10000.0)));
     }        
     if(xDA>0 && xDA < 1){
-      globalinfo.push_back(-1*log10(xDA));
+      input_tensor_values_global.push_back(-1*log10(xDA));
     }
     else{
-      globalinfo.push_back(-1*log10( (float) (rand()) / (float) (RAND_MAX/1.0)  ));
+      input_tensor_values_global.push_back(-1*log10( (float) (rand()) / (float) (RAND_MAX/1.0)  ));
     }
     if(xele>0 && xele < 1){
-      globalinfo.push_back(-1*log10(xele));
+      input_tensor_values_global.push_back(-1*log10(xele));
     }
     else{
-      globalinfo.push_back(-1*log10( (float) (rand()) / (float) (RAND_MAX/1.0)  ));
+      input_tensor_values_global.push_back(-1*log10( (float) (rand()) / (float) (RAND_MAX/1.0)  ));
     }
     if(xJB>0 && xJB < 1){
-      globalinfo.push_back(-1*log10(xJB));
+      input_tensor_values_global.push_back(-1*log10(xJB));
     }
     else{
-      globalinfo.push_back( -1*log10((float) (rand()) / (float) (RAND_MAX/1.0) ) );
-    }
-    globalinfo.push_back(vecQEle.Px());
-    globalinfo.push_back(vecQEle.Py());
-    globalinfo.push_back(vecQEle.Pz());
-    globalinfo.push_back(vecQEle.E());
-#ifdef SIDIS_MLPRED
-    py::object nnoutput = pfnimport(hfsinfo, globalinfo);
-    std::vector<float> nnvecq = nnoutput.cast<std::vector<float>>();
-    vecQ.SetPxPyPzE(nnvecq[0],nnvecq[1],nnvecq[2],nnvecq[3]);
-#endif
+     input_tensor_values_global.push_back( -1*log10((float) (rand()) / (float) (RAND_MAX/1.0) ) );
+    }    
+    input_tensor_values_global.push_back(vecElectron.Eta());
+    input_tensor_values_global.push_back(vecElectron.Phi());
+    input_tensor_values_global.push_back(vecElectron.Px());
+    input_tensor_values_global.push_back(vecElectron.Py());
+    input_tensor_values_global.push_back(vecElectron.Pz());
+    input_tensor_values_global.push_back(vecElectron.E());
+    ort_inputs.push_back(Ort::Value::CreateTensor<float>(memoryInfo,
+							 input_tensor_values_global.data(),
+							 input_tensor_values_global.size(),
+							 dimsglobal.data(),dimsglobal.size()
+							 ));
+    std::vector<Ort::Value> ort_outputs = ORTsession.Run(Ort::RunOptions{nullptr},
+							 input_node_names.data(),
+							 ort_inputs.data(),
+							 ort_inputs.size(),
+							 output_node_names.data(),
+							 1);
+    float* nnvecq = ort_outputs[0].GetTensorMutableData<float>();    
+    vecQ.SetPxPyPzE(nnvecq[0],nnvecq[1],nnvecq[2],nnvecq[3]);    
   }
   else{
     this->CalculateDISbyElectron();
@@ -289,7 +331,7 @@ void Kinematics::GetQWNu_ML(){
   vecW = vecEleBeam + vecIonBeam - vecElectron; 
   W = vecW.M();
   Nu = vecIonBeam.Dot(vecQ) / IonMass;
-  
+  #endif
 }
 
 // ------------------------------------------------------
@@ -536,6 +578,8 @@ void Kinematics::AddToHFS(TLorentzVector p4_) {
   hfspy[nHFS] = p4.Py();
   hfspz[nHFS] = p4.Pz();
   hfsE[nHFS] = p4.E();
+  hfseta[nHFS] = p4.Eta();
+  hfsphi[nHFS] = p4.Phi();
   new(ar[nHFS]) TLorentzVector(p4);
   nHFS++;
   
