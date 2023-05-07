@@ -17,13 +17,13 @@
 #include <fmt/format.h>
 
 // root
-#include "TChain.h"
-#include "TObjArray.h"
-#include "TFile.h"
-#include "TRegexp.h"
+#include <TChain.h>
+#include <TObjArray.h>
+#include <TFile.h>
+#include <TRegexp.h>
 
 // adage
-#include "adage/BinSet.h"
+#include <adage/BinSet.h>
 
 // epic-analysis
 #include "DataModel.h"

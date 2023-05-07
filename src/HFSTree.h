@@ -18,7 +18,7 @@
 #include "Kinematics.h"
 
 // ROOT
-#include "TTree.h"
+#include <TTree.h>
 
 class HFSTree
 {
