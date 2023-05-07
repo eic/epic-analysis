@@ -6,7 +6,7 @@
 [subrepo]
 	remote = git@github.com:c-dilks/adage.git
 	branch = main
-	commit = 996bdd7f7283b99d01feb38db81d8764ef05d87e
-	parent = 5cb40e0550b3a7e88dbf2a18f759178689f64598
+	commit = 54c1de428795b6f6e938911deade88177ea91e98
+	parent = 0eecfe224989ac5205fb150b10c5ec3e8ba54fb8
 	method = merge
-	cmdver = 0.4.3
+	cmdver = 0.4.6

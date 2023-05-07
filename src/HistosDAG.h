@@ -4,7 +4,7 @@
 // Implement Histos payload for Adage
 #pragma once
 
-#include "adage/Adage.h"
+#include <adage/Adage.h>
 #include "Histos.h"
 
 class HistosDAG : public Adage<Histos>
