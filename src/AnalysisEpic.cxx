@@ -55,9 +55,9 @@ void AnalysisEpic::Execute()
   TTreeReaderArray<Float_t> recparts_CHI2PID(tr,  "ReconstructedChargedParticles.goodnessOfPID");
   
   // RecoAssociations
-  TTreeReaderArray<UInt_t> assoc_simID(tr, "ReconstructedChargedParticlesAssociations.simID");
-  TTreeReaderArray<UInt_t> assoc_recID(tr, "ReconstructedChargedParticlesAssociations.recID");
-  TTreeReaderArray<Float_t> assoc_weight(tr, "ReconstructedChargedParticlesAssociations.weight");
+  TTreeReaderArray<UInt_t> assoc_simID(tr, "ReconstructedChargedParticleAssociations.simID");
+  TTreeReaderArray<UInt_t> assoc_recID(tr, "ReconstructedChargedParticleAssociations.recID");
+  TTreeReaderArray<Float_t> assoc_weight(tr, "ReconstructedChargedParticleAssociations.weight");
 
   // calculate Q2 weights
   CalculateEventQ2Weights();
