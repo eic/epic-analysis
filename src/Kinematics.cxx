@@ -34,7 +34,7 @@ Kinematics::Kinematics(
   // set method for determining `vecQ` 4-momentum components for certain recon methods (JB,DA,(e)Sigma)
   qComponentsMethod = qQuadratic; // qQuadratic, qHadronic, qElectronic
   /////////////////////////////////////////////////////////////
-
+  
   // set beam 4-momenta
   // - electron beam points toward negative z
   // - ion beam points toward positive z, negative x
@@ -532,13 +532,6 @@ void Kinematics::ValidateHeadOnFrame() {
 // add a 4-momentum to the hadronic final state
 void Kinematics::AddToHFS(TLorentzVector p4_) {
   TLorentzVector p4 = p4_;
-  hfspx[nHFS] = p4.Px();
-  hfspy[nHFS] = p4.Py();
-  hfspz[nHFS] = p4.Pz();
-  hfsE[nHFS] = p4.E();
-  new(ar[nHFS]) TLorentzVector(p4);
-  nHFS++;
-  
   if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(p4,p4);
   sigmah += (p4.E() - p4.Pz());
   Pxh += p4.Px();
@@ -546,6 +539,26 @@ void Kinematics::AddToHFS(TLorentzVector p4_) {
   hadronSumVec += p4;
   countHadrons++;
 };
+
+void Kinematics::AddToHFSTree(TLorentzVector p4, int pid,
+			      TLorentzVector p4true, int pidtrue
+			      ) {
+  hfspx[nHFS] = p4.Px();
+  hfspy[nHFS] = p4.Py();
+  hfspz[nHFS] = p4.Pz();
+  hfsE[nHFS] = p4.E();
+  new(ar[nHFS]) TLorentzVector(p4);  
+  hfspid[nHFS] = pid;
+
+  hfspxTrue[nHFS] = p4true.Px();
+  hfspyTrue[nHFS] = p4true.Py();
+  hfspzTrue[nHFS] = p4true.Pz();
+  hfsETrue[nHFS] = p4true.E();
+  hfspidTrue[nHFS] = pidtrue;
+  
+  nHFS++;
+};
+
 
 void Kinematics::AddPion(TLorentzVector p4_){
   TLorentzVector p4 = p4_;

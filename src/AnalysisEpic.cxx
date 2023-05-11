@@ -268,6 +268,24 @@ void AnalysisEpic::Execute()
 	}
 	// Add the final state particle to the HFS
 	kin->AddToHFS(recpart_.vecPart);
+	if( writeHFSTree ){
+	  int pid = recpart_.pid;
+	  int truepid;
+	  int mcid_ = recpart_.mcID;
+	  TLorentzVector truep4;
+	  if(mcid_ >= 0) {
+	    for(auto imc : mcpart) {
+	      if(mcid_ == imc.mcID) {
+		truep4 = imc.vecPart;
+		truepid = imc.pid;
+		break;
+	      }
+	    }
+	  }	  
+	  kin->AddToHFSTree(recpart_.vecPart, pid,
+			    truep4, truepid
+			    );
+	}
       }
       irec++; // Increment to next particle
     }

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: LGPL-3.0-or-later
+ // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2023 Christopher Dilks, Connor Pecar, Duane Byer, Sanghwa Park, Brian Page
 
 /* NOTE:
@@ -55,6 +55,8 @@ class Kinematics
 
     // hadronic final state (HFS)
     void AddToHFS(TLorentzVector p4_);
+    void AddToHFSTree(TLorentzVector p4, int pid,
+		      TLorentzVector p4true, int pidtrue);
     void AddPion(TLorentzVector p4_);
     void SubtractElectronFromHFS();
     void ResetHFS();
@@ -133,6 +135,16 @@ class Kinematics
     Double_t hfseta[100];
     Double_t hfsphi[100];
     Int_t hfspid[100];
+  // HFS tree true associated tracks
+  // (NOT full true HFS, just those associated with reco HFS)
+    Double_t hfspxTrue[100];
+    Double_t hfspyTrue[100];
+    Double_t hfspzTrue[100];
+    Double_t hfsETrue[100];
+    Double_t hfsetaTrue[100];
+    Double_t hfsphiTrue[100];
+    Int_t hfspidTrue[100];
+  
     TClonesArray *hfsp4 = new TClonesArray("TLorentzVector");
     TClonesArray &ar    = *hfsp4;
     TClonesArray *pip4  = new TClonesArray("TLorentzVector");
