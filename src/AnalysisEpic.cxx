@@ -268,6 +268,8 @@ void AnalysisEpic::Execute()
 	}
 	// Add the final state particle to the HFS
 	kin->AddToHFS(recpart_.vecPart);
+
+	// Add reconstructed particle and true info to HFSTree
 	if( writeHFSTree ){
 	  int pid = recpart_.pid;
 	  int truepid;

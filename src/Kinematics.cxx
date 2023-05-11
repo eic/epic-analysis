@@ -540,6 +540,8 @@ void Kinematics::AddToHFS(TLorentzVector p4_) {
   countHadrons++;
 };
 
+// add reconstructed and true information from a
+// reconstructed track to HFSTree
 void Kinematics::AddToHFSTree(TLorentzVector p4, int pid,
 			      TLorentzVector p4true, int pidtrue
 			      ) {
