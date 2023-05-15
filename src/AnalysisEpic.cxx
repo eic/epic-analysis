@@ -283,10 +283,10 @@ void AnalysisEpic::Execute()
 		break;
 	      }
 	    }
+	    kin->AddToHFSTree(recpart_.vecPart, pid,
+			      truep4, truepid
+			      );	    
 	  }	  
-	  kin->AddToHFSTree(recpart_.vecPart, pid,
-			    truep4, truepid
-			    );
 	}
       }
       irec++; // Increment to next particle
