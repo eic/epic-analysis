@@ -212,9 +212,7 @@ void Kinematics::GetQWNu_ML(){
       if(abs(hfspid[i])==22) pidadj = 0.2*pidsgn;
       if(abs(hfspid[i])==321) pidadj = 0.6*pidsgn;
       if(abs(hfspid[i])==2212) pidadj = 0.8*pidsgn;
-      if(abs(hfspid[i])==11) pidadj = 1.0*pidsgn;
-      partHold.push_back(hfseta[i]);
-      partHold.push_back(hfsphi[i]);
+      if(abs(hfspid[i])==11) pidadj = 1.0*pidsgn;      
       partHold.push_back(hfspx[i]);
       partHold.push_back(hfspy[i]);
       partHold.push_back(hfspz[i]);
@@ -545,28 +543,19 @@ void Kinematics::AddToHFS(TLorentzVector p4_) {
 void Kinematics::AddToHFSTree(TLorentzVector p4, int pid,
 			      TLorentzVector p4true, int pidtrue
 			      ) {
-  hfspx[nHFS] = p4.Px();
-  hfspy[nHFS] = p4.Py();
-  hfspz[nHFS] = p4.Pz();
-  hfsE[nHFS] = p4.E();
-  new(ar[nHFS]) TLorentzVector(p4);  
-  hfspid[nHFS] = pid;
+  hfspx.push_back(p4.Px());
+  hfspy.push_back(p4.Py());
+  hfspz.push_back(p4.Pz());
+  hfsE.push_back(p4.E());
+  hfspid.push_back(pid);
 
-  hfspxTrue[nHFS] = p4true.Px();
-  hfspyTrue[nHFS] = p4true.Py();
-  hfspzTrue[nHFS] = p4true.Pz();
-  hfsETrue[nHFS] = p4true.E();
-  hfspidTrue[nHFS] = pidtrue;
+  hfspxTrue.push_back(p4true.Px());
+  hfspyTrue.push_back(p4true.Py());
+  hfspzTrue.push_back(p4true.Pz());
+  hfsETrue.push_back(p4true.E());
+  hfspidTrue.push_back(pidtrue);
   
   nHFS++;
-};
-
-
-void Kinematics::AddPion(TLorentzVector p4_){
-  TLorentzVector p4 = p4_;
-  if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(p4,p4);
-  new(arpi[nPi]) TLorentzVector(p4);
-  nPi++;
 };
 
 // subtract electron from hadronic final state variables
@@ -587,9 +576,7 @@ void Kinematics::SubtractElectronFromHFS() {
         hadronSumVec -= HvecElectron;
         break;
     }
-    countHadrons--;
-    ar.Remove( &vecElectron );
-    nHFS--;
+    countHadrons--;    
   } else {
     cerr << "ERROR: electron energy is NaN" << endl;
     // TODO: kill event
@@ -604,8 +591,18 @@ void Kinematics::ResetHFS() {
   countHadrons = 0;
   nHFS = 0;
   nPi = 0;
-  ar.Clear();
-  arpi.Clear();
+  hfspx.clear();
+  hfspy.clear();
+  hfspz.clear();
+  hfsE.clear();
+  hfspid.clear();
+  
+  hfspxTrue.clear();
+  hfspyTrue.clear();
+  hfspzTrue.clear();
+  hfsETrue.clear();
+  hfspidTrue.clear();
+    
 };
 
 

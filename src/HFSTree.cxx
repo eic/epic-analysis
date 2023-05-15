@@ -17,12 +17,19 @@ HFSTree::HFSTree(TString treeName_, std::shared_ptr<Kinematics> K_, std::shared_
   T->Branch("vecEleBeamTrue", &(Ktrue->vecEleBeam));
   T->Branch("vecIonBeamTrue", &(Ktrue->vecIonBeam));
   T->Branch("nHFS", &(K->nHFS), "nHFS/I");
-  T->Branch("hfsp4", &(K->hfsp4));
-  T->Branch("hfspx", &(K->hfspx), "hfspx[nHFS]/D");
-  T->Branch("hfspy", &(K->hfspy), "hfspy[nHFS]/D");
-  T->Branch("hfspz", &(K->hfspz), "hfspz[nHFS]/D");
-  T->Branch("hfsE", &(K->hfsE), "hfsE[nHFS]/D");
-  T->Branch("hfspid", &(K->hfspid), "hfspid[nHFS]/D");
+
+  T->Branch("hfspx", &(K->hfspx));
+  T->Branch("hfspy", &(K->hfspy));
+  T->Branch("hfspz", &(K->hfspz));
+  T->Branch("hfsE", &(K->hfsE));
+  T->Branch("hfspid", &(K->hfspid));
+
+  T->Branch("hfspxTrue", &(K->hfspxTrue));
+  T->Branch("hfspyTrue", &(K->hfspyTrue));
+  T->Branch("hfspzTrue", &(K->hfspzTrue));
+  T->Branch("hfsETrue", &(K->hfsETrue));
+  T->Branch("hfspidTrue", &(K->hfspidTrue));
+  
   T->Branch("weight",    &(weight),       "weight/D");
 };
 

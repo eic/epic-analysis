@@ -128,27 +128,20 @@ class Kinematics
   // HFS tree objects
     Int_t nHFS;
     Int_t nPi;
-    Double_t hfspx[100];
-    Double_t hfspy[100];
-    Double_t hfspz[100];
-    Double_t hfsE[100];
-    Double_t hfseta[100];
-    Double_t hfsphi[100];
-    Int_t hfspid[100];
+    std::vector<double> hfspx;
+    std::vector<double> hfspy;
+    std::vector<double> hfspz;
+    std::vector<double> hfsE;
+    std::vector<int> hfspid;
+
   // HFS tree true associated tracks
   // (NOT full true HFS, just those associated with reco HFS)
-    Double_t hfspxTrue[100];
-    Double_t hfspyTrue[100];
-    Double_t hfspzTrue[100];
-    Double_t hfsETrue[100];
-    Double_t hfsetaTrue[100];
-    Double_t hfsphiTrue[100];
-    Int_t hfspidTrue[100];
+    std::vector<double> hfspxTrue;
+    std::vector<double> hfspyTrue;
+    std::vector<double> hfspzTrue;
+    std::vector<double> hfsETrue;
+    std::vector<int> hfspidTrue;
   
-    TClonesArray *hfsp4 = new TClonesArray("TLorentzVector");
-    TClonesArray &ar    = *hfsp4;
-    TClonesArray *pip4  = new TClonesArray("TLorentzVector");
-    TClonesArray &arpi  = *pip4;
     // TMVA for ML sidis reconstruction
     std::vector<std::vector<float>> hfsinfo;
     std::vector<float> globalinfo;
