@@ -1,4 +1,4 @@
- // SPDX-License-Identifier: LGPL-3.0-or-later
+// SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2023 Christopher Dilks, Connor Pecar, Duane Byer, Sanghwa Park, Brian Page
 
 /* NOTE:
