@@ -196,7 +196,6 @@ void AnalysisEcce::Execute()
 	  // add to hadronic final state sums
 	  kinTrue->AddToHFS(part.vecPart);
 
-
 	  // identify scattered electron by max momentum
 	  if(pid_ == 11) {
 	    if(pt_ > maxPt) {
@@ -309,6 +308,9 @@ void AnalysisEcce::Execute()
 	  //  cout  << "\t\t\t add  to hadfs  \n" ;
 	  recopart.push_back(part);
 	  kin->AddToHFS(part.vecPart);
+	  if( writeHFSTree ){
+	    kin->AddToHFSTree(part.vecPart, part.pid);
+	  }
 	  kin->hfspid[kin->nHFS - 1] = pid_;
 	}
       }
@@ -455,11 +457,20 @@ void AnalysisEcce::Execute()
       kin->vecHadron = part.vecPart;
       kin->CalculateHadronKinematics();
 
+      // add selected single hadron FS to HFS tree
+      if( writeHFSTree ){
+        kin->AddTrackToHFSTree(part.vecPart, part.pid);
+      }
+
       // find the matching truth hadron using mcID, and calculate its kinematics
       if(mcid_ > 0) {
         for(auto imc : mcpart) {
           if(mcid_ == imc.mcID) {
             kinTrue->vecHadron = imc.vecPart;
+	    // add tracks of interest for kinematic studies to HFSTree
+            if( writeHFSTree ){
+              kinTrue->AddTrackToHFSTree(imc.vecPart, imc.pid);
+            }
             break;
           }
         }
@@ -503,8 +514,8 @@ void AnalysisEcce::Execute()
       }
 
     }//hadron loop
-
-
+    
+    if( writeHFSTree && kin->nHFS > 0) HFST->FillTree(Q2weightFactor);
     
   } while(tr.Next()); // tree reader loop
   cout << "end event loop" << endl;

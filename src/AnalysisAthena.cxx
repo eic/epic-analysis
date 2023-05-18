@@ -174,6 +174,9 @@ void AnalysisAthena::Execute()
           if(part.mcID == imc.mcID) {
             recopart.push_back(part);
             kin->AddToHFS(part.vecPart);
+	    if( writeHFSTree ){
+	      kin->AddToHFSTree(part.vecPart, part.pid);
+	    }	    
             break;
           }
         }
@@ -240,11 +243,20 @@ void AnalysisAthena::Execute()
       kin->vecHadron = part.vecPart;
       kin->CalculateHadronKinematics();
 
+      // add selected single hadron FS to HFS tree
+      if( writeHFSTree ){
+        kin->AddTrackToHFSTree(part.vecPart, part.pid);
+      }
+
       // find the matching truth hadron using mcID, and calculate its kinematics
       if(mcid_ > 0) {
         for(auto imc : mcpart) {
           if(mcid_ == imc.mcID) {
             kinTrue->vecHadron = imc.vecPart;
+	    // add tracks of interest for kinematic studies to HFSTree
+            if( writeHFSTree ){
+              kinTrue->AddTrackToHFSTree(imc.vecPart, imc.pid);
+            }
             break;
           }
         }
@@ -288,7 +300,10 @@ void AnalysisAthena::Execute()
       }
 
     }//hadron loop
-
+    
+    // fill HFSTree for each event
+    if( writeHFSTree && kin->nHFS > 0) HFST->FillTree(Q2weightFactor);
+    
   } while(tr.Next()); // tree reader loop
   cout << "end event loop" << endl;
   // event loop end =========================================================
