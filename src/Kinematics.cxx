@@ -538,24 +538,26 @@ void Kinematics::AddToHFS(TLorentzVector p4_) {
   countHadrons++;
 };
 
-// add reconstructed and true information from a
-// reconstructed track to HFSTree
-void Kinematics::AddToHFSTree(TLorentzVector p4, int pid,
-			      TLorentzVector p4true, int pidtrue
-			      ) {
+// add  information from a reconstructed particle to HFSTree
+// branches containing full HFS
+void Kinematics::AddToHFSTree(TLorentzVector p4, int pid) {
   hfspx.push_back(p4.Px());
   hfspy.push_back(p4.Py());
   hfspz.push_back(p4.Pz());
   hfsE.push_back(p4.E());
   hfspid.push_back(pid);
 
-  hfspxTrue.push_back(p4true.Px());
-  hfspyTrue.push_back(p4true.Py());
-  hfspzTrue.push_back(p4true.Pz());
-  hfsETrue.push_back(p4true.E());
-  hfspidTrue.push_back(pidtrue);
-  
   nHFS++;
+};
+
+// add a specific track and its matched true four momentum
+// to HFSTree for final kinematic calculations (not full HFS)
+void Kinematics::AddTrackToHFSTree(TLorentzVector p4, int pid) {
+  selectedHadPx.push_back(p4.Px());
+  selectedHadPy.push_back(p4.Py());
+  selectedHadPz.push_back(p4.Pz());
+  selectedHadE.push_back(p4.E());
+  selectedHadPID.push_back(pid);  
 };
 
 // subtract electron from hadronic final state variables
@@ -590,19 +592,18 @@ void Kinematics::ResetHFS() {
   hadronSumVec.SetPxPyPzE(0,0,0,0);
   countHadrons = 0;
   nHFS = 0;
-  nPi = 0;
+  
   hfspx.clear();
   hfspy.clear();
   hfspz.clear();
   hfsE.clear();
   hfspid.clear();
   
-  hfspxTrue.clear();
-  hfspyTrue.clear();
-  hfspzTrue.clear();
-  hfsETrue.clear();
-  hfspidTrue.clear();
-    
+  selectedHadPx.clear();
+  selectedHadPy.clear();
+  selectedHadPz.clear();
+  selectedHadE.clear();
+  selectedHadPID.clear();    
 };
 
 
