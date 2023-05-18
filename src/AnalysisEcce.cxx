@@ -311,7 +311,6 @@ void AnalysisEcce::Execute()
 	  if( writeHFSTree ){
 	    kin->AddToHFSTree(part.vecPart, part.pid);
 	  }
-	  kin->hfspid[kin->nHFS - 1] = pid_;
 	}
       }
 
