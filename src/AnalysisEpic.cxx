@@ -24,7 +24,7 @@ void AnalysisEpic::Execute()
   }
   chain->CanDeleteRefs();
   auto listOfBranches = chain->GetListOfBranches();
-  
+
   TTreeReader tr(chain.get());
 
   TTreeReaderArray<Int_t> hepmcp_status(tr, "GeneratedParticles.type");
@@ -56,10 +56,6 @@ void AnalysisEpic::Execute()
   TTreeReaderArray<Float_t> recparts_CHI2PID(tr,  "ReconstructedChargedParticles.goodnessOfPID");
   
   // RecoAssociations
-  /*TTreeReaderArray<UInt_t> assoc_simID(tr, "ReconstructedChargedParticlesAssociations.simID");
-  TTreeReaderArray<UInt_t> assoc_recID(tr, "ReconstructedChargedParticlesAssociations.recID");
-  TTreeReaderArray<Float_t> assoc_weight(tr, "ReconstructedChargedParticlesAssociations.weight");
-  */
   std::string assoc_branch_name = "ReconstructedChargedParticleAssociations";
   if(listOfBranches->FindObject(assoc_branch_name.c_str()) == nullptr)
     assoc_branch_name = "ReconstructedChargedParticlesAssociations"; // productions before 23.5

@@ -1,5 +1,4 @@
-#ifndef BinSet_
-#define BinSet_
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,16 +6,15 @@
 #include <sstream>
 
 // ROOT
-#include "TSystem.h"
-#include "TObject.h"
-#include "TNamed.h"
-#include "TString.h"
-#include "TMath.h"
-#include "TAxis.h"
-#include "TObjArray.h"
+#include <TSystem.h>
+#include <TObject.h>
+#include <TNamed.h>
+#include <TString.h>
+#include <TMath.h>
+#include <TAxis.h>
+#include <TObjArray.h>
 
-
-// sidis-eic
+// adage
 #include "CutDef.h"
 
 
@@ -79,5 +77,3 @@ class BinSet : public TObject
 
   ClassDef(BinSet,1);
 };
-
-#endif

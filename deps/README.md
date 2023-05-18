@@ -64,7 +64,7 @@ changes can be both local to `epic-analysis` or local to `<subrepo>`, they do no
 
 Create a new branch (e.g., `<my-feature>`) for `<subrepo>` remote, and push the changes we made to it:
 ```bash
-git subrepo push deps/<subrepo> -b <my-feature> -u
+git subrepo push deps/<subrepo> -b <my-feature> -u   # NOTE: if this fails, see troubleshooting section below
 git push   # to push changes to `deps/<subrepo>/.gitrepo
 ```
 The commit that you made above will be "copied" and pushed, in the sense that
@@ -88,3 +88,16 @@ git subrepo fetch deps/<subrepo> -b main            # fetch changes from <subrep
 git subrepo pull deps/<subrepo> -b main -u --force  # pull changes (--force is needed if remote deleted <my-feature>)
 git push
 ```
+
+Finally, merge the feature branch in the main repository (*do NOT squash merge!*)
+
+#### Troubleshooting
+If a branch which included subrepo changes was *squash merged* in the primary
+repository, the parent commit of the `subrepo push` commit will not be in the
+commit history; therefore `git subrepo push` will fail with a cryptic error:
+```
+fatal: Not a valid object name: ''
+```
+Workaround: edit the `.gitrepo` file, changing `parent` to a recent, relevant
+parent commit in the primary repository (`epic-analysis` in this case), then
+try to `subrepo push` again

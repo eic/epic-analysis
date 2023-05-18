@@ -4,9 +4,9 @@
 #pragma once
 
 // ROOT
-#include "TTreeReader.h"
-#include "TTreeReaderValue.h"
-#include "TTreeReaderArray.h"
+#include <TTreeReader.h>
+#include <TTreeReaderValue.h>
+#include <TTreeReaderArray.h>
 
 // epic-analysis
 #include "Analysis.h"

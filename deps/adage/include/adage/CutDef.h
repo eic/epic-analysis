@@ -1,5 +1,4 @@
-#ifndef CutDef_
-#define CutDef_
+#pragma once
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,11 +6,11 @@
 #include <sstream>
 
 // ROOT
-#include "TSystem.h"
-#include "TObject.h"
-#include "TNamed.h"
-#include "TString.h"
-#include "TMath.h"
+#include <TSystem.h>
+#include <TObject.h>
+#include <TNamed.h>
+#include <TString.h>
+#include <TMath.h>
 
 
 class CutDef : public TObject
@@ -53,5 +52,3 @@ class CutDef : public TObject
 
   ClassDef(CutDef,1);
 };
-
-#endif
