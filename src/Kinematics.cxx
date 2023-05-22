@@ -654,6 +654,7 @@ void Kinematics::GetHFS(
         }
 
         this->AddToHFS(trackp4);
+	this->AddToHFSTree(trackp4,pid);
       }
     }    
   }
@@ -661,9 +662,18 @@ void Kinematics::GetHFS(
   // eflow high |eta| track loop
   while(Track *eflowTrack = (Track*)itEFlowTrack() ){
     TLorentzVector eflowTrackp4 = eflowTrack->P4();
+    int pid = GetTrackPID( // get smeared PID                                                                     
+            eflowTrack,
+            itpfRICHTrack,
+            itDIRCepidTrack, itDIRChpidTrack,
+            itBTOFepidTrack, itBTOFhpidTrack,
+            itdualRICHagTrack, itdualRICHcfTrack
+            );
+
     if(!isnan(eflowTrackp4.E())){
       if(std::abs(eflowTrack->Eta) >= 4.0){
         this->AddToHFS(eflowTrackp4);
+	this->AddToHFSTree(eflowTrackp4, pid);
       }
     }
   }
@@ -674,6 +684,7 @@ void Kinematics::GetHFS(
     if(!isnan(towerPhotonp4.E())){
       if( std::abs(towerPhoton->Eta) < 4.0  ){
         this->AddToHFS(towerPhotonp4);
+	this->AddToHFSTree(towerPhotonp4,22);
       }
     }
   }
@@ -684,6 +695,7 @@ void Kinematics::GetHFS(
     if(!isnan(towerNeutralHadronp4.E())){
       if( std::abs(towerNeutralHadron->Eta) < 4.0 ){
         this->AddToHFS(towerNeutralHadronp4);
+	this->AddToHFSTree(towerNeutralHadronp4,-1);
       }
     }
   }
