@@ -53,6 +53,13 @@ prodSettings = {
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
+  'epic.23.05.2' => {
+    :comment         => 'Pythia 8',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
   'epic.23.05.1' => {
     :comment         => 'Pythia 8',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
@@ -373,6 +380,7 @@ if [
 # pattern: "#{energy}/minQ2=#{minQ2}/"
 elsif [
   'epic.unstable',
+  'epic.23.05.2',
   'epic.23.05.1',
   'epic.23.03.0_pythia8',
   'epic.23.01.0',
