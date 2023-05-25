@@ -139,10 +139,10 @@ jobs:
       matrix:
         include:
           # ePIC
-          - { id: epic_arches,             options: --version epic.22.11.3 --limit 20 --detector arches      } # max limit=150
-          - { id: epic_brycecanyon,        options: --version epic.22.11.3 --limit 4  --detector brycecanyon } # max limit=35
-          - { id: epic_arches_radcor,      options: --version epic.22.11.3 --limit 20 --detector arches      --radcor } # max limit=150
-          - { id: epic_brycecanyon_radcor, options: --version epic.22.11.3 --limit 4  --detector brycecanyon --radcor } # max limit=35
+          - { id: epic_arches,             options: --limit 20 --detector arches      } # max limit=150
+          - { id: epic_brycecanyon,        options: --limit 20 --detector brycecanyon } # max limit=35
+          - { id: epic_arches_radcor,      options: --limit 20 --detector arches      --radcor } # max limit=150
+          - { id: epic_brycecanyon_radcor, options: --limit 20 --detector brycecanyon --radcor } # max limit=35
           # ECCE / ATHENA
           - { id: ecce,   options: --version ecce.22.1               --limit 40 } # max limit=375
           - { id: athena, options: --version athena.deathvalley-v1.0 --limit 20 } # max limit=500
