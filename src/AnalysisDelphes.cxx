@@ -200,6 +200,7 @@ void AnalysisDelphes::Execute() {
           trk->Phi,
           trk->Mass /* TODO: do we use track mass here ?? */
           );
+
       GenParticle* trkPart = (GenParticle*)trk->Particle.GetObject();
       kinTrue->hadPID = pid;
       kinTrue->vecHadron.SetPtEtaPhiM(
@@ -212,6 +213,11 @@ void AnalysisDelphes::Execute() {
       kin->CalculateHadronKinematics();
       kinTrue->CalculateHadronKinematics();
 
+      if( writeHFSTree ){
+	kin->AddTrackToHFSTree(kin->vecHadron,kin->hadPID);
+	kinTrue->AddTrackToHFSTree(kinTrue->vecHadron,kinTrue->hadPID);
+      }
+      
       // asymmetry injection
       //kin->InjectFakeAsymmetry(); // sets tSpin, based on reconstructed kinematics
       //kinTrue->InjectFakeAsymmetry(); // sets tSpin, based on generated kinematics
@@ -235,7 +241,7 @@ void AnalysisDelphes::Execute() {
 
     }; // end track loop
 
-
+    if( writeHFSTree ) HFST->FillTree(Q2weightFactor);
     // jet loop - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     if(includeOutputSet["jets"]) {
 

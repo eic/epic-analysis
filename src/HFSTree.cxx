@@ -17,12 +17,25 @@ HFSTree::HFSTree(TString treeName_, std::shared_ptr<Kinematics> K_, std::shared_
   T->Branch("vecEleBeamTrue", &(Ktrue->vecEleBeam));
   T->Branch("vecIonBeamTrue", &(Ktrue->vecIonBeam));
   T->Branch("nHFS", &(K->nHFS), "nHFS/I");
-  T->Branch("hfsp4", &(K->hfsp4));
-  T->Branch("hfspx", &(K->hfspx), "hfspx[nHFS]/D");
-  T->Branch("hfspy", &(K->hfspy), "hfspy[nHFS]/D");
-  T->Branch("hfspz", &(K->hfspz), "hfspz[nHFS]/D");
-  T->Branch("hfsE", &(K->hfsE), "hfsE[nHFS]/D");
-  T->Branch("hfspid", &(K->hfspid), "hfspid[nHFS]/D");
+
+  T->Branch("hfspx", &(K->hfspx));
+  T->Branch("hfspy", &(K->hfspy));
+  T->Branch("hfspz", &(K->hfspz));
+  T->Branch("hfsE", &(K->hfsE));
+  T->Branch("hfspid", &(K->hfspid));
+
+  T->Branch("selectedHadPx", &(K->selectedHadPx));
+  T->Branch("selectedHadPy", &(K->selectedHadPy));
+  T->Branch("selectedHadPz", &(K->selectedHadPz));
+  T->Branch("selectedHadE", &(K->selectedHadE));
+  T->Branch("selectedHadPID", &(K->selectedHadPID));
+
+  T->Branch("selectedHadPxTrue", &(Ktrue->selectedHadPx));
+  T->Branch("selectedHadPyTrue", &(Ktrue->selectedHadPy));
+  T->Branch("selectedHadPzTrue", &(Ktrue->selectedHadPz));
+  T->Branch("selectedHadETrue", &(Ktrue->selectedHadE));
+  T->Branch("selectedHadPIDTrue", &(Ktrue->selectedHadPID));
+  
   T->Branch("weight",    &(weight),       "weight/D");
 };
 
