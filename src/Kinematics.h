@@ -55,7 +55,8 @@ class Kinematics
 
     // hadronic final state (HFS)
     void AddToHFS(TLorentzVector p4_);
-    void AddPion(TLorentzVector p4_);
+    void AddToHFSTree(TLorentzVector p4, int pid);   	      
+    void AddTrackToHFSTree(TLorentzVector p4, int pid);			   
     void SubtractElectronFromHFS();
     void ResetHFS();
 
@@ -123,20 +124,22 @@ class Kinematics
     TLorentzVector vecElectron, vecW, vecQ;
     TLorentzVector vecHadron;
 
-  // HFS tree objects
-    Int_t nHFS;
-    Int_t nPi;
-    Double_t hfspx[100];
-    Double_t hfspy[100];
-    Double_t hfspz[100];
-    Double_t hfsE[100];
-    Double_t hfseta[100];
-    Double_t hfsphi[100];
-    Int_t hfspid[100];
-    TClonesArray *hfsp4 = new TClonesArray("TLorentzVector");
-    TClonesArray &ar    = *hfsp4;
-    TClonesArray *pip4  = new TClonesArray("TLorentzVector");
-    TClonesArray &arpi  = *pip4;
+    // HFS tree objects
+    Int_t nHFS;    
+    std::vector<double> hfspx;
+    std::vector<double> hfspy;
+    std::vector<double> hfspz;
+    std::vector<double> hfsE;
+    std::vector<int> hfspid;
+
+    // HFS tree select FS tracks and matched true p4
+    // (NOT full true HFS)
+    std::vector<double> selectedHadPx;
+    std::vector<double> selectedHadPy;
+    std::vector<double> selectedHadPz;
+    std::vector<double> selectedHadE;
+    std::vector<int> selectedHadPID;
+
     // TMVA for ML sidis reconstruction
     std::vector<std::vector<float>> hfsinfo;
     std::vector<float> globalinfo;
