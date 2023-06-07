@@ -3,18 +3,6 @@
 
 #pragma once
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string>
-#include <iostream>
-#include <sstream>
-#include <fstream>
-#include <vector>
-#include <map>
-#include <set>
-#include <stdexcept>
-#include <functional>
-#include <fmt/format.h>
 
 // root
 #include <TChain.h>
@@ -81,28 +69,16 @@ public:
   double jetRad, jetMin;
   double jetMatchDR;
   
-  // add a group of files to the analysis, where all of these files have a
-  // common cross section `xs`, and Q2 range `Q2min` to `Q2max`
-  void AddFileGroup(
-        std::vector<std::string> fileNames,
-        Long64_t totalEntries,
-        Double_t xs,
-        Double_t Q2min,
-        Double_t Q2max
-		    );
-  
   // access HistosDAG
   std::shared_ptr<HistosDAG> GetHistosDAG() { return HD; };
   
   
-  Double_t GetEventQ2Weight(Double_t Q2, Int_t guess=0);
-  // after adding all files, estimate the weights for events in each Q2 range
-    void CalculateEventQ2Weights();
-
-    Int_t GetEventQ2Idx(Double_t Q2, Int_t guess=0);
-
-    // run the analysis
-    virtual void Execute() = 0;
+  std::vector<int> a = {
+    1,
+    3,
+    4,
+    6
+  };
 
   protected:
   

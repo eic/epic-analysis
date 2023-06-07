@@ -5,13 +5,6 @@
  * if you make changes, MAINTAIN DOCUMENTATION IN ../doc/kinematics.md
  */
 
-#pragma once
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <iostream>
-#include <sstream>
-#include <stdexcept>
 
 // ROOT
 #include <TSystem.h>
