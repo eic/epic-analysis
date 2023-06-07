@@ -17,6 +17,47 @@ AnalysisAthena::AnalysisAthena(TString configFileName_, TString outfilePrefix_) 
 // destructor
 AnalysisAthena::~AnalysisAthena() { };
 
+// constructor
+AnalysisAthena::AnalysisAthena(TString configFileName_, TString outfilePrefix_) :
+  Analysis(configFileName_, outfilePrefix_)
+{ };
+
+// destructor
+AnalysisAthena::~AnalysisAthena() { };
+
+// constructor
+AnalysisAthena::AnalysisAthena(TString configFileName_, TString outfilePrefix_) :
+  Analysis(configFileName_, outfilePrefix_)
+{ };
+
+// destructor
+AnalysisAthena::~AnalysisAthena() { };
+
+// constructor
+AnalysisAthena::AnalysisAthena(TString configFileName_, TString outfilePrefix_) :
+  Analysis(configFileName_, outfilePrefix_)
+{ };
+
+// destructor
+AnalysisAthena::~AnalysisAthena() { };
+
+// constructor
+AnalysisAthena::AnalysisAthena(TString configFileName_, TString outfilePrefix_) :
+  Analysis(configFileName_, outfilePrefix_)
+{ };
+
+// destructor
+AnalysisAthena::~AnalysisAthena() { };
+
+// constructor
+AnalysisAthena::AnalysisAthena(TString configFileName_, TString outfilePrefix_) :
+  Analysis(configFileName_, outfilePrefix_)
+{ };
+
+// destructor
+AnalysisAthena::~AnalysisAthena() { };
+
+
 
 //=============================================
 // perform the analysis
