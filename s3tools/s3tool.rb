@@ -9,7 +9,7 @@ require 'fileutils'
 
 # default CLI options
 options = OpenStruct.new
-options.version    = 'epic.22.11.3'
+options.version    = 'epic.23.05.2'
 options.energy     = '18x275'
 options.locDir     = ''
 options.mode       = 's'
@@ -53,6 +53,13 @@ prodSettings = {
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
+  'epic.23.05.2' => {
+    :comment         => 'Pythia 8: high-stats May 2023 production',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
   'epic.23.05.1' => {
     :comment         => 'Pythia 8',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
@@ -82,7 +89,7 @@ prodSettings = {
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
   'epic.22.11.3' => {
-    :comment         => 'Pythia 6, with & without radiative corrections',
+    :comment         => 'Pythia 6: high-stats November 2022 production, with & without radiative corrections',
     :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
     :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/SIDIS/pythia6" },
     :energySubDir    => Proc.new { "ep_#{options.energy}" },
@@ -95,7 +102,7 @@ prodSettings = {
     },
   },
   'epic.22.11.2' => {
-    :comment         => 'Pythia 8',
+    :comment         => 'Pythia 8: high-stats November 2022 production',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
     :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
@@ -373,6 +380,7 @@ if [
 # pattern: "#{energy}/minQ2=#{minQ2}/"
 elsif [
   'epic.unstable',
+  'epic.23.05.2',
   'epic.23.05.1',
   'epic.23.03.0_pythia8',
   'epic.23.01.0',
