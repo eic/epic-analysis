@@ -9,7 +9,7 @@ require 'fileutils'
 
 # default CLI options
 options = OpenStruct.new
-options.version    = 'epic.23.05.2'
+options.version    = 'epic.23.06.1'
 options.energy     = '18x275'
 options.locDir     = ''
 options.mode       = 's'
@@ -50,6 +50,13 @@ prodSettings = {
     :comment         => "Latest ePIC TEST sample production; update in #{$0} as needed",
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
     :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/main/epic_brycecanyon/DIS/NC" }, # FORCE brycecanyon only
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
+  'epic.23.06.1' => {
+    :comment         => 'Pythia 8: high-stats May 2023 production',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
@@ -380,6 +387,7 @@ if [
 # pattern: "#{energy}/minQ2=#{minQ2}/"
 elsif [
   'epic.unstable',
+  'epic.23.06.1',
   'epic.23.05.2',
   'epic.23.05.1',
   'epic.23.03.0_pythia8',
