@@ -140,7 +140,7 @@ jobs:
         include:
           # ePIC
           # - { id: epic_arches,             options: --limit 20 --detector arches      }
-          - { id: epic_brycecanyon,        options: --limit 20 --detector brycecanyon }
+          - { id: epic_brycecanyon,        options: --limit 100 --detector brycecanyon }
           # - { id: epic_arches_radcor,      options: --limit 20 --detector arches      --radcor }
           # - { id: epic_brycecanyon_radcor, options: --limit 20 --detector brycecanyon --radcor }
           # ECCE / ATHENA
