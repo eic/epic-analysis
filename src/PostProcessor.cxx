@@ -330,6 +330,7 @@ void PostProcessor::DrawSingle(TString histSet, TString histName) {
     canv->SetLogz(H->GetHistConfig(histName)->logz);
     canv->SetBottomMargin(0.15);
     canv->SetLeftMargin(0.15);
+    canv->SetRightMargin(0.15);
     canv->Print(pngDir+"/"+canvN+".png");
     outfile->cd("/");
     canv->Write();
@@ -350,6 +351,7 @@ void PostProcessor::DrawSingle(TString histSet, TString histName) {
     canv->SetLogz(H->GetHist4Config(histName)->logz);
     canv->SetBottomMargin(0.15);
     canv->SetLeftMargin(0.15);
+    canv->SetRightMargin(0.15);
     hist4->Draw();
 
     canv->Print(pngDir+"/"+canvN+".png");
