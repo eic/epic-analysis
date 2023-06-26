@@ -242,6 +242,7 @@ void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat, 
   canv->SetLogz(H->GetHistConfig(histName)->logz);
   canv->SetBottomMargin(0.15);
   canv->SetLeftMargin(0.15);
+  canv->SetRightMargin(0.15);
 
   // profile for 2D plot
   if(profileAxis>0 && hist->GetDimension()==2) {
