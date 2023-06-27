@@ -18,8 +18,6 @@ env:
   pbeam_en: 275
   root: root -b -q
   root_no_delphes: root -b -q macro/ci/define_exclude_delphes.C 
-  prod_latest: epic.23.06.1
-  prod_previous: epic.23.05.2
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -140,8 +138,8 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - { id: epic_latest,   options: --version epic_latest             --limit 20 --detector brycecanyon --no-radcor }
-          - { id: epic_previous, options: --version epic_previous           --limit 20 --detector brycecanyon --no-radcor }
+          - { id: epic_latest,   options: --version epic.latest             --limit 20 --detector brycecanyon --no-radcor }
+          - { id: epic_previous, options: --version epic.previous           --limit 20 --detector brycecanyon --no-radcor }
           - { id: ecce,          options: --version ecce.22.1               --limit 40 }
           - { id: athena,        options: --version athena.deathvalley-v1.0 --limit 20 }
     steps:
@@ -162,7 +160,7 @@ jobs:
               --output ${{matrix.id}} \
               --mode   s \
               --config s3files.config \
-              $(echo ${{matrix.options}} | sed "s;epic_latest;${{env.prod_latest}};g" | sed "s;epic_previous;${{env.prod_previous}};g")
+              ${{matrix.options}}
             echo "[CI] cat config file"
             cat s3files.config
       - uses: actions/upload-artifact@v3
@@ -528,10 +526,10 @@ jobs:
             echo "yvar = ${{matrix.yvar}}"
             echo "[CI] COMPARATOR MACRO: ePIC"
             macro/ci/comparator_run.sh ${{matrix.aname}} ${{matrix.pname}} ${{matrix.recon}} ${{matrix.xvar}} ${{matrix.yvar}} \
-              "${{env.prod_latest}}"   "epic_latest"   \
-              "${{env.prod_previous}}" "epic_previous" \
-              "ecce"                   "ecce"          \
-              "delphes"                "fastsim"       \
+              "ePIC Latest"   "epic_latest"   \
+              "ePIC Previous" "epic_previous" \
+              "ECCE"          "ecce"          \
+              "Delphes"       "fastsim"       \
               "epic_productions"
             # echo "[CI] COMPARATOR MACRO: LEGACY"
             # macro/ci/comparator_run.sh ${{matrix.aname}} ${{matrix.pname}} ${{matrix.recon}} ${{matrix.xvar}} ${{matrix.yvar}} \
