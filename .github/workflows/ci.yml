@@ -18,6 +18,8 @@ env:
   pbeam_en: 275
   root: root -b -q
   root_no_delphes: root -b -q macro/ci/define_exclude_delphes.C 
+  prod_latest: epic.23.06.1
+  prod_previous: epic.23.05.2
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -138,14 +140,10 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          # ePIC
-          # - { id: epic_arches,             options: --limit 20 --detector arches      }
-          - { id: epic_brycecanyon,        options: --limit 300 --detector brycecanyon }
-          # - { id: epic_arches_radcor,      options: --limit 20 --detector arches      --radcor }
-          # - { id: epic_brycecanyon_radcor, options: --limit 20 --detector brycecanyon --radcor }
-          # ECCE / ATHENA
-          - { id: ecce,   options: --version ecce.22.1               --limit 40 } # max limit=375
-          - { id: athena, options: --version athena.deathvalley-v1.0 --limit 20 } # max limit=500
+          - { id: epic_latest,   options: --version ${{env.prod_latest}}    --limit 20 --detector brycecanyon --no-radcor }
+          - { id: epic_previous, options: --version ${{env.prod_previous}}  --limit 20 --detector brycecanyon --no-radcor }
+          - { id: ecce,          options: --version ecce.22.1               --limit 40 }
+          - { id: athena,        options: --version athena.deathvalley-v1.0 --limit 20 }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -238,35 +236,23 @@ jobs:
       fail-fast: true
       matrix:
         detector:
-          # - epic_arches
-          - epic_brycecanyon
-          # - epic_arches_radcor
-          # - epic_brycecanyon_radcor
+          - epic_latest
+          - epic_previous
           - athena
           - ecce
         aname: [x_q2, p_eta, yRatio, single_bin]
         recon: [Ele]
         include: # enable other recon methods for `aname==x_q2` only
-        # - { aname: x_q2, recon: Mixed,  detector: epic_arches } # FIXME: not sure how to avoid being repetitive... 
-        # - { aname: x_q2, recon: JB,     detector: epic_arches }
-        # - { aname: x_q2, recon: DA,     detector: epic_arches }
-        # - { aname: x_q2, recon: Sigma,  detector: epic_arches }
-        # - { aname: x_q2, recon: eSigma, detector: epic_arches }
-        - { aname: x_q2, recon: Mixed,  detector: epic_brycecanyon }
-        - { aname: x_q2, recon: JB,     detector: epic_brycecanyon }
-        - { aname: x_q2, recon: DA,     detector: epic_brycecanyon }
-        - { aname: x_q2, recon: Sigma,  detector: epic_brycecanyon }
-        - { aname: x_q2, recon: eSigma, detector: epic_brycecanyon }
-        # - { aname: x_q2, recon: Mixed,  detector: epic_arches_radcor }
-        # - { aname: x_q2, recon: JB,     detector: epic_arches_radcor }
-        # - { aname: x_q2, recon: DA,     detector: epic_arches_radcor }
-        # - { aname: x_q2, recon: Sigma,  detector: epic_arches_radcor }
-        # - { aname: x_q2, recon: eSigma, detector: epic_arches_radcor }
-        # - { aname: x_q2, recon: Mixed,  detector: epic_brycecanyon_radcor }
-        # - { aname: x_q2, recon: JB,     detector: epic_brycecanyon_radcor }
-        # - { aname: x_q2, recon: DA,     detector: epic_brycecanyon_radcor }
-        # - { aname: x_q2, recon: Sigma,  detector: epic_brycecanyon_radcor }
-        # - { aname: x_q2, recon: eSigma, detector: epic_brycecanyon_radcor }
+        - { aname: x_q2, recon: Mixed,  detector: epic_latest } # FIXME: not sure how to avoid being repetitive... 
+        - { aname: x_q2, recon: JB,     detector: epic_latest }
+        - { aname: x_q2, recon: DA,     detector: epic_latest }
+        - { aname: x_q2, recon: Sigma,  detector: epic_latest }
+        - { aname: x_q2, recon: eSigma, detector: epic_latest }
+        - { aname: x_q2, recon: Mixed,  detector: epic_previous }
+        - { aname: x_q2, recon: JB,     detector: epic_previous }
+        - { aname: x_q2, recon: DA,     detector: epic_previous }
+        - { aname: x_q2, recon: Sigma,  detector: epic_previous }
+        - { aname: x_q2, recon: eSigma, detector: epic_previous }
         - { aname: x_q2, recon: Mixed,  detector: athena }
         - { aname: x_q2, recon: JB,     detector: athena }
         - { aname: x_q2, recon: DA,     detector: athena }
@@ -359,7 +345,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        detector: [epic_brycecanyon]
+        detector: [epic_latest]
         aname: [x_q2]
         recon: [Ele]
     steps:
@@ -402,10 +388,8 @@ jobs:
       matrix:
         mode:
           - fastsim
-          # - epic_arches
-          - epic_brycecanyon
-          # - epic_arches_radcor
-          # - epic_brycecanyon_radcor
+          - epic_latest
+          - epic_previous
           - athena
           - ecce
         pname: # list only jobs which will only use one (primary) recon method
@@ -423,48 +407,36 @@ jobs:
           - { pname: q2_weights_test,  aname: single_bin, pmacro: postprocess_q2_weights.C      }
           - { pname: eta_vs_p_forPID,  aname: single_bin, pmacro: postprocess_eta_vs_p_forPID.C }
           # use all reconstruction methods: # FIXME: not sure how to avoid being repetitive... 
-          - { mode: fastsim,                 pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim,                 pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim,                 pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim,                 pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim,                 pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: fastsim,                 pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_arches,             pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_arches,             pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_arches,             pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_arches,             pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_arches,             pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_arches,             pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_brycecanyon,        pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_brycecanyon,        pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_brycecanyon,        pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_brycecanyon,        pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_brycecanyon,        pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: epic_brycecanyon,        pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_arches_radcor,      pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_arches_radcor,      pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_arches_radcor,      pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_arches_radcor,      pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_arches_radcor,      pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_arches_radcor,      pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_brycecanyon_radcor, pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_brycecanyon_radcor, pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_brycecanyon_radcor, pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_brycecanyon_radcor, pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_brycecanyon_radcor, pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          # - { mode: epic_brycecanyon_radcor, pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: athena,                  pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: athena,                  pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: athena,                  pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: athena,                  pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: athena,                  pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: athena,                  pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: ecce,                    pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: ecce,                    pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: ecce,                    pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: ecce,                    pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: ecce,                    pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
-          - { mode: ecce,                    pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim,       pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim,       pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim,       pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim,       pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim,       pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: fastsim,       pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_latest,   pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_latest,   pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_latest,   pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_latest,   pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_latest,   pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_latest,   pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_previous, pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_previous, pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_previous, pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_previous, pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_previous, pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: epic_previous, pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena,        pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena,        pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena,        pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena,        pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena,        pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: athena,        pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: ecce,          pname: coverage2D_x_q2, recon: Ele,    aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: ecce,          pname: coverage2D_x_q2, recon: DA,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: ecce,          pname: coverage2D_x_q2, recon: eSigma, aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: ecce,          pname: coverage2D_x_q2, recon: JB,     aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: ecce,          pname: coverage2D_x_q2, recon: Mixed,  aname: x_q2, pmacro: postprocess_x_q2.C }
+          - { mode: ecce,          pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
     steps:
       - uses: actions/checkout@v3
       - uses: actions/download-artifact@v3
@@ -502,79 +474,79 @@ jobs:
 # COMPARATORS ---------------------------------------------------------------------------
 
 # run compare macros matrix for fastsim vs. fullsim
-  # comparison:
-  #   needs:
-  #     - analysis_fastsim
-  #     - analysis_fullsim
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       pname: # list only jobs which will only use one (primary) recon method
-  #         - coverage_p_eta
-  #         - resolution_p_eta
-  #       recon: [Ele] # primary recon method(s)
-  #       include:
-  #         # use only primary recon method
-  #         - { pname: coverage_p_eta,   aname: p_eta, xvar: p, yvar: eta }
-  #         - { pname: resolution_p_eta, aname: p_eta, xvar: p, yvar: eta }
-  #         # use all reconstruction methods:
-  #         ## resolution
-  #         - { pname: resolution_x_q2, recon: Ele,    aname: x_q2, xvar: x, yvar: q2 }
-  #         - { pname: resolution_x_q2, recon: Mixed,  aname: x_q2, xvar: x, yvar: q2 }
-  #         - { pname: resolution_x_q2, recon: DA,     aname: x_q2, xvar: x, yvar: q2 }
-  #         - { pname: resolution_x_q2, recon: JB,     aname: x_q2, xvar: x, yvar: q2 }
-  #         - { pname: resolution_x_q2, recon: Sigma,  aname: x_q2, xvar: x, yvar: q2 }
-  #         - { pname: resolution_x_q2, recon: eSigma, aname: x_q2, xvar: x, yvar: q2 }
-  #         ## coverage
-  #         - { pname: coverage_x_q2,   recon: Ele,    aname: x_q2, xvar: x, yvar: q2 }
-  #         - { pname: coverage_x_q2,   recon: Mixed,  aname: x_q2, xvar: x, yvar: q2 }
-  #         - { pname: coverage_x_q2,   recon: DA,     aname: x_q2, xvar: x, yvar: q2 }
-  #         - { pname: coverage_x_q2,   recon: JB,     aname: x_q2, xvar: x, yvar: q2 }
-  #         - { pname: coverage_x_q2,   recon: Sigma,  aname: x_q2, xvar: x, yvar: q2 }
-  #         - { pname: coverage_x_q2,   recon: eSigma, aname: x_q2, xvar: x, yvar: q2 }
-  #   steps:
-  #     - uses: actions/checkout@v3
-  #     - uses: actions/download-artifact@v3
-  #       with:
-  #         name: x_build_no_delphes
-  #     - uses: actions/download-artifact@v3
-  #       with:
-  #         name: analysis
-  #         path: out
-  #     - uses: cvmfs-contrib/github-action-cvmfs@v3
-  #     - uses: eic/run-cvmfs-osg-eic-shell@main
-  #       with:
-  #         platform-release: "jug_xl:nightly"
-  #         setup: environ.sh
-  #         run: |
-  #           echo "[CI] job matrix params:"
-  #           echo "aname = ${{matrix.aname}}"
-  #           echo "pname = ${{matrix.pname}}"
-  #           echo "recon = ${{matrix.recon}}"
-  #           echo "xvar = ${{matrix.xvar}}"
-  #           echo "yvar = ${{matrix.yvar}}"
-  #           echo "[CI] COMPARATOR MACRO: ePIC"
-  #           macro/ci/comparator_run.sh ${{matrix.aname}} ${{matrix.pname}} ${{matrix.recon}} ${{matrix.xvar}} ${{matrix.yvar}} \
-  #             'ePIC Arches (no radcor)'      'epic_arches'             \
-  #             'ePIC BryceCanyon (no radcor)' 'epic_brycecanyon'        \
-  #             'ePIC Arches (radcor)'         'epic_arches_radcor'      \
-  #             'ePIC BryceCanyon (radcor)'    'epic_brycecanyon_radcor' \
-  #             'ePIC'
-  #           echo "[CI] COMPARATOR MACRO: LEGACY"
-  #           macro/ci/comparator_run.sh ${{matrix.aname}} ${{matrix.pname}} ${{matrix.recon}} ${{matrix.xvar}} ${{matrix.yvar}} \
-  #             'Delphes Pythia6 (no radcor)' 'fastsim'     \
-  #             'ePIC Arches (no radcor)'     'epic_arches' \
-  #             'ATHENA'                      'athena'      \
-  #             'ECCE'                        'ecce'        \
-  #             'LEGACY'
-  #     - uses: actions/upload-artifact@v3
-  #       with:
-  #         name: comparison
-  #         retention-days: 30
-  #         path: |
-  #           out/comparison*.images/*.png
-  #           out/comparison*.root
+  comparison:
+    needs:
+      - analysis_fastsim
+      - analysis_fullsim
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        pname: # list only jobs which will only use one (primary) recon method
+          - coverage_p_eta
+          - resolution_p_eta
+        recon: [Ele] # primary recon method(s)
+        include:
+          # use only primary recon method
+          - { pname: coverage_p_eta,   aname: p_eta, xvar: p, yvar: eta }
+          - { pname: resolution_p_eta, aname: p_eta, xvar: p, yvar: eta }
+          # use all reconstruction methods:
+          ## resolution
+          - { pname: resolution_x_q2, recon: Ele,    aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: resolution_x_q2, recon: Mixed,  aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: resolution_x_q2, recon: DA,     aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: resolution_x_q2, recon: JB,     aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: resolution_x_q2, recon: Sigma,  aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: resolution_x_q2, recon: eSigma, aname: x_q2, xvar: x, yvar: q2 }
+          ## coverage
+          - { pname: coverage_x_q2,   recon: Ele,    aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: coverage_x_q2,   recon: Mixed,  aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: coverage_x_q2,   recon: DA,     aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: coverage_x_q2,   recon: JB,     aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: coverage_x_q2,   recon: Sigma,  aname: x_q2, xvar: x, yvar: q2 }
+          - { pname: coverage_x_q2,   recon: eSigma, aname: x_q2, xvar: x, yvar: q2 }
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: x_build_no_delphes
+      - uses: actions/download-artifact@v3
+        with:
+          name: analysis
+          path: out
+      - uses: cvmfs-contrib/github-action-cvmfs@v3
+      - uses: eic/run-cvmfs-osg-eic-shell@main
+        with:
+          platform-release: "jug_xl:nightly"
+          setup: environ.sh
+          run: |
+            echo "[CI] job matrix params:"
+            echo "aname = ${{matrix.aname}}"
+            echo "pname = ${{matrix.pname}}"
+            echo "recon = ${{matrix.recon}}"
+            echo "xvar = ${{matrix.xvar}}"
+            echo "yvar = ${{matrix.yvar}}"
+            echo "[CI] COMPARATOR MACRO: ePIC"
+            macro/ci/comparator_run.sh ${{matrix.aname}} ${{matrix.pname}} ${{matrix.recon}} ${{matrix.xvar}} ${{matrix.yvar}} \
+              "${{env.prod_latest}}"   "epic_latest"   \
+              "${{env.prod_previous}}" "epic_previous" \
+              "ecce"                   "ecce"          \
+              "delphes"                "fastsim"       \
+              "epic_productions"
+            # echo "[CI] COMPARATOR MACRO: LEGACY"
+            # macro/ci/comparator_run.sh ${{matrix.aname}} ${{matrix.pname}} ${{matrix.recon}} ${{matrix.xvar}} ${{matrix.yvar}} \
+            #   "Delphes Pythia6 (no radcor)" "fastsim"     \
+            #   "ePIC Arches (no radcor)"     "epic_latest" \
+            #   "ATHENA"                      "athena"      \
+            #   "ECCE"                        "ecce"        \
+            #   "LEGACY"
+      - uses: actions/upload-artifact@v3
+        with:
+          name: comparison
+          retention-days: 30
+          path: |
+            out/comparison*.images/*.png
+            out/comparison*.root
 
 # ARTIFACTS ---------------------------------------------------------------------------
 
@@ -616,16 +588,10 @@ jobs:
           tree results
       - name: merge_fastfull
         run: |
-          # macro/ci/merge-fastfull.sh results \
-          #   epic_arches             \
-          #   epic_brycecanyon        \
-          #   epic_arches_radcor      \
-          #   epic_brycecanyon_radcor \
-          #   ecce                    \
-          #   athena
           macro/ci/merge-fastfull.sh results \
-            epic_brycecanyon        \
-            ecce                    \
+            epic_latest   \
+            epic_previous \
+            ecce          \
             athena
           tree results
       - uses: actions/upload-artifact@v3
