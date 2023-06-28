@@ -51,7 +51,7 @@ end
 # }
 prodSettings = {
   'epic.23.06.1' => {
-    :comment         => 'Pythia 8: high-stats May 2023 production',
+    :comment         => 'Pythia 8: high-stats June 2023 production',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
     :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
