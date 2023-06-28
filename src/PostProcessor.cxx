@@ -242,6 +242,7 @@ void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat, 
   canv->SetLogz(H->GetHistConfig(histName)->logz);
   canv->SetBottomMargin(0.15);
   canv->SetLeftMargin(0.15);
+  canv->SetRightMargin(0.15);
 
   // profile for 2D plot
   if(profileAxis>0 && hist->GetDimension()==2) {
@@ -329,6 +330,7 @@ void PostProcessor::DrawSingle(TString histSet, TString histName) {
     canv->SetLogz(H->GetHistConfig(histName)->logz);
     canv->SetBottomMargin(0.15);
     canv->SetLeftMargin(0.15);
+    canv->SetRightMargin(0.15);
     canv->Print(pngDir+"/"+canvN+".png");
     outfile->cd("/");
     canv->Write();
@@ -349,6 +351,7 @@ void PostProcessor::DrawSingle(TString histSet, TString histName) {
     canv->SetLogz(H->GetHist4Config(histName)->logz);
     canv->SetBottomMargin(0.15);
     canv->SetLeftMargin(0.15);
+    canv->SetRightMargin(0.15);
     hist4->Draw();
 
     canv->Print(pngDir+"/"+canvN+".png");
