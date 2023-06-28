@@ -552,7 +552,7 @@ jobs:
   collect:
     needs: 
       - postprocess
-      # - comparison
+      - comparison
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -560,10 +560,10 @@ jobs:
         with:
           name: postprocess
           path: results
-      # - uses: actions/download-artifact@v3
-      #   with:
-      #     name: comparison
-      #     path: results
+      - uses: actions/download-artifact@v3
+        with:
+          name: comparison
+          path: results
       - name: tree_artifacts
         run: tree results
       - name: cull
