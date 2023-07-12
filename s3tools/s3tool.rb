@@ -8,8 +8,8 @@ require 'ostruct'
 require 'fileutils'
 
 # default versions
-VersionLatest   = 'epic.23.06.1'
-VersionPrevious = 'epic.23.05.2'
+VersionLatest   = 'epic.23.07.1'
+VersionPrevious = 'epic.23.06.1'
 
 # default CLI options
 options = OpenStruct.new
@@ -19,7 +19,7 @@ options.locDir     = ''
 options.mode       = 's'
 options.limit      = 2
 options.configFile = ''
-options.detector   = 'arches'
+options.detector   = 'brycecanyon'
 options.radCor     = false
 options.minQ2      = -1
 options.maxQ2      = -1
@@ -50,6 +50,13 @@ end
 #   :fileExtension   => File extension (optional, defaults to 'root')
 # }
 prodSettings = {
+  'epic.23.07.1' => {
+    :comment         => 'Pythia 8: high-stats July 2023 production',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
   'epic.23.06.1' => {
     :comment         => 'Pythia 8: high-stats June 2023 production',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
@@ -388,6 +395,7 @@ if [
 
 # pattern: "#{energy}/minQ2=#{minQ2}/"
 elsif [
+  'epic.23.07.1',
   'epic.23.06.1',
   'epic.23.05.2',
   'epic.23.05.1',
