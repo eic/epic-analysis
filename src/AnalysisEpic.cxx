@@ -44,25 +44,25 @@ void AnalysisEpic::Execute()
   TTreeReaderArray<Float_t> mcpart_psx(tr,       "MCParticles.momentum.x");
   TTreeReaderArray<Float_t> mcpart_psy(tr,       "MCParticles.momentum.y");
   TTreeReaderArray<Float_t> mcpart_psz(tr,       "MCParticles.momentum.z");
-
+  
 
   // Reco tracks
-  TTreeReaderArray<Int_t> recparts_type(tr,  "ReconstructedChargedParticles.type"); // needs to be made an int eventually in actual EE code
-  TTreeReaderArray<Float_t> recparts_e(tr, "ReconstructedChargedParticles.energy");
-  TTreeReaderArray<Float_t> recparts_p_x(tr, "ReconstructedChargedParticles.momentum.x");
-  TTreeReaderArray<Float_t> recparts_p_y(tr, "ReconstructedChargedParticles.momentum.y");
-  TTreeReaderArray<Float_t> recparts_p_z(tr, "ReconstructedChargedParticles.momentum.z");
-  TTreeReaderArray<Int_t> recparts_PDG(tr,  "ReconstructedChargedParticles.PDG");
-  TTreeReaderArray<Float_t> recparts_CHI2PID(tr,  "ReconstructedChargedParticles.goodnessOfPID");
+  TTreeReaderArray<Int_t> recparts_type(tr,  "ReconstructedParticles.type"); // needs to be made an int eventually in actual EE code
+  TTreeReaderArray<Float_t> recparts_e(tr, "ReconstructedParticles.energy");
+  TTreeReaderArray<Float_t> recparts_p_x(tr, "ReconstructedParticles.momentum.x");
+  TTreeReaderArray<Float_t> recparts_p_y(tr, "ReconstructedParticles.momentum.y");
+  TTreeReaderArray<Float_t> recparts_p_z(tr, "ReconstructedParticles.momentum.z");
+  TTreeReaderArray<Int_t> recparts_PDG(tr,  "ReconstructedParticles.PDG");
+  TTreeReaderArray<Float_t> recparts_CHI2PID(tr,  "ReconstructedParticles.goodnessOfPID");
   
   // RecoAssociations
-  std::string assoc_branch_name = "ReconstructedChargedParticleAssociations";
+  std::string assoc_branch_name = "ReconstructedParticleAssociations";
   if(listOfBranches->FindObject(assoc_branch_name.c_str()) == nullptr)
-    assoc_branch_name = "ReconstructedChargedParticlesAssociations"; // productions before 23.5
+    assoc_branch_name = "ReconstructedParticlesAssociations"; // productions before 23.5
   TTreeReaderArray<UInt_t> assoc_simID(tr, (assoc_branch_name+".simID").c_str());
   TTreeReaderArray<UInt_t> assoc_recID(tr, (assoc_branch_name+".recID").c_str());
   TTreeReaderArray<Float_t> assoc_weight(tr, (assoc_branch_name+".weight").c_str());
-
+  
   // calculate Q2 weights
   CalculateEventQ2Weights();
 
@@ -301,8 +301,8 @@ void AnalysisEpic::Execute()
     };
    
     // calculate DIS kinematics
-    if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed
-    if(!(kinTrue->CalculateDIS(reconMethod))) continue; // generated (truth)
+    if(!(kin->CalculateDIS(reconMethod))) continue; // reconstructed    
+    if(!(kinTrue->CalculateDIS("ele"))) continue; // generated (truth)
 
     // Get the weight for this event's Q2
     auto Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
