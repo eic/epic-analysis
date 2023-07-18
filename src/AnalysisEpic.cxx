@@ -370,8 +370,10 @@ void AnalysisEpic::Execute()
       
       // find the matching truth hadron using mcID, and calculate its kinematics
       if(mcid_ >= 0) {
+	bool found_MC_match = false;
 	for(auto imc : mcpart) {
 	  if(mcid_ == imc.mcID) {
+	    found_MC_match = true;
 	    kinTrue->vecHadron = imc.vecPart;
 	    // add tracks of interest for kinematic studies to HFSTree
 	    if( writeHFSTree ){
@@ -379,6 +381,12 @@ void AnalysisEpic::Execute()
 	    }
 	    break;
 	  }
+	}
+	if(includeOutputSet["2h"]){ // if analyzing dihadrons, append to list
+	  if(found_MC_match)
+	    kinTrue->vecHadrons.push_back(kinTrue->vecHadron);
+	  else
+	    kinTrue->vecHadrons.push_back(TLorentzVector());
 	}
       }
 
@@ -405,19 +413,26 @@ void AnalysisEpic::Execute()
 	// Skip hadron if its PID isn't the first track wanted by user
 	int pid_h1 = kin->vecHadronsPIDs.at(i);
 	if(pid_h1==211) // *** Temporary code for only PiPlus PiMinus dihadrons ***
-	  kin->vecDihadronA = kin->vecHadrons.at(i);
+	  {
+	    kin->vecDihadronA = kin->vecHadrons.at(i);
+	    kinTrue->vecDihadronA = kinTrue->vecHadrons.at(i);
+	  }
 	else
 	  continue;
 	// Second hadron loop
 	for(unsigned int j = 0 ; j < kin->vecHadrons.size(); j++){
 	  // Skip hadron if its PID isn't the first track wanted by user
 	  int pid_h2 = kin->vecHadronsPIDs.at(j);
-	  if(pid_h2==-211) // *** Temporary code for only PiPlus PiMinus dihadrons **
-	    kin->vecDihadronB = kin->vecHadrons.at(j);
+	  if(pid_h2==-211) // *** Temporary code for only PiPlus PiMinus dihadrons ***
+	    {
+	      kin->vecDihadronB = kin->vecHadrons.at(j);
+	      kinTrue->vecDihadronB = kinTrue->vecHadrons.at(j);
+	    }
 	  else
 	    continue;
 
 	  kin->CalculateDihadronKinematics();
+	  kinTrue->CalculateDihadronKinematics();
 	  FillHistos2h(Q2weightFactor); // Needs to be changed likely
 	  
 	}	  
