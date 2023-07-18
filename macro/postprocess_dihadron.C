@@ -18,6 +18,10 @@ void postprocess_dihadron(
   // payload: draw a few plots, using PostProcessor::DrawSingle
   P->Op()->Payload(
       [&P](Histos *H) {
+        P->DrawSingle(H,"x","HIST");
+        P->DrawSingle(H,"Q2","HIST");
+        P->DrawSingle(H,"y","HIST");
+        P->DrawSingle(H,"W","HIST");
         P->DrawSingle(H,"dihadron_phiH","HIST");
         P->DrawSingle(H,"dihadron_phiRperp","HIST");
         P->DrawSingle(H,"dihadron_phiRT","HIST");
@@ -33,6 +37,16 @@ void postprocess_dihadron(
         P->DrawSingle(H,"dihadron_pLab","HIST");
         P->DrawSingle(H,"dihadron_pTlab","HIST");
         P->DrawSingle(H,"dihadron_pT","HIST");
+
+        P->DrawSingle(H,"dihadron_phiH_Res","HIST");
+        P->DrawSingle(H,"dihadron_phiRperp_Res","HIST");
+        P->DrawSingle(H,"dihadron_phiRT_Res","HIST");
+        P->DrawSingle(H,"dihadron_theta_Res","HIST");
+        P->DrawSingle(H,"dihadron_z_Res","HIST");
+        P->DrawSingle(H,"dihadron_xF_Res","HIST");
+        P->DrawSingle(H,"dihadron_Mh_Res","HIST");
+        P->DrawSingle(H,"dihadron_mX_Res","HIST");
+
       }
   );
 
