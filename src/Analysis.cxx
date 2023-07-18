@@ -930,7 +930,22 @@ void Analysis::FillHistos2h(Double_t wgt) {
     H->FillHist1D("dihadron_pTlab1",   kin->dihadron_pTlab1,   wgt);
     H->FillHist1D("dihadron_pTlab2",   kin->dihadron_pTlab2,   wgt);
     H->FillHist1D("dihadron_pLab",   kin->dihadron_pLab,   wgt);
-
+    // resolutions
+    auto fillRelativeResolution = [&H,&wgt] (auto name, auto rec, auto gen) { if(gen!=0) H->FillHist1D(name, (rec-gen)/gen, wgt); };
+    fillRelativeResolution("x_Res",  kin->x,  kinTrue->x);
+    fillRelativeResolution("y_Res",  kin->y,  kinTrue->y);
+    fillRelativeResolution("Q2_Res", kin->Q2, kinTrue->Q2);
+    fillRelativeResolution("W_Res",  kin->W,  kinTrue->W);
+    fillRelativeResolution("Nu_Res", kin->Nu, kinTrue->Nu);
+    fillRelativeResolution("dihadron_Mh_Res", kin->dihadron_Mh, kinTrue->dihadron_Mh);
+    fillRelativeResolution("dihadron_z_Res",  kin->dihadron_z,  kinTrue->dihadron_z);
+    fillRelativeResolution("dihadron_phiH_Res",  kin->dihadron_phiH,  kinTrue->dihadron_phiH);
+    fillRelativeResolution("dihadron_phiRT_Res",  kin->dihadron_phiRT,  kinTrue->dihadron_phiRT);
+    fillRelativeResolution("dihadron_phiRperp_Res",  kin->dihadron_phiRperp,  kinTrue->dihadron_phiRperp);
+    fillRelativeResolution("dihadron_theta_Res",  kin->dihadron_theta,  kinTrue->dihadron_theta);
+    fillRelativeResolution("dihadron_mX_Res", kin->dihadron_mX, kinTrue->dihadron_mX);
+    fillRelativeResolution("dihadron_xF_Res", kin->dihadron_xF, kinTrue->dihadron_xF);
+    
   };
   FillHistos(fill_payload);
 };
