@@ -80,10 +80,10 @@ void AnalysisEpic::Execute()
     // resets
     kin->ResetHFS();
     kinTrue->ResetHFS();
-    kin->vecDihadron.clear();
-    kin->vecDihadronPIDs.clear();
-    kinTrue->vecDihadron.clear();
-    kinTrue->vecDihadronPIDs.clear();
+    kin->vecHadrons.clear();
+    kin->vecHadronsPIDs.clear();
+    kinTrue->vecHadrons.clear();
+    kinTrue->vecHadronsPIDs.clear();
     
     double maxP = 0;
     int genEleID = -1;
@@ -359,8 +359,8 @@ void AnalysisEpic::Execute()
 
       // if we are analyzing dihadrons, store the particle into a vector
       if(includeOutputSet["2h"]){
-	kin->vecDihadron.push_back(part.vecPart);
-	kin->vecDihadronPIDs.push_back(pid_);
+	kin->vecHadrons.push_back(part.vecPart);
+	kin->vecHadronsPIDs.push_back(pid_);
       }
       // add selected single hadron FS to HFS tree
       if( writeHFSTree ){
@@ -401,25 +401,23 @@ void AnalysisEpic::Execute()
     // Calculate dihadron kinematics
     if(includeOutputSet["2h"]) {
       // First hadron loop
-      for(unsigned int i = 0 ; i < kin->vecDihadron.size(); i++){
+      for(unsigned int i = 0 ; i < kin->vecHadrons.size(); i++){
 	// Skip hadron if its PID isn't the first track wanted by user
-	int pid_h1 = kin->vecDihadronPIDs.at(i);
+	int pid_h1 = kin->vecHadronsPIDs.at(i);
 	if(pid_h1==211) // *** Temporary code for only PiPlus PiMinus dihadrons ***
-	  kin->vecDihadronA = kin->vecDihadron.at(i);
+	  kin->vecDihadronA = kin->vecHadrons.at(i);
 	else
 	  continue;
 	// Second hadron loop
-	for(unsigned int j = 0 ; j < kin->vecDihadron.size(); j++){
+	for(unsigned int j = 0 ; j < kin->vecHadrons.size(); j++){
 	  // Skip hadron if its PID isn't the first track wanted by user
-	  int pid_h2 = kin->vecDihadronPIDs.at(j);
-	  if(pid_h2==-211) // *** Temporary code for only PiPlus PiMinus dihadrons ***
-	    kin->vecDihadronB = kin->vecDihadron.at(j);
+	  int pid_h2 = kin->vecHadronsPIDs.at(j);
+	  if(pid_h2==-211) // *** Temporary code for only PiPlus PiMinus dihadrons **
+	    kin->vecDihadronB = kin->vecHadrons.at(j);
 	  else
 	    continue;
-	  kin->vecDihadronB = kin->vecDihadron.at(j);
 
 	  kin->CalculateDihadronKinematics();
-
 	  FillHistos2h(Q2weightFactor); // Needs to be changed likely
 	  
 	}	  
