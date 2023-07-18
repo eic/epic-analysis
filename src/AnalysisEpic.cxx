@@ -434,8 +434,8 @@ void AnalysisEpic::Execute()
 	  kin->CalculateDihadronKinematics();
 	  kinTrue->CalculateDihadronKinematics();
 	  
-	  // Fill bins (what do with two tracks?)
-	  auto wTrack = Q2weightFactor; // * weightTrack->GetWeight(*kinTrue);
+	  // Fill bins
+	  auto wTrack = Q2weightFactor * weightTrack->GetWeight(*kinTrue);
 	  FillHistos2h(wTrack); 
 	  if( writeDiSidisTree && HD->IsActiveEvent() ) DiST->FillTree(wTrack);
 	}	  
