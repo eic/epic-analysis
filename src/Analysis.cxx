@@ -549,7 +549,7 @@ void Analysis::Prepare() {
       HS->DefineHist1D("dihadron_phiRT","#phi_{R_{T}}","",NBINS,-3.1415,3.1415);
       HS->DefineHist1D("dihadron_phiRperp","#phi_{R_{#perp}}","",NBINS,-3.1415,3.1415);
       HS->DefineHist1D("dihadron_theta","#theta_{COM}","",NBINS,-3.1415,3.1415);
-      HS->DefineHist1D("dihadron_Mh","M_{h} [GeV]","",NBINS,0,5);
+      HS->DefineHist1D("dihadron_Mh","M_{h} [GeV]","",NBINS,0.3,2);
       HS->DefineHist1D("dihadron_pTlab","p_{T}^{lab} [GeV]","",NBINS,0,5);
       HS->DefineHist1D("dihadron_pTlab1","p_{T,1}^{lab} [GeV]","",NBINS,0,5);
       HS->DefineHist1D("dihadron_pTlab2","p_{T,2}^{lab} [GeV]","",NBINS,0,5);
