@@ -3,21 +3,36 @@
 
 R__LOAD_LIBRARY(EpicAnalysis)
 
+
+struct WeightsTest : public WeightsSivers {
+  Double_t Asymmetry(Double_t x, Double_t z, Double_t Q2, Double_t pt) const override {
+    return 0.068;
+  }
+};
+
+
+
 void analysis_dihadron(
     TString configFile="datarec/dihadron.test/10x100/files.config", 
     TString outfilePrefix="dihadron.test" /* output filename prefix*/
 ) {
 
-  //outfilePrefix+="_DA";
   // setup analysis ========================================
   AnalysisEpic *A = new AnalysisEpic(
       configFile,
       outfilePrefix
       );
-  
+
+  Weights* weights = new WeightsSum({
+      new WeightsUniform(),
+      new WeightsTest()
+    });
+  A->SetDihadronWeights(weights);   
+
   //  A->maxEvents = 1000; // use this to limit the number of events
   A->SetReconMethod("ele"); // set reconstruction method
-    
+  A->writeDiSidisTree = true; // save Dihadron kinematics to simple TTree
+
   A->AddFinalState("pippimDihadron"); // two-pion dihadron
   
   A->includeOutputSet["2h"] = true; // Dihadron final state variables
