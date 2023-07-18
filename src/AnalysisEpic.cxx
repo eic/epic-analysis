@@ -80,7 +80,10 @@ void AnalysisEpic::Execute()
     // resets
     kin->ResetHFS();
     kinTrue->ResetHFS();
-
+    kin->vecDihadron.clear();
+    kin->vecDihadronPIDs.clear();
+    kinTrue->vecDihadron.clear();
+    kinTrue->vecDihadronPIDs.clear();
     
     double maxP = 0;
     int genEleID = -1;
@@ -330,20 +333,41 @@ void AnalysisEpic::Execute()
       // final state cut
       // - check PID, to see if it's a final state we're interested in for
       //   histograms; if not, proceed to next track
+      
+      // First we start with the single particle tracks
+      bool keep_reco_particle = false;
       auto kv = PIDtoFinalState.find(pid_);
-      if(kv!=PIDtoFinalState.end()) finalStateID = kv->second; else continue;
-      if(activeFinalStates.find(finalStateID)==activeFinalStates.end()) continue;
+      if(kv!=PIDtoFinalState.end()){
+	finalStateID = kv->second;
+	if(activeFinalStates.find(finalStateID)!=activeFinalStates.end()) keep_reco_particle=true;
+      }
+      // Second, we check the multiparticle tracks (ex: dihadrons)
+      for (const auto& entry : PIDStoFinalState) {
+	const std::vector<int>& key = entry.first;
+	if (std::find(key.begin(), key.end(), pid_) != key.end()) {
+	  finalStateID = entry.second;
+	  if(activeFinalStates.find(finalStateID)!=activeFinalStates.end()) keep_reco_particle=true;
+	}
+      }
+      
+      // Now, we skip the particles which were not needed
+      if(!keep_reco_particle) continue;
 
       // calculate reconstructed hadron kinematics
       kin->vecHadron = part.vecPart;
       kin->CalculateHadronKinematics();
 
+      // if we are analyzing dihadrons, store the particle into a vector
+      if(includeOutputSet["2h"]){
+	kin->vecDihadron.push_back(part.vecPart);
+	kin->vecDihadronPIDs.push_back(pid_);
+      }
       // add selected single hadron FS to HFS tree
       if( writeHFSTree ){
 	kin->AddTrackToHFSTree(part.vecPart, part.pid);
       }   
       
-
+      
       // find the matching truth hadron using mcID, and calculate its kinematics
       if(mcid_ >= 0) {
 	for(auto imc : mcpart) {
@@ -374,6 +398,34 @@ void AnalysisEpic::Execute()
       }
     } //hadron loop
 
+    // Calculate dihadron kinematics
+    if(includeOutputSet["2h"]) {
+      // First hadron loop
+      for(unsigned int i = 0 ; i < kin->vecDihadron.size(); i++){
+	// Skip hadron if its PID isn't the first track wanted by user
+	int pid_h1 = kin->vecDihadronPIDs.at(i);
+	if(pid_h1==211) // *** Temporary code for only PiPlus PiMinus dihadrons ***
+	  kin->vecDihadronA = kin->vecDihadron.at(i);
+	else
+	  continue;
+	// Second hadron loop
+	for(unsigned int j = 0 ; j < kin->vecDihadron.size(); j++){
+	  // Skip hadron if its PID isn't the first track wanted by user
+	  int pid_h2 = kin->vecDihadronPIDs.at(j);
+	  if(pid_h2==-211) // *** Temporary code for only PiPlus PiMinus dihadrons ***
+	    kin->vecDihadronB = kin->vecDihadron.at(j);
+	  else
+	    continue;
+	  kin->vecDihadronB = kin->vecDihadron.at(j);
+
+	  kin->CalculateDihadronKinematics();
+
+	  FillHistos2h(Q2weightFactor); // Needs to be changed likely
+	  
+	}	  
+      }
+    } // dihadron post loop
+    
     if( writeHFSTree && kin->nHFS > 0) HFST->FillTree(Q2weightFactor);
     
     /*
