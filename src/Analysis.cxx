@@ -368,6 +368,7 @@ void Analysis::Prepare() {
   includeOutputSet.insert({ "inclusive_only",
       includeOutputSet["inclusive"]
       && !includeOutputSet["1h"]
+      && !includeOutputSet["2h"]
       && !includeOutputSet["jets"]
       });
 
