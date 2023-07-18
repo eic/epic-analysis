@@ -23,7 +23,7 @@ void postprocess_dihadron(
         P->DrawSingle(H,"y","HIST");
         P->DrawSingle(H,"W","HIST");
         P->DrawSingle(H,"dihadron_phiH","HIST");
-        P->DrawSingle(H,"dihadron_phiRperp","HIST");
+	P->DrawSingle(H,"dihadron_phiRperp","HIST");
         P->DrawSingle(H,"dihadron_phiRT","HIST");
         P->DrawSingle(H,"dihadron_theta","HIST");
         P->DrawSingle(H,"dihadron_z","HIST");
@@ -33,7 +33,7 @@ void postprocess_dihadron(
         P->DrawSingle(H,"dihadron_xF1","HIST");
         P->DrawSingle(H,"dihadron_xF2","HIST");
         P->DrawSingle(H,"dihadron_Mh","HIST");
-        P->DrawSingle(H,"dihadron_Mx","HIST");
+        P->DrawSingle(H,"dihadron_mX","HIST");
         P->DrawSingle(H,"dihadron_pLab","HIST");
         P->DrawSingle(H,"dihadron_pTlab","HIST");
         P->DrawSingle(H,"dihadron_pT","HIST");
@@ -46,7 +46,7 @@ void postprocess_dihadron(
         P->DrawSingle(H,"dihadron_xF_Res","HIST");
         P->DrawSingle(H,"dihadron_Mh_Res","HIST");
         P->DrawSingle(H,"dihadron_mX_Res","HIST");
-
+	
       }
   );
 
