@@ -557,6 +557,15 @@ void Kinematics::CalculateDihadronKinematics() {
 					  ));
   // dihadrom c.o.m angle theta
   dihadron_theta = DvecDihadronA.Angle(-Dboost);
+  // phiS: calculated in ion rest frame
+  tSpin = RNG->Uniform() < 0.5 ? 1 : -1;
+  lSpin = RNG->Uniform() < 0.5 ? 1 : -1;
+  vecSpin.SetXYZT(0,1,0,0); // Pauli-Lubanski pseudovector, in lab frame
+  this->BoostToIonFrame(vecSpin,IvecSpin); // boost to ion rest frame
+  phiS = AdjAngle(PlaneAngle(
+      IvecQ.Vect(), IvecElectron.Vect(),
+      IvecQ.Vect(), IvecSpin.Vect()
+			     ));
   // dihadron invariant mass
   dihadron_Mh = vecDihadron.M();
   // feynman-x: calculated in photon+ion c.o.m. frame

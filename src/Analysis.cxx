@@ -118,6 +118,7 @@ Analysis::Analysis(
   // - these settings can be set at the macro level
   verbose           = false;
   writeSidisTree   = false;
+  writeDiSidisTree   = false;
   writeHFSTree      = false;
   writeParticleTree = false;
 
@@ -350,6 +351,7 @@ void Analysis::Prepare() {
   kinJetTrue = std::make_shared<KinematicsJets>(eleBeamEn, ionBeamEn, crossingAngle);
 #endif
   ST         = std::make_unique<SidisTree>("tree",kin,kinTrue);
+  DiST       = std::make_unique<DiSidisTree>("dihadron_tree",kin,kinTrue);
   HFST       = std::make_unique<HFSTree>("hfstree",kin,kinTrue);
   PT         = std::make_unique<ParticleTree>("ptree");
 
@@ -738,6 +740,7 @@ void Analysis::Finish() {
   cout << "writing ROOT file..." << endl;
   outFile->cd();
   if(writeSidisTree)   ST->WriteTree();
+  if(writeDiSidisTree)   DiST->WriteTree();
   if(writeHFSTree)      HFST->WriteTree();
   if(writeParticleTree) PT->WriteTree();
   HD->Payload([this](Histos *H){ H->WriteHists(outFile); }); HD->ExecuteAndClearOps();
