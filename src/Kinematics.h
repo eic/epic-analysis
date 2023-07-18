@@ -52,6 +52,7 @@ class Kinematics
     // SIDIS calculators
     Bool_t CalculateDIS(TString recmethod); // return true if succeeded
     void CalculateHadronKinematics();
+    void CalculateDihadronKinematics();
 
     // hadronic final state (HFS)
     void AddToHFS(TLorentzVector p4_);
@@ -92,7 +93,8 @@ class Kinematics
 
     // kinematics (should be Double_t, if going in SidisTree)
     Double_t W,Q2,Nu,x,y,s; // DIS
-    Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // hadron
+    Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // single hadron
+    Double_t dihadron_phiH, dihadron_phiRperp, dihadron_theta, dihadron_Mh, dihadron_pt, dihadron_ptLab, dihadron_z; // dihadron 
     Double_t sigmah, Pxh, Pyh; // hadronic final state variables
     TLorentzVector hadronSumVec;
   
@@ -123,6 +125,9 @@ class Kinematics
     TLorentzVector vecEleBeam, vecIonBeam;
     TLorentzVector vecElectron, vecW, vecQ;
     TLorentzVector vecHadron;
+    std::vector<TLorentzVector> vecDihadron; // Vector of particles to produce dihadrons
+    TLorentzVector vecDihadronA, vecDihadronB; // Individual dihadron particles
+    std::vector<int> vecDihadronPIDs; // Corresponding PID vector
 
     // HFS tree objects
     Int_t nHFS;    

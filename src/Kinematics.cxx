@@ -500,6 +500,16 @@ void Kinematics::CalculateHadronKinematics() {
   qT = pT / z;
 };
 
+void Kinematics::CalculateDihadronKinematics() {
+  dihadron_phiH = 0;
+  dihadron_phiRperp = 1;
+  dihadron_theta = 2;
+  dihadron_Mh = 3;
+  dihadron_pt = 4;
+  dihadron_ptLab = 5;
+  dihadron_z = 6;
+}
+
 // validate transformations to the head-on frame
 void Kinematics::ValidateHeadOnFrame() {
   this->BoostToIonFrame(vecEleBeam,IvecEleBeam);
