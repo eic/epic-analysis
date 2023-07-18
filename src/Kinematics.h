@@ -94,7 +94,7 @@ class Kinematics
     // kinematics (should be Double_t, if going in SidisTree)
     Double_t W,Q2,Nu,x,y,s; // DIS
     Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // single hadron
-    Double_t dihadron_phiH, dihadron_phiRperp, dihadron_theta, dihadron_Mh, dihadron_pt, dihadron_ptLab, dihadron_z; // dihadron 
+    Double_t dihadron_phiH, dihadron_phiRperp, dihadron_phiRT, dihadron_theta, dihadron_Mh, dihadron_pT, dihadron_pLab, dihadron_pTlab, dihadron_pTlab1, dihadron_pTlab2, dihadron_phiLab, dihadron_etaLab, dihadron_z, dihadron_z1, dihadron_z2, dihadron_mX, dihadron_xF, dihadron_xF1, dihadron_xF2; // dihadron 
     Double_t sigmah, Pxh, Pyh; // hadronic final state variables
     TLorentzVector hadronSumVec;
   
@@ -125,9 +125,11 @@ class Kinematics
     TLorentzVector vecEleBeam, vecIonBeam;
     TLorentzVector vecElectron, vecW, vecQ;
     TLorentzVector vecHadron;
-    std::vector<TLorentzVector> vecDihadron; // Vector of particles to produce dihadrons
+    std::vector<TLorentzVector> vecHadrons; // Vector of particles to produce dihadrons
+    std::vector<int> vecHadronsPIDs; // Corresponding PID vector
+    TLorentzVector vecDihadron; // Full dihadron particle
     TLorentzVector vecDihadronA, vecDihadronB; // Individual dihadron particles
-    std::vector<int> vecDihadronPIDs; // Corresponding PID vector
+
 
     // HFS tree objects
     Int_t nHFS;    
@@ -164,11 +166,13 @@ class Kinematics
     void BoostToIonFrame(TLorentzVector Lvec, TLorentzVector &Ivec);
     // - boost from Lab frame `Lvec` to ion+electron Beam c.o.m. frame `Bvec`
     void BoostToBeamComFrame(TLorentzVector Lvec, TLorentzVector &Bvec);
+    // - boost from Lab frame `Lvec` to hadron+hadron C.o.m. frame `Dvec`
+    void BoostToDihadronComFrame(TLorentzVector Lvec, TLorentzVector &Dvec);
     // - tranform from Lab frame `Lvec` to Head-on frame `Hvec`
     void TransformToHeadOnFrame(TLorentzVector Lvec, TLorentzVector &Hvec);
     // transform from Head-on frame `Hvec` back to Lab frame `Lvec`
     void TransformBackToLabFrame(TLorentzVector Hvec, TLorentzVector &Lvec);
-
+    
 
     // misc calculations
     // - convert energy,mass to momentum
@@ -285,21 +289,30 @@ class Kinematics
     TLorentzVector CvecEleBeam, CvecIonBeam;
     TLorentzVector CvecElectron, CvecW, CvecQ;
     TLorentzVector CvecHadron;
+    TLorentzVector CvecDihadron, CvecDihadronA, CvecDihadronB;
     // - ion rest frame
     TLorentzVector IvecBoost;
     TVector3 Iboost;
     TLorentzVector IvecEleBeam, IvecIonBeam;
     TLorentzVector IvecElectron, IvecW, IvecQ;
     TLorentzVector IvecHadron;
+    TLorentzVector IvecDihadron, IvecDihadronA, IvecDihadronB;
+    TVector3 I3vecQ, I3vecDihadronR, I3vecDihadronA, I3vecDihadronB, I3vecDihadronAperp, I3vecDihadronBperp;
+    TVector3 I3vecDihadronRT, I3vecDihadronRperp;
     // - head-on frame
     TLorentzVector HvecEleBeam, HvecIonBeam;
     TLorentzVector HvecElectron, HvecW, HvecQ;
     TLorentzVector HvecHadron;
+    TLorentzVector HvecDihadronA, HvecDihadronB;
+    // - dihadron C.o.m frame
+    TVector3 Dboost;
+    TLorentzVector DvecDihadronA;
     // - other intermediate frames (for head-on frame transformation)
     TLorentzVector BvecBoost, OvecBoost;
     TVector3 Bboost, Oboost;
     TLorentzVector BvecEleBeam, BvecIonBeam;
     Double_t rotAboutX, rotAboutY;
+    
     // other
     TLorentzVector vecSpin, IvecSpin;
 #ifdef SIDIS_MLPRED

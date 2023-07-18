@@ -501,13 +501,73 @@ void Kinematics::CalculateHadronKinematics() {
 };
 
 void Kinematics::CalculateDihadronKinematics() {
-  dihadron_phiH = 0;
-  dihadron_phiRperp = 1;
-  dihadron_theta = 2;
-  dihadron_Mh = 3;
-  dihadron_pt = 4;
-  dihadron_ptLab = 5;
-  dihadron_z = 6;
+
+  vecDihadron = vecDihadronA + vecDihadronB; // Add up pieces of dihadron
+  Dboost = -1. * (vecDihadron.BoostVector());
+  // Lab frame
+  dihadron_pLab = vecDihadron.P();
+  dihadron_pTlab = vecDihadron.Pt();
+  dihadron_pTlab1 = vecDihadronA.Pt();
+  dihadron_pTlab2 = vecDihadronB.Pt();
+  dihadron_phiLab = vecDihadron.Phi();
+  dihadron_etaLab = vecDihadron.Eta();
+  // dihadron z
+  dihadron_z = vecIonBeam.Dot(vecDihadron) / vecIonBeam.Dot(vecQ);
+  dihadron_z1 = vecIonBeam.Dot(vecDihadronA) / vecIonBeam.Dot(vecQ);
+  dihadron_z2 = vecIonBeam.Dot(vecDihadronB) / vecIonBeam.Dot(vecQ);
+  // missing mass
+  dihadron_mX = (vecW-vecDihadron).M(); // missing mass
+  // boosts
+  this->BoostToComFrame(vecDihadron,CvecDihadron);
+  this->BoostToComFrame(vecDihadronA,CvecDihadronA);
+  this->BoostToComFrame(vecDihadronB,CvecDihadronB);
+  this->BoostToDihadronComFrame(vecDihadronA,DvecDihadronA);
+  this->BoostToComFrame(vecQ,CvecQ);
+  this->BoostToIonFrame(vecDihadron,IvecDihadron);
+  this->BoostToIonFrame(vecDihadronA,IvecDihadronA);
+  this->BoostToIonFrame(vecDihadronB,IvecDihadronB);
+  this->BoostToIonFrame(vecQ,IvecQ);
+  this->BoostToIonFrame(vecElectron,IvecElectron);
+  // feynman-x: calculated in photon+ion c.o.m. frame
+  dihadron_xF = 2 * CvecDihadron.Vect().Dot(CvecQ.Vect()) /
+      (W * CvecQ.Vect().Mag());
+  // phiH: calculated in ion rest frame
+  dihadron_phiH = AdjAngle(PlaneAngle(
+				      IvecQ.Vect(), IvecElectron.Vect(),
+				      IvecQ.Vect(), IvecDihadron.Vect()
+				      ));
+  // phiRT and phiRperp: calculated in ion rest frame
+  I3vecQ = IvecQ.Vect();
+  I3vecDihadronA = IvecDihadronA.Vect();
+  I3vecDihadronB = IvecDihadronB.Vect();
+  I3vecDihadronR = 0.5 * (I3vecDihadronA - I3vecDihadronB);
+  I3vecDihadronRT = I3vecDihadronR - (I3vecQ*I3vecDihadronR)/(I3vecQ*I3vecQ)*I3vecQ;
+
+  I3vecDihadronAperp = I3vecDihadronA - (I3vecQ*I3vecDihadronA)/(I3vecQ*I3vecQ)*I3vecQ;
+  I3vecDihadronBperp = I3vecDihadronB - (I3vecQ*I3vecDihadronB)/(I3vecQ*I3vecQ)*I3vecQ;
+  I3vecDihadronRperp = (dihadron_z2*I3vecDihadronAperp - dihadron_z1*I3vecDihadronBperp)*((1)/(dihadron_z1+dihadron_z2));
+
+  dihadron_phiRT = AdjAngle(PlaneAngle(
+				       I3vecQ, IvecElectron.Vect(),
+				       I3vecQ, I3vecDihadronRT
+				       ));
+  dihadron_phiRperp = AdjAngle(PlaneAngle(
+					  I3vecQ, IvecElectron.Vect(),
+					  I3vecQ, I3vecDihadronRperp
+					  ));
+  // dihadrom c.o.m angle theta
+  dihadron_theta = DvecDihadronA.Angle(-Dboost);
+  // dihadron invariant mass
+  dihadron_Mh = vecDihadron.M();
+  // feynman-x: calculated in photon+ion c.o.m. frame
+  dihadron_xF = 2 * CvecDihadron.Vect().Dot(CvecQ.Vect()) /
+    (W * CvecQ.Vect().Mag());
+  dihadron_xF1 = 2 * CvecDihadronA.Vect().Dot(CvecQ.Vect()) /
+    (W * CvecQ.Vect().Mag());
+  dihadron_xF2 = 2 * CvecDihadronB.Vect().Dot(CvecQ.Vect()) /
+    (W * CvecQ.Vect().Mag());
+  // pT: transverse to q in ion rest frame
+  dihadron_pT = IvecDihadron.Pt(I3vecQ);
 }
 
 // validate transformations to the head-on frame
@@ -808,6 +868,12 @@ void Kinematics::BoostToIonFrame(TLorentzVector Lvec, TLorentzVector &Ivec) {
 void Kinematics::BoostToBeamComFrame(TLorentzVector Lvec, TLorentzVector &Bvec) {
   Bvec=Lvec;
   Bvec.Boost(Bboost);
+};
+
+// boost from Lab frame `Lvec` to hadron+hadron C.o.m frame `Dvec`
+void Kinematics::BoostToDihadronComFrame(TLorentzVector Lvec, TLorentzVector &Dvec) {
+  Dvec=Lvec;
+  Dvec.Boost(Dboost);
 };
 
 // transform from Lab frame `Lvec` to Head-on frame `Hvec`
