@@ -562,6 +562,16 @@ void Analysis::Prepare() {
       HS->DefineHist1D("dihadron_xF","x_{F}","",NBINS,-1,1);
       HS->DefineHist1D("dihadron_xF1","x_{F,1}","",NBINS,-1,1);
       HS->DefineHist1D("dihadron_xF2","x_{F,2}","",NBINS,-1,1);
+
+      HS->DefineHist1D("dihadron_z_Res",  "z-z_{true}/z_{true}",             "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("dihadron_mX_Res", "m_{X}-m_{X}^{true}/m_{X}^{true}", "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("dihadron_xF_Res", "x_{F}-x_{F}^{true}/x_{F}^{true}", "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("dihadron_Mh_Res", "M_{h}-M_{h}^{true}/M_{h}^{true}", "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("dihadron_phiRperp_Res", "#phi_{R_{#perp}}-#phi_{R_{#perp}}^{true}/#phi_{R_{#perp}}^{true}", "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("dihadron_phiRT_Res", "#phi_{R_{T}}-#phi_{R_{T}}^{true}/#phi_{R_{T}}^{true}", "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("dihadron_phiH_Res", "#phi_{h}-#phi_{h}^{true}/#phi_{h}^{true}", "", NBINS, -1.0, 1.0);
+      HS->DefineHist1D("dihadron_theta_Res", "#theta_{COM}-#theta_{COM}^{true}/#theta_{COM}^{true}", "", NBINS, -1.0, 1.0);
+
     }
 
     // -- jet kinematics
