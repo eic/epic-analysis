@@ -46,6 +46,15 @@ Analysis::Analysis(
   availableBinSchemes.insert({ "phiS",  "#phi_{S}"    });
   availableBinSchemes.insert({ "tSpin", "spin"        });
   availableBinSchemes.insert({ "lSpin", "spinL"       });
+  /* dihadron */
+  availableBinSchemes.insert({ "dihadron_phiH",  "#phi_{h}"    });
+  availableBinSchemes.insert({ "dihadron_phiRperp",  "#phi_{R_{#perp}}"    });
+  availableBinSchemes.insert({ "dihadron_theta",  "#theta_{COM}"    });
+  availableBinSchemes.insert({ "dihadron_Mh",  "M_{h}"    });
+  availableBinSchemes.insert({ "dihadron_pt",    "p_{T}"       }); // transverse to q, in ion rest frame
+  availableBinSchemes.insert({ "dihadron_ptLab", "p_{T}^{lab}" }); // transverse to xy plane, in lab frame
+  availableBinSchemes.insert({ "dihadron_z",    "z_{h}"       }); 
+
   /* jets */
 #ifndef EXCLUDE_DELPHES
   availableBinSchemes.insert({ "JetPT", "jet p_{T}" });
@@ -65,13 +74,15 @@ Analysis::Analysis(
   finalStateToTitle.insert({ "KpTrack",  "K^{+} tracks"   });
   finalStateToTitle.insert({ "KmTrack",  "K^{-} tracks"   });
   finalStateToTitle.insert({ "pTrack",   "p^{+} tracks"   });
+  finalStateToTitle.insert({ "pippimDihadron", "#pi^{+}#pi^{-} dihadrons" }); // dihadron
   // - PID -> finalState ID
   PIDtoFinalState.insert({  211,  "pipTrack" });
   PIDtoFinalState.insert({ -211,  "pimTrack" });
   PIDtoFinalState.insert({  321,  "KpTrack"  });
   PIDtoFinalState.insert({ -321,  "KmTrack"  });
   PIDtoFinalState.insert({  2212, "pTrack"   });
-
+  // - PIDS -> finalState ID (for dihadrons)
+  PIDStoFinalState.insert({  {211,-211}, "pippimDihadron"   });
   // kinematics reconstruction methods
   // - choose one of these methods using `SetReconMethod(TString name)`
   // - if you specify none, a default method will be chosen
@@ -87,6 +98,7 @@ Analysis::Analysis(
   // - the default settings are set here; override them at the macro level
   includeOutputSet.insert({ "inclusive",      true  }); // inclusive kinematics
   includeOutputSet.insert({ "1h",             true  }); // single hadron kinematics
+  includeOutputSet.insert({ "2h",             true  }); // dihadron kinematics
   includeOutputSet.insert({ "jets",           false }); // jet kinematics
   includeOutputSet.insert({ "depolarization", false }); // depolarization factors & ratios
 
@@ -512,6 +524,9 @@ void Analysis::Prepare() {
           NBINS,-TMath::Pi(),TMath::Pi()
           );
     }
+    if(includeOutputSet["1h"]) {
+      HS->DefineHist1D("dihadron_phiH","#phi_{h}","",NBINS,-3.1415,3.1415);
+    }
 
     // -- jet kinematics
 #ifndef EXCLUDE_DELPHES
@@ -851,6 +866,17 @@ void Analysis::FillHistos1h(Double_t wgt) {
     H->FillHist2D("x_RvG",    kinTrue->x,    kin->x,    wgt);
     H->FillHist2D("phiH_RvG", kinTrue->phiH, kin->phiH, wgt);
     H->FillHist2D("phiS_RvG", kinTrue->phiS, kin->phiS, wgt);
+  };
+  FillHistos(fill_payload);
+};
+
+// fill 2h (di-hadron) histograms
+void Analysis::FillHistos2h(Double_t wgt) {
+  auto fill_payload = [this,wgt] (Histos *H) {
+    // Full phase space.
+    H->FillHist4D("full_xsec", kin->x, kin->Q2, kin->dihadron_pt, kin->dihadron_z, wgt);
+    // hadron 4-momentum
+    H->FillHist1D("dihadron_phiH",   kin->dihadron_phiH,   wgt);
   };
   FillHistos(fill_payload);
 };
