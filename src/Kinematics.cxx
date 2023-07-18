@@ -513,6 +513,7 @@ void Kinematics::CalculateDihadronKinematics() {
   dihadron_etaLab = vecDihadron.Eta();
   // dihadron z
   dihadron_z = vecIonBeam.Dot(vecDihadron) / vecIonBeam.Dot(vecQ);
+  z = dihadron_z; // Define plain "z" for the asymmetries
   dihadron_z1 = vecIonBeam.Dot(vecDihadronA) / vecIonBeam.Dot(vecQ);
   dihadron_z2 = vecIonBeam.Dot(vecDihadronB) / vecIonBeam.Dot(vecQ);
   // missing mass
@@ -536,6 +537,7 @@ void Kinematics::CalculateDihadronKinematics() {
 				      IvecQ.Vect(), IvecElectron.Vect(),
 				      IvecQ.Vect(), IvecDihadron.Vect()
 				      ));
+  phiH = dihadron_phiH; // Define plain "phiH" for the asymmetries
   // phiRT and phiRperp: calculated in ion rest frame
   I3vecQ = IvecQ.Vect();
   I3vecDihadronA = IvecDihadronA.Vect();
@@ -577,6 +579,7 @@ void Kinematics::CalculateDihadronKinematics() {
     (W * CvecQ.Vect().Mag());
   // pT: transverse to q in ion rest frame
   dihadron_pT = IvecDihadron.Pt(I3vecQ);
+  pT = dihadron_pT; // Define plain "pT" for the asymmetries
 }
 
 // validate transformations to the head-on frame
