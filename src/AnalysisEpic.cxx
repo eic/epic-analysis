@@ -435,9 +435,10 @@ void AnalysisEpic::Execute()
 	  kinTrue->CalculateDihadronKinematics();
 	  
 	  // Fill bins
-	  auto wTrack = Q2weightFactor * weightTrack->GetWeight(*kinTrue);
-	  FillHistos2h(wTrack); 
-	  if( writeDiSidisTree && HD->IsActiveEvent() ) DiST->FillTree(wTrack);
+	  auto wDihadron = Q2weightFactor * weightDihadron->GetWeight(*kinTrue);
+	  wDihadronTotal += wDihadron; 
+	  FillHistos2h(wDihadron); 
+	  if( writeDiSidisTree && HD->IsActiveEvent() ) DiST->FillTree(wDihadron);
 	}	  
       }
     } // dihadron post loop

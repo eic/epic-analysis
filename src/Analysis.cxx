@@ -132,6 +132,7 @@ Analysis::Analysis(
 
   weightInclusive = std::make_unique<WeightsUniform>();
   weightTrack     = std::make_unique<WeightsUniform>();
+  weightDihadron  = std::make_unique<WeightsUniform>();
   weightJet       = std::make_unique<WeightsUniform>();
 
   // miscellaneous
@@ -638,6 +639,7 @@ void Analysis::Prepare() {
   // initialize total weights
   wInclusiveTotal = 0.;
   wTrackTotal     = 0.;
+  wDihadronTotal  = 0.;
   wJetTotal       = 0.;
 };
 
@@ -747,10 +749,12 @@ void Analysis::Finish() {
   HD->Payload([this](Histos *H){ H->Write(); }); HD->ExecuteAndClearOps();
   std::vector<Double_t> vec_wInclusiveTotal { wInclusiveTotal };
   std::vector<Double_t> vec_wTrackTotal     { wTrackTotal     };
+  std::vector<Double_t> vec_wDihadronTotal  { wDihadronTotal  };
   std::vector<Double_t> vec_wJetTotal       { wJetTotal       };
   outFile->WriteObject(&Q2xsecs, "XsTotal");
   outFile->WriteObject(&vec_wInclusiveTotal, "WeightInclusiveTotal");
   outFile->WriteObject(&vec_wTrackTotal,     "WeightTrackTotal");
+  outFile->WriteObject(&vec_wDihadronTotal,  "WeightDihadronTotal");
   outFile->WriteObject(&vec_wJetTotal,       "WeightJetTotal");
 
   // write binning schemes

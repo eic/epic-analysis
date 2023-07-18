@@ -99,13 +99,19 @@ public:
   
   Double_t GetEventQ2Weight(Double_t Q2, Int_t guess=0);
   // after adding all files, estimate the weights for events in each Q2 range
-    void CalculateEventQ2Weights();
+  void CalculateEventQ2Weights();
+  
+  Int_t GetEventQ2Idx(Double_t Q2, Int_t guess=0);
+  
+  void SetInclusiveWeights(Weights *w){weightInclusive.reset(w);}
+  void SetTrackWeights(Weights *w){weightTrack.reset(w);}
+  void SetJetWeights(Weights *w){weightJet.reset(w);}
+  void SetDihadronWeights(Weights *w){weightDihadron.reset(w);}
 
-    Int_t GetEventQ2Idx(Double_t Q2, Int_t guess=0);
+  // run the analysis
+  virtual void Execute() = 0;
 
-    // run the analysis
-    virtual void Execute() = 0;
-
+  
   protected:
   
     // prepare to perform the analysis; in derived classes, define a method `Execute()`, which
@@ -135,8 +141,8 @@ public:
     std::shared_ptr<KinematicsJets> kinJet, kinJetTrue;
 #endif
     std::shared_ptr<HistosDAG>    HD;
-    std::unique_ptr<Weights> weightInclusive, weightTrack, weightJet;
-    Double_t wInclusiveTotal, wTrackTotal, wJetTotal;
+    std::unique_ptr<Weights> weightInclusive, weightTrack, weightDihadron, weightJet;
+    Double_t wInclusiveTotal, wTrackTotal, wDihadronTotal, wJetTotal;
     Long64_t entriesTot;
     Long64_t errorCnt;
     const TString sep = "--------------------------------------------";
