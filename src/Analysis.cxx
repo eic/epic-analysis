@@ -49,11 +49,23 @@ Analysis::Analysis(
   /* dihadron */
   availableBinSchemes.insert({ "dihadron_phiH",  "#phi_{h}"    });
   availableBinSchemes.insert({ "dihadron_phiRperp",  "#phi_{R_{#perp}}"    });
+  availableBinSchemes.insert({ "dihadron_phiRT",  "#phi_{R_{T}}"    });
   availableBinSchemes.insert({ "dihadron_theta",  "#theta_{COM}"    });
   availableBinSchemes.insert({ "dihadron_Mh",  "M_{h}"    });
-  availableBinSchemes.insert({ "dihadron_pt",    "p_{T}"       }); // transverse to q, in ion rest frame
-  availableBinSchemes.insert({ "dihadron_ptLab", "p_{T}^{lab}" }); // transverse to xy plane, in lab frame
+  availableBinSchemes.insert({ "dihadron_pLab", "p^{lab}" }); 
+  availableBinSchemes.insert({ "dihadron_pT",    "p_{T}"       }); // transverse to q, in ion rest frame
+  availableBinSchemes.insert({ "dihadron_pTlab", "p_{T}^{lab}" }); // transverse to xy plane, in lab frame
+  availableBinSchemes.insert({ "dihadron_pTlab1", "p_{T,1}^{lab}" }); // transverse to xy plane, in lab frame
+  availableBinSchemes.insert({ "dihadron_pTlab2", "p_{T,2}^{lab}" }); // transverse to xy plane, in lab frame
+  availableBinSchemes.insert({ "dihadron_phiLab", "#phi^{lab}" });
+  availableBinSchemes.insert({ "dihadron_etaLab", "#eta^{lab}" });
   availableBinSchemes.insert({ "dihadron_z",    "z_{h}"       }); 
+  availableBinSchemes.insert({ "dihadron_z1",    "z_{1}"       }); 
+  availableBinSchemes.insert({ "dihadron_z2",    "z_{2}"       }); 
+  availableBinSchemes.insert({ "dihadron_mX",    "M_{X}"       }); 
+  availableBinSchemes.insert({ "dihadron_xF",    "x_{F}"       }); 
+  availableBinSchemes.insert({ "dihadron_xF1",    "x_{F,1}"       }); 
+  availableBinSchemes.insert({ "dihadron_xF2",    "x_{F,2}"       }); 
 
   /* jets */
 #ifndef EXCLUDE_DELPHES
@@ -394,6 +406,14 @@ void Analysis::Prepare() {
   HD->SetBinSchemeValue("phiS",  [this](){ return kin->phiS;                    });
   HD->SetBinSchemeValue("tSpin", [this](){ return (Double_t)kin->tSpin;         });
   HD->SetBinSchemeValue("lSpin", [this](){ return (Double_t)kin->lSpin;         });
+  /* dihadron */
+  HD->SetBinSchemeValue("dihadron_xF1", [this](){ return kin->dihadron_xF1;     });
+  HD->SetBinSchemeValue("dihadron_xF2", [this](){ return kin->dihadron_xF2;     });
+  HD->SetBinSchemeValue("dihadron_pTlab1", [this](){ return kin->dihadron_pTlab1;     });
+  HD->SetBinSchemeValue("dihadron_pTlab2", [this](){ return kin->dihadron_pTlab2;     });
+  HD->SetBinSchemeValue("dihadron_mX", [this](){ return kin->dihadron_mX;       });
+  HD->SetBinSchemeValue("dihadron_z1", [this](){ return kin->dihadron_z1;       });
+  HD->SetBinSchemeValue("dihadron_z2", [this](){ return kin->dihadron_z2;       });
   /* jets */
 #ifndef EXCLUDE_DELPHES
   HD->SetBinSchemeValue("JetPT", [this](){ return kinJet->pTjet;                });
@@ -524,8 +544,24 @@ void Analysis::Prepare() {
           NBINS,-TMath::Pi(),TMath::Pi()
           );
     }
-    if(includeOutputSet["1h"]) {
+    if(includeOutputSet["2h"]) {
       HS->DefineHist1D("dihadron_phiH","#phi_{h}","",NBINS,-3.1415,3.1415);
+      HS->DefineHist1D("dihadron_phiRT","#phi_{R_{T}}","",NBINS,-3.1415,3.1415);
+      HS->DefineHist1D("dihadron_phiRperp","#phi_{R_{#perp}}","",NBINS,-3.1415,3.1415);
+      HS->DefineHist1D("dihadron_theta","#theta_{COM}","",NBINS,-3.1415,3.1415);
+      HS->DefineHist1D("dihadron_Mh","M_{h} [GeV]","",NBINS,0,5);
+      HS->DefineHist1D("dihadron_pTlab","p_{T}^{lab} [GeV]","",NBINS,0,5);
+      HS->DefineHist1D("dihadron_pTlab1","p_{T,1}^{lab} [GeV]","",NBINS,0,5);
+      HS->DefineHist1D("dihadron_pTlab2","p_{T,2}^{lab} [GeV]","",NBINS,0,5);
+      HS->DefineHist1D("dihadron_pT","p_{T} [GeV]","",NBINS,0,5);
+      HS->DefineHist1D("dihadron_pLab","p^{lab} [GeV]","",NBINS,0,10);
+      HS->DefineHist1D("dihadron_mX","M_{X} [GeV]","",NBINS,-5,5);
+      HS->DefineHist1D("dihadron_z","z_{h}","",NBINS,0,1);
+      HS->DefineHist1D("dihadron_z1","z_{1}","",NBINS,0,1);
+      HS->DefineHist1D("dihadron_z2","z_{2}","",NBINS,0,1);
+      HS->DefineHist1D("dihadron_xF","x_{F}","",NBINS,-1,1);
+      HS->DefineHist1D("dihadron_xF1","x_{F,1}","",NBINS,-1,1);
+      HS->DefineHist1D("dihadron_xF2","x_{F,2}","",NBINS,-1,1);
     }
 
     // -- jet kinematics
@@ -874,9 +910,27 @@ void Analysis::FillHistos1h(Double_t wgt) {
 void Analysis::FillHistos2h(Double_t wgt) {
   auto fill_payload = [this,wgt] (Histos *H) {
     // Full phase space.
-    H->FillHist4D("full_xsec", kin->x, kin->Q2, kin->dihadron_pt, kin->dihadron_z, wgt);
-    // hadron 4-momentum
+    H->FillHist4D("full_xsec", kin->x, kin->Q2, kin->dihadron_pT, kin->dihadron_z, wgt);
+    // dihadron angles
     H->FillHist1D("dihadron_phiH",   kin->dihadron_phiH,   wgt);
+    H->FillHist1D("dihadron_phiRT",   kin->dihadron_phiRT,   wgt);
+    H->FillHist1D("dihadron_phiRperp",   kin->dihadron_phiRperp,   wgt);
+    H->FillHist1D("dihadron_theta",   kin->dihadron_theta,   wgt);
+    // dihadron kinematics
+    H->FillHist1D("dihadron_z",   kin->dihadron_z,   wgt);
+    H->FillHist1D("dihadron_z1",   kin->dihadron_z1,   wgt);
+    H->FillHist1D("dihadron_z2",   kin->dihadron_z2,   wgt);
+    H->FillHist1D("dihadron_xF",   kin->dihadron_xF,   wgt);
+    H->FillHist1D("dihadron_xF1",   kin->dihadron_xF1,   wgt);
+    H->FillHist1D("dihadron_xF2",   kin->dihadron_xF2,   wgt);
+    H->FillHist1D("dihadron_Mh",   kin->dihadron_Mh,   wgt);
+    H->FillHist1D("dihadron_mX",   kin->dihadron_mX,   wgt);
+    H->FillHist1D("dihadron_pT",   kin->dihadron_pT,   wgt);
+    H->FillHist1D("dihadron_pTlab",   kin->dihadron_pTlab,   wgt);
+    H->FillHist1D("dihadron_pTlab1",   kin->dihadron_pTlab1,   wgt);
+    H->FillHist1D("dihadron_pTlab2",   kin->dihadron_pTlab2,   wgt);
+    H->FillHist1D("dihadron_pLab",   kin->dihadron_pLab,   wgt);
+
   };
   FillHistos(fill_payload);
 };
