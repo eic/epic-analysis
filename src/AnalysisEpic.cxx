@@ -23,6 +23,7 @@ void AnalysisEpic::Execute()
     }
   }
   chain->CanDeleteRefs();
+  auto listOfBranches = chain->GetListOfBranches();
 
   TTreeReader tr(chain.get());
 
@@ -55,9 +56,12 @@ void AnalysisEpic::Execute()
   TTreeReaderArray<Float_t> recparts_CHI2PID(tr,  "ReconstructedChargedParticles.goodnessOfPID");
   
   // RecoAssociations
-  TTreeReaderArray<UInt_t> assoc_simID(tr, "ReconstructedChargedParticlesAssociations.simID");
-  TTreeReaderArray<UInt_t> assoc_recID(tr, "ReconstructedChargedParticlesAssociations.recID");
-  TTreeReaderArray<Float_t> assoc_weight(tr, "ReconstructedChargedParticlesAssociations.weight");
+  std::string assoc_branch_name = "ReconstructedChargedParticleAssociations";
+  if(listOfBranches->FindObject(assoc_branch_name.c_str()) == nullptr)
+    assoc_branch_name = "ReconstructedChargedParticlesAssociations"; // productions before 23.5
+  TTreeReaderArray<UInt_t> assoc_simID(tr, (assoc_branch_name+".simID").c_str());
+  TTreeReaderArray<UInt_t> assoc_recID(tr, (assoc_branch_name+".recID").c_str());
+  TTreeReaderArray<Float_t> assoc_weight(tr, (assoc_branch_name+".weight").c_str());
 
   // calculate Q2 weights
   CalculateEventQ2Weights();
@@ -268,6 +272,11 @@ void AnalysisEpic::Execute()
 	}
 	// Add the final state particle to the HFS
 	kin->AddToHFS(recpart_.vecPart);
+
+	// Add reconstructed particle and true info to HFSTree
+	if( writeHFSTree ){
+	  kin->AddToHFSTree(recpart_.vecPart, pid);	    
+	}
       }
       irec++; // Increment to next particle
     }
@@ -297,8 +306,6 @@ void AnalysisEpic::Execute()
 
     // Get the weight for this event's Q2
     auto Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
-
-    if( writeHFSTree && kin->nHFS > 0) HFST->FillTree(Q2weightFactor);
     
     // fill inclusive histograms, if only `inclusive` is included in output
     // (otherwise they will be filled in track and jet loops)
@@ -331,11 +338,21 @@ void AnalysisEpic::Execute()
       kin->vecHadron = part.vecPart;
       kin->CalculateHadronKinematics();
 
+      // add selected single hadron FS to HFS tree
+      if( writeHFSTree ){
+	kin->AddTrackToHFSTree(part.vecPart, part.pid);
+      }   
+      
+
       // find the matching truth hadron using mcID, and calculate its kinematics
       if(mcid_ >= 0) {
 	for(auto imc : mcpart) {
 	  if(mcid_ == imc.mcID) {
 	    kinTrue->vecHadron = imc.vecPart;
+	    // add tracks of interest for kinematic studies to HFSTree
+	    if( writeHFSTree ){
+	      kinTrue->AddTrackToHFSTree(imc.vecPart, imc.pid);				     
+	    }
 	    break;
 	  }
 	}
@@ -356,6 +373,8 @@ void AnalysisEpic::Execute()
 	if( writeSidisTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
       }
     } //hadron loop
+
+    if( writeHFSTree && kin->nHFS > 0) HFST->FillTree(Q2weightFactor);
     
     /*
       Loop again over the reconstructed particles

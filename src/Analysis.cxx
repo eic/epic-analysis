@@ -466,7 +466,7 @@ void Analysis::Prepare() {
       HS->DefineHist2D("etaVsP","p","#eta","GeV","",
           NBINS,0.1,100,
           NBINS,-4,4,
-          true,false
+          true,false,true
           );
       Double_t etabinsCoarse[] = {-4.0,-1.0,1.0,4.0};
       Double_t pbinsCoarse[] = {0.1,1,10,100};

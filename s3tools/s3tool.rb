@@ -7,15 +7,19 @@ require 'optparse'
 require 'ostruct'
 require 'fileutils'
 
+# default versions
+VersionLatest   = 'epic.23.07.1'
+VersionPrevious = 'epic.23.06.1'
+
 # default CLI options
 options = OpenStruct.new
-options.version    = 'epic.22.11.3'
+options.version    = VersionLatest
 options.energy     = '18x275'
 options.locDir     = ''
 options.mode       = 's'
 options.limit      = 2
 options.configFile = ''
-options.detector   = 'arches'
+options.detector   = 'brycecanyon'
 options.radCor     = false
 options.minQ2      = -1
 options.maxQ2      = -1
@@ -46,10 +50,31 @@ end
 #   :fileExtension   => File extension (optional, defaults to 'root')
 # }
 prodSettings = {
-  'epic.unstable' => {
-    :comment         => "Latest ePIC TEST sample production; update in #{$0} as needed",
+  'epic.23.07.1' => {
+    :comment         => 'Pythia 8: high-stats July 2023 production',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/main/epic_brycecanyon/DIS/NC" }, # FORCE brycecanyon only
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
+  'epic.23.06.1' => {
+    :comment         => 'Pythia 8: high-stats June 2023 production',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
+  'epic.23.05.2' => {
+    :comment         => 'Pythia 8: high-stats May 2023 production',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
+  'epic.23.05.1' => {
+    :comment         => 'Pythia 8',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
@@ -75,7 +100,7 @@ prodSettings = {
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
   'epic.22.11.3' => {
-    :comment         => 'Pythia 6, with & without radiative corrections',
+    :comment         => 'Pythia 6: high-stats November 2022 production, with & without radiative corrections',
     :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
     :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/SIDIS/pythia6" },
     :energySubDir    => Proc.new { "ep_#{options.energy}" },
@@ -88,7 +113,7 @@ prodSettings = {
     },
   },
   'epic.22.11.2' => {
-    :comment         => 'Pythia 8',
+    :comment         => 'Pythia 8: high-stats November 2022 production',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
     :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
@@ -149,13 +174,18 @@ OptionParser.new do |o|
        "Default: #{options.version}",
        "Choose one of the following:"
       ) do |a|
-        unless prodSettings.keys.include? a
-          $stderr.puts "ERROR: unknown DETECTOR_VERSION '#{a}'"
+        ver = a
+        ver = VersionLatest   if a == 'epic.latest'
+        ver = VersionPrevious if a == 'epic.previous'
+        unless prodSettings.keys.include? ver
+          $stderr.puts "ERROR: unknown DETECTOR_VERSION '#{ver}'"
           exit 1
         end
-        options.version = a
+        options.version = ver
       end
   o.separator ''
+  o.separator 'epic.latest'.rjust(30)   + '  ::  ' + "Latest production: #{VersionLatest}"
+  o.separator 'epic.previous'.rjust(30) + '  ::  ' + "Previous production: #{VersionPrevious}"
   prodSettings.map{ |k,v| o.separator k.rjust(30) + '  ::  ' + v[:comment] }
   o.separator ''
   o.separator ' '*20+'NOTE: if the version name starts with \'hepmc\', HEPMC files will be'
@@ -365,7 +395,10 @@ if [
 
 # pattern: "#{energy}/minQ2=#{minQ2}/"
 elsif [
-  'epic.unstable',
+  'epic.23.07.1',
+  'epic.23.06.1',
+  'epic.23.05.2',
+  'epic.23.05.1',
   'epic.23.03.0_pythia8',
   'epic.23.01.0',
   'epic.22.11.2',

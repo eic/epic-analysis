@@ -34,7 +34,7 @@ Kinematics::Kinematics(
   // set method for determining `vecQ` 4-momentum components for certain recon methods (JB,DA,(e)Sigma)
   qComponentsMethod = qQuadratic; // qQuadratic, qHadronic, qElectronic
   /////////////////////////////////////////////////////////////
-
+  
   // set beam 4-momenta
   // - electron beam points toward negative z
   // - ion beam points toward positive z, negative x
@@ -212,9 +212,7 @@ void Kinematics::GetQWNu_ML(){
       if(abs(hfspid[i])==22) pidadj = 0.2*pidsgn;
       if(abs(hfspid[i])==321) pidadj = 0.6*pidsgn;
       if(abs(hfspid[i])==2212) pidadj = 0.8*pidsgn;
-      if(abs(hfspid[i])==11) pidadj = 1.0*pidsgn;
-      partHold.push_back(hfseta[i]);
-      partHold.push_back(hfsphi[i]);
+      if(abs(hfspid[i])==11) pidadj = 1.0*pidsgn;      
       partHold.push_back(hfspx[i]);
       partHold.push_back(hfspy[i]);
       partHold.push_back(hfspz[i]);
@@ -532,13 +530,6 @@ void Kinematics::ValidateHeadOnFrame() {
 // add a 4-momentum to the hadronic final state
 void Kinematics::AddToHFS(TLorentzVector p4_) {
   TLorentzVector p4 = p4_;
-  hfspx[nHFS] = p4.Px();
-  hfspy[nHFS] = p4.Py();
-  hfspz[nHFS] = p4.Pz();
-  hfsE[nHFS] = p4.E();
-  new(ar[nHFS]) TLorentzVector(p4);
-  nHFS++;
-  
   if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(p4,p4);
   sigmah += (p4.E() - p4.Pz());
   Pxh += p4.Px();
@@ -547,11 +538,26 @@ void Kinematics::AddToHFS(TLorentzVector p4_) {
   countHadrons++;
 };
 
-void Kinematics::AddPion(TLorentzVector p4_){
-  TLorentzVector p4 = p4_;
-  if(mainFrame==fHeadOn) this->TransformToHeadOnFrame(p4,p4);
-  new(arpi[nPi]) TLorentzVector(p4);
-  nPi++;
+// add  information from a reconstructed particle to HFSTree
+// branches containing full HFS
+void Kinematics::AddToHFSTree(TLorentzVector p4, int pid) {
+  hfspx.push_back(p4.Px());
+  hfspy.push_back(p4.Py());
+  hfspz.push_back(p4.Pz());
+  hfsE.push_back(p4.E());
+  hfspid.push_back(pid);
+
+  nHFS++;
+};
+
+// add a specific track and its matched true four momentum
+// to HFSTree for final kinematic calculations (not full HFS)
+void Kinematics::AddTrackToHFSTree(TLorentzVector p4, int pid) {
+  selectedHadPx.push_back(p4.Px());
+  selectedHadPy.push_back(p4.Py());
+  selectedHadPz.push_back(p4.Pz());
+  selectedHadE.push_back(p4.E());
+  selectedHadPID.push_back(pid);  
 };
 
 // subtract electron from hadronic final state variables
@@ -572,9 +578,7 @@ void Kinematics::SubtractElectronFromHFS() {
         hadronSumVec -= HvecElectron;
         break;
     }
-    countHadrons--;
-    ar.Remove( &vecElectron );
-    nHFS--;
+    countHadrons--;    
   } else {
     cerr << "ERROR: electron energy is NaN" << endl;
     // TODO: kill event
@@ -588,9 +592,18 @@ void Kinematics::ResetHFS() {
   hadronSumVec.SetPxPyPzE(0,0,0,0);
   countHadrons = 0;
   nHFS = 0;
-  nPi = 0;
-  ar.Clear();
-  arpi.Clear();
+  
+  hfspx.clear();
+  hfspy.clear();
+  hfspz.clear();
+  hfsE.clear();
+  hfspid.clear();
+  
+  selectedHadPx.clear();
+  selectedHadPy.clear();
+  selectedHadPz.clear();
+  selectedHadE.clear();
+  selectedHadPID.clear();    
 };
 
 
@@ -641,6 +654,7 @@ void Kinematics::GetHFS(
         }
 
         this->AddToHFS(trackp4);
+	this->AddToHFSTree(trackp4,pid);
       }
     }    
   }
@@ -648,9 +662,18 @@ void Kinematics::GetHFS(
   // eflow high |eta| track loop
   while(Track *eflowTrack = (Track*)itEFlowTrack() ){
     TLorentzVector eflowTrackp4 = eflowTrack->P4();
+    int pid = GetTrackPID( // get smeared PID                                                                     
+            eflowTrack,
+            itpfRICHTrack,
+            itDIRCepidTrack, itDIRChpidTrack,
+            itBTOFepidTrack, itBTOFhpidTrack,
+            itdualRICHagTrack, itdualRICHcfTrack
+            );
+
     if(!isnan(eflowTrackp4.E())){
       if(std::abs(eflowTrack->Eta) >= 4.0){
         this->AddToHFS(eflowTrackp4);
+	this->AddToHFSTree(eflowTrackp4, pid);
       }
     }
   }
@@ -661,6 +684,7 @@ void Kinematics::GetHFS(
     if(!isnan(towerPhotonp4.E())){
       if( std::abs(towerPhoton->Eta) < 4.0  ){
         this->AddToHFS(towerPhotonp4);
+	this->AddToHFSTree(towerPhotonp4,22);
       }
     }
   }
@@ -671,6 +695,7 @@ void Kinematics::GetHFS(
     if(!isnan(towerNeutralHadronp4.E())){
       if( std::abs(towerNeutralHadron->Eta) < 4.0 ){
         this->AddToHFS(towerNeutralHadronp4);
+	this->AddToHFSTree(towerNeutralHadronp4,-1);
       }
     }
   }
