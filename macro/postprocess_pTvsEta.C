@@ -12,7 +12,7 @@ using the BuildBins function.
 */
   
 void postprocess_pTvsEta(
-     TString infile = "out/coverage_dagtest.pythia8NCDISS3_10x100_Q21_cross-0.025.root"
+     TString infile = "out/coverage.root"
 ){
   
   PostProcessor *P = new PostProcessor(infile);

@@ -13,7 +13,7 @@ R__LOAD_LIBRARY(EpicAnalysis)
 // Does not place any cuts besides requiring a reconstructed scattered electron
 // and at least 1 reconstructed HFS particle
 void analysis_makeHFStree(
-    TString configFile="datarec/in.config", /* delphes tree(s) */
+    TString configFile="datarec/epic.23.07.1/18x275/files.config", /* delphes tree(s) */
     TString outfilePrefix="resolutions" /* output filename prefix*/
 ) {
 

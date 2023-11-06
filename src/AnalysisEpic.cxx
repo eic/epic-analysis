@@ -391,14 +391,15 @@ void AnalysisEpic::Execute()
       }
 
       kinTrue->CalculateHadronKinematics();
-
+      
       if(includeOutputSet["1h"]) {
         // fill single-hadron histograms in activated bins
         auto wTrack = Q2weightFactor * weightTrack->GetWeight(*kinTrue);
         wTrackTotal += wTrack;
         FillHistos1h(wTrack);
         FillHistosInclusive(wTrack);
-
+	cout << kin->Q2 << " " << wTrack << endl;
+	cout << writeSidisTree << " " << HD->IsActiveEvent() << endl;
 	// fill simple tree
 	// - not binned
 	// - `IsActiveEvent()` is only true if at least one bin gets filled for this track

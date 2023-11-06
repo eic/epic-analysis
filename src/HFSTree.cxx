@@ -17,7 +17,9 @@ HFSTree::HFSTree(TString treeName_, std::shared_ptr<Kinematics> K_, std::shared_
   T->Branch("vecEleBeamTrue", &(Ktrue->vecEleBeam));
   T->Branch("vecIonBeamTrue", &(Ktrue->vecIonBeam));
   T->Branch("nHFS", &(K->nHFS), "nHFS/I");
-
+  T->Branch("PhiS",      &(K->phiS),      "PhiS/D");
+  T->Branch("Spin_idx",  &(K->tSpin),     "Spin_idx/I");
+      
   T->Branch("hfspx", &(K->hfspx));
   T->Branch("hfspy", &(K->hfspy));
   T->Branch("hfspz", &(K->hfspz));

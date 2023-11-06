@@ -8,12 +8,12 @@ R__LOAD_LIBRARY(EpicAnalysis)
  * - observe how the resulting histograms differ in each (x,Q2) bin
  */
 void analysis_coverage(
-    TString configFile="datarec/in.config", /* delphes tree(s) */
+    TString configFile="datarec/test/18x275/files.config", /* delphes tree(s) */
     TString outfilePrefix="coverage" /* output filename prefix*/
 ) {
 
   // setup analysis ========================================
-  AnalysisDelphes *A = new AnalysisDelphes(
+  AnalysisEpic *A = new AnalysisEpic(
       configFile,
       outfilePrefix
       );
@@ -40,17 +40,17 @@ void analysis_coverage(
    * - eta vs. p in bins of (x,Q2)
    * - Q2 vs. x in bins of (eta,p)
    */
-
+  
   A->AddBinScheme("q2");
   A->AddBinScheme("x");
-  A->AddBinScheme("z");
+  //  A->AddBinScheme("z");
 
   A->BinScheme("q2")->BuildBins( 5, 1,    1000,  true );
   A->BinScheme("x")->BuildBins(  10, 1e-4, 1,    true );
-  A->BinScheme("z")->BuildBin("Range", 0.2, 0.4 );
-  A->BinScheme("z")->BuildBin("Range", 0.4, 0.8 );
-  A->BinScheme("z")->BuildBin("Min", 0.2);
-
+  //  A->BinScheme("z")->BuildBin("Range", 0.2, 0.4 );
+  //  A->BinScheme("z")->BuildBin("Range", 0.4, 0.8 );
+  //  A->BinScheme("z")->BuildBin("Min", 0.2);
+  
 
   // perform the analysis ==================================
   A->Execute();

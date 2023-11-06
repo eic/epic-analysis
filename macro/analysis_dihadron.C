@@ -13,7 +13,7 @@ struct WeightsTest : public WeightsSivers {
 
 
 void analysis_dihadron(
-    TString configFile="datarec/dihadron.test/10x100/files.config", 
+    TString configFile="datarec/test/18x275/files.config", 
     TString outfilePrefix="dihadron.test" /* output filename prefix*/
 ) {
 
@@ -35,6 +35,7 @@ void analysis_dihadron(
 
   A->AddFinalState("pippimDihadron"); // two-pion dihadron
   
+  A->includeOutputSet["1h"] = false; // Single hadron final state variables
   A->includeOutputSet["2h"] = true; // Dihadron final state variables
 
   // define cuts ====================================

@@ -110,7 +110,7 @@ Analysis::Analysis(
   // - the default settings are set here; override them at the macro level
   includeOutputSet.insert({ "inclusive",      true  }); // inclusive kinematics
   includeOutputSet.insert({ "1h",             true  }); // single hadron kinematics
-  includeOutputSet.insert({ "2h",             true  }); // dihadron kinematics
+  includeOutputSet.insert({ "2h",             false  }); // dihadron kinematics
   includeOutputSet.insert({ "jets",           false }); // jet kinematics
   includeOutputSet.insert({ "depolarization", false }); // depolarization factors & ratios
 
