@@ -49,6 +49,7 @@ end
 # make/clean directories
 cleanDirs = [
   "#{OutDir}/parts",
+  "#{OutDir}/log",
   ShellScriptDir,
 ]
 puts "\nCleanup ...\nRemoving the following directories:"
@@ -105,13 +106,13 @@ File.open(slurmConfigN, 'w') do |slurmConfig|
     slurmConfig.puts """#SBATCH --array=1-#{nfiles}"""                  
     # output
     slurmConfig.puts """#SBATCH --output=#{OutDir}/log/%x-%j-%N.out
-#SBATCH --error=#{OutDir}/log/%x-%j-%N.err
+#SBATCH --error=#{OutDir}/%x-%j-%N.err
     """
-    # command
+    
     slurmConfig.puts """
 srun $(sed -n ${SLURM_ARRAY_TASK_ID}p #{commandListFile})
-"""
-
+    """
+                       
     # loop over config.part files
     partFileList.each do |partFile|
 
@@ -155,7 +156,7 @@ source environ.sh
 root -b -q #{RootMacro}'(#{macroArgs})'"""
       end
       FileUtils.chmod 'u+x', shellScriptName
-      commandList.puts """#{eicShellPrefix}/eic-shell -- #{shellScriptName}
+      commandList.puts """#{eicShellPrefix}/../eic-shell -- #{shellScriptName}
 """
     end # loop over config.part files
   end # close slurm command list file
