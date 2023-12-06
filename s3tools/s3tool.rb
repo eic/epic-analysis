@@ -183,6 +183,7 @@ typicalEnergyList = [
 detectorConfigList = [
   "arches",
   "brycecanyon",
+  "craterlake",
 ]
 
 # parse options
