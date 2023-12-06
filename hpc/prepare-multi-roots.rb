@@ -90,48 +90,62 @@ end # end loop over config file lines
 templateFile.puts ":endGroup"
 templateFile.close
 
+puts "#{templateFile}"
+puts "#{templateFileN}"
 
 # generate config.part files from the template
 puts "\nParsing #{templateFileN} to generate config.part files ..."
 
-part_file_index = 0
-root_files_accumulated = 0
 rootFile = nil  # Declare rootFile here
 created_files = []  # Array to store the names of created files
 
-rootFileNum.times do |i|
-  if root_files_accumulated == 0
-    # Start a new config.part file
-    @partFileN = OutDirN + '/' + File.basename(ConfigFileN).sub(/\.config$/, '') + ".%07d.config.part" % [part_file_index]
-    part_file_index += 1
-    @partFile = File.open(@partFileN, 'w')
-  end
+# Parse the templateFile to record q2/cross section info for each ROOT file
+template_line_data = []
+current_q2_data = ""
+File.open(templateFileN, 'r') do |templateFile|
+  templateFile.each do |line|
+    line.strip!
+    next if line.empty?
 
-  # Increment the count of accumulated ROOT files
-  root_files_accumulated += 1
-
-  # Process the template file
-  File.open(templateFileN).each do |line|
-    if line.match?(/^__numEvents__/)
-      numEvents = numEventsHash[line.split.last][:numEvents]
-      line = ":numEvents #{numEvents}"
-    elsif line.match?(/^__ROOT_#{i}__/)
-      rootFile = line.split.last  # Update rootFile here
-      line = rootFile
-    elsif line.match?(/^__ROOT/)
-      next
+    if line.include?(":endGroup")
+      sections = current_q2_data.split("&&&")
+      current_q2_data = sections[0...-3].join("&&&") + "&&&" 
+    elsif line.include?("__ROOT_")
+      template_line_data << [current_q2_data.split("&&&"), line.split(" ")[1]]
+    else
+      current_q2_data += line + "&&&"
     end
-    @partFile.puts line
-  end
-
-  # Check if we have accumulated enough ROOT files or if this is the last ROOT file
-  if root_files_accumulated == RootFilesPerConfig || i == rootFileNum - 1
-    @partFile.close
-    puts "#{@partFileN} => #{rootFile}"  # rootFile is now defined
-    created_files << @partFileN  # Store the file name
-    root_files_accumulated = 0
   end
 end
+
+i = 0
+root_files_accumulated = 0
+part_file_index = 0
+created_files = []
+# Generate config files for each small batch
+loop do
+  data = template_line_data[i]
+  if root_files_accumulated.zero?
+    @partFileN = OutDirN + '/' + File.basename(ConfigFileN).sub(/\.config$/, '') + ".%07d.config.part" % [part_file_index]
+    @partFile = File.open(@partFileN, 'w')
+    part_file_index += 1
+  end
+  i += 1
+  root_files_accumulated += 1
+
+  data[0].each { |line| @partFile.puts line }
+  @partFile.puts data[1]
+  @partFile.puts "\n"
+
+  if root_files_accumulated == RootFilesPerConfig || i == rootFileNum - 1
+    @partFile.close
+    puts "#{@partFileN} => #{data[1]}"  # rootFile is now defined
+    created_files << @partFileN
+    root_files_accumulated = 0
+    break if i == rootFileNum - 1
+  end
+end
+
 
 puts "\nDone. Config files written to #{OutDirN}/"
 
