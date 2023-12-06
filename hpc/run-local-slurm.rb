@@ -49,7 +49,6 @@ end
 # make/clean directories
 cleanDirs = [
   "#{OutDir}/parts",
-  "#{OutDir}/log",
   ShellScriptDir,
 ]
 puts "\nCleanup ...\nRemoving the following directories:"
@@ -105,8 +104,8 @@ File.open(slurmConfigN, 'w') do |slurmConfig|
     nfiles = partFileList.count()
     slurmConfig.puts """#SBATCH --array=1-#{nfiles}"""                  
     # output
-    slurmConfig.puts """#SBATCH --output=#{OutDir}/log/%x-%j-%N.out
-#SBATCH --error=#{OutDir}/%x-%j-%N.err
+    slurmConfig.puts """#SBATCH --output=#{LogSubDir}/%x-%j-%N.out
+#SBATCH --error=#{LogSubDir}/%x-%j-%N.err
     """
     
     slurmConfig.puts """
