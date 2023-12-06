@@ -57,7 +57,7 @@ correct = ask("\nIs this OK? [y/N]")
 puts "you answered " + (correct ? "yes" : "no; stopping!")
 exit unless correct
 cleanDirs.each do |dir|
-  FileUtils.rm_f    dir, verbose: true
+  FileUtils.rm_rf   dir, verbose: true
   FileUtils.mkdir_p dir, verbose: true
 end
 FileUtils.mkdir_p LogSubDir, verbose: true
