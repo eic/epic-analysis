@@ -76,7 +76,7 @@ void AnalysisEpic::Execute()
   tr.SetEntriesRange(1,maxEvents);
   do{
     if(tr.GetCurrentEntry()%10000==0) cout << tr.GetCurrentEntry() << " events..." << endl;
-
+    total_events[0]++; // increment number of events
     // resets
     kin->ResetHFS();
     kinTrue->ResetHFS();
@@ -362,7 +362,7 @@ void AnalysisEpic::Execute()
 
       if(includeOutputSet["1h"]) {
         // fill single-hadron histograms in activated bins
-        auto wTrack = Q2weightFactor * weightTrack->GetWeight(*kinTrue);
+	auto wTrack = Q2weightFactor * weightTrack->GetWeight(*kinTrue);
         wTrackTotal += wTrack;
         FillHistos1h(wTrack);
         FillHistosInclusive(wTrack);
