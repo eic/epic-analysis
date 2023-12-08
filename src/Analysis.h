@@ -88,7 +88,8 @@ public:
         Long64_t totalEntries,
         Double_t xs,
         Double_t Q2min,
-        Double_t Q2max
+        Double_t Q2max,
+        Double_t manualWeight
 		    );
   
   // access HistosDAG
@@ -146,6 +147,7 @@ public:
     std::vector<Double_t> Q2maxs;
     std::vector<Long64_t> Q2entries;
     std::vector<Double_t> Q2weights;
+    std::vector<int> total_events = {0};
     TString configFileName,outfileName,outfilePrefix;
     TFile *outFile;
     Double_t eleBeamEn; // GeV
