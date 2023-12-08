@@ -46,6 +46,16 @@ int main(int argc, char** argv) {
   std::map<TString,Histos*> in_histos;
   std::map<TString,BinSet*> in_binsets;
 
+  // Merged tree vectors
+  std::vector<float> xs_total = {0};
+  std::vector<float> weight_track_total = {0};
+  std::vector<int>   total_events = {0};
+    
+  // Temporary vectors
+  std::vector<float>* tmp_xs_total;
+  std::vector<float>* tmp_weight_track_total;
+  std::vector<int>*   tmp_total_events;
+    
   // loop over input files
   bool first_file = true;
   for(auto in_file : in_files) {
@@ -100,6 +110,24 @@ int main(int argc, char** argv) {
         }
       }
 
+      // handle XsTotal
+      else if(keyName=="XsTotal"){
+          in_file->GetObject(keyName,tmp_xs_total);
+          if (tmp_xs_total->at(0)>xs_total.at(0)) // Replace XsTotal with larger one
+              xs_total[0] = tmp_xs_total->at(0);
+      }
+        
+      // handle WeightTrackTotal
+      else if(keyName=="WeightTrackTotal"){
+          in_file->GetObject(keyName,tmp_weight_track_total);
+          weight_track_total[0]+=tmp_weight_track_total->at(0);
+      }
+    
+      // handle TotalEvents
+      else if(keyName=="TotalEvents"){
+          in_file->GetObject(keyName,tmp_total_events);
+          total_events[0]+=tmp_total_events->at(0);
+      }
       // handle Weights // TODO
       else if(
           TString(key->GetClassName()).Contains(TRegexp("vector<.*>")) &&
@@ -145,6 +173,11 @@ int main(int argc, char** argv) {
     binset->Write(name);
   }
 
+  // write std::vectors
+  out_file->WriteObject(&xs_total,"XsTotal");
+  out_file->WriteObject(&weight_track_total,"WeightTrackTotal");
+  out_file->WriteObject(&total_events,"TotalEvents");
+    
   // close files
   for(auto in_file : in_files)
     in_file->Close();
