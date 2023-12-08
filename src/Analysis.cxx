@@ -124,7 +124,8 @@ void Analysis::AddFileGroup(
     Long64_t totalEntries,
     Double_t xs,
     Double_t Q2min,
-    Double_t Q2max
+    Double_t Q2max,
+    Double_t manualWeight
     )
 {
   // print
@@ -141,7 +142,9 @@ void Analysis::AddFileGroup(
   Q2mins.push_back(Q2min);
   Q2maxs.push_back(Q2max);
   Q2entries.push_back(totalEntries);
-
+  if (manualWeight!=0)
+      Q2weights.push_back(manualWeight);
+    
   // check if the cross section for each group decreases; this is preferred
   // to make sure that `GetEventQ2Idx` behaves correctly
   for (std::size_t idx = 0; idx+1 < Q2xsecs.size(); ++idx) {
@@ -175,6 +178,7 @@ void Analysis::Prepare() {
   Double_t xsec;
   Double_t Q2min;
   Double_t Q2max;
+  Double_t manualWeight;
   Long64_t numEvents;
   std::vector<std::string> fileNames;
   bool readingListOfFiles;
@@ -185,6 +189,7 @@ void Analysis::Prepare() {
     xsec      = totalCrossSection;
     Q2min     = 1.0;
     Q2max     = 0.0;
+    manualWeight    = 0.0;
     numEvents = -1;
     fileNames.clear();
     readingListOfFiles = false;
@@ -195,7 +200,7 @@ void Analysis::Prepare() {
   /* lambda to add a list of files to this analysis; wraps `Analysis::AddFileGroup`,
    * and checks the files beforehand
    */
-  auto AddFiles = [this, &fileNames, &xsec, &Q2min, &Q2max, &numEvents] () {
+  auto AddFiles = [this, &fileNames, &xsec, &Q2min, &Q2max, &numEvents, &manualWeight] () {
     Long64_t entries = 0;
     if(numEvents<0) {
       // get the number of entries, and check the file
@@ -218,7 +223,7 @@ void Analysis::Prepare() {
     }
     else entries = numEvents;
     // add the file group
-    AddFileGroup(fileNames, entries, xsec, Q2min, Q2max);
+    AddFileGroup(fileNames, entries, xsec, Q2min, Q2max, manualWeight);
   };
 
   // loop over lines
@@ -270,6 +275,7 @@ void Analysis::Prepare() {
       else if (bufferKey==":q2min")             Q2min             = std::stod(bufferVal);
       else if (bufferKey==":q2max")             Q2max             = std::stod(bufferVal);
       else if (bufferKey==":crossSection")      xsec              = std::stod(bufferVal);
+      else if (bufferKey==":Weight")            manualWeight      = std::stod(bufferVal);
       else if (bufferKey==":numEvents")         numEvents         = std::stoll(bufferVal);
       else if (bufferKey==":endGroup")          endGroupCalled    = true;
       else
@@ -600,7 +606,8 @@ void Analysis::CalculateEventQ2Weights() {
       }
     }
     // calculate the weight for this Q2 range
-    Q2weights[idx] = lumiTotal / lumiThis;
+    if(Q2weights[idx]==0)
+        Q2weights[idx] = lumiTotal / lumiThis;
     cout << "\tQ2 > "     << Q2mins[idx];
     if(Q2maxs[idx]>0) cout << " && Q2 < " << Q2maxs[idx];
     cout << ":" << endl;
@@ -688,7 +695,8 @@ void Analysis::Finish() {
   outFile->WriteObject(&vec_wInclusiveTotal, "WeightInclusiveTotal");
   outFile->WriteObject(&vec_wTrackTotal,     "WeightTrackTotal");
   outFile->WriteObject(&vec_wJetTotal,       "WeightJetTotal");
-
+  outFile->WriteObject(&total_events,    "TotalEvents");
+    
   // write binning schemes
   for(auto const &kv : binSchemes) {
     if(kv.second->GetNumBins()>0) kv.second->Write("binset__"+kv.first);
