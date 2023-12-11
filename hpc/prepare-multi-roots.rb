@@ -187,7 +187,8 @@ File.open(templateFileN, 'r') do |templateFile|
         puts "Retrieved #{numEvents} events for #{basename} from database"
       else
         puts "Counting events in #{basename}"
-        numEvents = `hpc/src/count_events.exe #{rootFileN}`.chomp.to_i
+        modified_rootFileN = rootFileN.gsub('s3https://eics3.sdcc.bnl.gov:9000/eictest/', 'root://dtn-eic.jlab.org//work/eic2/')
+        numEvents = `hpc/src/count_events.exe #{modified_rootFileN}`.chomp.to_i
         puts "  => #{numEvents} events"
 
         # Append to CSV in the corresponding directory
