@@ -12,12 +12,15 @@ PROJECT_NAME="single_piplus_study"
 CAMPAIGNS=["epic.23.10.0" ,
            "epic.23.11.0" ]
 
+DETECTORS = ["epic_craterlake",
+             "epic_craterlake"]
+
 ENERGIES=[ ["5x41","10x100","18x275"] ,
            ["5x41","10x100","18x275"] ]
 
-NFILES = 1000000 # Set this to very large number for all campaign files
+NFILES = 14 # Set this to very large number for all campaign files
 
-NROOT_FILES_PER_JOB = 50 
+NROOT_FILES_PER_JOB = 5 
 
 PATH_TO_ANALYSIS_MACRO = "macro/analysis_singlePion.C"
 
@@ -37,6 +40,8 @@ final_slurm_scripts=[]
 CAMPAIGNS.each_with_index do |campaign, index|
   puts "Processing Campaign: #{campaign}"
   puts "--------------------------------------------------------------------"
+
+  detector = DETECTORS[index]
   # Loop over energies for the current campaign
   ENERGIES[index].each do |energy|
 
@@ -64,10 +69,24 @@ CAMPAIGNS.each_with_index do |campaign, index|
     FileUtils.mkdir_p(dir_path)
     puts "Creating project --> out/#{outdir}"
     
+
     # Grab the files from s3
     puts `./s3tools/s3tool.rb -e #{energy} -o #{outdir} -l #{NFILES} -v #{campaign}`
-    
-    # create shell script for generating the config files and slurm files
+      
+      
+    # create shell script to count nevents
+     File.open("out/#{outdir}/count-nevents.sh", 'w') do |file|
+      file.puts "#!/bin/bash"
+      file.puts ""
+      file.puts "echo \"Counting events for campaign #{campaign} with beam energy #{energy}...(may take a few minutes)...\""
+      file.puts "echo \"Results are stored for later access in hpc/nevents_databases for faster computation...\""
+      file.puts "python3 ./hpc/src/count_events.py #{campaign} #{detector} #{energy}"
+    end
+
+    puts "Shell script created at out/#{outdir}/count-nevents.sh"
+      
+      
+    # create shell script for generating the config files and slurm files    
     File.open("out/#{outdir}/make-configs.sh", 'w') do |file|
       file.puts "#!/bin/bash"
       file.puts ""
@@ -111,6 +130,7 @@ CAMPAIGNS.each_with_index do |campaign, index|
 #SBATCH --output=out/#{outdir}/pipeline.out
 #SBATCH --error=out/#{outdir}/pipeline.err
 
+bash out/#{outdir}/count-nevents.sh
 #{PATH_TO_EIC_SHELL}/eic-shell -- out/#{outdir}/make-configs.sh
 bash out/#{outdir}/run-parallel.sh
 #{PATH_TO_EIC_SHELL}/eic-shell -- out/#{outdir}/merge.sh
