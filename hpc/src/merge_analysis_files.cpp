@@ -47,13 +47,13 @@ int main(int argc, char** argv) {
   std::map<TString,BinSet*> in_binsets;
 
   // Merged tree vectors
-  std::vector<float> xs_total = {0};
-  std::vector<float> weight_track_total = {0};
+  std::vector<double> xs_total = {0};
+  std::vector<double> weight_track_total = {0};
   std::vector<int>   total_events = {0};
     
   // Temporary vectors
-  std::vector<float>* tmp_xs_total;
-  std::vector<float>* tmp_weight_track_total;
+  std::vector<double>* tmp_xs_total;
+  std::vector<double>* tmp_weight_track_total;
   std::vector<int>*   tmp_total_events;
     
   // loop over input files

@@ -9,18 +9,18 @@ require 'fileutils'
 # prefix for output
 PROJECT_NAME="single_piplus_study"
 
-CAMPAIGNS=["epic.23.10.0" ,
-           "epic.23.11.0" ]
+CAMPAIGNS=["epic.23.10.0",
+           "epic.23.11.0"]
 
 DETECTORS = ["epic_craterlake",
              "epic_craterlake"]
 
-ENERGIES=[ ["5x41","10x100","18x275"] ,
+ENERGIES=[ ["5x41","10x100","18x275"],
            ["5x41","10x100","18x275"] ]
 
-NFILES = 14 # Set this to very large number for all campaign files
+NFILES = 1000000 # Set this to very large number for all campaign files
 
-NROOT_FILES_PER_JOB = 5 
+NROOT_FILES_PER_JOB = 50 
 
 PATH_TO_ANALYSIS_MACRO = "macro/analysis_singlePion.C"
 
@@ -78,7 +78,7 @@ CAMPAIGNS.each_with_index do |campaign, index|
      File.open("out/#{outdir}/count-nevents.sh", 'w') do |file|
       file.puts "#!/bin/bash"
       file.puts ""
-      file.puts "echo \"Counting events for campaign #{campaign} with beam energy #{energy}...(may take a few minutes)...\""
+      file.puts "echo \"Counting events for campaign #{campaign} with beam energy #{energy}...(may take a while)...\""
       file.puts "echo \"Results are stored for later access in hpc/nevents_databases for faster computation...\""
       file.puts "python3 ./hpc/src/count_events.py #{campaign} #{detector} #{energy}"
     end
@@ -125,7 +125,7 @@ CAMPAIGNS.each_with_index do |campaign, index|
 #SBATCH --job-name=#{outdir}
 #SBATCH --account=eic
 #SBATCH --partition=production
-#SBATCH --mem-per-cpu=400
+#SBATCH --mem-per-cpu=4000
 #SBATCH --time=24:00:00
 #SBATCH --output=out/#{outdir}/pipeline.out
 #SBATCH --error=out/#{outdir}/pipeline.err
