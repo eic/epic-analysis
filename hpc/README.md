@@ -34,6 +34,8 @@ hpc/run-local-slurm-pipeline.rb
 
 Optionally, you can use the `--overwrite` flag to skip the query to delete pre-existing project files.
 
+There are several known issues to be aware of pertaining to memory usage. If `NROOT_FILES_PER_JOB` is too large, then the per job memory allocation listed in `run-local-slurm.rb` may be too small to create the ROOT TTree's from the analysis macro. Additionally, the merging of all ROOT TFile's into one may run out of memory. This would be limited by the memory allocation listed in the pipeline job created by `run-local-slurm-pipeline.rb`. It is set to `4000mb` now which is reasonable and should not run out of memory.
+
 ## 1. Preparation
 ```bash
 hpc/prepare.rb
