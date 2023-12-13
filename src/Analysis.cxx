@@ -638,6 +638,11 @@ Int_t Analysis::GetEventQ2Idx(Double_t Q2, Int_t guess) {
     // fmt::print(stderr,"WARNING: Q2={} not in any Q2 range\n",Q2); // usually just below the smallest Q2 min
     idx = 0; // assume the least-restrictive range
   }
+  else if(idx<guess){
+      // When crossingAngle!=0, some event can be reconstructed with trueQ2 < Q2min of the Monte Carlo.
+      // If so, set the idx=guess, i.e. just assume the event was generated in its file's Q2range
+      idx = guess; 
+  }
   return idx;
 }
 
