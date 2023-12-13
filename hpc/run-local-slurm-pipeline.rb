@@ -7,7 +7,7 @@ require 'fileutils'
 # Manually edit these according to your desired simulation
 
 # prefix for output
-PROJECT_NAME="single_piplus_study"
+PROJECT_NAME="single_piplus_study_14_per_Q2"
 
 CAMPAIGNS=["epic.23.10.0",
            "epic.23.11.0"]
@@ -18,9 +18,9 @@ DETECTORS = ["epic_craterlake",
 ENERGIES=[ ["5x41","10x100","18x275"],
            ["5x41","10x100","18x275"] ]
 
-NFILES = 1000000 # Set this to very large number for all campaign files
+NFILES = 14 # Set this to very large number for all campaign files
 
-NROOT_FILES_PER_JOB = 50 
+NROOT_FILES_PER_JOB = 5
 
 PATH_TO_ANALYSIS_MACRO = "macro/analysis_singlePion.C"
 
@@ -50,6 +50,7 @@ CAMPAIGNS.each_with_index do |campaign, index|
     dir_path = "out/#{outdir}"
 
     # Check if the directory exists
+    
     if Dir.exist?(dir_path) && !overwrite
       puts "Directory #{dir_path} already exists. Delete it? [y/N]"
       user_input = gets.chomp.downcase

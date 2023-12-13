@@ -46,6 +46,9 @@ int main(int argc, char** argv) {
   std::map<TString,Histos*> in_histos;
   std::map<TString,BinSet*> in_binsets;
 
+  // tree tracker
+  std::vector<TString> tree_tracker;
+    
   // Merged tree vectors
   std::vector<double> xs_total = {0};
   std::vector<double> weight_track_total = {0};
@@ -60,13 +63,19 @@ int main(int argc, char** argv) {
   bool first_file = true;
   for(auto in_file : in_files) {
 
+    // clear ttree tracker for this file
+    // helps avoid duplicate trees during merging (current/backup cycles)
+    tree_tracker.clear();
+      
     // loop over input file's keys
     TListIter nextKey(in_file->GetListOfKeys());
     while(TKey * key = (TKey*) nextKey()) {
       TString keyName(key->GetName());
-
       // handle TTrees: add their pointers to lists `in_trees`
       if(TString(key->GetClassName())=="TTree") {
+        if(std::find(tree_tracker.begin(), tree_tracker.end(), keyName) != tree_tracker.end()){
+            continue; // TTree named 'keyName' already added to list, this one way a backup so skip it
+        }
         auto obj = (TTree*) key->ReadObj(); 
         if(first_file) {
           fmt::print("Start list for TTree '{}'\n",keyName);
@@ -74,6 +83,7 @@ int main(int argc, char** argv) {
         }
         try {
           in_trees.at(keyName)->Add(obj);
+          tree_tracker.push_back(keyName);
         } catch(const std::out_of_range& e) {
           fmt::print(stderr,"ERROR: cannot find TTree '{}' in {}\n",keyName,in_file->GetName());
         }
