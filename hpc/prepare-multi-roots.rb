@@ -245,6 +245,8 @@ q2bank.each do |keyi, valuei|
      end
   end
   valuei["Weight"] = lumiTotal / lumiThis
+  valuei["Weight"] = sprintf("%.10f", valuei["Weight"]) # reformat to remove things like 5E-5
+
 end
 
 
