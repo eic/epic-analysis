@@ -93,11 +93,13 @@ commandListFile = "#{OutDir}/scripts/commandlist.slurm"
 File.open(slurmConfigN, 'w') do |slurmConfig|
   File.open(commandListFile, 'w') do |commandList|
     # header
+    # Split the InDir string and extract the desired text
+    desired_text = InDir.split("___")[1].gsub('/', '')
     slurmConfig.puts """#!/bin/bash
-#SBATCH --job-name=epic-analysis
+#SBATCH --job-name=epic-analysis-#{desired_text}
 #SBATCH --account=eic
 #SBATCH --partition=production
-#SBATCH --mem-per-cpu=200
+#SBATCH --mem-per-cpu=500
 #SBATCH --time=24:00:00"""
     
     # job array
