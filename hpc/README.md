@@ -22,7 +22,7 @@ The `hpc` toolkit has a built-in macro for streamlining analysis across many cam
 4. Execution of the analysis macro for each batched `.config` file
 5. Merging of the output analysis `.root` files into a single `analysis.root` file
 
-The script that handles the pipeline is `run-local-slurm-pipeline.rb`. The user should edit this script with the desired configurations. These include the campaigns, the energies of interest within those campaigns, the detector configuration, the number of files from `s3` to analyze (per Q2 range) and the number of root files which are analyzed per slurm job.
+The script that handles the pipeline is `run-local-slurm-pipeline.rb`. The user should edit this script with the desired configurations. These include the campaigns, the energies of interest within those campaigns, the detector configuration, the number of files from `s3` to analyze (per Q2 range) and the number of root files which are analyzed per slurm job. By default, several of these parameters will trip the error handler until the user sets them accordingly.
 
 We note that the calculation of the `nevents` for each s3 `TTree`, albeit time-consuming, is very important for our parallel computing needs. This is because the event-by-event Q2weights depend on how many total events are simulated for each Q2 range. Since we are batching the main s3 `.config` into smaller chunks, this information is lost unless we calculate the number of events before running the analysis. These event counts are then used to set manual weights in the batched `.config` files.
 

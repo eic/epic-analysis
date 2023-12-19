@@ -7,7 +7,7 @@ require 'fileutils'
 # Manually edit these according to your desired simulation
 
 # prefix for output
-PROJECT_NAME="single_piplus_study_14_per_Q2"
+PROJECT_NAME=""
 
 CAMPAIGNS=["epic.23.10.0",
            "epic.23.11.0"]
@@ -18,13 +18,47 @@ DETECTORS = ["epic_craterlake",
 ENERGIES=[ ["5x41","10x100","18x275"],
            ["5x41","10x100","18x275"] ]
 
-NFILES = 14 # Set this to very large number for all campaign files
+# Number of Files per Q2 binning
+# Set this to very large number for all campaign files
+NFILES = 0
 
-NROOT_FILES_PER_JOB = 5
+NROOT_FILES_PER_JOB = 0
 
-PATH_TO_ANALYSIS_MACRO = "macro/analysis_singlePion.C"
+# Points to analysis macro
+PATH_TO_ANALYSIS_MACRO = "macro/MY_MACRO.C"
 
-PATH_TO_EIC_SHELL = "../eic-shell" # path to directory, not executable
+# Path to the directory containing eic-shell
+PATH_TO_EIC_SHELL = "#{ENV['EIC_SHELL_PREFIX']}/../"
+
+#################################################################################
+#################################################################################
+#################################################################################
+#################################################################################
+# Error Handling
+# Check if project name is empty
+if PROJECT_NAME.empty?
+  puts "Error: PROJECT_NAME is empty"
+  exit 1
+end
+
+# Check if NFILES is less than or equal to 0
+if NFILES <= 0
+  puts "Error: NFILES must be greater than 0"
+  exit 1
+end
+
+# Check if NROOT_FILES_PER_JOB is less than or equal to 0
+if NROOT_FILES_PER_JOB <= 0
+  puts "Error: NROOT_FILES_PER_JOB must be greater than 0"
+  exit 1
+end
+
+# Check if PATH_TO_ANALYSIS_MACRO file exists
+unless File.exist?(PATH_TO_ANALYSIS_MACRO)
+  puts "Error: File specified in PATH_TO_ANALYSIS_MACRO does not exist"
+  exit 1
+end
+
 #################################################################################
 #################################################################################
 #################################################################################
