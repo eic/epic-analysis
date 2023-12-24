@@ -13,6 +13,7 @@ endif
 CXX := g++
 FLAGS = -Wno-deprecated -fPIC
 FLAGS += -fmax-errors=3
+FLAGS += -g # force debug build for all builds (REMOVE THIS BEFORE MERGING!)
 # FLAGS += -fvisibility=hidden # FIXME: required by pybind, but causes unresolved symbols in cling...
 ROOTCLING = rootcling
 
