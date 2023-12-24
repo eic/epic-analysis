@@ -31,7 +31,9 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        recipe: [debug, release]
+        recipe: 
+          - release
+          # - debug ### disabled, since was only used for `valgrind` CI tests
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
