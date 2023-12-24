@@ -15,6 +15,7 @@ void comparator(
     TString outfile="out/resolution.comparison.root",
     TString gx="x", TString gy="q2" // plotgrid vars
     ) {
+  return; // smoke test
 
   // histograms ==================================================
   // - set histogram lists, based on infile name
