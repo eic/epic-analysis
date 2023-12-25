@@ -17,6 +17,7 @@ void comparator(
     ) {
   return; // smoke test
 
+  /*
   // histograms ==================================================
   // - set histogram lists, based on infile name
   std::vector<TString> histList;
@@ -173,4 +174,5 @@ void comparator(
   P0->Op()->Payload(fillHistosArr);
   P0->Execute();
   P0->Finish();
+  */
 };
