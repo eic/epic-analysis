@@ -13,7 +13,7 @@ void comparator(
     TString title2="ATHENA",  TString infile2="out/resolution.athena.root",
     TString title3="ECCE",    TString infile3="out/resolution.ecce.root",
     TString outfile="out/resolution.comparison.root",
-    TString gx="x"//, TString gy="q2" // plotgrid vars
+    TString gx="x", TString gy="q2" // plotgrid vars
     ) {
   return; // smoke test
 
