@@ -11,8 +11,8 @@ void comparator(
     TString title0="Delphes", TString infile0="out/resolution.fastsim.root",
     TString title1="ePIC",    TString infile1="out/resolution.epic.root",
     TString title2="ATHENA",  TString infile2="out/resolution.athena.root",
-    TString title3="ECCE",    TString infile3="out/resolution.ecce.root"
-    // TString outfile="out/resolution.comparison.root",
+    TString title3="ECCE",    TString infile3="out/resolution.ecce.root",
+    TString outfile="out/resolution.comparison.root"
     // TString gx="x", TString gy="q2" // plotgrid vars
     ) {
   return; // smoke test
