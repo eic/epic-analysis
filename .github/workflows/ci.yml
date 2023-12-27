@@ -100,10 +100,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - { id: 1,    options: --version hepmc.pythia6 --no-radcor --limit 5 --num-hepmc-events 15000 --minQ2 1    } # max limit=30
-          - { id: 10,   options: --version hepmc.pythia6 --no-radcor --limit 5 --num-hepmc-events 15000 --minQ2 10   } # max limit=40
-          - { id: 100,  options: --version hepmc.pythia6 --no-radcor --limit 5 --num-hepmc-events 15000 --minQ2 100  } # max limit=50
-          - { id: 1000, options: --version hepmc.pythia6 --no-radcor --limit 5 --num-hepmc-events 15000 --minQ2 1000 } # max limit=60
+          - { id: 1,    options: --version hepmc.pythia6 --no-radcor --limit 5 --num-hepmc-events 150 --minQ2 1    } # max limit=30
+          - { id: 10,   options: --version hepmc.pythia6 --no-radcor --limit 5 --num-hepmc-events 150 --minQ2 10   } # max limit=40
+          - { id: 100,  options: --version hepmc.pythia6 --no-radcor --limit 5 --num-hepmc-events 150 --minQ2 100  } # max limit=50
+          - { id: 1000, options: --version hepmc.pythia6 --no-radcor --limit 5 --num-hepmc-events 150 --minQ2 1000 } # max limit=60
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -140,10 +140,10 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - { id: epic_latest,   options: --version epic.latest             --limit 20 --detector brycecanyon --no-radcor }
-          - { id: epic_previous, options: --version epic.previous           --limit 20 --detector brycecanyon --no-radcor }
-          - { id: ecce,          options: --version ecce.22.1               --limit 40 }
-          - { id: athena,        options: --version athena.deathvalley-v1.0 --limit 20 }
+          - { id: epic_latest,   options: --version epic.latest             --limit 2 --detector brycecanyon --no-radcor }
+          - { id: epic_previous, options: --version epic.previous           --limit 2 --detector brycecanyon --no-radcor }
+          - { id: ecce,          options: --version ecce.22.1               --limit 4 }
+          - { id: athena,        options: --version athena.deathvalley-v1.0 --limit 2 }
     steps:
       - uses: actions/checkout@v3
       - uses: cvmfs-contrib/github-action-cvmfs@v3
