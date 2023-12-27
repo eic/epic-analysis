@@ -54,6 +54,7 @@ void comparator(
     return;
   };
 
+  /*
 
   // setup =======================================================
 
@@ -172,4 +173,5 @@ void comparator(
   P0->Op()->Payload(fillHistosArr);
   P0->Execute();
   P0->Finish();
+  */
 };
