@@ -15,9 +15,7 @@ void comparator(
     TString outfile="out/resolution.comparison.root",
     TString gx="x", TString gy="q2" // plotgrid vars
     ) {
-  return; // smoke test
 
-  /*
   // histograms ==================================================
   // - set histogram lists, based on infile name
   std::vector<TString> histList;
@@ -174,5 +172,4 @@ void comparator(
   P0->Op()->Payload(fillHistosArr);
   P0->Execute();
   P0->Finish();
-  */
 };
