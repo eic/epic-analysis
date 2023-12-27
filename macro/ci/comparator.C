@@ -86,7 +86,6 @@ void comparator(
   Int_t numXbins, numYbins;
   Double_t xMin, xMax, yMin, yMax;
 
-  /*
   // PostProcessor and DAG pointers
   // - `P0` stores the first infile's DAG, which will be used for execution
   // - Dext will store the additional DAGs from other infiles
@@ -94,6 +93,7 @@ void comparator(
   HistosDAG *D;
   std::vector<HistosDAG*> Dext; // additional DAGs
 
+  /*
   // get DAGs and binning
   for(auto [title,infile] : infiles) {
     D = new HistosDAG();
