@@ -54,7 +54,6 @@ void comparator(
     return;
   };
 
-  /*
 
   // setup =======================================================
 
@@ -87,6 +86,7 @@ void comparator(
   Int_t numXbins, numYbins;
   Double_t xMin, xMax, yMin, yMax;
 
+  /*
   // PostProcessor and DAG pointers
   // - `P0` stores the first infile's DAG, which will be used for execution
   // - Dext will store the additional DAGs from other infiles
