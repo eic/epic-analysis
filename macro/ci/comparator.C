@@ -4,6 +4,7 @@
 #define EXCLUDE_DELPHES
 
 R__LOAD_LIBRARY(EpicAnalysis)
+R__LOAD_LIBRARY(Adage)
 
 // make grids of plots, comparing data from the infiles
 // - depending on infile, different histograms will be drawn
