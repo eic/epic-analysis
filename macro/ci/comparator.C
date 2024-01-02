@@ -90,14 +90,17 @@ void comparator(
   // - `P0` stores the first infile's DAG, which will be used for execution
   // - Dext will store the additional DAGs from other infiles
   PostProcessor *P0;
-  std::vector<HistosDAG> Dext; // additional DAGs
+  HistosDAG *D;
+  std::vector<TObject*> test_vector;
+  // std::vector<HistosDAG*> Dext; // additional DAGs
 
+  /*
   // get DAGs and binning
   for(auto [title,infile] : infiles) {
-    HistosDAG D;
-    D.BuildFromFile(infile);
-    auto xBins = D.GetBinSet(gx);
-    auto yBins = D.GetBinSet(gy);
+    D = new HistosDAG();
+    D->BuildFromFile(infile);
+    auto xBins = D->GetBinSet(gx);
+    auto yBins = D->GetBinSet(gy);
     if(first) {
       first = false;
       P0 = new PostProcessor(infile->GetName(),outfile);
@@ -144,8 +147,8 @@ void comparator(
     printf("   bx, by = %d, %d\n",bx,by);
     try { 
       histosArrList.at(0).at(bx).at(by) = H; // first, insert the Histos* of D0
-      for(auto& De : Dext) { // then insert the Histos* of each DAG in Dext
-        histosArrList.at(++pc).at(bx).at(by) = De.GetPayloadData(NP,true); // "true", since `NP` is not owned by `P0->Op()`
+      for(auto De : Dext) { // then insert the Histos* of each DAG in Dext
+        histosArrList.at(++pc).at(bx).at(by) = De->GetPayloadData(NP,true); // "true", since `NP` is not owned by `P0->Op()`
       }
     }
     catch(const std::out_of_range &e) { 
@@ -171,4 +174,5 @@ void comparator(
   P0->Op()->Payload(fillHistosArr);
   P0->Execute();
   P0->Finish();
+  */
 };
