@@ -91,7 +91,6 @@ void comparator(
   // - Dext will store the additional DAGs from other infiles
   PostProcessor *P0;
   HistosDAG *D;
-  std::vector<TObject*> test_vector;
   // std::vector<HistosDAG*> Dext; // additional DAGs
 
   /*
