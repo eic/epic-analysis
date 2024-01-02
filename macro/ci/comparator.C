@@ -91,9 +91,8 @@ void comparator(
   // - Dext will store the additional DAGs from other infiles
   PostProcessor *P0;
   HistosDAG *D;
-  // std::vector<HistosDAG*> Dext; // additional DAGs
+  std::vector<HistosDAG*> Dext; // additional DAGs
 
-  /*
   // get DAGs and binning
   for(auto [title,infile] : infiles) {
     D = new HistosDAG();
@@ -173,5 +172,4 @@ void comparator(
   P0->Op()->Payload(fillHistosArr);
   P0->Execute();
   P0->Finish();
-  */
 };
