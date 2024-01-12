@@ -38,6 +38,7 @@ args+="\"$title2\",\"out/$name2.$pname.$recon.root\","
 args+="\"$title3\",\"out/$name3.$pname.$recon.root\","
 args+="\"$title4\",\"out/$name4.$pname.$recon.root\","
 args+="\"out/comparison.$outname.$pname.$recon\",\"$xvar\",\"$yvar\""
+export CLING_DEBUG=1
 root -b -q "macro/ci/comparator.C($args)"
 
 echo "DONE $0"
