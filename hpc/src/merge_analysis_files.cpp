@@ -46,17 +46,36 @@ int main(int argc, char** argv) {
   std::map<TString,Histos*> in_histos;
   std::map<TString,BinSet*> in_binsets;
 
+  // tree tracker
+  std::vector<TString> tree_tracker;
+    
+  // Merged tree vectors
+  std::vector<double> xs_total = {0};
+  std::vector<double> weight_track_total = {0};
+  std::vector<int>   total_events = {0};
+    
+  // Temporary vectors
+  std::vector<double>* tmp_xs_total;
+  std::vector<double>* tmp_weight_track_total;
+  std::vector<int>*   tmp_total_events;
+    
   // loop over input files
   bool first_file = true;
   for(auto in_file : in_files) {
 
+    // clear ttree tracker for this file
+    // helps avoid duplicate trees during merging (current/backup cycles)
+    tree_tracker.clear();
+      
     // loop over input file's keys
     TListIter nextKey(in_file->GetListOfKeys());
     while(TKey * key = (TKey*) nextKey()) {
       TString keyName(key->GetName());
-
       // handle TTrees: add their pointers to lists `in_trees`
       if(TString(key->GetClassName())=="TTree") {
+        if(std::find(tree_tracker.begin(), tree_tracker.end(), keyName) != tree_tracker.end()){
+            continue; // TTree named 'keyName' already added to list, this one way a backup so skip it
+        }
         auto obj = (TTree*) key->ReadObj(); 
         if(first_file) {
           fmt::print("Start list for TTree '{}'\n",keyName);
@@ -64,6 +83,7 @@ int main(int argc, char** argv) {
         }
         try {
           in_trees.at(keyName)->Add(obj);
+          tree_tracker.push_back(keyName);
         } catch(const std::out_of_range& e) {
           fmt::print(stderr,"ERROR: cannot find TTree '{}' in {}\n",keyName,in_file->GetName());
         }
@@ -100,6 +120,24 @@ int main(int argc, char** argv) {
         }
       }
 
+      // handle XsTotal
+      else if(keyName=="XsTotal"){
+          in_file->GetObject(keyName,tmp_xs_total);
+          if (tmp_xs_total->at(0)>xs_total.at(0)) // Replace XsTotal with larger one
+              xs_total[0] = tmp_xs_total->at(0);
+      }
+        
+      // handle WeightTrackTotal
+      else if(keyName=="WeightTrackTotal"){
+          in_file->GetObject(keyName,tmp_weight_track_total);
+          weight_track_total[0]+=tmp_weight_track_total->at(0);
+      }
+    
+      // handle TotalEvents
+      else if(keyName=="TotalEvents"){
+          in_file->GetObject(keyName,tmp_total_events);
+          total_events[0]+=tmp_total_events->at(0);
+      }
       // handle Weights // TODO
       else if(
           TString(key->GetClassName()).Contains(TRegexp("vector<.*>")) &&
@@ -145,6 +183,11 @@ int main(int argc, char** argv) {
     binset->Write(name);
   }
 
+  // write std::vectors
+  out_file->WriteObject(&xs_total,"XsTotal");
+  out_file->WriteObject(&weight_track_total,"WeightTrackTotal");
+  out_file->WriteObject(&total_events,"TotalEvents");
+    
   // close files
   for(auto in_file : in_files)
     in_file->Close();

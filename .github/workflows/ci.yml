@@ -140,8 +140,8 @@ jobs:
       fail-fast: true
       matrix:
         include:
-          - { id: epic_latest,   options: --version epic.latest             --limit 20 --detector brycecanyon --no-radcor }
-          - { id: epic_previous, options: --version epic.previous           --limit 20 --detector brycecanyon --no-radcor }
+          - { id: epic_latest,   options: --version epic.latest             --limit 20 --detector craterlake --no-radcor }
+          - { id: epic_previous, options: --version epic.previous           --limit 20 --detector craterlake --no-radcor }
           - { id: ecce,          options: --version ecce.22.1               --limit 40 }
           - { id: athena,        options: --version athena.deathvalley-v1.0 --limit 20 }
     steps:
