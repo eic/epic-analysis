@@ -150,7 +150,8 @@ void Analysis::AddFileGroup(
     Long64_t totalEntries,
     Double_t xs,
     Double_t Q2min,
-    Double_t Q2max
+    Double_t Q2max,
+    Double_t manualWeight
     )
 {
   // print
@@ -167,7 +168,9 @@ void Analysis::AddFileGroup(
   Q2mins.push_back(Q2min);
   Q2maxs.push_back(Q2max);
   Q2entries.push_back(totalEntries);
-
+  if (manualWeight!=0)
+      Q2weights.push_back(manualWeight);
+      
   // check if the cross section for each group decreases; this is preferred
   // to make sure that `GetEventQ2Idx` behaves correctly
   for (std::size_t idx = 0; idx+1 < Q2xsecs.size(); ++idx) {
@@ -202,6 +205,7 @@ void Analysis::Prepare() {
   Double_t Q2min;
   Double_t Q2max;
   Long64_t numEvents;
+  Double_t manualWeight;
   std::vector<std::string> fileNames;
   bool readingListOfFiles;
   bool endGroupCalled;
@@ -211,6 +215,7 @@ void Analysis::Prepare() {
     xsec      = totalCrossSection;
     Q2min     = 1.0;
     Q2max     = 0.0;
+    manualWeight = 0.0;
     numEvents = -1;
     fileNames.clear();
     readingListOfFiles = false;
@@ -221,7 +226,7 @@ void Analysis::Prepare() {
   /* lambda to add a list of files to this analysis; wraps `Analysis::AddFileGroup`,
    * and checks the files beforehand
    */
-  auto AddFiles = [this, &fileNames, &xsec, &Q2min, &Q2max, &numEvents] () {
+  auto AddFiles = [this, &fileNames, &xsec, &Q2min, &Q2max, &numEvents, &manualWeight] () {
     Long64_t entries = 0;
     if(numEvents<0) {
       // get the number of entries, and check the file
@@ -244,7 +249,7 @@ void Analysis::Prepare() {
     }
     else entries = numEvents;
     // add the file group
-    AddFileGroup(fileNames, entries, xsec, Q2min, Q2max);
+    AddFileGroup(fileNames, entries, xsec, Q2min, Q2max, manualWeight);
   };
 
   // loop over lines
@@ -292,6 +297,7 @@ void Analysis::Prepare() {
       else if (bufferKey==":eleBeamEn")         eleBeamEn         = std::stod(bufferVal);
       else if (bufferKey==":ionBeamEn")         ionBeamEn         = std::stod(bufferVal);
       else if (bufferKey==":crossingAngle")     crossingAngle     = std::stod(bufferVal);
+      else if (bufferKey==":Weight") manualWeight = std::stod(bufferVal);
       else if (bufferKey==":totalCrossSection") totalCrossSection = std::stod(bufferVal);
       else if (bufferKey==":q2min")             Q2min             = std::stod(bufferVal);
       else if (bufferKey==":q2max")             Q2max             = std::stod(bufferVal);
@@ -666,7 +672,8 @@ void Analysis::CalculateEventQ2Weights() {
       }
     }
     // calculate the weight for this Q2 range
-    Q2weights[idx] = lumiTotal / lumiThis;
+    if(Q2weights[idx]==0)
+        Q2weights[idx] = lumiTotal / lumiThis;
     cout << "\tQ2 > "     << Q2mins[idx];
     if(Q2maxs[idx]>0) cout << " && Q2 < " << Q2maxs[idx];
     cout << ":" << endl;
@@ -696,6 +703,11 @@ Int_t Analysis::GetEventQ2Idx(Double_t Q2, Int_t guess) {
   if (idx<0) {
     // fmt::print(stderr,"WARNING: Q2={} not in any Q2 range\n",Q2); // usually just below the smallest Q2 min
     idx = 0; // assume the least-restrictive range
+  }
+  else if(idx<guess){
+  // When crossingAngle!=0, some event can be reconstructed with trueQ2 < Q2min of the Monte Carlo.
+  // If so, set the idx=guess, i.e. just assume the event was generated in its file's Q2range
+      idx = guess; 
   }
   return idx;
 }
@@ -757,7 +769,7 @@ void Analysis::Finish() {
   outFile->WriteObject(&vec_wTrackTotal,     "WeightTrackTotal");
   outFile->WriteObject(&vec_wDihadronTotal,  "WeightDihadronTotal");
   outFile->WriteObject(&vec_wJetTotal,       "WeightJetTotal");
-
+  outFile->WriteObject(&total_events, "TotalEvents");
   // write binning schemes
   for(auto const &kv : binSchemes) {
     if(kv.second->GetNumBins()>0) kv.second->Write("binset__"+kv.first);

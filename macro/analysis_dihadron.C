@@ -23,11 +23,11 @@ void analysis_dihadron(
       outfilePrefix
       );
 
-  Weights* weights = new WeightsSum({
-      new WeightsUniform(),
-      new WeightsTest()
-    });
-  A->SetDihadronWeights(weights);   
+//   Weights* weights = new WeightsSum({
+//       new WeightsUniform(),
+//       new WeightsTest()
+//     });
+//   A->SetDihadronWeights(weights);   
 
   //  A->maxEvents = 1000; // use this to limit the number of events
   A->SetReconMethod("ele"); // set reconstruction method

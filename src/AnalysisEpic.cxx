@@ -76,7 +76,7 @@ void AnalysisEpic::Execute()
   tr.SetEntriesRange(1,maxEvents);
   do{
     if(tr.GetCurrentEntry()%10000==0) cout << tr.GetCurrentEntry() << " events..." << endl;
-
+    total_events[0]++; // increment number of events
     // resets
     kin->ResetHFS();
     kinTrue->ResetHFS();
