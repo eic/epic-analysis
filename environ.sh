@@ -13,7 +13,6 @@ fi
 echo "EPIC_ANALYSIS_HOME = $EPIC_ANALYSIS_HOME"
 
 ### DELPHES
-export LD_LIBRARY_PATH=$PYTHIA8/lib:$LD_LIBRARY_PATH
 export DELPHES_HOME=$EPIC_ANALYSIS_HOME/deps/delphes
 if [ -f "$DELPHES_HOME/DelphesEnv.sh" ]; then
   # set $LIBRARY_PATH to "", if unbound (for CI `eic/run-cvmfs-osg-eic-shell` payloads)

@@ -170,7 +170,7 @@ void Analysis::AddFileGroup(
   Q2entries.push_back(totalEntries);
   if (manualWeight!=0)
       Q2weights.push_back(manualWeight);
-      
+  
   // check if the cross section for each group decreases; this is preferred
   // to make sure that `GetEventQ2Idx` behaves correctly
   for (std::size_t idx = 0; idx+1 < Q2xsecs.size(); ++idx) {
@@ -204,6 +204,7 @@ void Analysis::Prepare() {
   Double_t xsec;
   Double_t Q2min;
   Double_t Q2max;
+  Double_t manualWeight;
   Long64_t numEvents;
   Double_t manualWeight;
   std::vector<std::string> fileNames;
@@ -302,6 +303,7 @@ void Analysis::Prepare() {
       else if (bufferKey==":q2min")             Q2min             = std::stod(bufferVal);
       else if (bufferKey==":q2max")             Q2max             = std::stod(bufferVal);
       else if (bufferKey==":crossSection")      xsec              = std::stod(bufferVal);
+      else if (bufferKey==":Weight")            manualWeight      = std::stod(bufferVal);
       else if (bufferKey==":numEvents")         numEvents         = std::stoll(bufferVal);
       else if (bufferKey==":endGroup")          endGroupCalled    = true;
       else
@@ -705,9 +707,11 @@ Int_t Analysis::GetEventQ2Idx(Double_t Q2, Int_t guess) {
     idx = 0; // assume the least-restrictive range
   }
   else if(idx<guess){
-  // When crossingAngle!=0, some event can be reconstructed with trueQ2 < Q2min of the Monte Carlo.
-  // If so, set the idx=guess, i.e. just assume the event was generated in its file's Q2range
-      idx = guess; 
+
+    // When crossingAngle!=0, some event can be reconstructed with trueQ2 < Q2min of the Monte Carlo.
+    // If so, set the idx=guess, i.e. just assume the event was generated in its file's Q2range
+    
+    idx = guess; 
   }
   return idx;
 }
@@ -769,7 +773,7 @@ void Analysis::Finish() {
   outFile->WriteObject(&vec_wTrackTotal,     "WeightTrackTotal");
   outFile->WriteObject(&vec_wDihadronTotal,  "WeightDihadronTotal");
   outFile->WriteObject(&vec_wJetTotal,       "WeightJetTotal");
-  outFile->WriteObject(&total_events, "TotalEvents");
+  outFile->WriteObject(&total_events,    "TotalEvents");
   // write binning schemes
   for(auto const &kv : binSchemes) {
     if(kv.second->GetNumBins()>0) kv.second->Write("binset__"+kv.first);

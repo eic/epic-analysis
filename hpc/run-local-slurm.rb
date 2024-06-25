@@ -57,7 +57,7 @@ correct = ask("\nIs this OK? [y/N]")
 puts "you answered " + (correct ? "yes" : "no; stopping!")
 exit unless correct
 cleanDirs.each do |dir|
-  FileUtils.rm_f    dir, verbose: true
+  FileUtils.rm_rf   dir, verbose: true
   FileUtils.mkdir_p dir, verbose: true
 end
 FileUtils.mkdir_p LogSubDir, verbose: true
@@ -93,25 +93,27 @@ commandListFile = "#{OutDir}/scripts/commandlist.slurm"
 File.open(slurmConfigN, 'w') do |slurmConfig|
   File.open(commandListFile, 'w') do |commandList|
     # header
+    # Split the InDir string and extract the desired text
+    desired_text = InDir.split("___")[1].gsub('/', '')
     slurmConfig.puts """#!/bin/bash
-#SBATCH --job-name=epic-analysis
+#SBATCH --job-name=epic-analysis-#{desired_text}
 #SBATCH --account=eic
 #SBATCH --partition=production
-#SBATCH --mem-per-cpu=200
+#SBATCH --mem-per-cpu=500
 #SBATCH --time=24:00:00"""
     
     # job array
     nfiles = partFileList.count()
     slurmConfig.puts """#SBATCH --array=1-#{nfiles}"""                  
     # output
-    slurmConfig.puts """#SBATCH --output=#{OutDir}/log/%x-%j-%N.out
-#SBATCH --error=#{OutDir}/log/%x-%j-%N.err
+    slurmConfig.puts """#SBATCH --output=#{LogSubDir}/%x-%j-%N.out
+#SBATCH --error=#{LogSubDir}/%x-%j-%N.err
     """
-    # command
+    
     slurmConfig.puts """
 srun $(sed -n ${SLURM_ARRAY_TASK_ID}p #{commandListFile})
-"""
-
+    """
+                       
     # loop over config.part files
     partFileList.each do |partFile|
 
@@ -155,7 +157,7 @@ source environ.sh
 root -b -q #{RootMacro}'(#{macroArgs})'"""
       end
       FileUtils.chmod 'u+x', shellScriptName
-      commandList.puts """#{eicShellPrefix}/eic-shell -- #{shellScriptName}
+      commandList.puts """#{eicShellPrefix}/../eic-shell -- #{shellScriptName}
 """
     end # loop over config.part files
   end # close slurm command list file
