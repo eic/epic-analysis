@@ -206,7 +206,6 @@ void Analysis::Prepare() {
   Double_t Q2max;
   Double_t manualWeight;
   Long64_t numEvents;
-  Double_t manualWeight;
   std::vector<std::string> fileNames;
   bool readingListOfFiles;
   bool endGroupCalled;
