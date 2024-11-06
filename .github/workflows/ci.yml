@@ -46,7 +46,7 @@ jobs:
             echo "[CI] build epic-analysis"
             source environ.sh
             make ${{matrix.recipe}}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: x_build_${{matrix.recipe}}
           retention-days: 1
@@ -76,7 +76,7 @@ jobs:
             echo "[CI] build epic-analysis"
             source environ.sh
             EXCLUDE_DELPHES=1 make release
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: x_build_no_delphes
           retention-days: 1
@@ -124,7 +124,7 @@ jobs:
               --output ci \
               --config datarec/ci/delphes_${{matrix.id}}.config \
               ${{matrix.options}}
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: x_fastsim_delphes
           retention-days: 1
@@ -165,7 +165,7 @@ jobs:
               ${{matrix.options}}
             echo "[CI] cat config file"
             cat s3files.config
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: x_fullsim_${{matrix.id}}
           retention-days: 1
@@ -194,10 +194,10 @@ jobs:
           - { aname: x_q2, recon: eSigma }
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: x_build_release
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: x_fastsim_delphes
           path: x_fastsim_delphes
@@ -220,7 +220,7 @@ jobs:
             cat delphes.config
             echo "[CI] ANALYSIS MACRO"
             ${{env.root}} 'macro/ci/analysis_${{matrix.aname}}.C("delphes.config","fastsim.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: analysis
           retention-days: 7
@@ -265,10 +265,10 @@ jobs:
         - { aname: x_q2, recon: eSigma, detector: ecce   }
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: x_build_no_delphes
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: x_fullsim_${{matrix.detector}}
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -287,7 +287,7 @@ jobs:
             cat s3files.config
             echo "[CI] ANALYSIS MACRO"
             ${{env.root_no_delphes}} 'macro/ci/analysis_${{matrix.aname}}.C("s3files.config","${{matrix.detector}}.${{matrix.aname}}.${{matrix.recon}}","${{matrix.recon}}")'
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: analysis
           retention-days: 7
@@ -357,10 +357,10 @@ jobs:
           - { mode: ecce,          pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: x_build_no_delphes
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: analysis
           path: out
@@ -381,7 +381,7 @@ jobs:
             mv -v out/${{matrix.mode}}.{${{matrix.aname}},${{matrix.pname}}}.${{matrix.recon}}.root # rename aname -> pname
             ${{env.root_no_delphes}} 'macro/ci/${{matrix.pmacro}}("out/${{matrix.mode}}.${{matrix.pname}}.${{matrix.recon}}.root")'
             rm -v out/${{matrix.mode}}.${{matrix.pname}}.${{matrix.recon}}.root # rm analysis_root artifact
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: postprocess
           retention-days: 30
@@ -425,10 +425,10 @@ jobs:
           - { pname: coverage_x_q2,   recon: eSigma, aname: x_q2, xvar: x, yvar: q2 }
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: x_build_no_delphes
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: analysis
           path: out
@@ -458,7 +458,7 @@ jobs:
             #   "ATHENA"                      "athena"      \
             #   "ECCE"                        "ecce"        \
             #   "LEGACY"
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: comparison
           retention-days: 30
@@ -476,11 +476,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: postprocess
           path: results
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: comparison
           path: results
@@ -512,7 +512,7 @@ jobs:
             ecce          \
             athena
           tree results
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           retention-days: 90
           name: _FULL_RESULTS
