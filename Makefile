@@ -13,6 +13,7 @@ endif
 CXX := g++
 FLAGS = -Wno-deprecated -fPIC
 FLAGS += -fmax-errors=3
+FLAGS += -std=c++20
 # FLAGS += -fvisibility=hidden # FIXME: required by pybind, but causes unresolved symbols in cling...
 ROOTCLING = rootcling
 
@@ -26,9 +27,10 @@ DEP_LIBRARIES = $(shell root-config --glibs)
 #DEP_LIBRARIES += -lMinuit -lRooFitCore -lRooFit -lRooStats -lProof -lMathMore
 
 # Data Model (PODIO + EDM4hep + EDM4eic)
-DEP_LIBRARIES += -L/usr/local/lib -ledm4hep -ledm4eic
+DEP_LIBRARIES += -L/opt/local/lib -ledm4hep -ledm4eic
+DEP_INCLUDES += -I/opt/local/include
 ifdef INCLUDE_PODIO
-	DEP_LIBRARIES += -L/usr/local/lib -lpodio -lpodioRootIO
+	DEP_LIBRARIES += -L/opt/local/lib -lpodio -lpodioRootIO
 	FLAGS += -DINCLUDE_PODIO
 endif
 
@@ -161,7 +163,7 @@ hpc-header:
 	@echo "\n===== HPC executables ====="
 hpc/src/%.exe: hpc/src/%.cpp $(EPIC_ANALYSIS_LIB) 
 	@echo "----- build $@.o -----"
-	$(CXX) -c $< -o $@.o $(FLAGS) $(DEP_INCLUDES) $(EPIC_ANALYSIS_INCLUDES)
+	$(CXX) -c $< -o $@.o $(FLAGS) $(DEP_INCLUDES) $(EPIC_ANALYSIS_INCLUDES) 
 	@echo "--- make executable $@"
 	$(CXX) -o $@ $@.o $(DEP_LIBRARIES) $(EPIC_ANALYSIS_LIBRARIES)
 	$(RM) $@.o
