@@ -19,6 +19,7 @@ SidisTree::SidisTree(TString treeName_, std::shared_ptr<Kinematics> K_, std::sha
   T->Branch("Y",         &(K->y),         "Y/D");
   T->Branch("Z",         &(K->z),         "Z/D");
   T->Branch("W",         &(K->W),         "W/D");
+  T->Branch("qT",        &(K->qT),         "qT/D");
   T->Branch("MX",        &(K->mX),        "MX/D");
   T->Branch("PhPerp",    &(K->pT),        "PhPerp/D");
   T->Branch("PhiH",      &(K->phiH),      "PhiH/D");

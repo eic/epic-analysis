@@ -8,8 +8,8 @@ require 'ostruct'
 require 'fileutils'
 
 # default versions
-VersionLatest   = 'epic.24.04.0'
-VersionPrevious = 'epic.24.05.0'
+VersionLatest   = 'epic.24.05.0'
+VersionPrevious = 'epic.24.04.0'
 
 # default CLI options
 options = OpenStruct.new
@@ -28,7 +28,7 @@ options.numHepmc   = 0
 # global settings
 CrossSectionTable = 'datarec/xsec/xsec.dat'
 HostURL           = 'https://eics3.sdcc.bnl.gov:9000'
-
+# root://dtn-eic.jlab.org//work/eic2/
 # helpers
 def versionNum(v) # options.version -> version number
   v
@@ -50,6 +50,13 @@ end
 #   :fileExtension   => File extension (optional, defaults to 'root')
 # }
 prodSettings = {
+  'epic.24.07.0' => {
+    :comment         => 'Pythia 8: high-stats July 2024 production',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
   'epic.24.05.0' => {
     :comment         => 'Pythia 8: high-stats May 2024 production',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
@@ -431,6 +438,7 @@ if [
 
 # pattern: "#{energy}/minQ2=#{minQ2}/"
 elsif [
+  'epic.24.07.0',
   'epic.24.05.0',
   'epic.24.04.0',
   'epic.23.11.0',

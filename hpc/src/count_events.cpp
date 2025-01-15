@@ -2,7 +2,6 @@
 // Copyright (C) 2023 Christopher Dilks
 
 // count number of events in a given file
-
 #include <fmt/format.h>
 #include <TFile.h>
 #include <TTree.h>
