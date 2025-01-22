@@ -7,7 +7,7 @@ require 'fileutils'
 # Manually edit these according to your desired simulation
 
 # prefix for output
-PROJECT_NAME="Kplus.1.7.2024"
+PROJECT_NAME="Piminus.1.16.2024"
 
 CAMPAIGNS=["epic.24.05.0"]
 
@@ -22,7 +22,7 @@ NFILES = 5000000
 NROOT_FILES_PER_JOB = 40
 
 # Points to analysis macro
-PATH_TO_ANALYSIS_MACRO = "macro/analysis_singleKaon.C"
+PATH_TO_ANALYSIS_MACRO = "macro/analysis_singlePion.C"
 
 # Path to the directory containing eic-shell
 PATH_TO_EIC_SHELL = "#{ENV['EIC_SHELL_PREFIX']}/../"

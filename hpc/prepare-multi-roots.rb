@@ -342,7 +342,7 @@ created_files.each do |file_name|
     when /^:Weight\s+(\d+\.\d+)/
       current_weight = $1
       grouped_lines[@current_q2min][:weight] = current_weight if current_weight
-    when /^s3/
+    when /^root:/
       grouped_lines[@current_q2min][:lines] << line.strip if @current_q2min
     end
   end
