@@ -331,17 +331,24 @@ void AnalysisEpic::Execute() {
       // First we start with the single particle tracks
       bool keep_reco_particle = false;
       auto kv = PIDtoFinalState.find(pid_);
-
+      
       if (kv != PIDtoFinalState.end()) {
-        finalStateID = kv -> second;
-        if (activeFinalStates.find(finalStateID) != activeFinalStates.end()) keep_reco_particle = true;
+        auto _finalStateID = kv -> second;
+        if (activeFinalStates.find(_finalStateID) != activeFinalStates.end()) {
+            keep_reco_particle = true;
+            finalStateID = _finalStateID;
+        }
       }
+
       // Second, we check the multiparticle tracks (ex: dihadrons)
       for (const auto & entry: PIDStoFinalState) {
         const std::vector < int > & key = entry.first;
         if (std::find(key.begin(), key.end(), pid_) != key.end()) {
-          finalStateID = entry.second;
-          if (activeFinalStates.find(finalStateID) != activeFinalStates.end()) keep_reco_particle = true;
+          auto _finalStateID = entry.second;
+          if (activeFinalStates.find(_finalStateID) != activeFinalStates.end()) {
+              keep_reco_particle = true;
+              finalStateID = _finalStateID;
+          }
         }
       }
 
