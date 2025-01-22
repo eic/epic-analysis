@@ -392,7 +392,6 @@ void AnalysisEpic::Execute() {
         wTrackTotal += wTrack;
         FillHistos1h(wTrack);
         FillHistosInclusive(wTrack);
-        
         // fill simple tree
         // - not binned
         // - `IsActiveEvent()` is only true if at least one bin gets filled for this track
