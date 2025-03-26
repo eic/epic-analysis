@@ -40,6 +40,14 @@
 #include "Weights.h"
 #include "CommonConstants.h"
 
+template <>
+struct fmt::formatter<TString> : fmt::formatter<std::string> {
+    template <typename FormatContext>
+    auto format(const TString& s, FormatContext& ctx) {
+        return fmt::formatter<std::string>::format(s.Data(), ctx);
+    }
+};
+
 class Analysis
 {
 public:

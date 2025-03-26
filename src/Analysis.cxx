@@ -423,6 +423,7 @@ void Analysis::Prepare() {
   HD->SetBinSchemeValue("dihadron_pTlab1", [this](){ return kin->dihadron_pTlab1;     });
   HD->SetBinSchemeValue("dihadron_pTlab2", [this](){ return kin->dihadron_pTlab2;     });
   HD->SetBinSchemeValue("dihadron_mX", [this](){ return kin->dihadron_mX;       });
+  HD->SetBinSchemeValue("dihadron_z", [this](){ return kin->dihadron_z;     });
   HD->SetBinSchemeValue("dihadron_z1", [this](){ return kin->dihadron_z1;       });
   HD->SetBinSchemeValue("dihadron_z2", [this](){ return kin->dihadron_z2;       });
   /* jets */

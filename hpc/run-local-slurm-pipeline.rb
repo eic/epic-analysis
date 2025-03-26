@@ -7,7 +7,7 @@ require 'fileutils'
 # Manually edit these according to your desired simulation
 
 # prefix for output
-PROJECT_NAME="Piminus.1.22.2024"
+PROJECT_NAME="Piplus.1.27.2025"
 
 CAMPAIGNS=["epic.24.05.0"]
 
