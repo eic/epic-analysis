@@ -187,7 +187,7 @@ File.open(templateFileN, 'r') do |templateFile|
         puts "Retrieved #{numEvents} events for #{basename} from database"
       else
         puts "Counting events in #{basename}"
-        modified_rootFileN = rootFileN.gsub('s3https://eics3.sdcc.bnl.gov:9000/eictest/', 'root://dtn-eic.jlab.org//work/eic2/')
+        modified_rootFileN = rootFileN.gsub('s3https://eics3.sdcc.bnl.gov:9000/eictest/', 'root://dtn-eic.jlab.org//volatile/eic/')
         numEvents = `hpc/src/count_events.exe #{modified_rootFileN}`.chomp.to_i
         puts "  => #{numEvents} events"
 
@@ -374,7 +374,7 @@ created_files.each do |file_name|
       file.puts(":crossSection #{data[:cross_section]}")
       file.puts(":Weight #{data[:weight]}")
       data[:lines].each do |line|
-        modified_line = line.gsub('s3https://eics3.sdcc.bnl.gov:9000/eictest/', 'root://dtn-eic.jlab.org//work/eic2/')
+        modified_line = line.gsub('s3https://eics3.sdcc.bnl.gov:9000/eictest/', 'root://dtn-eic.jlab.org//volatile/eic/')
         file.puts(modified_line)
       end
       file.puts(":endGroup") # Forces AddFileGroup to be run in Analysis.cxx, even if FileGroup is empty

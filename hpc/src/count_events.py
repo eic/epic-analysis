@@ -55,7 +55,7 @@ def print_progress_bar(iteration, total, prefix='', suffix='', length=50, fill='
 # Main function
 def main(campaign, detector, energy):
     s3_prefix = "s3https://eics3.sdcc.bnl.gov:9000/eictest"
-    xrootd_prefix = "root://dtn-eic.jlab.org//work/eic2/"
+    xrootd_prefix = "root://dtn-eic.jlab.org//volatile/eic/"
     base_path = "hpc/nevents_databases"
 
     dirname = f"/EPIC/RECO/{campaign}/{detector}/DIS/NC/{energy}/"
