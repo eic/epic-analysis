@@ -8,8 +8,8 @@ require 'ostruct'
 require 'fileutils'
 
 # default versions
-VersionLatest   = 'epic.23.11.0'
-VersionPrevious = 'epic.23.10.0'
+VersionLatest   = 'epic.24.07.0'
+VersionPrevious = 'epic.24.05.0'
 
 # default CLI options
 options = OpenStruct.new
@@ -28,6 +28,7 @@ options.numHepmc   = 0
 # global settings
 CrossSectionTable = 'datarec/xsec/xsec.dat'
 HostURL           = 'https://eics3.sdcc.bnl.gov:9000'
+XROOTD_PREFIX = 'root://dtn-eic.jlab.org/'
 
 # helpers
 def versionNum(v) # options.version -> version number
@@ -50,80 +51,101 @@ end
 #   :fileExtension   => File extension (optional, defaults to 'root')
 # }
 prodSettings = {
+  'epic.24.07.0' => {
+    :comment         => 'Pythia 8: high-stats July 2024 production',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
+  'epic.24.05.0' => {
+    :comment         => 'Pythia 8: high-stats May 2024 production',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
+  'epic.24.04.0' => {
+    :comment         => 'Pythia 8: high-stats April 2024 production',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
   'epic.23.11.0' => {
     :comment         => 'Pythia 8: high-stats November 2023 production',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
   'epic.23.10.0' => {
     :comment         => 'Pythia 8: high-stats November 2023 production',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
   'epic.23.09.1' => {
     :comment         => 'Pythia 8: high-stats ??? 2023 production',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
   'epic.23.07.1' => {
     :comment         => 'Pythia 8: high-stats July 2023 production',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
   'epic.23.06.1' => {
     :comment         => 'Pythia 8: high-stats June 2023 production',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
   'epic.23.05.2' => {
     :comment         => 'Pythia 8: high-stats May 2023 production',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
   'epic.23.05.1' => {
     :comment         => 'Pythia 8',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
   'epic.23.03.0_pythia8' => {
     :comment         => 'Pythia 8, small sample, 10x100, minQ2=1000 only',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
   # 'epic.23.03.0_pythia6' => { # FIXME: need cross section for Q2<1 bin
   #   :comment         => 'Pythia 6, small sample, 5x41, noradcor only, Q2<1 only',
   #   :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
-  #   :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/SIDIS/pythia6" },
+  #   :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/SIDIS/pythia6" },
   #   :energySubDir    => Proc.new { "ep_#{options.energy}" },
   #   :dataSubDir      => Proc.new { |radDir| "hepmc_ip6/#{radDir}" },
   # },
   'epic.23.01.0' => {
     :comment         => 'Pythia 8',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
   'epic.22.11.3' => {
     :comment         => 'Pythia 6: high-stats November 2022 production, with & without radiative corrections',
     :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/SIDIS/pythia6" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/SIDIS/pythia6" },
     :energySubDir    => Proc.new { "ep_#{options.energy}" },
     :dataSubDir      => Proc.new { |radDir|
       if [options.energy,radDir]==['18x275','noradcor']  # correct for S3 disorganization
@@ -136,14 +158,14 @@ prodSettings = {
   'epic.22.11.2' => {
     :comment         => 'Pythia 8: high-stats November 2022 production',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
     :energySubDir    => Proc.new { "#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
   'ecce.22.1' => {
     :comment         => 'Last ECCE Production, August 2022',
     :crossSectionID  => Proc.new { |minQ2,maxQ2| "pythia6:ep-#{options.energy}#{ecceQ2range(minQ2,maxQ2)}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/Campaigns/#{versionNum(options.version)}/SIDIS/pythia6" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/Campaigns/#{versionNum(options.version)}/SIDIS/pythia6" },
     :energySubDir    => Proc.new { "ep-#{options.energy}" },
     :dataSubDir      => Proc.new { |minQ2,maxQ2| ecceQ2range(minQ2,maxQ2) }, # (combined with :energySubDir)
   },
@@ -157,7 +179,7 @@ prodSettings = {
   'hepmc.pythia6' => {
     :comment         => 'HEPMC files from Pythia 6 for ePIC, with & without radiative corrections',
     :crossSectionID  => Proc.new { |minQ2,maxQ2,radDir| "pythia6:ep_#{radDir}.#{options.energy}_q2_#{minQ2}_#{maxQ2}" },
-    :releaseSubDir   => Proc.new { "S3/eictest/EPIC/EVGEN/SIDIS/pythia6" },
+    :releaseSubDir   => Proc.new { "/work/eic2/EPIC/EVGEN/SIDIS/pythia6" },
     :energySubDir    => Proc.new { "ep_#{options.energy}" },
     :dataSubDir      => Proc.new { |radDir| "hepmc_ip6/#{radDir}" },
     :fileExtension   => 'hepmc',
@@ -326,6 +348,16 @@ readingEvGen = options.version.match? /^hepmc/
 delphesCmd   = 's3tools/src/loop_run_delphes.sh'
 
 ## helper functions
+def xrdfs_ls(dir)
+  # Use the xrdfs command to list files in the given directory
+  output = `xrdfs dtn-eic.jlab.org ls #{dir}`
+  if $?.success?
+    return output.split("\n") # Split into an array of file paths
+  else
+    $stderr.puts "ERROR: Failed to list directory: #{dir}"
+    return []
+  end
+end
 # get a list of files on S3 at `dir`; use `preFilter` to filter out things that are not in the file name (e.g., file size)
 def mc_ls(dir, preFilter='')
   ls = `mc ls #{dir}`.split(/\n/)
@@ -387,7 +419,7 @@ if [
   prod[:targetDir] += "/"+prod[:radDir]
   puts "Target Dir: #{prod[:targetDir]}"
   # check if there are any files
-  if mc_ls("#{dataDir} | head").empty?
+  if xrdfs_ls("#{dataDir} | head").empty?
     $stderr.puts "ERROR: no files in this Data Dir"
     puts "Available Data Directory Tree (be patient...)"
     system "mc tree #{prod[:releaseDir]}"
@@ -395,7 +427,7 @@ if [
   end
   # get the Q2 ranges
   puts "Getting the full list of files... be patient..."
-  fullList = mc_ls(dataDir).grep(/\.#{ext}$/)
+  fullList = xrdfs_ls(dataDir).grep(/\.#{ext}$/)
   prod[:q2ranges] = fullList
     .map{ |file| file.gsub(/.*_q2_/,'').sub(/_run.*/,'') }
     .uniq
@@ -417,6 +449,9 @@ if [
 
 # pattern: "#{energy}/minQ2=#{minQ2}/"
 elsif [
+  'epic.24.07.0',
+  'epic.24.05.0',
+  'epic.24.04.0',
   'epic.23.11.0',
   'epic.23.10.0',
   'epic.23.09.1',
@@ -433,7 +468,7 @@ elsif [
   # print target directory
   puts "Target Dir: #{prod[:targetDir]}"
   # get list of Q2 subdirectories
-  q2dirList = mc_ls prod[:energyDir]
+  q2dirList = xrdfs_ls(prod[:energyDir])
   if q2dirList.empty?
     $stderr.puts "ERROR: energy not found"
     puts "Available energies"
@@ -456,8 +491,8 @@ elsif [
     prod[:dataDirs] << dataDir
     puts "Data Dir: #{dataDir}"
     fileList = readingEvGen ?
-      mc_ls(dataDir,/GiB/) .grep(/\.#{ext}$/) .grep(/vtxfix/) .first(options.limit) :
-      mc_ls(dataDir)       .grep(/\.#{ext}$/) .first(options.limit)
+      xrdfs_ls(dataDir,/GiB/) .grep(/\.#{ext}$/) .grep(/vtxfix/) .first(options.limit) :
+      xrdfs_ls(dataDir)       .grep(/\.#{ext}$/) .first(options.limit)
     puts "Files:"
     fileList.each{ |file| puts "  #{file}" }
     fileList
@@ -468,7 +503,7 @@ elsif [
   'ecce.22.1'
 ].include? options.version
   prod[:radDir] = '' # not used
-  prod[:q2ranges] = mc_ls(prod[:releaseDir]).grep(/#{options.energy}/).grep_v(/Lambda/).map do |dir|
+  prod[:q2ranges] = xrdfs_ls(prod[:releaseDir]).grep(/#{options.energy}/).grep_v(/Lambda/).map do |dir|
     if dir.match? /-q2-high/
       [100,0]
     elsif dir.match? /-q2-low/
@@ -482,7 +517,7 @@ elsif [
     prod[:energyDir] + prod[:dataSubDir].call(minQ2,maxQ2)
   end
   prod[:fileLists] = prod[:dataDirs].map do |dataDir|
-    mc_ls(dataDir)
+    xrdfs_ls(dataDir)
       .grep(/g4event_eval.root$/)
       .first(options.limit)
   end
@@ -545,7 +580,10 @@ prod[:q2ranges].zip(prod[:dataDirs],prod[:fileLists]).each do |q2range,dataDir,f
     if readingEvGen # if reading EVGEN, be sure to use `.root` extension
       file.sub! /\.#{ext}$/, '.root'
     elsif options.mode=='s' # if streaming, make URL
-      file = "#{dataDir.sub(/^S3/,'s3'+HostURL)}/#{fileBase}"
+      # remove the "S3/eictest" portion at the start, then prepend the XRootD prefix
+      #file = dataDir.sub(/^S3\/eictest/, XROOTD_PREFIX) + "/#{fileBase}"
+      file=XROOTD_PREFIX + fileBase
+      puts file
     end
     localFileTable.puts "#{file} #{crossSection} #{minQ2} #{maxQ2}"
   end
