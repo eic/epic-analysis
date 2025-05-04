@@ -194,10 +194,10 @@ jobs:
           - { aname: x_q2, recon: eSigma }
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: x_build_release
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: x_fastsim_delphes
           path: x_fastsim_delphes
@@ -265,10 +265,10 @@ jobs:
         - { aname: x_q2, recon: eSigma, detector: ecce   }
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: x_build_no_delphes
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: x_fullsim_${{matrix.detector}}
       - uses: cvmfs-contrib/github-action-cvmfs@v3
@@ -357,10 +357,10 @@ jobs:
           - { mode: ecce,          pname: coverage2D_x_q2, recon: Sigma,  aname: x_q2, pmacro: postprocess_x_q2.C }
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: x_build_no_delphes
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: analysis
           path: out
@@ -425,10 +425,10 @@ jobs:
           - { pname: coverage_x_q2,   recon: eSigma, aname: x_q2, xvar: x, yvar: q2 }
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: x_build_no_delphes
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: analysis
           path: out
@@ -476,11 +476,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: postprocess
           path: results
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: comparison
           path: results
