@@ -222,8 +222,17 @@ void PostProcessor::FinishDumpAve(TString datFile) {
  * - `profileAxis` will draw a TProfile on the specified axis, for 2D dists
  *   - 0=disabled(default), 1=x-axis, 2=y-axis
  * - `profileOnly` draw only the TProfile, for 2D dists
+ * - `extra_lambda` can be used to apply additional custom formatting, etc.
  */
-void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat, Int_t profileAxis, Bool_t profileOnly) {
+void PostProcessor::DrawSingle(
+    Histos  *H,
+    TString histName,
+    TString drawFormat,
+    Int_t   profileAxis,
+    Bool_t  profileOnly,
+    std::function<void(TH1*,TCanvas*)> extra_lambda
+    )
+{
   cout << "draw single plot " << histName << "..." << endl;
   TH1 *hist = H->Hist(histName);
   if(hist==nullptr) {
@@ -276,6 +285,10 @@ void PostProcessor::DrawSingle(Histos *H, TString histName, TString drawFormat, 
     prof->Write();
   }
 
+  // apply custom formatting
+  extra_lambda(hist, canv);
+
+  // print and write
   canv->Print(pngDir+"/"+canvN+".png");
   outfile->cd("/");
   canv->Write();
