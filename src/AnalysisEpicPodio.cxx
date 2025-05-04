@@ -1,15 +1,14 @@
 // SPDX-License-Identifier: LGPL-3.0-or-later
 // Copyright (C) 2023 Christopher Dilks
-#ifdef INCLUDE_PODIO
 
 #include "AnalysisEpicPodio.h"
 
 AnalysisEpicPodio::AnalysisEpicPodio(TString infileName_, TString outfilePrefix_)
   : Analysis(infileName_, outfilePrefix_)
   , crossCheckKinematics(false)
-{};
+{}
 
-AnalysisEpicPodio::~AnalysisEpicPodio() {};
+AnalysisEpicPodio::~AnalysisEpicPodio() {}
 
 void AnalysisEpicPodio::Execute()
 {
@@ -22,10 +21,9 @@ void AnalysisEpicPodio::Execute()
     for(const auto fileName : fileList)
       infilesFlat.push_back(fileName);
 
-  // create PODIO event store
+  // create PODIO reader
   podioReader.openFiles(infilesFlat);
-  evStore.setReader(&podioReader);
-  ENT = podioReader.getEntries();
+  ENT = podioReader.getEntries(inputTreeName);
   if(maxEvents>0) ENT = std::min(maxEvents,ENT);
   
   // calculate Q2 weights
@@ -60,11 +58,7 @@ void AnalysisEpicPodio::Execute()
     if(verbose) fmt::print("\n\n{:=<70}\n",fmt::format("EVENT {} ",e));
 
     // next event
-    // FIXME: check that we analyze ALL of the events: do we miss the first or last one?
-    if(e>0) {
-      evStore.clear();
-      podioReader.endOfEvent();
-    }
+    auto podioFrame = podio::Frame(podioReader.readNextEntry(inputTreeName));
 
     // resets
     kin->ResetHFS();
@@ -77,9 +71,10 @@ void AnalysisEpicPodio::Execute()
     int num_rec_electrons    = 0;
     
     // read particle collections for this event
-    const auto& simParts    = evStore.get<edm4hep::MCParticleCollection>("MCParticles");
-    const auto& recParts    = evStore.get<edm4eic::ReconstructedParticleCollection>("ReconstructedParticles");
-    const auto& mcRecAssocs = evStore.get<edm4eic::MCRecoParticleAssociationCollection>("ReconstructedParticlesAssoc");
+    // FIXME: which collections to read: "ReconstructedParticles*" or "ReconstructedChargedParticles*"?
+    const auto& simParts    = podioFrame.get<edm4hep::MCParticleCollection>("MCParticles");
+    const auto& recParts    = podioFrame.get<edm4eic::ReconstructedParticleCollection>("ReconstructedChargedParticles");
+    const auto& mcRecAssocs = podioFrame.get<edm4eic::MCRecoParticleAssociationCollection>("ReconstructedChargedParticlesAssociations");
 
     // data objects
     edm4hep::MCParticle mcPartEleBeam;
@@ -88,7 +83,7 @@ void AnalysisEpicPodio::Execute()
 
     // loop over generated particles
     if(verbose) fmt::print("\n{:-<60}\n","MCParticles ");
-    for(auto simPart : simParts) {
+    for(const auto& simPart : simParts) {
 
       // print out this MCParticle
       // if(verbose) PrintParticle(simPart);
@@ -132,10 +127,10 @@ void AnalysisEpicPodio::Execute()
     } // end loop over generated particles
 
     // check for found generated particles
-    if(num_ele_beams==0)     { ErrorPrint("WARNING: missing MC electron beam");      continue; };
-    if(num_ion_beams==0)     { ErrorPrint("WARNING: missing MC ion beam");           continue; };
-    if(num_sim_electrons==0) { ErrorPrint("WARNING: missing scattered electron");    continue; };
-    if(double_counted_beam)  { ErrorPrint("WARNING: found multiple beam particles"); continue; };
+    if(num_ele_beams==0)     { ErrorPrint("WARNING: missing MC electron beam");      continue; }
+    if(num_ion_beams==0)     { ErrorPrint("WARNING: missing MC ion beam");           continue; }
+    if(num_sim_electrons==0) { ErrorPrint("WARNING: missing scattered electron");    continue; }
+    if(double_counted_beam)  { ErrorPrint("WARNING: found multiple beam particles"); continue; }
 
     // set Kinematics 4-momenta
     kinTrue->vecEleBeam  = GetP4(mcPartEleBeam);
@@ -158,52 +153,46 @@ void AnalysisEpicPodio::Execute()
      * - first define a first-order function (`payload`), then call `LoopMCRecoAssocs`
      * - see `LoopMCRecoAssocs` for `payload` signature
      */
-    auto AllRecPartsToHFS = [&] (auto& simPart, auto& recPart, auto recPDG) {
+    auto AllRecPartsToHFS = [&] (const auto& simPart, const auto& recPart, auto recPDG) {
       kin->AddToHFS(GetP4(recPart));
     };
     if(verbose) fmt::print("\n{:-<60}\n","MC<->Reco ASSOCIATIONS ");
-    LoopMCRecoAssocs(mcRecAssocs, AllRecPartsToHFS, verbose);
+    LoopMCRecoAssocs(recParts, mcRecAssocs, AllRecPartsToHFS, verbose);
 
     // find reconstructed electron
     // ============================================================================
     /* FIXME: need realistic electron finder; all of the following options rely
-     * on MC-truth matching; is there any common upstream realistic electron finder
+     * on MC-truth matching; is there any common upstream realistic electron finder?
      */
 
     // find scattered electron by simply matching to truth
-    // FIXME: not working, until we have truth matching and/or reconstructed PID
-    // FIXME: does `simPart==mcPartElectron` work as expected?
-    /*
-    auto FindRecoEleByTruth = [&] (auto& simPart, auto& recPart, auto recPDG) {
-      if(recPDG==constants::pdgElectron && simPart==mcPartElectron) {
+    auto FindRecoEleByTruth = [&] (const auto& simPart, const auto& recPart, auto recPDG) {
+      if(recPDG==constants::pdgElectron && simPart.id()==mcPartElectron.id()) {
         num_rec_electrons++;
         kin->vecElectron = GetP4(recPart);
-      };
-    };
-    LoopMCRecoAssocs(mcRecAssocs, FindRecoEleByTruth);
-    */
-
-    // use electron finder from upstream algorithm `InclusiveKinematics*`
-    // FIXME: is the correct upstream electron finder used here? The
-    // `InclusiveKinematics*` recon algorithms seem to rely on
-    // `Jug::Base::Beam::find_first_scattered_electron(mcParts)` and matching
-    // to truth; this guarantees we get the correct reconstructed scattered
-    // electron
-    const auto& disCalcs = evStore.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematicsElectron");
-    if(disCalcs.size() != 1) ErrorPrint(fmt::format("WARNING: disCalcs.size = {} != 1 for this event",disCalcs.size()));
-    for(const auto& calc : disCalcs) {
-      auto ele = calc.getScat();
-      if( ! ele.isAvailable()) {
-        ErrorPrint("WARNING: `disCalcs` scattered electron unavailable");
-        continue;
       }
-      num_rec_electrons++;
-      kin->vecElectron = GetP4(ele);
+    };
+    LoopMCRecoAssocs(recParts, mcRecAssocs, FindRecoEleByTruth);
+
+    // Fallback: use electron finder from upstream algorithm `InclusiveKinematics*`
+    if(num_rec_electrons == 0) {
+      ErrorPrint("WARNING: first attempt to find reconstructed electron failed; trying InclusiveKinematics collection");
+      const auto& disCalcs = podioFrame.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematicsElectron");
+      if(disCalcs.size() != 1) ErrorPrint(fmt::format("WARNING: disCalcs.size = {} != 1 for this event",disCalcs.size()));
+      for(const auto& calc : disCalcs) {
+        auto ele = calc.getScat();
+        if( ! ele.isAvailable()) {
+          ErrorPrint("WARNING: `disCalcs` scattered electron unavailable");
+          continue;
+        }
+        num_rec_electrons++;
+        kin->vecElectron = GetP4(ele);
+      }
     }
 
     // check for found reconstructed scattered electron
-    if(num_rec_electrons == 0) { ErrorPrint("WARNING: reconstructed scattered electron not found"); continue; };
-    if(num_rec_electrons >  1) { ErrorPrint("WARNING: found more than 1 reconstructed scattered electron"); };
+    if(num_rec_electrons == 0) { ErrorPrint("WARNING: reconstructed scattered electron not found"); continue; }
+    if(num_rec_electrons >  1) { ErrorPrint("WARNING: found more than 1 reconstructed scattered electron"); }
 
     // subtract electron from hadronic final state variables
     kin->SubtractElectronFromHFS();
@@ -211,14 +200,14 @@ void AnalysisEpicPodio::Execute()
 
     // skip the event if there are no reconstructed particles (other than the
     // electron), otherwise hadronic recon methods will fail
-    if(kin->countHadrons == 0) { ErrorPrint("WARNING: no hadrons"); };
+    if(kin->countHadrons == 0) { ErrorPrint("WARNING: no hadrons"); }
   
     // calculate DIS kinematics; skip the event if the calculation did not go well
     if( ! kin->CalculateDIS(reconMethod)     ) continue; // reconstructed
     if( ! kinTrue->CalculateDIS(reconMethod) ) continue; // generated (truth)
 
     // Get the weight for this event's Q2
-    //   FIXME: we are in a podio::EventStore event loop, thus we need an
+    //   FIXME: we are in a PODIO reader event loop, thus we need an
     //          alternative to `chain->GetTreeNumber()`; currently disabling weighting
     //          for now, by setting `wTrack=1.0`
     // auto Q2weightFactor = GetEventQ2Weight(kinTrue->Q2, inLookup[chain->GetTreeNumber()]);
@@ -236,7 +225,7 @@ void AnalysisEpicPodio::Execute()
     /* - calculate SIDIS kinematics
      * - fill output data structures
      */
-    auto SidisOutput = [&] (auto& simPart, auto& recPart, auto recPDG) {
+    auto SidisOutput = [&] (const auto& simPart, const auto& recPart, auto recPDG) {
 
       // final state cut
       // - check PID, to see if it's a final state we're interested in
@@ -263,7 +252,7 @@ void AnalysisEpicPodio::Execute()
       // - `IsActiveEvent()` is only true if at least one bin gets filled for this track
       if( writeSidisTree && HD->IsActiveEvent() ) ST->FillTree(wTrack);
     };
-    LoopMCRecoAssocs(mcRecAssocs, SidisOutput);
+    LoopMCRecoAssocs(recParts, mcRecAssocs, SidisOutput);
 
 
     // read kinematics calculations from upstream /////////////////////////
@@ -279,7 +268,7 @@ void AnalysisEpicPodio::Execute()
       fmt::print("\n{:-<75}\n","KINEMATICS, calculated from upstream: ");
       PrintRow("", std::vector<std::string>({ "x", "Q2", "W", "y", "nu" }), true);
       for(const auto upstreamReconMethod : upstreamReconMethodList)
-        for(const auto& calc : evStore.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematics"+upstreamReconMethod) )
+        for(const auto& calc : podioFrame.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematics"+upstreamReconMethod) )
           PrintRow( upstreamReconMethod, std::vector<float>({
               calc.getX(),
               calc.getQ2(),
@@ -304,7 +293,7 @@ void AnalysisEpicPodio::Execute()
       if(associatedUpstreamMethod != "NONE") {
         fmt::print("{:-<75}\n",fmt::format("DIFFERENCE: upstream({}) - local({}): ",associatedUpstreamMethod,reconMethod));
         for(const auto upstreamMethod : std::vector<std::string>({"Truth",associatedUpstreamMethod})) {
-          const auto& upstreamCalcs = evStore.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematics"+upstreamMethod);
+          const auto& upstreamCalcs = podioFrame.get<edm4eic::InclusiveKinematicsCollection>("InclusiveKinematics"+upstreamMethod);
           for(const auto& upstreamCalc : upstreamCalcs) {
             auto K    = upstreamMethod=="Truth" ? kinTrue : kin;
             auto name = upstreamMethod=="Truth" ? "Truth" : "Reconstructed";
@@ -325,9 +314,6 @@ void AnalysisEpicPodio::Execute()
   fmt::print("end event loop\n");
 
   // finish execution
-  evStore.clear();
-  podioReader.endOfEvent();
-  podioReader.closeFile();
   Finish();
 }
 
@@ -399,71 +385,111 @@ void AnalysisEpicPodio::PrintParticle(const edm4eic::ReconstructedParticle& P) {
 //     payload signature: (simPart, recPart, reconstructed PDG)
  */
 void AnalysisEpicPodio::LoopMCRecoAssocs(
+    const edm4eic::ReconstructedParticleCollection&     recParts,
     const edm4eic::MCRecoParticleAssociationCollection& mcRecAssocs,
     std::function<void(const edm4hep::MCParticle&, const edm4eic::ReconstructedParticle&, int)> payload,
     bool printParticles
     )
 {
-  for(const auto& assoc : mcRecAssocs ) {
 
-    // get reconstructed and simulated particles, and check for matching
-    auto recPart = assoc.getRec(); // reconstructed particle
-    auto simPart = assoc.getSim(); // simulated (truth) particle
-    // if(!simPart.isAvailable()) continue; // FIXME: consider using this once we have matching
+  // check collection sizes equality
+  /* 
+   * NOTE: since it's possible that `recParts.size() != `mcRecAssocs.size()`,
+   *       we first loop over `recParts`, and find the association in `mcRecAssocs`
+   *       which contains it; this allows us to handle the case when we have a
+   *       reconstructed particle with no associated MC truth particle
+   *
+   * FIXME: for now we just warn about these unequal-size cases; we should think of a way to
+   *        properly handle them
+   */
+  if(recParts.size() > mcRecAssocs.size())
+    ErrorPrint("WARNING: there are more reconstructed particles than MC-Reco associations");
+  else if(recParts.size() < mcRecAssocs.size())
+    ErrorPrint("ERROR: there are more MC-Reco associations than reconstructed particles; this could be an upstream issue");
 
-    // print out this reconstructed particle, and its matching truth 
-    if(printParticles) {
-      fmt::print("\n   {:->35}\n"," reconstructed particle:");
-      PrintParticle(recPart);
-      fmt::print("\n   {:.>35}\n"," truth match:");
-      if(simPart.isAvailable())
-        PrintParticle(simPart);
-      else
-        fmt::print("     {:>35}\n","NO MATCH");
-      fmt::print("\n");
+  // loop over reconstructed particles
+  for(const auto& recPart : recParts) {
+
+    // find the associated MC particle
+    bool assocFound = false;
+    for(const auto& assoc : mcRecAssocs ) {
+      if(recPart.id() == assoc.getRec().id()) {
+        assocFound = true;
+
+        // get MC truth particle
+        const auto& simPart = assoc.getSim();
+
+        // print out this reconstructed particle, and its matching truth 
+        if(printParticles) {
+          fmt::print("\n   {:->35}\n"," reconstructed particle:");
+          PrintParticle(recPart);
+          fmt::print("\n   {:.>35}\n"," truth match:");
+          if(simPart.isAvailable())
+            PrintParticle(simPart);
+          else
+            fmt::print("     {:>35}\n","NO MATCH");
+          fmt::print("\n");
+        }
+
+        // handle case of missing MC truth particle
+        // FIXME: handle case this better, instead of just ignoring it
+        if(!simPart.isAvailable()) {
+          ErrorPrint("WARNING: found reconstructed particle with MC-Reco association, but no simulated particle is linked");
+          break;
+        }
+
+        // get reconstructed PDG from PID
+        bool usedTruthPID = false;
+        auto recPDG = GetPDG(simPart, recPart, usedTruthPID);
+        if(verbose) fmt::print("   GetPDG = {}\n",recPDG);
+        // if(usedTruthPID) continue; // FIXME: consider using this once we have decent PID
+
+        // run payload
+        payload(simPart, recPart, recPDG);
+
+      }
+    } // end loop over `mcRecAssocs`
+
+    // handle reconstructed particles with no MC association
+    // FIXME: what should we do about these?
+    if(!assocFound) {
+      ErrorPrint("WARNING: found reconstructed particle with no associated MC particle");
     }
 
-    // get reconstructed PDG from PID
-    bool usedTruthPID = false;
-    auto recPDG = GetReconstructedPDG(simPart, recPart, usedTruthPID);
-    if(verbose) fmt::print("   GetReconstructedPDG = {}\n",recPDG);
-    // if(usedTruthPID) continue; // FIXME: consider using this once we have decent PID
+  } // end loop over `recParts`
 
-    // run payload
-    payload(simPart, recPart, recPDG);
-
-  } // end loop over Reco<->MC associations
 } // end LoopMCRecoAssocs
 
 
 // get PDG from reconstructed particle; resort to true PDG, if
 // PID is unavailable (sets `usedTruth` to true)
-int AnalysisEpicPodio::GetReconstructedPDG(
+int AnalysisEpicPodio::GetPDG(
     const edm4hep::MCParticle& simPart,
     const edm4eic::ReconstructedParticle& recPart,
     bool& usedTruth
     )
 {
-  int pdg = 0;
-  usedTruth = false;
 
-  // if using edm4hep::ReconstructedParticle:
-  /*
-  if(recPart.getParticleIDUsed().isAvailable()) // FIXME: not available
-    pdg = recPart.getParticleIDUsed().getPDG();
-  */
-  
-  // if using edm4eic::ReconstructedParticle:
-  // pdg = recPart.getPDG(); // FIXME: not available either
+  // get PID PDG
+  usedTruth        = false;
+  auto pidHypBest  = recPart.getParticleIDUsed(); // presumably the best PID hypothesis
+  auto pidGoodness = recPart.getGoodnessOfPID(); // FIXME: should we use this?
+  if(pidHypBest.isAvailable())
+    return pidHypBest.getPDG();
 
-  // if reconstructed PID is unavailable, use MC PDG
-  if(pdg==0) {
-    usedTruth = true;
-    if(simPart.isAvailable())
-      pdg = simPart.getPDG();
-  }
+  // FIXME: should we check other PID hypotheses?
+  // for(auto pidHyp : recPart.getParticleIDs()) {
+  //   auto pdg        = pidHyp.getPDG();
+  //   auto likelihood = pidHyp.getLikelihood();
+  //   // ...
+  // }
 
-  return pdg;
+  // otherwise get true PDG from associated MC particle
+  usedTruth = true;
+  if(simPart.isAvailable())
+    return simPart.getPDG();
+
+  // last chance // FIXME: someday we may remove `ReconstructedParticle::PDG` from EDM4eic
+  ErrorPrint("WARNING: falling back to `ReconstructedParticle::PDG` member, which may be deprecated soon");
+  return recPart.getPDG();
 }
-
-#endif

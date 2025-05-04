@@ -137,6 +137,7 @@ public:
     Long64_t entriesTot;
     Long64_t errorCnt;
     const TString sep = "--------------------------------------------";
+    std::string inputTreeName;
   
     // setup / common settings
     std::vector<std::vector<std::string> > infiles;

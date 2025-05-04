@@ -113,6 +113,7 @@ Analysis::Analysis(
   infiles.clear();
   entriesTot = 0;
   errorCnt = 0;
+  inputTreeName = "";
 };
 
 
@@ -210,13 +211,31 @@ void Analysis::Prepare() {
           fmt::print(stderr,"ERROR: Couldn't open input file '{}'\n",fileName);
           return;
         }
-        TTree *tree = file->Get<TTree>("Delphes");                  // fastsim
-        if (tree == nullptr) tree = file->Get<TTree>("events");     // ATHENA, ePIC
-        if (tree == nullptr) tree = file->Get<TTree>("event_tree"); // ECCE
-        if (tree == nullptr) {
-          fmt::print(stderr,"ERROR: Couldn't find tree in file '{}'\n",fileName);
+        TTree *tree = nullptr;
+        if(inputTreeName == "") {
+          // figure out which tree we are analyzing
+          std::vector<std::string> inputTreeNameOpts = {
+            "Delphes",   // fastsim
+            "events",    // ePIC, ATHENA
+            "event_tree" // ECCE
+          };
+          for (auto inputTreeNameOpt : inputTreeNameOpts) {
+            tree = file->Get<TTree>(inputTreeNameOpt.c_str());
+            if (tree != nullptr) {
+              inputTreeName = inputTreeNameOpt;
+              break;
+            }
+          }
+          if (tree == nullptr)
+            fmt::print(stderr,"ERROR: Couldn't find any known tree in file '{}'\n",fileName);
         }
-        else entries += tree->GetEntries();
+        else {
+          tree = file->Get<TTree>(inputTreeName.c_str());
+          if (tree == nullptr)
+            fmt::print(stderr,"ERROR: Couldn't find tree '{}' in file '{}'\n",inputTreeName,fileName);
+        }
+        if (tree != nullptr)
+          entries += tree->GetEntries();
         file->Close();
         delete file;
       }
