@@ -16,7 +16,9 @@ DiSidisTree::DiSidisTree(TString treeName_, std::shared_ptr<Kinematics> K_, std:
   T = new TTree(treeName,treeName);
   T->Branch("Q2",            &(K->Q2),                    "Q2/D");
   T->Branch("X",             &(K->x),                     "X/D");
+  T->Branch("TrueX",         &(Ktrue->x),                 "TrueX/D");
   T->Branch("Y",             &(K->y),                     "Y/D");
+  T->Branch("TrueY",         &(Ktrue->y),                 "TrueY/D");
   T->Branch("Z",             &(K->dihadron_z),            "Z/D");
   T->Branch("Z1",            &(K->dihadron_z1),           "Z1/D");
   T->Branch("Z2",            &(K->dihadron_z2),           "Z2/D");

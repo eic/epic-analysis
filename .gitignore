@@ -9,6 +9,10 @@
 *.exe
 *.tmp
 *.zip
+*.slurm
+*.err
+*.out
+*.log
 *Dict.cxx
 tags
 
@@ -35,3 +39,4 @@ hpc/log
 external
 *.sif
 container/img
+*.ipynb_checkpoints

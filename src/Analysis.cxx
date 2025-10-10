@@ -660,6 +660,7 @@ void Analysis::CalculateEventQ2Weights() {
   }
   cout << "Q2 weighting info:" << endl;
   for (Int_t idx = 0; idx < Q2xsecs.size(); ++idx) {
+    cout << "Q2min=" << Q2mins[idx] << ",Q2max=" << Q2maxs[idx] << ",Q2entries=" << Q2entries[idx] << ",Q2xsecs=" << Q2xsecs[idx] << endl;
     // calculate total luminosity, and the luminosity that contains this Q2 range
     Double_t lumiTotal = Double_t(entriesTot)     / totalCrossSection;
     Double_t lumiThis  = Double_t(Q2entries[idx]) / Q2xsecs[idx];

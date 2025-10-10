@@ -8,8 +8,8 @@ require 'ostruct'
 require 'fileutils'
 
 # default versions
-VersionLatest   = 'epic.24.05.0'
-VersionPrevious = 'epic.24.04.0'
+VersionLatest   = 'epic.25.08.0'
+VersionPrevious = 'epic.25.03.1'
 
 # default CLI options
 options = OpenStruct.new
@@ -51,6 +51,34 @@ end
 #   :fileExtension   => File extension (optional, defaults to 'root')
 # }
 prodSettings = {
+'epic.25.08.0' => {
+  :comment         => 'Pythia 8: high-stats August 2025 production',
+  :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+  :releaseSubDir   => Proc.new { "/volatile/eic/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+  :energySubDir    => Proc.new { "#{options.energy}" },
+  :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
+  'epic.25.03.1' => {
+    :comment         => 'Pythia 8: high-stats March 2025 production',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "/volatile/eic/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
+  'epic.25.02.0' => {
+    :comment         => 'Pythia 8: high-stats February 2025 production',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "/volatile/eic/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
+  'epic.24.11.1' => {
+    :comment         => 'Pythia 8: high-stats November 2024 production',
+    :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
+    :releaseSubDir   => Proc.new { "/work/eic3/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+    :energySubDir    => Proc.new { "#{options.energy}" },
+    :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
   'epic.24.07.0' => {
     :comment         => 'Pythia 8: high-stats July 2024 production',
     :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
@@ -449,6 +477,10 @@ if [
 
 # pattern: "#{energy}/minQ2=#{minQ2}/"
 elsif [
+  'epic.25.08.0',
+  'epic.25.03.1',
+  'epic.25.02.0',
+  'epic.24.11.1',
   'epic.24.07.0',
   'epic.24.05.0',
   'epic.24.04.0',
