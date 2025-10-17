@@ -1,0 +1,722 @@
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x100/minQ2=100/pythia8CCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+5.45951642e+00 3.00132418e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x100/minQ2=100/pythia8CCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+5.46122598e+00 3.00191737e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x100/minQ2=100/pythia8CCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+5.46595495e+00 3.00281761e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x100/minQ2=100/pythia8CCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+5.46756212e+00 3.00558090e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x100/minQ2=100/pythia8CCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+5.46054470e+00 3.00125790e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x100/minQ2=1000/pythia8CCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+7.46409820e-01 3.93912100e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x100/minQ2=1000/pythia8CCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+7.46288492e-01 3.93972055e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x100/minQ2=1000/pythia8CCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+7.46987781e-01 3.94146620e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x100/minQ2=1000/pythia8CCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+7.47320579e-01 3.94502455e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x100/minQ2=1000/pythia8CCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+7.47265906e-01 3.94294391e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x275/minQ2=100/pythia8CCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+1.45606224e+01 8.31788788e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x275/minQ2=100/pythia8CCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+1.45787922e+01 8.33320980e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x275/minQ2=100/pythia8CCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+1.45686782e+01 8.32187975e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x275/minQ2=100/pythia8CCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+1.45633381e+01 8.31750873e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x275/minQ2=100/pythia8CCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+1.45589170e+01 8.31639827e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x275/minQ2=1000/pythia8CCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+5.56353572e+00 2.99864304e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x275/minQ2=1000/pythia8CCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+5.56707272e+00 2.99672371e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x275/minQ2=1000/pythia8CCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+5.55871680e+00 2.99255544e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x275/minQ2=1000/pythia8CCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+5.56600404e+00 2.99631752e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/10x275/minQ2=1000/pythia8CCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+5.56518818e+00 2.99757538e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/18x275/minQ2=100/pythia8CCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+2.35559082e+01 1.36365221e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/18x275/minQ2=100/pythia8CCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+2.35645206e+01 1.36459599e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/18x275/minQ2=100/pythia8CCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+2.35846615e+01 1.36638763e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/18x275/minQ2=100/pythia8CCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+2.35481053e+01 1.36387262e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/18x275/minQ2=100/pythia8CCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+2.35588820e+01 1.36481090e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/18x275/minQ2=1000/pythia8CCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+1.15495171e+01 6.27662396e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/18x275/minQ2=1000/pythia8CCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+1.15601725e+01 6.28553528e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/18x275/minQ2=1000/pythia8CCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+1.15599588e+01 6.28112483e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/18x275/minQ2=1000/pythia8CCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+1.15599553e+01 6.27790023e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/18x275/minQ2=1000/pythia8CCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+1.15510184e+01 6.27252785e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x100/minQ2=100/pythia8CCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+2.42660740e+00 1.29896654e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x100/minQ2=100/pythia8CCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+2.42754363e+00 1.29975163e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x100/minQ2=100/pythia8CCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+2.42617735e+00 1.29894329e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x100/minQ2=100/pythia8CCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+2.42693566e+00 1.29961416e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x100/minQ2=100/pythia8CCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+2.42809930e+00 1.30028452e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x100/minQ2=1000/pythia8CCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+4.10167930e-02 2.24770775e-05
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x100/minQ2=1000/pythia8CCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+4.09848826e-02 2.24574778e-05
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x100/minQ2=1000/pythia8CCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+4.10121026e-02 2.24793543e-05
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x100/minQ2=1000/pythia8CCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+4.10022178e-02 2.24736890e-05
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x100/minQ2=1000/pythia8CCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+4.10050134e-02 2.24698247e-05
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x41/minQ2=100/pythia8CCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+6.45166963e-01 3.21671104e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x41/minQ2=100/pythia8CCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+6.45537676e-01 3.21794707e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x41/minQ2=100/pythia8CCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+6.45591853e-01 3.21673731e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x41/minQ2=100/pythia8CCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+6.45185254e-01 3.21670981e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/CC/5x41/minQ2=100/pythia8CCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+6.45894164e-01 3.22053209e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1/pythia8NCDIS_10x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+5.55970634e+05 3.43192270e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1/pythia8NCDIS_10x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+5.56069505e+05 3.43200809e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1/pythia8NCDIS_10x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_2_022.hepmc3.tree.root
+5.55783640e+05 7.37165300e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1/pythia8NCDIS_10x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+5.55898859e+05 3.43244446e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1/pythia8NCDIS_10x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+5.56389695e+05 3.43392644e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1/pythia8NCDIS_10x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+5.55718317e+05 3.43072156e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1/pythia8NCDIS_10x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+5.55970634e+05 3.43192270e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1/pythia8NCDIS_10x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+5.56069505e+05 3.43200809e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1/pythia8NCDIS_10x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+5.55898859e+05 3.43244446e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1/pythia8NCDIS_10x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+5.56389695e+05 3.43392644e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1/pythia8NCDIS_10x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+5.55718317e+05 3.43072156e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=10/pythia8NCDIS_10x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+3.99634216e+04 2.30486306e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=10/pythia8NCDIS_10x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+3.99745902e+04 2.30627107e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=10/pythia8NCDIS_10x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+4.00165080e+04 2.30693227e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=10/pythia8NCDIS_10x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+3.99861482e+04 2.30629978e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=10/pythia8NCDIS_10x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+3.99926525e+04 2.30636476e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=10/pythia8NCDIS_10x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+3.99634216e+04 2.30486306e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=10/pythia8NCDIS_10x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+3.99745902e+04 2.30627107e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=10/pythia8NCDIS_10x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+4.00165080e+04 2.30693227e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=10/pythia8NCDIS_10x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+3.99861482e+04 2.30629978e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=10/pythia8NCDIS_10x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+3.99926525e+04 2.30636476e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=100/pythia8NCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+1.34270341e+03 6.90749432e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=100/pythia8NCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+1.34319651e+03 6.91078415e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=100/pythia8NCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+1.34081895e+03 6.89604774e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=100/pythia8NCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+1.34320679e+03 6.91087682e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=100/pythia8NCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+1.34334684e+03 6.91139024e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=100/pythia8NCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+1.34270341e+03 6.90749432e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=100/pythia8NCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+1.34319651e+03 6.91078415e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=100/pythia8NCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+1.34081895e+03 6.89604774e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=100/pythia8NCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+1.34320679e+03 6.91087682e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=100/pythia8NCDIS_10x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+1.34334684e+03 6.91139024e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1000/pythia8NCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+6.82381038e+00 3.50721687e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1000/pythia8NCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+6.82521261e+00 3.50995841e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1000/pythia8NCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+6.82430898e+00 3.50648253e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1000/pythia8NCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+6.81845743e+00 3.50365824e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1000/pythia8NCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+6.81501406e+00 3.50462303e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1000/pythia8NCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+6.82381038e+00 3.50721687e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1000/pythia8NCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+6.82521261e+00 3.50995841e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1000/pythia8NCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+6.82430898e+00 3.50648253e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1000/pythia8NCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+6.81845743e+00 3.50365824e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x100/minQ2=1000/pythia8NCDIS_10x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+6.81501406e+00 3.50462303e-03
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1/pythia8NCDIS_10x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+6.69559512e+05 4.13015055e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1/pythia8NCDIS_10x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+6.69025860e+05 4.12506870e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1/pythia8NCDIS_10x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+6.69133908e+05 4.12930794e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1/pythia8NCDIS_10x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+6.69334943e+05 4.12961825e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1/pythia8NCDIS_10x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+6.69510172e+05 4.13089841e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1/pythia8NCDIS_10x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+6.69559512e+05 4.13015055e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1/pythia8NCDIS_10x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+6.69025860e+05 4.12506870e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1/pythia8NCDIS_10x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+6.69133908e+05 4.12930794e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1/pythia8NCDIS_10x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+6.69334943e+05 4.12961825e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1/pythia8NCDIS_10x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+6.69510172e+05 4.13089841e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=10/pythia8NCDIS_10x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+5.70831308e+04 3.39978575e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=10/pythia8NCDIS_10x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+5.71073005e+04 3.40104999e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=10/pythia8NCDIS_10x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+5.71235227e+04 3.40094002e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=10/pythia8NCDIS_10x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+5.70317872e+04 3.39854429e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=10/pythia8NCDIS_10x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+5.70038182e+04 3.39557748e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=10/pythia8NCDIS_10x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+5.70831308e+04 3.39978575e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=10/pythia8NCDIS_10x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+5.71073005e+04 3.40104999e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=10/pythia8NCDIS_10x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+5.71235227e+04 3.40094002e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=10/pythia8NCDIS_10x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+5.70317872e+04 3.39854429e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=10/pythia8NCDIS_10x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+5.70038182e+04 3.39557748e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=100/pythia8NCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+2.49020890e+03 1.33740584e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=100/pythia8NCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+2.48831131e+03 1.33518137e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=100/pythia8NCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+2.48917118e+03 1.33625151e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=100/pythia8NCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+2.48937224e+03 1.33701259e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=100/pythia8NCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+2.48747394e+03 1.33520168e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=100/pythia8NCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+2.49020890e+03 1.33740584e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=100/pythia8NCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+2.48831131e+03 1.33518137e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=100/pythia8NCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+2.48917118e+03 1.33625151e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=100/pythia8NCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+2.48937224e+03 1.33701259e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=100/pythia8NCDIS_10x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+2.48747394e+03 1.33520168e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1000/pythia8NCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+4.19854636e+01 2.07825319e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1000/pythia8NCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+4.20036544e+01 2.07937312e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1000/pythia8NCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+4.20063746e+01 2.07870493e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1000/pythia8NCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+4.19625073e+01 2.07962607e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1000/pythia8NCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+4.19618375e+01 2.07814080e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1000/pythia8NCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+4.19854636e+01 2.07825319e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1000/pythia8NCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+4.20036544e+01 2.07937312e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1000/pythia8NCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+4.20063746e+01 2.07870493e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1000/pythia8NCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+4.19625073e+01 2.07962607e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/10x275/minQ2=1000/pythia8NCDIS_10x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+4.19618375e+01 2.07814080e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1/pythia8NCDIS_18x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+7.43109082e+05 4.59555680e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1/pythia8NCDIS_18x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+7.42743554e+05 4.59703405e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1/pythia8NCDIS_18x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+7.41926670e+05 4.58883059e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1/pythia8NCDIS_18x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+7.42563763e+05 4.59272358e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1/pythia8NCDIS_18x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+7.42519148e+05 4.59144002e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1/pythia8NCDIS_18x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+7.43109082e+05 4.59555680e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1/pythia8NCDIS_18x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+7.42743554e+05 4.59703405e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1/pythia8NCDIS_18x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+7.41926670e+05 4.58883059e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1/pythia8NCDIS_18x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+7.42563763e+05 4.59272358e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1/pythia8NCDIS_18x275_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+7.42519148e+05 4.59144002e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=10/pythia8NCDIS_18x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+6.93087343e+04 4.12955596e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=10/pythia8NCDIS_18x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+6.93338981e+04 4.12980662e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=10/pythia8NCDIS_18x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+6.92580426e+04 4.12665403e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=10/pythia8NCDIS_18x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+6.93901435e+04 4.13124207e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=10/pythia8NCDIS_18x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+6.93462439e+04 4.13160226e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=10/pythia8NCDIS_18x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+6.93087343e+04 4.12955596e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=10/pythia8NCDIS_18x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+6.93338981e+04 4.12980662e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=10/pythia8NCDIS_18x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+6.92580426e+04 4.12665403e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=10/pythia8NCDIS_18x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+6.93901435e+04 4.13124207e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=10/pythia8NCDIS_18x275_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+6.93462439e+04 4.13160226e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=100/pythia8NCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+3.36786349e+03 1.84838975e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=100/pythia8NCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+3.36886678e+03 1.84968081e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=100/pythia8NCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+3.37293633e+03 1.85183048e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=100/pythia8NCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+3.37254439e+03 1.85095099e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=100/pythia8NCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+3.36596203e+03 1.84795176e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=100/pythia8NCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+3.36786349e+03 1.84838975e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=100/pythia8NCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+3.36886678e+03 1.84968081e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=100/pythia8NCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+3.37293633e+03 1.85183048e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=100/pythia8NCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+3.37254439e+03 1.85095099e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=100/pythia8NCDIS_18x275_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+3.36596203e+03 1.84795176e+00
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1000/pythia8NCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+7.94668555e+01 3.95204075e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1000/pythia8NCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+7.94459500e+01 3.95293455e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1000/pythia8NCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+7.93847062e+01 3.94801291e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1000/pythia8NCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+7.94238330e+01 3.95190159e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1000/pythia8NCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+7.93933085e+01 3.95011033e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1000/pythia8NCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+7.94668555e+01 3.95204075e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1000/pythia8NCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+7.94459500e+01 3.95293455e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1000/pythia8NCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+7.93847062e+01 3.94801291e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1000/pythia8NCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+7.94238330e+01 3.95190159e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/18x275/minQ2=1000/pythia8NCDIS_18x275_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+7.93933085e+01 3.95011033e-02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1/pythia8NCDIS_5x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+4.84923899e+05 2.92569988e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1/pythia8NCDIS_5x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+4.85405482e+05 2.93126920e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1/pythia8NCDIS_5x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+4.85055695e+05 2.92883614e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1/pythia8NCDIS_5x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+4.84959351e+05 2.92690590e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1/pythia8NCDIS_5x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+4.85116638e+05 2.92836365e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1/pythia8NCDIS_5x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+4.84923899e+05 2.92569988e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1/pythia8NCDIS_5x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+4.85405482e+05 2.93126920e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1/pythia8NCDIS_5x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+4.85055695e+05 2.92883614e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1/pythia8NCDIS_5x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+4.84959351e+05 2.92690590e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1/pythia8NCDIS_5x100_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+4.85116638e+05 2.92836365e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=10/pythia8NCDIS_5x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+3.04782167e+04 1.71235976e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=10/pythia8NCDIS_5x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+3.04968635e+04 1.71363404e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=10/pythia8NCDIS_5x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+3.04761410e+04 1.71290852e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=10/pythia8NCDIS_5x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+3.04899235e+04 1.71368760e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=10/pythia8NCDIS_5x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+3.04806961e+04 1.71212364e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=10/pythia8NCDIS_5x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+3.04782167e+04 1.71235976e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=10/pythia8NCDIS_5x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+3.04968635e+04 1.71363404e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=10/pythia8NCDIS_5x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+3.04761410e+04 1.71290852e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=10/pythia8NCDIS_5x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+3.04899235e+04 1.71368760e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=10/pythia8NCDIS_5x100_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+3.04806961e+04 1.71212364e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=100/pythia8NCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+7.79163243e+02 3.87908369e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=100/pythia8NCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+7.78858227e+02 3.87409918e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=100/pythia8NCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+7.79050373e+02 3.87804203e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=100/pythia8NCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+7.78856113e+02 3.87706949e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=100/pythia8NCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+7.78603196e+02 3.87619034e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=100/pythia8NCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+7.79163243e+02 3.87908369e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=100/pythia8NCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+7.78858227e+02 3.87409918e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=100/pythia8NCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+7.79050373e+02 3.87804203e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=100/pythia8NCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+7.78856113e+02 3.87706949e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=100/pythia8NCDIS_5x100_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+7.78603196e+02 3.87619034e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1000/pythia8NCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+4.30704464e-01 2.48523788e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1000/pythia8NCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+4.30467003e-01 2.48316500e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1000/pythia8NCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+4.30485029e-01 2.48367679e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1000/pythia8NCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+4.30451577e-01 2.48400143e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1000/pythia8NCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+4.30162216e-01 2.48447874e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1000/pythia8NCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+4.30704464e-01 2.48523788e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1000/pythia8NCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+4.30467003e-01 2.48316500e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1000/pythia8NCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+4.30485029e-01 2.48367679e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1000/pythia8NCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+4.30451577e-01 2.48400143e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x100/minQ2=1000/pythia8NCDIS_5x100_minQ2=1000_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+4.30162216e-01 2.48447874e-04
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+4.00006581e+05 2.37975031e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_1_novtx.hepmc3.tree.root
+4.00006581e+05 2.37975031e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+4.00418616e+05 2.38306976e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_2_novtx.hepmc3.tree.root
+4.00418616e+05 2.38306976e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+4.00518973e+05 2.38273274e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_3_novtx.hepmc3.tree.root
+4.00518973e+05 2.38273274e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+4.00507660e+05 2.38238590e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_4_novtx.hepmc3.tree.root
+4.00507660e+05 2.38238590e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+3.99847628e+05 2.37870955e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_5_novtx.hepmc3.tree.root
+3.99847628e+05 2.37870955e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+4.00006581e+05 2.37975031e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+4.00418616e+05 2.38306976e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+4.00518973e+05 2.38273274e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+4.00507660e+05 2.38238590e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=1/pythia8NCDIS_5x41_minQ2=1_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+3.99847628e+05 2.37870955e+02
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=10/pythia8NCDIS_5x41_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+2.03435040e+04 1.10098840e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=10/pythia8NCDIS_5x41_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+2.03448317e+04 1.10269043e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=10/pythia8NCDIS_5x41_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+2.03474644e+04 1.10166142e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=10/pythia8NCDIS_5x41_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+2.03556935e+04 1.10288873e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=10/pythia8NCDIS_5x41_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+2.03370784e+04 1.10140346e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=10/pythia8NCDIS_5x41_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+2.03435040e+04 1.10098840e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=10/pythia8NCDIS_5x41_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+2.03448317e+04 1.10269043e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=10/pythia8NCDIS_5x41_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+2.03474644e+04 1.10166142e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=10/pythia8NCDIS_5x41_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+2.03556935e+04 1.10288873e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=10/pythia8NCDIS_5x41_minQ2=10_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+2.03370784e+04 1.10140346e+01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=100/pythia8NCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_1.hepmc3.tree.root
+2.86736455e+02 1.38703925e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=100/pythia8NCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_2.hepmc3.tree.root
+2.86854650e+02 1.38682281e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=100/pythia8NCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_3.hepmc3.tree.root
+2.86703058e+02 1.38646128e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=100/pythia8NCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_4.hepmc3.tree.root
+2.87056657e+02 1.38722144e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=100/pythia8NCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_5.hepmc3.tree.root
+2.86849860e+02 1.38730685e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=100/pythia8NCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_1.hepmc3.tree.root
+2.86736455e+02 1.38703925e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=100/pythia8NCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_2.hepmc3.tree.root
+2.86854650e+02 1.38682281e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=100/pythia8NCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_3.hepmc3.tree.root
+2.86703058e+02 1.38646128e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=100/pythia8NCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_4.hepmc3.tree.root
+2.87056657e+02 1.38722144e-01
+
+root://dtn-eic.jlab.org//work/eic2/EPIC/EVGEN/DIS/NC/5x41/minQ2=100/pythia8NCDIS_5x41_minQ2=100_beamEffects_xAngle=-0.025_hiDiv_vtxfix_5.hepmc3.tree.root
+2.86849860e+02 1.38730685e-01
