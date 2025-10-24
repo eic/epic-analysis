@@ -24,6 +24,7 @@ options.radCor     = false
 options.minQ2      = -1
 options.maxQ2      = -1
 options.numHepmc   = 0
+options.target     = 'NC'
 
 # global settings
 CrossSectionTable = 'datarec/xsec/xsec.dat'
@@ -53,8 +54,20 @@ end
 prodSettings = {
 'epic.25.08.0' => {
   :comment         => 'Pythia 8: high-stats August 2025 production',
-  :crossSectionID  => Proc.new { |minQ2| "pythia8:#{options.energy}/minQ2=#{minQ2}" },
-  :releaseSubDir   => Proc.new { "/volatile/eic/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC" },
+  :crossSectionID  => Proc.new { |minQ2,maxQ2|
+    if options.target == 'He3'
+      "beagle:eHe3.#{options.energy}_q2_#{minQ2}_#{maxQ2>0 ? maxQ2 : 100000}"
+    else
+      "pythia8:#{options.energy}/minQ2=#{minQ2}"
+    end
+  },
+  :releaseSubDir   => Proc.new {
+      if options.target == 'He3'
+        "/volatile/eic/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/BeAGLE1.03.02-1.0/eHe3"
+      else
+        "/volatile/eic/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC"
+      end
+  },
   :energySubDir    => Proc.new { "#{options.energy}" },
   :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
   },
@@ -227,6 +240,7 @@ typicalEnergyList = [
   "5x41",
   "5x100",
   "10x100",
+  "10x166",
   "10x275",
   "18x275",
 ]
@@ -319,6 +333,16 @@ OptionParser.new do |o|
           exit 1
         end
         options.detector = a
+      end
+  o.on("-t", "--target [TARGET]",
+       "Target nucleus: 'NC' (neutral current) or 'He3' (Helium-3 BeAGLE)",
+       "Default: NC"
+      ) do |a|
+        unless ['NC', 'He3'].include? a
+          $stderr.puts "ERROR: unknown TARGET '#{a}'"
+          exit 1
+        end
+        options.target = a
       end
   o.separator ''
   o.on("-r", "--[no-]radcor",
@@ -497,39 +521,64 @@ elsif [
   'athena.deathvalley-v1.0',
   'hepmc.pythia8',
 ].include? options.version
-  # print target directory
+
   puts "Target Dir: #{prod[:targetDir]}"
-  # get list of Q2 subdirectories
-  q2dirList = xrdfs_ls(prod[:energyDir])
-  if q2dirList.empty?
-    $stderr.puts "ERROR: energy not found"
-    puts "Available energies"
-    system "mc ls #{prod[:releaseDir]}"
-    exit 1
+
+  # === Special handling for He3 BeAGLE case ===
+  if options.target == 'He3'
+    q2dirList = xrdfs_ls(prod[:energyDir])
+    puts "Q2 subdirectories: #{q2dirList}"
+
+    # Parse "q2_1to10" style directories
+    prod[:q2ranges] = q2dirList.map do |dir|
+      match = dir.match(/q2_(\d+)to(\d+)/)
+      if match
+        [match[1].to_i, match[2].to_i]
+      else
+        [0, 0]
+      end
+    end
+    cullQ2bins.call prod[:q2ranges]
+    puts "Q2 ranges: #{prod[:q2ranges]}"
+
+    # Get file lists per range
+    prod[:dataDirs] = []
+    prod[:fileLists] = prod[:q2ranges].map do |minQ2, maxQ2|
+      puts "--- #{minQ2} < Q2 < #{maxQ2>0?maxQ2:'inf'}"
+      dataDir = "#{prod[:energyDir]}/q2_#{minQ2}to#{maxQ2}"
+      prod[:dataDirs] << dataDir
+      puts "Data Dir: #{dataDir}"
+      fileList = xrdfs_ls(dataDir).grep(/\.root$/).first(options.limit)
+      fileList.each { |f| puts "  #{f}" }
+      fileList
+    end
+    prod[:radDir] = ''
+  else
+    # === Default Pythia layout ===
+    q2dirList = xrdfs_ls(prod[:energyDir])
+    if q2dirList.empty?
+      $stderr.puts "ERROR: energy not found"
+      puts "Available energies"
+      system "mc ls #{prod[:releaseDir]}"
+      exit 1
+    end
+    puts "Q2 subdirectories: #{q2dirList}"
+    prod[:q2ranges] = q2dirList.map { |dir| [ dir.split('=').last.sub(/\/$/,'').to_i, 0 ] }
+    cullQ2bins.call prod[:q2ranges]
+    puts "Q2 ranges: #{prod[:q2ranges]}"
+
+    prod[:dataDirs] = []
+    prod[:fileLists] = prod[:q2ranges].map do |minQ2, maxQ2|
+      puts "--- #{minQ2} < Q2 < #{maxQ2>0?maxQ2:'inf'}"
+      dataDir = prod[:energyDir] + '/' + prod[:dataSubDir].call(minQ2)
+      prod[:dataDirs] << dataDir
+      puts "Data Dir: #{dataDir}"
+      fileList = xrdfs_ls(dataDir).grep(/\.root$/).first(options.limit)
+      fileList.each { |f| puts "  #{f}" }
+      fileList
+    end
+    prod[:radDir] = ''
   end
-  puts "Q2 subdirectories: #{q2dirList}"
-  # get the Q2 ranges
-  prod[:q2ranges] = q2dirList.map do |dir|
-    [ dir.split('=').last.sub(/\/$/,'').to_i, 0 ]
-  end
-  cullQ2bins.call prod[:q2ranges]
-  puts "Q2 ranges: #{prod[:q2ranges]}"
-  # get a list of files for each Q2 range
-  puts "File names for each Q2 range:"
-  prod[:dataDirs] = []
-  prod[:fileLists] = prod[:q2ranges].map do |minQ2, maxQ2|
-    puts "--- #{minQ2} < Q2 < #{maxQ2>0?maxQ2:'inf'}"
-    dataDir = prod[:energyDir] + '/' + prod[:dataSubDir].call(minQ2)
-    prod[:dataDirs] << dataDir
-    puts "Data Dir: #{dataDir}"
-    fileList = readingEvGen ?
-      xrdfs_ls(dataDir,/GiB/) .grep(/\.#{ext}$/) .grep(/vtxfix/) .first(options.limit) :
-      xrdfs_ls(dataDir)       .grep(/\.#{ext}$/) .first(options.limit)
-    puts "Files:"
-    fileList.each{ |file| puts "  #{file}" }
-    fileList
-  end
-  prod[:radDir] = '' # not used
 
 elsif [
   'ecce.22.1'

@@ -108,7 +108,7 @@ void AnalysisEpic::Execute() {
       double e_ = hepmcp_E[igen];
 
       double p_ = sqrt(pow(hepmcp_psx[igen], 2) + pow(hepmcp_psy[igen], 2) + pow(hepmcp_psz[igen], 2));
-      double mass_ = (fabs(pid_) == 211) ? constants::pimass : (fabs(pid_) == 321) ? constants::kmass : (fabs(pid_) == 11) ? constants::emass : (fabs(pid_) == 13) ? constants::mumass : (fabs(pid_) == 2212) ? constants::pmass : 0.;
+      double mass_ = (fabs(pid_) == 211) ? constants::pimass : (fabs(pid_) == 321) ? constants::kmass : (fabs(pid_) == 11) ? constants::emass : (fabs(pid_) == 13) ? constants::mumass : (fabs(pid_) == 2212) ? constants::pmass : (fabs(pid_) == 2112) ? constants::pmass : 0.;
 
       // Add to genpart
       Particles part;
@@ -228,8 +228,11 @@ void AnalysisEpic::Execute() {
       } else if (mcpart_.pid == 2212 && genStat_ == 4) {
         foundBeamIon = true;
         kinTrue -> vecIonBeam = mcpart_.vecPart;
+      } else if (mcpart_.pid == 2112 && genStat_ == 4) {
+        foundBeamIon = true;
+        kinTrue -> vecIonBeam = mcpart_.vecPart;
       } else if (genStat_ == 4) {
-        cout << "Warning...unknown beam particle with generatorStatus == 4 found...Continuing..." << endl;
+        cout << "Warning...unknown beam particle pid " << mcpart_.pid << " with generatorStatus == 4 found...Continuing..." << endl;
       }
 
       /* Assume the scattered electron is the pid==11 final state particle with the most energy */

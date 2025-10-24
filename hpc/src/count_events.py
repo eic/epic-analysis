@@ -1,101 +1,146 @@
 import os
-import os
 import csv
 import sys
+import subprocess
 from pathlib import Path
 import ROOT
-import uproot
 
-# Function to create necessary directory structure
+# --------------------------- CONFIGURATION --------------------------- #
+XROOTD_SERVER = "root://dtn-eic.jlab.org"
+VOLATILE_PREFIX = "/volatile/eic"
+BASE_PATH = Path("hpc/nevents_databases")
+S3_PREFIX = "s3https://eics3.sdcc.bnl.gov:9000/eictest"
+# --------------------------------------------------------------------- #
+
+
 def create_directory_structure(base_path, path_parts):
     dir_path = Path(base_path, *path_parts)
     dir_path.mkdir(parents=True, exist_ok=True)
     return dir_path
 
-# Function to load CSV data into a list
+
 def load_csv_data(csv_file):
-    data = []
     if csv_file.exists():
-        with open(csv_file, mode='r') as csvf:
-            reader = csv.reader(csvf)
-            data = [row for row in reader]
-    return data
+        with open(csv_file, mode='r') as f:
+            return [row for row in csv.reader(f)]
+    return []
 
-# Function to check if a file exists in the loaded CSV data
+
 def file_exists_in_csv(file_name, csv_data):
-    return any(file_name in row for row in csv_data)
+    return any(file_name == row[0] for row in csv_data)
 
-# Function to append data to CSV
+
 def append_to_csv(csv_file, file_name, num_events):
-    with open(csv_file, mode='a', newline='') as csvf:
-        writer = csv.writer(csvf)
+    with open(csv_file, mode='a', newline='') as f:
+        writer = csv.writer(f)
         writer.writerow([file_name, num_events])
 
-# Function to count events in ROOT files
+
 def count_events(file_path):
+    """Count entries in the 'events' TTree."""
     ROOT.gErrorIgnoreLevel = ROOT.kFatal
     try:
         tfile = ROOT.TFile.Open(file_path)
+        if not tfile or tfile.IsZombie():
+            return 0
         ttree = tfile.Get("events")
-        nevents = ttree.GetEntries()
+        if not ttree:
+            return 0
+        nevents = int(ttree.GetEntries())
+        tfile.Close()
         return nevents
-    except:
+    except Exception:
         return 0
 
-# Function to display a simple progress bar
+
 def print_progress_bar(iteration, total, prefix='', suffix='', length=50, fill='='):
-    percent = ("{0:.1f}").format(100 * (iteration / float(total)))
-    filled_length = int(length * iteration // total)
-    bar = fill * filled_length + '-' * (length - filled_length)
-    print(f'{prefix} |{bar}| {percent}% {suffix}', end='\r')
-    # Print New Line on Complete
-    if iteration == total: 
+    percent = "{0:.1f}".format(100 * (iteration / float(total)))
+    filled_len = int(length * iteration // total)
+    bar = fill * filled_len + '-' * (length - filled_len)
+    print(f'\r{prefix} |{bar}| {percent}% {suffix}', end='', flush=True)
+    if iteration == total:
         print()
 
-# Main function
+
+def list_remote_dirs(server, path):
+    """Return subdirectories under an XRootD directory."""
+    try:
+        result = subprocess.check_output(
+            ["xrdfs", server, "ls", path], text=True
+        ).strip().splitlines()
+        # keep only directory paths (heuristic)
+        return [p for p in result if "/q2_" in p or "/minQ2" in p]
+    except subprocess.CalledProcessError:
+        return []
+
+
+def list_remote_files(server, path):
+    """Return .root files under an XRootD directory."""
+    try:
+        result = subprocess.check_output(
+            ["xrdfs", server, "ls", path], text=True
+        ).strip().splitlines()
+        return [p for p in result if p.endswith(".root")]
+    except subprocess.CalledProcessError:
+        return []
+
+
 def main(campaign, detector, energy):
-    s3_prefix = "s3https://eics3.sdcc.bnl.gov:9000/eictest"
-    xrootd_prefix = "root://dtn-eic.jlab.org//work/eic2/"
-    base_path = "hpc/nevents_databases"
+    # Determine base path for this dataset
+    if "10x166" in energy:
+        data_dir = f"{VOLATILE_PREFIX}/EPIC/RECO/{campaign}/{detector}/DIS/BeAGLE1.03.02-1.0/eHe3/{energy}"
+    else:
+        data_dir = f"{VOLATILE_PREFIX}/EPIC/RECO/{campaign}/{detector}/DIS/NC/{energy}"
 
-    dirname = f"/EPIC/RECO/{campaign}/{detector}/DIS/NC/{energy}/"
-    minQ2s = [file.GetName() for file in ROOT.TSystemDirectory(xrootd_prefix + dirname, xrootd_prefix + dirname).GetListOfFiles()]
+    print(f"Scanning {data_dir} ...")
 
-    for minQ2 in minQ2s:
-        full_dirname = dirname + minQ2
-        d = ROOT.TSystemDirectory(xrootd_prefix + full_dirname, xrootd_prefix + full_dirname)
+    q2_dirs = list_remote_dirs(XROOTD_SERVER, data_dir)
+    if not q2_dirs:
+        print(f"No Q² directories found under {data_dir}")
+        sys.exit(1)
 
-        processed_files = 0
-        total_files = len(d.GetListOfFiles())
-        print("Found",total_files,"for",minQ2)
-        for ifile,file in enumerate(d.GetListOfFiles()):
-            file_path = xrootd_prefix + full_dirname + "/" + file.GetName()
-            col1_value = s3_prefix + full_dirname + "/" + file.GetName()
-            path_parts = col1_value.split('/')[5:12]  # Adjust indices as needed
-            dir_path = create_directory_structure(base_path, path_parts)
-            csv_file = dir_path / 'data.csv'
-            if ifile==0:
-                csv_data = load_csv_data(csv_file)
-            
-            processed_files += 1
-            print_progress_bar(processed_files, total_files, prefix='Processing [{}]:'.format(minQ2), suffix='Complete', length=50)
+    for q2_dir in q2_dirs:
+        q2_label = Path(q2_dir).name
+        root_files = list_remote_files(XROOTD_SERVER, q2_dir)
+        total_files = len(root_files)
+        if total_files == 0:
+            print(f"No ROOT files found in {q2_label}")
+            continue
+
+        print(f"Found {total_files} ROOT files for {q2_label}")
+        csv_data_cache = {}
+
+        for i, file_path in enumerate(root_files, 1):
+            basename = Path(file_path).name
+            col1_value = S3_PREFIX + file_path.replace(VOLATILE_PREFIX, "")
+            path_parts = file_path.split("/")[5:12]  # e.g. EPIC/.../q2_100to1000
+            dir_path = create_directory_structure(BASE_PATH, path_parts)
+            csv_file = dir_path / "data.csv"
+
+            if csv_file not in csv_data_cache:
+                csv_data_cache[csv_file] = load_csv_data(csv_file)
+
+            csv_data = csv_data_cache[csv_file]
+            print_progress_bar(i, total_files, prefix=f'[{q2_label}]', suffix='Complete')
+
             if file_exists_in_csv(col1_value, csv_data):
                 continue
-            else:
-                nevents = count_events(file_path)
-                col2_value = nevents
-                append_to_csv(csv_file, col1_value, col2_value)
-        
-    
+
+            full_remote_path = f"{XROOTD_SERVER}/{file_path}"
+            nevents = count_events(full_remote_path)
+            append_to_csv(csv_file, col1_value, nevents)
+            csv_data.append([col1_value, nevents])
+
+        print(f"Finished {q2_label}")
+
+
 if __name__ == "__main__":
     if len(sys.argv) != 4:
         print("Usage: python3 count_events.py <campaign> <detector> <energy>")
         sys.exit(1)
 
-    campaign = sys.argv[1]
-    if "epic." in campaign:
-        campaign=campaign[5:] # Refactor 
+    campaign = sys.argv[1].replace("epic.", "")  # strip 'epic.' prefix
     detector = sys.argv[2]
     energy = sys.argv[3]
-    print("Running count_events.py for CAMPAIGN: {} ... ENERGY: {}".format(campaign,energy))
+    print(f"Running count_events.py for CAMPAIGN: {campaign} ... ENERGY: {energy}")
     main(campaign, detector, energy)

@@ -1,36 +1,35 @@
 #!/usr/bin/env ruby
 require 'fileutils'
 #################################################################################
+#                          USER CONFIGURATION SECTION                            #
+# Edit the parameters below to define your simulation campaign.                  #
 #################################################################################
-#################################################################################
-#################################################################################
-# Manually edit these according to your desired simulation
 
-# prefix for output
-PROJECT_NAME="PiPlus.9.9.2025"
+# ---------------------------- Project Metadata -------------------------------- #
+PROJECT_NAME = "BeAGLE.10.24.2025"   # Prefix for output directory names
+CAMPAIGNS    = ["epic.25.08.0"]      # Simulation campaign tags (e.g., "epic.25.08.0")
+DETECTORS    = ["epic_craterlake"]   # Detector configurations (must align with CAMPAIGNS)
 
-CAMPAIGNS=["epic.25.08.0"]
+# ------------------------------- Beam Settings -------------------------------- #
+# Example: [["5x41", "10x100", "18x275"]] for multiple energies per campaign
+ENERGIES = [["10x166"]]              # Nested arrays: one list of energies per campaign
 
-DETECTORS = ["epic_craterlake"]
+# ---------------------------- Simulation Mode --------------------------------- #
+IS_BEAGLE = true                     # true → use BeAGLE generator (adds --target He3)
+                                     # false → use standard PYTHIA or other DIS production
 
-ENERGIES=[ ["5x41","10x100","18x275"] ]
+# -------------------------- File and Job Parameters --------------------------- #
+NFILES               = 500_000       # Max number of files per Q² bin (large = all)
+NROOT_FILES_PER_JOB  = 40            # ROOT files merged per job
 
-# Number of Files per Q2 binning
-# Set this to very large number for all campaign files
-NFILES = 500000
-
-NROOT_FILES_PER_JOB = 40
-
-# Points to analysis macro
-PATH_TO_ANALYSIS_MACRO = "macro/analysis_piplus.C"
-
-# Path to the directory containing eic-shell
-PATH_TO_EIC_SHELL = "#{ENV['EIC_SHELL_PREFIX']}/../"
+# ------------------------------- Analysis Setup ------------------------------- #
+PATH_TO_ANALYSIS_MACRO = "macro/analysis_dihadron.C"   # ROOT analysis macro to run
+PATH_TO_EIC_SHELL      = "#{ENV['EIC_SHELL_PREFIX']}/../"  # Path to eic-shell directory
 
 #################################################################################
+# End of user configuration section                                              #
 #################################################################################
-#################################################################################
-#################################################################################
+
 # Error Handling
 # Check if project name is empty
 if PROJECT_NAME.empty?
@@ -103,8 +102,15 @@ CAMPAIGNS.each_with_index do |campaign, index|
     
 
     # Grab the files from s3
-    puts `./s3tools/s3tool.rb -e #{energy} -o #{outdir} -l #{NFILES} -v #{campaign}`
-      
+    # If BeAGLE is used, automatically set the --target flag
+    target_flag = IS_BEAGLE ? "--target He3" : ""
+    puts `./s3tools/s3tool.rb -e #{energy} -o #{outdir} -l #{NFILES} -v #{campaign} #{target_flag}`
+    
+    if IS_BEAGLE
+        puts "BeAGLE mode detected → using --target He3"
+    else
+        puts "Standard Pythia mode (no --target)"
+    end       
       
     # create shell script to count nevents
      File.open("out/#{outdir}/count-nevents.sh", 'w') do |file|

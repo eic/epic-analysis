@@ -13,10 +13,10 @@ struct WeightsTest : public WeightsSivers {
 
 
 void analysis_dihadron(
-    TString configFile="datarec/test_08_12_2025/5x41/files.config", 
+    TString configFile="datarec/beagle_test/10x166/files.config", 
     //TString configFile="datarec/latest.6.11.2024___epic.24.05.0_5x41/5x41/files.config", 
     //TString configFile="datarec/single_piplus_study_14_per_Q2___epic.23.10.0_10x100/10x100/files.config",
-    TString outfilePrefix="test_5x41" /* output filename prefix*/
+    TString outfilePrefix="beagle_test_10x166" /* output filename prefix*/
 ) {
 
   // setup analysis ========================================
