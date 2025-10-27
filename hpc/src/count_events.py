@@ -11,7 +11,7 @@ XROOTD_SERVER = "root://dtn-eic.jlab.org"
 VOLATILE_PREFIX = "/volatile/eic"
 BASE_PATH = Path(f"{PWD}/../nevents_databases")
 print(f"Base path for nevents databases: {BASE_PATH}")
-S3_PREFIX = "s3https://eics3.sdcc.bnl.gov:9000/eictest"
+S3_PREFIX = "root://dtn-eic.jlab.org//volatile/eic"
 # --------------------------------------------------------------------- #
 
 

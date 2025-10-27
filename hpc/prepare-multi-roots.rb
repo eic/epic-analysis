@@ -179,7 +179,7 @@ File.open(templateFileN, 'r') do |templateFile|
       basename = File.basename(rootFileN)
 
       # Extract directory names from rootFileN
-      path_parts = rootFileN.split('/').slice(5, 7) # Adjust indices as needed
+      path_parts = rootFileN.split('/')[8...-1] # Adjust indices as needed
       dir_path = create_directory_structure(base_path, path_parts)
       csv_file = File.join(dir_path, 'data.csv')
 
