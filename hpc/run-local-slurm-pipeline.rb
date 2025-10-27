@@ -1,30 +1,53 @@
 #!/usr/bin/env ruby
 require 'fileutils'
+require 'yaml'
+require 'optparse'
+
+# Parse command line options
+options = {}
+OptionParser.new do |opts|
+  opts.on('--runcard FILE', 'YAML runcard file for configuration') do |f|
+    options[:runcard] = f
+  end
+end.parse!
+
 #################################################################################
 #                          USER CONFIGURATION SECTION                            #
 # Edit the parameters below to define your simulation campaign.                  #
+# If a runcard is provided via --runcard, these defaults will be overridden.     #
 #################################################################################
 
+# Load configuration from runcard if provided
+if options[:runcard]
+  unless File.exist?(options[:runcard])
+    puts "Error: Runcard file #{options[:runcard]} does not exist"
+    exit 1
+  end
+  config = YAML.load_file(options[:runcard])
+else
+  config = {}
+end
+
 # ---------------------------- Project Metadata -------------------------------- #
-PROJECT_NAME = "BeAGLE.10.24.2025"   # Prefix for output directory names
-CAMPAIGNS    = ["epic.25.08.0"]      # Simulation campaign tags (e.g., "epic.25.08.0")
-DETECTORS    = ["epic_craterlake"]   # Detector configurations (must align with CAMPAIGNS)
+PROJECT_NAME = config['project_name'] || "BeAGLE.10.24.2025"   # Prefix for output directory names
+CAMPAIGNS    = config['campaigns'] || ["epic.25.08.0"]      # Simulation campaign tags (e.g., "epic.25.08.0")
+DETECTORS    = config['detectors'] || ["epic_craterlake"]   # Detector configurations (must align with CAMPAIGNS)
 
 # ------------------------------- Beam Settings -------------------------------- #
 # Example: [["5x41", "10x100", "18x275"]] for multiple energies per campaign
-ENERGIES = [["10x166"]]              # Nested arrays: one list of energies per campaign
+ENERGIES = config['energies'] || [["10x166"]]              # Nested arrays: one list of energies per campaign
 
 # ---------------------------- Simulation Mode --------------------------------- #
-IS_BEAGLE = true                     # true → use BeAGLE generator (adds --target He3)
+IS_BEAGLE = config['is_beagle'] || true                     # true → use BeAGLE generator (adds --target He3)
                                      # false → use standard PYTHIA or other DIS production
 
 # -------------------------- File and Job Parameters --------------------------- #
-NFILES               = 500_000       # Max number of files per Q² bin (large = all)
-NROOT_FILES_PER_JOB  = 40            # ROOT files merged per job
+NFILES               = config['nfiles'] || 500_000       # Max number of files per Q² bin (large = all)
+NROOT_FILES_PER_JOB  = config['nroot_files_per_job'] || 40            # ROOT files merged per job
 
 # ------------------------------- Analysis Setup ------------------------------- #
-PATH_TO_ANALYSIS_MACRO = "macro/analysis_dihadron.C"   # ROOT analysis macro to run
-PATH_TO_EIC_SHELL      = "#{ENV['EIC_SHELL_PREFIX']}/../"  # Path to eic-shell directory
+PATH_TO_ANALYSIS_MACRO = config['path_to_analysis_macro'] || "macro/analysis_dihadron.C"   # ROOT analysis macro to run
+PATH_TO_EIC_SHELL      = config['path_to_eic_shell'] || "#{ENV['EIC_SHELL_PREFIX']}/../"  # Path to eic-shell directory
 
 #################################################################################
 # End of user configuration section                                              #
