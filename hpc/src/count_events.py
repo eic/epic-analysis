@@ -9,7 +9,7 @@ import ROOT
 PWD = Path(__file__).parent.resolve()
 XROOTD_SERVER = "root://dtn-eic.jlab.org"
 VOLATILE_PREFIX = "/volatile/eic"
-BASE_PATH = Path(f"{PWD}/hpc/nevents_databases")
+BASE_PATH = Path(f"{PWD}/../nevents_databases")
 print(f"Base path for nevents databases: {BASE_PATH}")
 S3_PREFIX = "s3https://eics3.sdcc.bnl.gov:9000/eictest"
 # --------------------------------------------------------------------- #
