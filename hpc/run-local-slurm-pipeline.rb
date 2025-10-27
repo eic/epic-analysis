@@ -39,6 +39,8 @@ ENERGIES = config['energies'] || [["10x166"]]              # Nested arrays: one 
 
 # ---------------------------- Simulation Mode --------------------------------- #
 IS_BEAGLE = config['is_beagle'] || true                     # true → use BeAGLE generator (adds --target He3)
+puts "IS_BEAGLE = #{IS_BEAGLE}"
+puts "config['is_beagle'] = #{config['is_beagle']}"
                                      # false → use standard PYTHIA or other DIS production
 
 # -------------------------- File and Job Parameters --------------------------- #
