@@ -6,9 +6,10 @@ from pathlib import Path
 import ROOT
 
 # --------------------------- CONFIGURATION --------------------------- #
+PWD = Path(__file__).parent.resolve()
 XROOTD_SERVER = "root://dtn-eic.jlab.org"
 VOLATILE_PREFIX = "/volatile/eic"
-BASE_PATH = Path("hpc/nevents_databases")
+BASE_PATH = Path(f"{PWD}/hpc/nevents_databases")
 S3_PREFIX = "s3https://eics3.sdcc.bnl.gov:9000/eictest"
 # --------------------------------------------------------------------- #
 
