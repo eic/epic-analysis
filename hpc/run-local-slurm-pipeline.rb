@@ -191,23 +191,24 @@ CAMPAIGNS.each_with_index do |campaign, index|
 
     # create slurm script that will run the above shell scripts
     File.open("#{PWD}/out/#{outdir}/run-pipeline.slurm", 'w') do |file|
-      file.puts """#!/bin/bash
-#SBATCH --job-name=#{outdir}
-#SBATCH --account=eic
-#SBATCH --partition=production
-#SBATCH --mem-per-cpu=4000
-#SBATCH --time=24:00:00
-#SBATCH --output=#{PWD}/out/#{outdir}/pipeline.out
-#SBATCH --error=#{PWD}/out/#{outdir}/pipeline.err
+      file.puts <<~SLURM
+        #!/bin/bash
+        #SBATCH --job-name=#{outdir}
+        #SBATCH --account=eic
+        #SBATCH --partition=production
+        #SBATCH --mem-per-cpu=4000
+        #SBATCH --time=24:00:00
+        #SBATCH --output=#{PWD}/out/#{outdir}/pipeline.out
+        #SBATCH --error=#{PWD}/out/#{outdir}/pipeline.err
 
-bash #{PWD}/out/#{outdir}/count-nevents.sh
-#{PATH_TO_EIC_SHELL}/eic-shell -- "
-  cd \#{PWD}
-  \#{PWD}/out/\#{outdir}/make-configs.sh
-  bash \#{PWD}/out/\#{outdir}/run-parallel.sh
-  \#{PWD}/out/\#{outdir}/merge.sh
-"
-      """
+        bash #{PWD}/out/#{outdir}/count-nevents.sh
+        #{PATH_TO_EIC_SHELL}/eic-shell -- "
+          cd ${PWD}
+          ${PWD}/out/#{outdir}/make-configs.sh
+          bash ${PWD}/out/#{outdir}/run-parallel.sh
+          ${PWD}/out/#{outdir}/merge.sh
+        "
+      SLURM
     end
 
 
