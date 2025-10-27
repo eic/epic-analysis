@@ -201,12 +201,13 @@ CAMPAIGNS.each_with_index do |campaign, index|
         #SBATCH --output=#{PWD}/out/#{outdir}/pipeline.out
         #SBATCH --error=#{PWD}/out/#{outdir}/pipeline.err
 
-        bash #{PWD}/out/#{outdir}/count-nevents.sh
+        epicdir=#{PWD}
+        bash ${epicdir}/out/#{outdir}/count-nevents.sh
         #{PATH_TO_EIC_SHELL}/eic-shell -- "
-          cd ${PWD}
-          ${PWD}/out/#{outdir}/make-configs.sh
-          bash ${PWD}/out/#{outdir}/run-parallel.sh
-          ${PWD}/out/#{outdir}/merge.sh
+          cd ${epicdir}
+          ${epicdir}/out/#{outdir}/make-configs.sh
+          bash ${epicdir}/out/#{outdir}/run-parallel.sh
+          ${epicdir}/out/#{outdir}/merge.sh
         "
       SLURM
     end
