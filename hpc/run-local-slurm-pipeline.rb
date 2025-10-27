@@ -16,7 +16,7 @@ end.parse!
 # Edit the parameters below to define your simulation campaign.                  #
 # If a runcard is provided via --runcard, these defaults will be overridden.     #
 #################################################################################
-
+ 
 # Load configuration from runcard if provided
 if options[:runcard]
   unless File.exist?(options[:runcard])
