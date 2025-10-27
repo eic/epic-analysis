@@ -29,7 +29,7 @@ else
 end
 
 # ---------------------------- Project Metadata -------------------------------- #
-PROJECT_NAME = config['project_name'] || "BeAGLE.10.24.2025"   # Prefix for output directory names
+PROJECT_NAME = config['project_name'] || "test"   # Prefix for output directory names
 CAMPAIGNS    = config['campaigns'] || ["epic.25.08.0"]      # Simulation campaign tags (e.g., "epic.25.08.0")
 DETECTORS    = config['detectors'] || ["epic_craterlake"]   # Detector configurations (must align with CAMPAIGNS)
 
@@ -127,6 +127,7 @@ CAMPAIGNS.each_with_index do |campaign, index|
     # Grab the files from s3
     # If BeAGLE is used, automatically set the --target flag
     target_flag = IS_BEAGLE ? "--target He3" : ""
+    puts "./s3tools/s3tool.rb -e #{energy} -o #{outdir} -l #{NFILES} -v #{campaign} #{target_flag}"
     puts `./s3tools/s3tool.rb -e #{energy} -o #{outdir} -l #{NFILES} -v #{campaign} #{target_flag}`
     
     if IS_BEAGLE
