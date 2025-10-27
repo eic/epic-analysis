@@ -36,9 +36,9 @@ void AnalysisEpic::Execute() {
   TTreeReaderArray < Int_t > mcpart_genStat(tr, "MCParticles.generatorStatus");
   TTreeReaderArray < Int_t > mcpart_simStat(tr, "MCParticles.simulatorStatus");
   TTreeReaderArray < Double_t > mcpart_m(tr, "MCParticles.mass");
-  TTreeReaderArray < Float_t > mcpart_psx(tr, "MCParticles.momentum.x");
-  TTreeReaderArray < Float_t > mcpart_psy(tr, "MCParticles.momentum.y");
-  TTreeReaderArray < Float_t > mcpart_psz(tr, "MCParticles.momentum.z");
+  TTreeReaderArray < Double_t > mcpart_psx(tr, "MCParticles.momentum.x");
+  TTreeReaderArray < Double_t > mcpart_psy(tr, "MCParticles.momentum.y");
+  TTreeReaderArray < Double_t > mcpart_psz(tr, "MCParticles.momentum.z");
 
   // Reco tracks
   TTreeReaderArray < Int_t > recparts_type(tr, "ReconstructedChargedParticles.type"); // needs to be made an int eventually in actual EE code
@@ -164,7 +164,7 @@ void AnalysisEpic::Execute() {
       - Add all particles to the std::vector<> of particles
       - Look up associated MC particle
     */
-
+    //cout << "RECPARTICLES =====================" << endl;
     for (int irec = 0; irec < recparts_PDG.GetSize(); irec++) {
 
       int pid_ = recparts_PDG[irec];
@@ -179,7 +179,7 @@ void AnalysisEpic::Execute() {
       part.pid = pid_;
       // part.charge = // TODO; not used yet
       part.vecPart.SetPxPyPzE(px_, py_, pz_, e_);
-
+      //cout << "px,py,pz,e,pid=" << px_ <<','<<py_<<','<<pz_<<','<<e_<<','<<pid_<<endl;    
       double m_ = part.vecPart.M();
 
       /*
