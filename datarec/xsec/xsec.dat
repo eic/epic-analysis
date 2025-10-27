@@ -1,7 +1,7 @@
 # Pythia 6, for ePIC: S3/eictest/EPIC/EVGEN/DIS/NC
 # qbins from 1-10-100-1000-100000 
 # noradcor is without radgen, radcor is including radgen 
-#label                                    cross_section_[pb] relative_uncertainty
+#label                                    cross_section_[nb] relative_uncertainty
 pythia6:ep_noradcor.18x275_q2_1_10        8.089e+05          0.0010      # 20   40.0 M 4.95e+01 nb-1
 pythia6:ep_noradcor.18x275_q2_10_100      7.087e+04          0.0007      # 20   20.0 M 2.82e+02 nb-1
 pythia6:ep_noradcor.18x275_q2_100_1000    3.034e+03          0.0347      # 40   4.0  M 1.32e+03 nb-1
@@ -27,7 +27,7 @@ pythia6:ep_radcor.5x41_q2_100_1000        2.576e+02          0.0074      # 20   
 
 # Pythia 8, from ATHENA production HEPMC files: S3/eictest/ATHENA/EVGEN/DIS/NC
 # Q2 binning by minimum only (no maxima)
-#label                     cross_section_[pb]  relative_uncertainty
+#label                     cross_section_[nb]  relative_uncertainty
 pythia8:5x100/minQ2=1000   0.43023             0.00258
 pythia8:5x100/minQ2=100    778.99              0.00223
 pythia8:5x100/minQ2=10     30476               0.00251
@@ -50,7 +50,7 @@ pythia8:18x275/minQ2=1     7.4167e+05          0.00277
 
 # Pythia 6, from ECCE production files: S3/eictest/ECCE/ProductionInputFiles/SIDIS/pythia6
 # Note: the following are values for noradcor files, radcor 
-#label                     cross_section_[pb]  relative_uncertainty
+#label                     cross_section_[nb]  relative_uncertainty
 pythia6:ep-5x41            3.189e+05           0.0011   # general Q2
 pythia6:ep-5x41-q2-low     3.187e+05           0.0009   # 1 < Q2 < 100
 pythia6:ep-5x41-q2-high    1.622e+02           0.0111   # 100 < Q2
