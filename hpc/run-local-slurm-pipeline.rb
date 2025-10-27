@@ -38,10 +38,11 @@ DETECTORS    = config['detectors'] || ["epic_craterlake"]   # Detector configura
 ENERGIES = config['energies'] || [["10x166"]]              # Nested arrays: one list of energies per campaign
 
 # ---------------------------- Simulation Mode --------------------------------- #
-IS_BEAGLE = config['is_beagle'] || true                     # true → use BeAGLE generator (adds --target He3)
-puts "IS_BEAGLE = #{IS_BEAGLE}"
-puts "config['is_beagle'] = #{config['is_beagle']}"
-                                     # false → use standard PYTHIA or other DIS production
+if config['--is_beagle'].nil?
+  IS_BEAGLE = false                  # default to false if not specified
+else
+  IS_BEAGLE = config['is_beagle']    # use specified value from runcard
+end
 
 # -------------------------- File and Job Parameters --------------------------- #
 NFILES               = config['nfiles'] || 500_000       # Max number of files per Q² bin (large = all)
