@@ -112,11 +112,28 @@ def main(campaign, detector, energy):
         print(f"Found {total_files} ROOT files for {q2_label}")
         csv_data_cache = {}
 
+        # Read the first 20 files to calculate the mean number of events
+        sample_files = root_files[:20]
+        sample_events = []
+
+        for file_path in sample_files:
+            full_remote_path = f"{XROOTD_SERVER}/{file_path}"
+            nevents = count_events(full_remote_path)
+            if nevents > 0:
+                sample_events.append(nevents)
+
+        if not sample_events:
+            print(f"No valid events found in the sample for {q2_label}")
+            continue
+
+        mean_events = sum(sample_events) / len(sample_events)
+        print(f"Mean events for {q2_label}: {mean_events}")
+
         for i, file_path in enumerate(root_files, 1):
             basename = Path(file_path).name
             col1_value = S3_PREFIX + file_path.replace(VOLATILE_PREFIX, "")
             file_path_split_min = 5
-            file_path_split_max = len(file_path.split("/"))-1
+            file_path_split_max = len(file_path.split("/")) - 1
             path_parts = file_path.split("/")[file_path_split_min:file_path_split_max]  # e.g. EPIC/.../q2_100to1000
             dir_path = create_directory_structure(BASE_PATH, path_parts)
             csv_file = dir_path / "data.csv"
@@ -130,10 +147,9 @@ def main(campaign, detector, energy):
             if file_exists_in_csv(col1_value, csv_data):
                 continue
 
-            full_remote_path = f"{XROOTD_SERVER}/{file_path}"
-            nevents = count_events(full_remote_path)
-            append_to_csv(csv_file, col1_value, nevents)
-            csv_data.append([col1_value, nevents])
+            # Use the mean events for extrapolation
+            append_to_csv(csv_file, col1_value, mean_events)
+            csv_data.append([col1_value, mean_events])
 
         print(f"Finished {q2_label}")
 
