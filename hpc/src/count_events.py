@@ -115,7 +115,9 @@ def main(campaign, detector, energy):
         for i, file_path in enumerate(root_files, 1):
             basename = Path(file_path).name
             col1_value = S3_PREFIX + file_path.replace(VOLATILE_PREFIX, "")
-            path_parts = file_path.split("/")[5:12]  # e.g. EPIC/.../q2_100to1000
+            file_path_split_min = 5
+            file_path_split_max = len(file_path.split("/"))-1
+            path_parts = file_path.split("/")[file_path_split_min:file_path_split_max]  # e.g. EPIC/.../q2_100to1000
             dir_path = create_directory_structure(BASE_PATH, path_parts)
             csv_file = dir_path / "data.csv"
 
