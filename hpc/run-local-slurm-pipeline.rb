@@ -36,8 +36,8 @@ CAMPAIGNS    = config['campaigns'] || ["epic.25.08.0"]      # Simulation campaig
 DETECTORS    = config['detectors'] || ["epic_craterlake"]   # Detector configurations (must align with CAMPAIGNS)
 
 # ------------------------------- Beam Settings -------------------------------- #
-# Example: [["5x41", "10x100", "18x275"]] for multiple energies per campaign
-ENERGIES = config['energies'] || [["10x166"]]              # Nested arrays: one list of energies per campaign
+# Example: ["5x41", "10x100", "18x275"] for multiple energies per campaign
+ENERGIES = config['energies'] || ["10x166"]              # Nested arrays: one list of energies per campaign
 
 # ---------------------------- Simulation Mode --------------------------------- #
 if config['--is_beagle'].nil?
@@ -101,7 +101,7 @@ CAMPAIGNS.each_with_index do |campaign, index|
 
   detector = DETECTORS[index]
   # Loop over energies for the current campaign
-  ENERGIES[index].each do |energy|
+  ENERGIES.each do |energy|
 
     # create output directory
     outdir="#{PROJECT_NAME}___#{campaign}_#{energy}"
