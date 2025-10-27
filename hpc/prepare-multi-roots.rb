@@ -6,6 +6,8 @@
 require 'csv'
 require 'fileutils'
 
+PWD = `pwd`.strip
+
 # arguments
 if ARGV.length != 3
   $stderr.puts """
@@ -155,7 +157,7 @@ def get_num_events_from_csv(filename, csv_file)
   end
 end
 
-base_path = 'hpc/nevents_databases'
+base_path = "#{PWD}/hpc/nevents_databases"
 
 File.open(templateFileN, 'r') do |templateFile|
   templateFile.each do |line|
@@ -190,7 +192,7 @@ File.open(templateFileN, 'r') do |templateFile|
         modified_rootFileN = rootFileN
           .gsub('s3https://eics3.sdcc.bnl.gov:9000/eictest/', 'root://dtn-eic.jlab.org//volatile/eic/')
           .gsub('/work/eic2/', '/volatile/eic/')
-        numEvents = `hpc/src/count_events.exe #{modified_rootFileN}`.chomp.to_i
+        numEvents = `#{PWD}/hpc/src/count_events.exe #{modified_rootFileN}`.chomp.to_i
         puts "  => #{numEvents} events"
 
         # Append to CSV in the corresponding directory
