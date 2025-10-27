@@ -40,7 +40,7 @@ DETECTORS    = config['detectors'] || ["epic_craterlake"]   # Detector configura
 ENERGIES = config['energies'] || ["10x166"]              # Nested arrays: one list of energies per campaign
 
 # ---------------------------- Simulation Mode --------------------------------- #
-if config['--is_beagle'].nil?
+if config['is_beagle'].nil?
   IS_BEAGLE = false                  # default to false if not specified
 else
   IS_BEAGLE = config['is_beagle']    # use specified value from runcard
