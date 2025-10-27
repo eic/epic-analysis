@@ -40,3 +40,9 @@ external
 *.sif
 container/img
 *.ipynb_checkpoints
+
+# hpc
+hpc/hpc/*
+hpc/project_scripts/*
+macro/dihadron_IFF/*
+macro/unpolarized_tmds_analysis/*
