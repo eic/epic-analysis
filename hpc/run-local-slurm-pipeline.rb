@@ -202,10 +202,10 @@ CAMPAIGNS.each_with_index do |campaign, index|
 
 bash #{PWD}/out/#{outdir}/count-nevents.sh
 #{PATH_TO_EIC_SHELL}/eic-shell -- "
-  cd #{PWD}
-  #{PWD}/out/#{outdir}/make-configs.sh
-  bash #{PWD}/out/#{outdir}/run-parallel.sh
-  #{PWD}/out/#{outdir}/merge.sh
+  cd \#{PWD}
+  \#{PWD}/out/\#{outdir}/make-configs.sh
+  bash \#{PWD}/out/\#{outdir}/run-parallel.sh
+  \#{PWD}/out/\#{outdir}/merge.sh
 "
       """
     end
