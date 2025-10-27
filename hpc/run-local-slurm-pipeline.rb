@@ -3,6 +3,8 @@ require 'fileutils'
 require 'yaml'
 require 'optparse'
 
+PWD=`pwd`.strip
+
 # Parse command line options
 options = {}
 OptionParser.new do |opts|
@@ -103,7 +105,7 @@ CAMPAIGNS.each_with_index do |campaign, index|
 
     # create output directory
     outdir="#{PROJECT_NAME}___#{campaign}_#{energy}"
-    dir_path = "out/#{outdir}"
+    dir_path = "#{PWD}/out/#{outdir}"
 
     # Check if the directory exists
     
@@ -124,15 +126,15 @@ CAMPAIGNS.each_with_index do |campaign, index|
 
     # Create the directory
     FileUtils.mkdir_p(dir_path)
-    puts "Creating project --> out/#{outdir}"
-    
+    puts "Creating project --> #{dir_path}"
+
 
     # Grab the files from s3
     # If BeAGLE is used, automatically set the --target flag
     target_flag = IS_BEAGLE ? "--target He3" : ""
-    puts "./s3tools/s3tool.rb -e #{energy} -o #{outdir} -l #{NFILES} -v #{campaign} #{target_flag}"
-    puts `./s3tools/s3tool.rb -e #{energy} -o #{outdir} -l #{NFILES} -v #{campaign} #{target_flag}`
-    
+    puts "#{PWD}/s3tools/s3tool.rb -e #{energy} -o #{outdir} -l #{NFILES} -v #{campaign} #{target_flag}"
+    puts `#{PWD}/s3tools/s3tool.rb -e #{energy} -o #{outdir} -l #{NFILES} -v #{campaign} #{target_flag}`
+
     if IS_BEAGLE
         puts "BeAGLE mode detected → using --target He3"
     else
@@ -140,74 +142,73 @@ CAMPAIGNS.each_with_index do |campaign, index|
     end       
       
     # create shell script to count nevents
-     File.open("out/#{outdir}/count-nevents.sh", 'w') do |file|
+     File.open("#{PWD}/out/#{outdir}/count-nevents.sh", 'w') do |file|
       file.puts "#!/bin/bash"
       file.puts ""
       file.puts "echo \"Counting events for campaign #{campaign} with beam energy #{energy}...(may take a while)...\""
       file.puts "echo \"Results are stored for later access in hpc/nevents_databases for faster computation...\""
-      file.puts "python3 ./hpc/src/count_events.py #{campaign} #{detector} #{energy}"
+      file.puts "python3 #{PWD}/hpc/src/count_events.py #{campaign} #{detector} #{energy}"
     end
 
-    puts "Shell script created at out/#{outdir}/count-nevents.sh"
-      
-      
-    # create shell script for generating the config files and slurm files    
-    File.open("out/#{outdir}/make-configs.sh", 'w') do |file|
+    puts "Shell script created at #{PWD}/out/#{outdir}/count-nevents.sh"
+
+    # create shell script for generating the config files and slurm files
+    File.open("#{PWD}/out/#{outdir}/make-configs.sh", 'w') do |file|
       file.puts "#!/bin/bash"
       file.puts ""
-      file.puts "source environ.sh"
-      file.puts "hpc/prepare-multi-roots.rb datarec/#{outdir}/#{energy}/files.config out/#{outdir} #{NROOT_FILES_PER_JOB}"
-      file.puts "echo \"y\" | hpc/run-local-slurm.rb #{PATH_TO_ANALYSIS_MACRO} out/#{outdir} #{outdir}"
+      file.puts "source #{PWD}/environ.sh"
+      file.puts "#{PWD}/hpc/prepare-multi-roots.rb datarec/#{outdir}/#{energy}/files.config #{PWD}/out/#{outdir} #{NROOT_FILES_PER_JOB}"
+      file.puts "echo \"y\" | #{PWD}/hpc/run-local-slurm.rb #{PATH_TO_ANALYSIS_MACRO} #{PWD}/out/#{outdir} #{outdir}"
     end
 
-    puts "Shell script created at out/#{outdir}/make-configs.sh"
-      
+    puts "Shell script created at #{PWD}/out/#{outdir}/make-configs.sh"
+
     # create shell script for running the 'run.slurm' objective created by hpc/run-local-slurm.rb
     # This is a separate script that runs outside the eic-shell environment
-    File.open("out/#{outdir}/run-parallel.sh", 'w') do |file|
+    File.open("#{PWD}/out/#{outdir}/run-parallel.sh", 'w') do |file|
       file.puts "#!/bin/bash"
       file.puts ""
       file.puts "echo \"Running run.slurm...\""
-      file.puts "sbatch --wait out/#{outdir}/scripts/run.slurm"
-    end  
-    
-    puts "Shell script created at out/#{outdir}/run-parallel.sh"
-      
+      file.puts "sbatch --wait #{PWD}/out/#{outdir}/scripts/run.slurm"
+    end
+
+    puts "Shell script created at #{PWD}/out/#{outdir}/run-parallel.sh"
+
     # create shell script for running the 'merge.rb' function to merge the TTrees
-    File.open("out/#{outdir}/merge.sh", 'w') do |file|
+    File.open("#{PWD}/out/#{outdir}/merge.sh", 'w') do |file|
       file.puts "#!/bin/bash"
       file.puts ""
       file.puts "echo \"Merging TTrees...\""
-      file.puts "source environ.sh"
-      file.puts "hpc/merge.rb out/#{outdir}/"
-    end  
-    
-    puts "Shell script created at out/#{outdir}/merge.sh"
-      
+      file.puts "source #{PWD}/environ.sh"
+      file.puts "#{PWD}/hpc/merge.rb #{PWD}/out/#{outdir}/"
+    end
+
+    puts "Shell script created at #{PWD}/out/#{outdir}/merge.sh"
+
     # create slurm script that will run the above shell scripts
-    File.open("out/#{outdir}/run-pipeline.slurm", 'w') do |file|
+    File.open("#{PWD}/out/#{outdir}/run-pipeline.slurm", 'w') do |file|
       file.puts """#!/bin/bash
 #SBATCH --job-name=#{outdir}
 #SBATCH --account=eic
 #SBATCH --partition=production
 #SBATCH --mem-per-cpu=4000
 #SBATCH --time=24:00:00
-#SBATCH --output=out/#{outdir}/pipeline.out
-#SBATCH --error=out/#{outdir}/pipeline.err
+#SBATCH --output=#{PWD}/out/#{outdir}/pipeline.out
+#SBATCH --error=#{PWD}/out/#{outdir}/pipeline.err
 
-bash out/#{outdir}/count-nevents.sh
-#{PATH_TO_EIC_SHELL}/eic-shell -- out/#{outdir}/make-configs.sh
-bash out/#{outdir}/run-parallel.sh
-#{PATH_TO_EIC_SHELL}/eic-shell -- out/#{outdir}/merge.sh
+bash #{PWD}/out/#{outdir}/count-nevents.sh
+#{PATH_TO_EIC_SHELL}/eic-shell -- #{PWD}/out/#{outdir}/make-configs.sh
+bash #{PWD}/out/#{outdir}/run-parallel.sh
+#{PATH_TO_EIC_SHELL}/eic-shell -- #{PWD}/out/#{outdir}/merge.sh
       """
     end
-    
-    
-    puts "Slurm script created at out/#{outdir}/run-pipeline.slurm"
-    FileUtils.chmod('+x', "out/#{outdir}/make-configs.sh")
-    FileUtils.chmod('+x', "out/#{outdir}/run-parallel.sh")
-    FileUtils.chmod('+x', "out/#{outdir}/merge.sh")
-    final_slurm_scripts << "out/#{outdir}/run-pipeline.slurm"
+
+
+    puts "Slurm script created at #{PWD}/out/#{outdir}/run-pipeline.slurm"
+    FileUtils.chmod('+x', "#{PWD}/out/#{outdir}/make-configs.sh")
+    FileUtils.chmod('+x', "#{PWD}/out/#{outdir}/run-parallel.sh")
+    FileUtils.chmod('+x', "#{PWD}/out/#{outdir}/merge.sh")
+    final_slurm_scripts << "#{PWD}/out/#{outdir}/run-pipeline.slurm"
     puts "--------------------------------------------------------------------"
     # create 
   end # end loop energies
@@ -223,4 +224,4 @@ end
 
 puts "Completed setup ... "
 puts "To execute the analysis, run the following **OUTSIDE** the eic-shell environment"
-puts "bash hpc/project_scripts/run-#{PROJECT_NAME}.sh "
+puts "bash #{PWD}/hpc/project_scripts/run-#{PROJECT_NAME}.sh "
