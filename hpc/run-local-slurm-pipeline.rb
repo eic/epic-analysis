@@ -201,9 +201,12 @@ CAMPAIGNS.each_with_index do |campaign, index|
 #SBATCH --error=#{PWD}/out/#{outdir}/pipeline.err
 
 bash #{PWD}/out/#{outdir}/count-nevents.sh
-#{PATH_TO_EIC_SHELL}/eic-shell -- #{PWD}/out/#{outdir}/make-configs.sh
-bash #{PWD}/out/#{outdir}/run-parallel.sh
-#{PATH_TO_EIC_SHELL}/eic-shell -- #{PWD}/out/#{outdir}/merge.sh
+#{PATH_TO_EIC_SHELL}/eic-shell -- "
+  cd #{PWD}
+  #{PWD}/out/#{outdir}/make-configs.sh
+  bash #{PWD}/out/#{outdir}/run-parallel.sh
+  #{PWD}/out/#{outdir}/merge.sh
+"
       """
     end
 
