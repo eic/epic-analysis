@@ -40,6 +40,18 @@ DiSidisTree::DiSidisTree(TString treeName_, std::shared_ptr<Kinematics> K_, std:
   T->Branch("TruePhiRT",     &(Ktrue->dihadron_phiRT),    "TruePhiRT/D");
   T->Branch("TruePhiRperp",  &(Ktrue->dihadron_phiRperp), "TruePhiRperp/D");
   T->Branch("TrueThetaCOM",  &(Ktrue->dihadron_theta),    "TrueThetaCOM/D");
+  T->Branch("TrueQ2",        &(Ktrue->Q2),                "TrueQ2/D");
+  T->Branch("TrueZ",         &(Ktrue->dihadron_z),        "TrueZ/D");
+  T->Branch("TrueW",         &(Ktrue->W),                 "TrueW/D");
+  T->Branch("TrueMh",        &(Ktrue->dihadron_Mh),       "TrueMh/D");
+  T->Branch("TruePhPerp",    &(Ktrue->dihadron_pT),       "TruePhPerp/D");
+  T->Branch("TrueXF",        &(Ktrue->dihadron_xF),       "TrueXF/D");
+  T->Branch("TrueMX",        &(Ktrue->dihadron_mX),       "TrueMX/D");
+  T->Branch("TruePhPerpLab", &(Ktrue->dihadron_pTlab),    "TruePhPerpLab/D");
+  T->Branch("TrueDepol1",    &(Ktrue->depolP1),           "TrueDepol1/D");
+  T->Branch("TrueDepol2",    &(Ktrue->depolP2),           "TrueDepol2/D");
+  T->Branch("TrueDepol3",    &(Ktrue->depolP3),           "TrueDepol3/D");
+  T->Branch("TrueDepol4",    &(Ktrue->depolP4),           "TrueDepol4/D");
   T->Branch("PolT",          &(K->polT),                  "PolT/D");
   T->Branch("PolL",          &(K->polL),                  "PolL/D");
   T->Branch("PolB",          &(K->polBeam),               "PolB/D");
