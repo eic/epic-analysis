@@ -128,6 +128,10 @@ CAMPAIGNS.each_with_index do |campaign, index|
     FileUtils.mkdir_p(dir_path)
     puts "Creating project --> #{dir_path}"
 
+    # Copy the analysis macro to the output directory for record keeping
+    FileUtils.cp(PATH_TO_ANALYSIS_MACRO, "#{dir_path}/#{File.basename(PATH_TO_ANALYSIS_MACRO)}")
+    puts "Copied analysis macro to #{dir_path}/#{File.basename(PATH_TO_ANALYSIS_MACRO)}"
+
 
     # Grab the files from s3
     # If BeAGLE is used, automatically set the --target flag
