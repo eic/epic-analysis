@@ -13,8 +13,8 @@ struct WeightsTest : public WeightsSivers {
 
 
 void analysis_dihadron(
-    TString configFile="datarec/beagle_test/10x166/files.config", 
-    //TString configFile="datarec/latest.6.11.2024___epic.24.05.0_5x41/5x41/files.config", 
+    //TString configFile="datarec/beagle_test/10x166/files.config", 
+    TString configFile="datarec/epic.25.08.0/5x41/files.config", 
     //TString configFile="datarec/single_piplus_study_14_per_Q2___epic.23.10.0_10x100/10x100/files.config",
     TString outfilePrefix="beagle_test_10x166" /* output filename prefix*/
 ) {
@@ -44,7 +44,7 @@ void analysis_dihadron(
   A->AddBinScheme("w");  A->BinScheme("w")->BuildBin("Min",3.0); // W > 3 GeV
   A->AddBinScheme("q2");  A->BinScheme("q2")->BuildBin("Min",1.0); // Q2 > 1 GeV^2
   A->AddBinScheme("y");  A->BinScheme("y")->BuildBin("Range",0.05,0.95); // 0.05 < y < 0.95
-  A->AddBinScheme("dihadron_z"); A->BinScheme("dihadron_z")->BuildBin("Min",0.25); // z > 0.25
+  A->AddBinScheme("dihadron_z");  A->BinScheme("dihadron_z")->BuildBin("Range",0.25,0.95); // 0.25 < z < 0.95
   A->AddBinScheme("dihadron_xF1"); A->BinScheme("dihadron_xF1")->BuildBin("Min",0.0); // xF1 > 0 (first hadron is in CFR)
   A->AddBinScheme("dihadron_xF2"); A->BinScheme("dihadron_xF2")->BuildBin("Min",0.0); // xF2 > 0 (second hadron is in CFR)
   A->AddBinScheme("dihadron_pTlab1");  A->BinScheme("dihadron_pTlab1")->BuildBin("Min",0.1); // pT_lab > 0.1 GeV (tracking limit for first hadron)
