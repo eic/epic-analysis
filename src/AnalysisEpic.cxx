@@ -435,6 +435,83 @@ void AnalysisEpic::Execute() {
           kin -> CalculateDihadronKinematics();
           kinTrue -> CalculateDihadronKinematics();
 
+          // // DEBUG: Check if Z > 2
+          // if (kin->dihadron_z < 1) {
+          //   std::cout << "DEBUG: Z > 2 (" << kin->dihadron_z << "), event " << tr.GetCurrentEntry() << std::endl;
+          //   std::cout << "Reconstructed particles in event:" << std::endl;
+          //   for (size_t k = 0; k < recpart.size(); ++k) {
+          //     auto& p = recpart[k];
+          //     std::cout << "Particle " << k << ": pid=" << p.pid 
+          //               << ", px=" << p.vecPart.Px() 
+          //               << ", py=" << p.vecPart.Py() 
+          //               << ", pz=" << p.vecPart.Pz() 
+          //               << ", E=" << p.vecPart.E() << std::endl;
+          //   }
+          //   std::cout << "Dihadron particle A (index " << i << " in vecHadrons): pid=" << kin->vecHadronsPIDs.at(i)
+          //             << ", px=" << kin->vecDihadronA.Px()
+          //             << ", py=" << kin->vecDihadronA.Py()
+          //             << ", pz=" << kin->vecDihadronA.Pz()
+          //             << ", E=" << kin->vecDihadronA.E() << std::endl;
+          //   std::cout << "Dihadron particle B (index " << j << " in vecHadrons): pid=" << kin->vecHadronsPIDs.at(j)
+          //             << ", px=" << kin->vecDihadronB.Px()
+          //             << ", py=" << kin->vecDihadronB.Py()
+          //             << ", pz=" << kin->vecDihadronB.Pz()
+          //             << ", E=" << kin->vecDihadronB.E() << std::endl;
+          //   std::cout << "Incoming beam electron: px=" << kin->vecEleBeam.Px()
+          //             << ", py=" << kin->vecEleBeam.Py()
+          //             << ", pz=" << kin->vecEleBeam.Pz()
+          //             << ", E=" << kin->vecEleBeam.E() << std::endl;
+          //   std::cout << "Incoming beam hadron: px=" << kin->vecIonBeam.Px()
+          //             << ", py=" << kin->vecIonBeam.Py()
+          //             << ", pz=" << kin->vecIonBeam.Pz()
+          //             << ", E=" << kin->vecIonBeam.E() << std::endl;
+          //   std::cout << "Scattered beam electron: px=" << kin->vecElectron.Px()
+          //             << ", py=" << kin->vecElectron.Py()
+          //             << ", pz=" << kin->vecElectron.Pz()
+          //             << ", E=" << kin->vecElectron.E() << std::endl;
+          //   std::cout << "Virtual photon: px=" << kin->vecQ.Px()
+          //             << ", py=" << kin->vecQ.Py()
+          //             << ", pz=" << kin->vecQ.Pz()
+          //             << ", E=" << kin->vecQ.E() << std::endl;
+          //   std::cout << "Z calculation step by step:" << std::endl;
+          //   double numerator = kin->vecIonBeam.Dot(kin->vecDihadron);
+          //   double denominator = kin->vecIonBeam.Dot(kin->vecQ);
+          //   std::cout << "  Numerator (vecIonBeam.Dot(vecDihadron)): " << numerator << std::endl;
+          //   std::cout << "  Denominator (vecIonBeam.Dot(vecQ)): " << denominator << std::endl;
+          //   std::cout << "  Z = numerator / denominator = " << numerator << " / " << denominator << " = " << (numerator / denominator) << std::endl;
+          //   std::cout << "True kinematics:" << std::endl;
+          //   std::cout << "True incoming beam electron: px=" << kinTrue->vecEleBeam.Px()
+          //             << ", py=" << kinTrue->vecEleBeam.Py()
+          //             << ", pz=" << kinTrue->vecEleBeam.Pz()
+          //             << ", E=" << kinTrue->vecEleBeam.E() << std::endl;
+          //   std::cout << "True incoming beam hadron: px=" << kinTrue->vecIonBeam.Px()
+          //             << ", py=" << kinTrue->vecIonBeam.Py()
+          //             << ", pz=" << kinTrue->vecIonBeam.Pz()
+          //             << ", E=" << kinTrue->vecIonBeam.E() << std::endl;
+          //   std::cout << "True scattered beam electron: px=" << kinTrue->vecElectron.Px()
+          //             << ", py=" << kinTrue->vecElectron.Py()
+          //             << ", pz=" << kinTrue->vecElectron.Pz()
+          //             << ", E=" << kinTrue->vecElectron.E() << std::endl;
+          //   std::cout << "True virtual photon: px=" << kinTrue->vecQ.Px()
+          //             << ", py=" << kinTrue->vecQ.Py()
+          //             << ", pz=" << kinTrue->vecQ.Pz()
+          //             << ", E=" << kinTrue->vecQ.E() << std::endl;
+          //   std::cout << "True dihadron particle A: px=" << kinTrue->vecDihadronA.Px()
+          //             << ", py=" << kinTrue->vecDihadronA.Py()
+          //             << ", pz=" << kinTrue->vecDihadronA.Pz()
+          //             << ", E=" << kinTrue->vecDihadronA.E() << std::endl;
+          //   std::cout << "True dihadron particle B: px=" << kinTrue->vecDihadronB.Px()
+          //             << ", py=" << kinTrue->vecDihadronB.Py()
+          //             << ", pz=" << kinTrue->vecDihadronB.Pz()
+          //             << ", E=" << kinTrue->vecDihadronB.E() << std::endl;
+          //   std::cout << "True Z calculation step by step:" << std::endl;
+          //   double true_numerator = kinTrue->vecIonBeam.Dot(kinTrue->vecDihadron);
+          //   double true_denominator = kinTrue->vecIonBeam.Dot(kinTrue->vecQ);
+          //   std::cout << "  True numerator (vecIonBeam.Dot(vecDihadron)): " << true_numerator << std::endl;
+          //   std::cout << "  True denominator (vecIonBeam.Dot(vecQ)): " << true_denominator << std::endl;
+          //   std::cout << "  True Z = true_numerator / true_denominator = " << true_numerator << " / " << true_denominator << " = " << (true_numerator / true_denominator) << "\n\n" << std::endl;
+          // }
+
           // Fill bins
           auto wDihadron = Q2weightFactor * weightDihadron -> GetWeight( * kinTrue);
           wDihadronTotal += wDihadron;

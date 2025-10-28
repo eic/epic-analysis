@@ -65,8 +65,10 @@ pythia6:ep-18x275-Lambda   8.830e+05           0.0011   # FIXME: assuming genera
 # BeAGLE 1.03.02 eHe3 target, CraterLake RECO 25.08.0
 # Q2 bins: 1-10, 10-100, 100-1000
 # https://docs.google.com/presentation/d/1C_CTEtEXP12SCzgMoxbUVQgdghKO6kBZS7tK2oD7MsI/edit?slide=id.g348a1f1f4de_0_1080#slide=id.g348a1f1f4de_0_1080
+# We take the weighted average of ep to en
+# e.g. sigma_avg = (sigma_ep * N_ep  + sigma_en * N_en)/(N_ep + N_en)
 #label                                 cross_section_[nb]  relative_uncertainty
-beagle:eHe3.10x166_q2_1_10             1.984404e+05        0.001 # FIXME: assuming value
-beagle:eHe3.10x166_q2_10_100           4.043714e+04        0.001 # FIXME: assuming value
-beagle:eHe3.10x166_q2_100_1000         1.364169e+03        0.001 # FIXME: assuming value
+beagle:eHe3.10x166_q2_1_10             2.0303e+05        0.001 # FIXME: assuming value
+beagle:eHe3.10x166_q2_10_100           4.29428e+04        0.001 # FIXME: assuming value
+beagle:eHe3.10x166_q2_100_1000         1.585e+03        0.001 # FIXME: assuming value
 
