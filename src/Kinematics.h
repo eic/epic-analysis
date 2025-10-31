@@ -93,9 +93,9 @@ class Kinematics
 
 
     // kinematics (should be Double_t, if going in SidisTree)
-    Double_t W,Q2,Nu,x,y,s; // DIS
-    Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS; // single hadron
-    Double_t dihadron_phiH, dihadron_phiRperp, dihadron_phiRT, dihadron_theta, dihadron_Mh, dihadron_pT, dihadron_pLab, dihadron_pTlab, dihadron_pTlab1, dihadron_pTlab2, dihadron_phiLab, dihadron_etaLab, dihadron_z, dihadron_z1, dihadron_z2, dihadron_mX, dihadron_xF, dihadron_xF1, dihadron_xF2; // dihadron 
+    Double_t W,Q2,Nu,x,y,s,theta_e; // DIS
+    Double_t pLab,pTlab,phiLab,etaLab,z,pT,qT,mX,xF,phiH,phiS,thetaLab; // single hadron
+    Double_t dihadron_phiH, dihadron_phiRperp, dihadron_phiRT, dihadron_theta, dihadron_Mh, dihadron_pT, dihadron_pLab, dihadron_pTlab, dihadron_pTlab1, dihadron_pTlab2, dihadron_phiLab, dihadron_etaLab, dihadron_z, dihadron_z1, dihadron_z2, dihadron_mX, dihadron_xF, dihadron_xF1, dihadron_xF2,theta_h1,theta_h2; // dihadron 
     Double_t sigmah, Pxh, Pyh; // hadronic final state variables
     TLorentzVector hadronSumVec;
   

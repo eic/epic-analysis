@@ -356,6 +356,7 @@ void Kinematics::CalculateDISbyElectron() {
   Q2 = -1 * vecQ.M2();
   x = Q2 / ( 2 * vecQ.Dot(vecIonBeam) );
   y = vecIonBeam.Dot(vecQ) / vecIonBeam.Dot(vecEleBeam);
+  theta_e = vecElectron.Theta()*180/3.14159265;
 };
 
 // calculate DIS kinematics using JB method
@@ -464,6 +465,7 @@ void Kinematics::CalculateHadronKinematics() {
   pTlab = vecHadron.Pt();
   phiLab = vecHadron.Phi();
   etaLab = vecHadron.Eta();
+  thetaLab = vecHadron.Theta()*180/3.14159265;
   // hadron z
   z = vecIonBeam.Dot(vecHadron) / vecIonBeam.Dot(vecQ);
   // missing mass
@@ -511,6 +513,8 @@ void Kinematics::CalculateDihadronKinematics() {
   dihadron_pTlab2 = vecDihadronB.Pt();
   dihadron_phiLab = vecDihadron.Phi();
   dihadron_etaLab = vecDihadron.Eta();
+  theta_h1 = vecDihadronA.Theta()*180/3.14159265;
+  theta_h2 = vecDihadronB.Theta()*180/3.14159265;
   // dihadron z
   dihadron_z = vecIonBeam.Dot(vecDihadron) / vecIonBeam.Dot(vecQ);
   z = dihadron_z; // Define plain "z" for the asymmetries

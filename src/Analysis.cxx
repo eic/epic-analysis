@@ -32,6 +32,7 @@ Analysis::Analysis(
   availableBinSchemes.insert({ "q2",    "Q^{2}"       });
   availableBinSchemes.insert({ "w",     "W"           });
   availableBinSchemes.insert({ "y",     "y"           });
+  availableBinSchemes.insert({ "theta_e" , "theta_e" });
   /* single hadron */
   availableBinSchemes.insert({ "p",     "p"           });
   availableBinSchemes.insert({ "eta",   "#eta"        });
@@ -46,6 +47,7 @@ Analysis::Analysis(
   availableBinSchemes.insert({ "phiS",  "#phi_{S}"    });
   availableBinSchemes.insert({ "tSpin", "spin"        });
   availableBinSchemes.insert({ "lSpin", "spinL"       });
+  availableBinSchemes.insert({ "theta", "#theta"});
   /* dihadron */
   availableBinSchemes.insert({ "dihadron_phiH",  "#phi_{h}"    });
   availableBinSchemes.insert({ "dihadron_phiRperp",  "#phi_{R_{#perp}}"    });
@@ -66,6 +68,8 @@ Analysis::Analysis(
   availableBinSchemes.insert({ "dihadron_xF",    "x_{F}"       }); 
   availableBinSchemes.insert({ "dihadron_xF1",    "x_{F,1}"       }); 
   availableBinSchemes.insert({ "dihadron_xF2",    "x_{F,2}"       }); 
+  availableBinSchemes.insert({ "theta_h1", "#theta_{h1}"});
+  availableBinSchemes.insert({ "theta_h2", "#theta_{h2}"});
 
   /* jets */
 #ifndef EXCLUDE_DELPHES
@@ -403,6 +407,7 @@ void Analysis::Prepare() {
   HD->SetBinSchemeValue("q2",    [this](){ return kin->Q2;                      });
   HD->SetBinSchemeValue("w",     [this](){ return kin->W;                       });
   HD->SetBinSchemeValue("y",     [this](){ return kin->y;                       });
+  HD->SetBinSchemeValue("theta_e",[this](){ return kin->theta_e;                });
   /* single hadron */
   HD->SetBinSchemeValue("p",     [this](){ return kin->pLab;                    });
   HD->SetBinSchemeValue("eta",   [this](){ return kin->etaLab;                  });
@@ -417,6 +422,7 @@ void Analysis::Prepare() {
   HD->SetBinSchemeValue("phiS",  [this](){ return kin->phiS;                    });
   HD->SetBinSchemeValue("tSpin", [this](){ return (Double_t)kin->tSpin;         });
   HD->SetBinSchemeValue("lSpin", [this](){ return (Double_t)kin->lSpin;         });
+  HD->SetBinSchemeValue("theta",[this](){ return kin->thetaLab                  });
   /* dihadron */
   HD->SetBinSchemeValue("dihadron_xF1", [this](){ return kin->dihadron_xF1;     });
   HD->SetBinSchemeValue("dihadron_xF2", [this](){ return kin->dihadron_xF2;     });
@@ -426,6 +432,9 @@ void Analysis::Prepare() {
   HD->SetBinSchemeValue("dihadron_z", [this](){ return kin->dihadron_z;     });
   HD->SetBinSchemeValue("dihadron_z1", [this](){ return kin->dihadron_z1;       });
   HD->SetBinSchemeValue("dihadron_z2", [this](){ return kin->dihadron_z2;       });
+  HD->SetBinSchemeValue("theta_h1", [this](){ return kin->theta_h1;});
+  HD->SetBinSchemeValue("theta_h2", [this](){ return kin->theta_h2;});
+    
   /* jets */
 #ifndef EXCLUDE_DELPHES
   HD->SetBinSchemeValue("JetPT", [this](){ return kinJet->pTjet;                });
