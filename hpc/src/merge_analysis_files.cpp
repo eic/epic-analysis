@@ -21,7 +21,6 @@ struct fmt::formatter<TString> : fmt::formatter<std::string> {
 };
 
 int main(int argc, char** argv) {
-
   // arguments
   if(argc<=2) {
     fmt::print(stderr,"USAGE: {} [output_root_file] [input_root_files]...\n",argv[0]);
