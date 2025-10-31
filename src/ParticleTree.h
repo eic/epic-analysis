@@ -25,11 +25,12 @@ class ParticleTree
     ~ParticleTree();
 
     TTree *GetTree() { return T; };
-    void FillTree(TLorentzVector recopart, TLorentzVector mcpart, int pid, int status) {
+    void FillTree(TLorentzVector recopart, TLorentzVector mcpart, int pid, int status, double weight) {
       recopart_ = recopart;
       mcpart_   = mcpart;
       pid_      = pid;
       status_   = status;
+      weight_    = weight;
       T->Fill(); };
     void WriteTree() { T->Write(); };
 
@@ -41,6 +42,7 @@ class ParticleTree
     TLorentzVector mcpart_;
     int status_;
     int pid_;
+    double weight_;
   
   ClassDef(ParticleTree,1);
 };

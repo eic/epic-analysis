@@ -34,7 +34,7 @@ void analysis_dihadron(
   //  A->maxEvents = 1000; // use this to limit the number of events
   A->SetReconMethod("ele"); // set reconstruction method
   A->writeDiSidisTree = true; // save Dihadron kinematics to simple TTree
-
+  A->writeParticleTree = true;
   A->AddFinalState("pippimDihadron"); // two-pion dihadron
   
   A->includeOutputSet["1h"] = false; // Single hadron final state variables

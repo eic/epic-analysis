@@ -545,7 +545,8 @@ void AnalysisEpic::Execute() {
         PT -> FillTree(part.vecPart, // Fill Tree
           mcpart_.vecPart,
           part.pid,
-          genStat_);
+          genStat_,
+          Q2weightFactor);
       } // particle loop
       ipart++;
     }
