@@ -14,7 +14,7 @@ struct WeightsTest : public WeightsSivers {
 
 void analysis_dihadron(
     //TString configFile="datarec/beagle_test/10x166/files.config", 
-    TString configFile="datarec/epic.25.08.0/5x41/files.config", 
+    TString configFile="datarec/epic.25.08.0/10x166/files.config", 
     //TString configFile="datarec/single_piplus_study_14_per_Q2___epic.23.10.0_10x100/10x100/files.config",
     TString outfilePrefix="beagle_test_10x166" /* output filename prefix*/
 ) {
@@ -49,7 +49,8 @@ void analysis_dihadron(
   A->AddBinScheme("dihadron_xF2"); A->BinScheme("dihadron_xF2")->BuildBin("Min",0.0); // xF2 > 0 (second hadron is in CFR)
   A->AddBinScheme("dihadron_pTlab1");  A->BinScheme("dihadron_pTlab1")->BuildBin("Min",0.1); // pT_lab > 0.1 GeV (tracking limit for first hadron)
   A->AddBinScheme("dihadron_pTlab2");  A->BinScheme("dihadron_pTlab2")->BuildBin("Min",0.1); // pT_lab > 0.1 GeV (tracking limit for first hadron)
-
+  A->AddBinScheme("theta_e"); A->BinScheme("theta_e")->BuildBin("Min",20.0); // degrees
+  A->AddBinScheme("theta_h2"); A->BinScheme("theta_h2")->BuildBin("Max",145.0); // degrees
   // perform the analysis ==================================
   A->Execute();
 

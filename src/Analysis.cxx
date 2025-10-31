@@ -422,7 +422,7 @@ void Analysis::Prepare() {
   HD->SetBinSchemeValue("phiS",  [this](){ return kin->phiS;                    });
   HD->SetBinSchemeValue("tSpin", [this](){ return (Double_t)kin->tSpin;         });
   HD->SetBinSchemeValue("lSpin", [this](){ return (Double_t)kin->lSpin;         });
-  HD->SetBinSchemeValue("theta",[this](){ return kin->thetaLab                  });
+  HD->SetBinSchemeValue("theta",[this](){ return kin->thetaLab;                  });
   /* dihadron */
   HD->SetBinSchemeValue("dihadron_xF1", [this](){ return kin->dihadron_xF1;     });
   HD->SetBinSchemeValue("dihadron_xF2", [this](){ return kin->dihadron_xF2;     });
