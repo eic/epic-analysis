@@ -71,4 +71,5 @@ pythia6:ep-18x275-Lambda   8.830e+05           0.0011   # FIXME: assuming genera
 beagle:eHe3.10x166_q2_1_10             2.0303e+05        0.001 # FIXME: assuming value
 beagle:eHe3.10x166_q2_10_100           4.29428e+04        0.001 # FIXME: assuming value
 beagle:eHe3.10x166_q2_100_1000         1.585e+03        0.001 # FIXME: assuming value
+beagle:eHe3.10x166_q2_100_10000         1.585e+03        0.001 # FIXME: assuming value
 
