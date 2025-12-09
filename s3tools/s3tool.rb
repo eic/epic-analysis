@@ -56,19 +56,10 @@ prodSettings = {
   'epic.25.10.2' => {
   :comment         => 'BeAGLE: high-stats October 2025 production',
   :crossSectionID  => Proc.new { |minQ2,maxQ2|
-    if options.target == 'He3'
       "beagle:eHe3.#{options.energy}_q2_#{minQ2}_#{maxQ2>0 ? maxQ2 : 100000}"
-      # could presumably delete pythia8 for 25.10.2
-    else
-      "pythia8:#{options.energy}/minQ2=#{minQ2}"
-    end
   },
   :releaseSubDir   => Proc.new {
-      if options.target == 'He3'
-        "/volatile/eic/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/BeAGLE1.03.02-1.0/eHe3"
-      else
-        "/volatile/eic/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC"
-      end
+      "/volatile/eic/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/BeAGLE1.03.02-1.0/eHe3"
   },
   :energySubDir    => Proc.new { "#{options.energy}" },
   :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
@@ -76,18 +67,10 @@ prodSettings = {
   'epic.25.10.0' => {
   :comment         => 'Pythia 8: high-stats October 2025 production',
   :crossSectionID  => Proc.new { |minQ2,maxQ2|
-    if options.target == 'He3'
-      "beagle:eHe3.#{options.energy}_q2_#{minQ2}_#{maxQ2>0 ? maxQ2 : 100000}"
-    else
       "pythia8:#{options.energy}/minQ2=#{minQ2}"
-    end
   },
   :releaseSubDir   => Proc.new {
-      if options.target == 'He3'
-        "/volatile/eic/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/BeAGLE1.03.02-1.0/eHe3"
-      else
         "/volatile/eic/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC"
-      end
   },
   :energySubDir    => Proc.new { "#{options.energy}" },
   :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
