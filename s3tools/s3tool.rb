@@ -8,7 +8,6 @@ require 'ostruct'
 require 'fileutils'
 
 # default versions
-#VersionLatest   = 'epic.25.08.0'
 VersionLatest   = 'epic.25.10.0'
 VersionPrevious = 'epic.25.03.1'
 
