@@ -8,7 +8,7 @@ require 'ostruct'
 require 'fileutils'
 
 # default versions
-VersionLatest   = 'epic.25.08.0'
+VersionLatest   = 'epic.25.10.0'
 VersionPrevious = 'epic.25.03.1'
 
 # default CLI options
@@ -52,7 +52,29 @@ end
 #   :fileExtension   => File extension (optional, defaults to 'root')
 # }
 prodSettings = {
-'epic.25.08.0' => {
+  'epic.25.10.2' => {
+  :comment         => 'BeAGLE: high-stats October 2025 production',
+  :crossSectionID  => Proc.new { |minQ2,maxQ2|
+      "beagle:eHe3.#{options.energy}_q2_#{minQ2}_#{maxQ2>0 ? maxQ2 : 100000}"
+  },
+  :releaseSubDir   => Proc.new {
+      "/volatile/eic/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/BeAGLE1.03.02-1.0/eHe3"
+  },
+  :energySubDir    => Proc.new { "#{options.energy}" },
+  :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
+  'epic.25.10.0' => {
+  :comment         => 'Pythia 8: high-stats October 2025 production',
+  :crossSectionID  => Proc.new { |minQ2,maxQ2|
+      "pythia8:#{options.energy}/minQ2=#{minQ2}"
+  },
+  :releaseSubDir   => Proc.new {
+        "/volatile/eic/EPIC/RECO/#{versionNum(options.version)}/epic_#{options.detector}/DIS/NC"
+  },
+  :energySubDir    => Proc.new { "#{options.energy}" },
+  :dataSubDir      => Proc.new { |minQ2| "minQ2=#{minQ2}" },
+  },
+  'epic.25.08.0' => {
   :comment         => 'Pythia 8: high-stats August 2025 production',
   :crossSectionID  => Proc.new { |minQ2,maxQ2|
     if options.target == 'He3'
@@ -501,6 +523,8 @@ if [
 
 # pattern: "#{energy}/minQ2=#{minQ2}/"
 elsif [
+  'epic.25.10.2',
+  'epic.25.10.0',
   'epic.25.08.0',
   'epic.25.03.1',
   'epic.25.02.0',
