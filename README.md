@@ -113,7 +113,6 @@ Additional build options are available:
 ```bash
 INCLUDE_CENTAURO=1 make  # build with fastjet plugin Centauro (not included in Delphes by default!)
 EXCLUDE_DELPHES=1 make   # build without Delphes support; primarily used to expedite CI workflows
-INCLUDE_PODIO=1 make     # build with support for reading data with PODIO
 ```
 
 ## Quick Start: Tutorial Macros

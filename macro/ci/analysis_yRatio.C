@@ -13,7 +13,7 @@ void analysis_yRatio(
 
   // setup analysis ========================================
   Analysis *A;
-  if   (outfilePrefix.Contains("epic"))     A = new AnalysisEpic(   configFile, outfilePrefix );
+  if   (outfilePrefix.Contains("epic"))     A = new AnalysisEpicPodio(   configFile, outfilePrefix );
   else if(outfilePrefix.Contains("athena")) A = new AnalysisAthena( configFile, outfilePrefix );
   else if(outfilePrefix.Contains("ecce"))   A = new AnalysisEcce(   configFile, outfilePrefix );
 #ifndef EXCLUDE_DELPHES
