@@ -5,6 +5,7 @@
 
 #include <map>
 #include <iomanip>
+#include <functional>
 
 // root
 #include <TFile.h>
@@ -69,7 +70,14 @@ class PostProcessor
     // - you are welcome to add your own algorithms
     void DumpHist(TString datFile, TString histSet, TString varName);
     void DumpAve(TString datFile, Histos *H, TString cutName);
-    void DrawSingle(Histos *H, TString histName, TString drawFormat="", Int_t profileAxis=0, Bool_t profileOnly=false);
+    void DrawSingle(
+        Histos  *H,
+        TString histName,
+        TString drawFormat  = "",
+        Int_t   profileAxis = 0,
+        Bool_t  profileOnly = false,
+        std::function<void(TH1*,TCanvas*)> extra_lambda = [] (TH1* h, TCanvas *c) {}
+        );
     void DrawSingle(TString histSet, TString histName);
     void DrawRatios(
         TString outName, Histos *numerSet, Histos *denomSet, Bool_t plotRatioOnly=false
