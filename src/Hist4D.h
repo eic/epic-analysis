@@ -12,6 +12,8 @@
 #include <TFrame.h>
 #include <stdexcept>
 
+using std::isnan;
+
 // Convenience class for plotting 4d histogram. Can't derive from TH1 because
 // some of the virtual methods are only designed with up to 3 dimensions in
 // mind.

@@ -42,6 +42,7 @@ using std::map;
 using std::cout;
 using std::cerr;
 using std::endl;
+using std::isnan;
 
 class Kinematics
 {

@@ -95,21 +95,22 @@ int main(int argc, char** argv) {
       }
 
       // handle Histos objects: add all histograms to the first file's histograms
-      else if(TString(key->GetClassName())=="Histos") {
-        auto obj = (Histos*) key->ReadObj(); 
-        if(first_file) {
-          fmt::print("Read Histos '{}'\n",keyName);
-          in_histos.insert({ keyName, obj });
-        } else {
-          Histos *out_histos;
-          try {
-            out_histos = in_histos.at(keyName);
-            out_histos->AddHistos(obj);
-          } catch(const std::out_of_range& e) {
-            fmt::print(stderr,"ERROR: cannot find Histos '{}' in {}\n",keyName,in_file->GetName());
-          }
-        }
-      }
+      // Commented out by G. Matousek on 6/10/2024
+//       else if(TString(key->GetClassName())=="Histos") {
+//         auto obj = (Histos*) key->ReadObj(); 
+//         if(first_file) {
+//           fmt::print("Read Histos '{}'\n",keyName);
+//           in_histos.insert({ keyName, obj });
+//         } else {
+//           Histos *out_histos;
+//           try {
+//             out_histos = in_histos.at(keyName);
+//             out_histos->AddHistos(obj);
+//           } catch(const std::out_of_range& e) {
+//             fmt::print(stderr,"ERROR: cannot find Histos '{}' in {}\n",keyName,in_file->GetName());
+//           }
+//         }
+//       }
 
       // handle BinSet objects: store the first file's BinSets; TODO: compare with all the others
       else if(TString(key->GetClassName())=="BinSet") {

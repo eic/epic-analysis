@@ -7,25 +7,22 @@ require 'fileutils'
 # Manually edit these according to your desired simulation
 
 # prefix for output
-PROJECT_NAME=""
+PROJECT_NAME="single_piplus_study"
 
-CAMPAIGNS=["epic.23.10.0",
-           "epic.23.11.0"]
+CAMPAIGNS=["epic.24.05.0"]
 
-DETECTORS = ["epic_craterlake",
-             "epic_craterlake"]
+DETECTORS = ["epic_craterlake"]
 
-ENERGIES=[ ["5x41","10x100","18x275"],
-           ["5x41","10x100","18x275"] ]
+ENERGIES=[ ["5x41","10x100","18x275"] ]
 
 # Number of Files per Q2 binning
 # Set this to very large number for all campaign files
-NFILES = 0
+NFILES = 100000
 
-NROOT_FILES_PER_JOB = 0
+NROOT_FILES_PER_JOB = 40
 
 # Points to analysis macro
-PATH_TO_ANALYSIS_MACRO = "macro/MY_MACRO.C"
+PATH_TO_ANALYSIS_MACRO = "macro/analysis_singlePion.C"
 
 # Path to the directory containing eic-shell
 PATH_TO_EIC_SHELL = "#{ENV['EIC_SHELL_PREFIX']}/../"
